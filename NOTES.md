@@ -122,3 +122,66 @@ monotone in mu. Cone edges are scaled to unit *normal* component, not unit
 length; the unit-length convention makes epsilon non-monotone in mu because the
 normal component shrinks as the cone widens. Not yet validated against a physical
 outcome, because there is no working physical outcome to validate against.
+
+## 2026-09-11, evening: a lift exists, and it is not manipulation
+
+**The scene, corrected properly.** v1 fixed the 4 cm penetration by raising the
+box to rest on the table (z 0.80 -> 0.8401), which moved it into the part of the
+arm workspace already measured as having no vertical headroom. v2 lowers the
+TABLE instead (table_z 0.75 -> 0.71, top 0.730) so the box rests at its original
+centre height of 0.80. Do-nothing baseline on this scene: **-0.01 cm**. All
+numbers below are on it.
+
+**Two bugs of mine, both found by their own symptoms.**
+- `squeeze_sweep.run` called `p.reset()` *after* posing the hands at the
+  standoff, so every trial drove from the home pose straight through the box and
+  batted it off the table (displacement 8-33 cm at every inset, 0 contacts).
+- The first `held` criterion was `drop < 1 cm` alone. A box lying on the floor
+  satisfies that forever: it scored 3/48 "held" at 1.35 m displacement. This is
+  the degenerate solution named in advance in EXPERIMENTS.md 5 and written
+  anyway. `held` now also requires contacts > 0 and displacement < 5 cm.
+
+**Result after both fixes.** Grip-margin sweep over inward inset, squeeze depth
+and contact height, 48 configurations: **11/48 hold** the box once the table is
+removed. Best grip eps = 0.277 at inset 12 mm. Progressive-squeeze lift sweep,
+96 configurations: **3 sustain >= 10 cm with contacts still present after a 3 s
+hold at the top**, best **+11.4 cm** (inset 15 mm, squeeze 0.85, gain 0.05).
+Rendered: `figures/4_best_squeeze_lift.gif`, peak +12.6 cm at step 321, contact
+lost at step 374 for the zero-gain version.
+
+So a lift exists on this platform. It is the first one that is not the spawn
+artifact, and it is the paired working reference the pairing protocol needed.
+
+**And it is not dexterous manipulation.** Instrumented lift, zero gain:
+
+    way   d(cm)  ik_err R/L (mm)  separation(cm)  contacts
+      1     1.5     47.8 / 54.3        15.03         8
+      5     7.5     62.8 / 61.4        18.14         9
+     10    15.0     87.9 / 94.1        21.59         0
+
+The arms miss their own IK targets by 5-9 cm, and the commanded 15.0 cm grip
+opens to 21.6 cm during the lift. The object is held in a closing wedge between
+two wrists; the fingers contribute nothing that two flat paddles would not. The
+f5d6 is not grasping, it is being used as a surface. Consistent with the
+opposition floor: a hand that cannot oppose cannot grasp, so anything that looks
+like a bimanual grasp on this robot is the two ARMS opposing, not the hands.
+
+**Consequence for the project.** The claim "two hands restore what one hand
+lost" is true here only in the trivial sense that two arms make a gripper. That
+is not a result, it is not bimanual coordination (both hands do the same thing
+to opposite faces), and it is not what any human demonstration looks like. The
+platform cannot carry the question as posed.
+
+**Decision.** Stop developing f5d6 grasping. The comparison hands are already on
+disk -- `DexTrack/assets/leap_hand/leap_hand_right.urdf` and
+`allegro_hand_description/urdf/allegro_hand_description_right.urdf`, 16 DoF each,
+both load in MuJoCo (nq=16, nbody=17). Either mount one on the Vega wrists or
+bench them floating, which is what DexTrack and the grasp literature do. f5d6
+becomes one extreme point on the opposition axis instead of the platform.
+
+**Not a finding: the hand bench.** `scripts/hand_bench.py` currently reports LEAP
+at 0/72 held, 630 N, 127 contacts. That is the generic `close_pose` driving every
+joint through the box, not a property of LEAP, which grasps boxes routinely in
+published work. Filed as a bug. It is exactly the shape of error that
+rule-null-results exists to stop, and it is recorded here so it cannot later be
+mistaken for evidence.
