@@ -270,7 +270,16 @@ def _bounds(lo, hi):
 
 def retarget_keypoints(p, side, h_wrist, h_ft, restarts=6, seed=0):
     """Minimise the standard dex-retargeting objective: wrist->fingertip vector
-    error, plus a wrist position term (which is how the arm gets placed)."""
+    error, plus a wrist position term (which is how the arm gets placed).
+
+    Resets first. An earlier version seeded the optimiser from whatever pose the
+    robot happened to be in and used that state for the joints it does not
+    optimise, so the solution depended on execution order: three clean runs gave
+    ncon=2 / kp=13.21 cm identically, but running a random-walk baseline first
+    gave ncon=0 / kp=13.60 and ncon=5 / kp=15.76. The A row of an earlier
+    results table was computed that way and its contact count is not meaningful.
+    """
+    p.reset()
     b = p.block[side]
     lo, hi = _bounds(p.lo36[b:b + 18], p.hi36[b:b + 18])
     q_full = p.q36()

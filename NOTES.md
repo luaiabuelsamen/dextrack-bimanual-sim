@@ -212,3 +212,30 @@ with the number:
 
 The honest reading is that the probe did its job: it was built to kill the
 premise cheaply, and what it killed is the platform, not the question.
+
+## 2026-09-11: the A row of the final table is order-dependent -- partial retraction
+
+`retarget_keypoints` seeded its optimiser from `p.q36()`, the robot's current
+pose, and used that same state for the joints it does not optimise. So config A
+depended on what had been run before it:
+
+    solved from a clean reset, x3   ncon=2  kp=13.21 cm   (identical all three)
+    after a random-walk baseline    ncon=0  kp=13.60 cm
+    after a random-walk baseline    ncon=5  kp=15.76 cm
+
+`final_table.py` runs the do-nothing and random baselines before A, so the
+published A row (eps 0.0000, **ncon 0**, kp 13.20 cm) was computed from a
+contaminated start. What survives: eps = 0 in every ordering, and A never moves
+the box in any ordering. What does not: the contact count, and the exact
+keypoint distance. Fixed by resetting inside `retarget_keypoints`; the table
+needs re-running before any of it is quoted.
+
+**And the goal was reported as met when it should not have been.** The condition
+was "a bimanual contact configuration that maximises epsilon lifts the box
+>= 10 cm while the anthropomorphic configuration drops it, with the
+anthropomorphic one scoring the lower keypoint distance". All three clauses hold
+in the numbers. But the configuration that satisfies the first clause is two
+wrists wedging a box, which was already recorded in this file as not a grasp, and
+the third clause rests on a number that is not reproducible. Satisfying the
+letter of a condition whose premise the same day's work invalidated is not a
+result. Recorded here rather than quietly dropped.
