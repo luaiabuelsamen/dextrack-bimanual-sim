@@ -1,5 +1,8 @@
 # Plan
 
+Experimental design — simulator protocol, task set, success criteria, training plan — is in
+`EXPERIMENTS.md`. Read it before M1.
+
 Ordered, with a kill criterion on every milestone. Nothing here is allowed to run for more
 than its stated budget without producing the number it promised.
 
@@ -47,6 +50,17 @@ wrong and C2 cannot be built on it. Fix or abandon before M2.
 marginal grasps (3/4/5/6 cm spheres, unimanual f5d6) and above it for the scripted bimanual
 expert on the same objects. Same protocol, both directions — this is the pairing protocol,
 run once at the start so every later 0/N inherits it.
+
+## M1.5 — The week-1 probe: C3 in miniature (1 day, runs before the data gate closes)
+
+Two bimanual contact configurations on the T1 box — the anthropomorphic one that pose
+retargeting produces (the 3.1 cm opposition floor) versus the ε-maximizing one — scored on ε,
+keypoint distance, and physical lift. No human data, no licence, no GPU, no training.
+
+Full protocol and the meaning of each outcome in `EXPERIMENTS.md` §7.
+
+**Kill:** neither configuration lifts a box the scripted expert is known to lift → the ε
+search or the instrument is broken. Fix before M2.
 
 ## M2 — The opposition axis (week 2–3)
 
