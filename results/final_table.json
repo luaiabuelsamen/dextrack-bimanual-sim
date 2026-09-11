@@ -1,0 +1,28 @@
+{
+  "do_nothing": {
+    "net_lift_m": -0.00010775542021657092
+  },
+  "random": {
+    "net_lift_m": -0.00010775542021657092
+  },
+  "A_pose_retarget": {
+    "eps": 0.0,
+    "n": 0,
+    "kp_vec_m": 0.13198993152190247,
+    "drop_m": 0.7299999999999996,
+    "held": false,
+    "net_lift_m": 0.0,
+    "success": false
+  },
+  "B_eps_bimanual": {
+    "eps": 0.277226964918542,
+    "n": 7,
+    "kp_vec_m": 0.21601996492534684,
+    "drop_m": 0.002419611727402793,
+    "held": true,
+    "net_lift_m": 0.11398319616585717,
+    "peak_m": 0.11993702175214227,
+    "n_end": 3,
+    "success": true
+  }
+}

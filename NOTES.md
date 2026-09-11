@@ -185,3 +185,30 @@ joint through the box, not a property of LEAP, which grasps boxes routinely in
 published work. Filed as a bug. It is exactly the shape of error that
 rule-null-results exists to stop, and it is recorded here so it cannot later be
 mistaken for evidence.
+
+## 2026-09-11: M1.5 closed, one scene, one table
+
+    config                 eps  ncon  kp_vec(cm)  drop(cm)  held  net lift(cm)  >=10cm
+    do nothing               -     -           -         -     -        -0.01       -
+    random                   -     -           -         -     -        -0.01       -
+    A pose-retargeted   0.0000     0       13.20      73.0    no         0.00      no
+    B eps-max bimanual  0.2772     7       21.60       0.2   yes        11.40     yes
+
+All four rows measured in a single run of `scripts/final_table.py` on the
+corrected scene. The keypoint objective prefers A by 8.4 cm; epsilon prefers B;
+the task agrees with epsilon. Rendered as `figures/5_...gif` (B, +11.3 cm) and
+`figures/6_...gif` (A, 0.0 cm).
+
+**What this is and is not.** It is the C3 shape: the configuration that best
+matches the human grasp is the one that fails, and epsilon picks the one that
+works. It is NOT evidence for the paper, for three reasons that have to travel
+with the number:
+
+1. The human grasp is synthetic, placed analytically. No MANO, no ARCTIC.
+2. B is not a grasp. It is two wrists wedging the box (see the instrumented lift
+   above). So "re-allocating contacts across two hands" is, on this embodiment,
+   just "use the arms as a gripper".
+3. n = 1 object, 1 mass, 1 hand.
+
+The honest reading is that the probe did its job: it was built to kill the
+premise cheaply, and what it killed is the platform, not the question.
