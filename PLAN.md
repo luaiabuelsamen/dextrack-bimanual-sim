@@ -68,9 +68,10 @@ Four hands — f5d6, LEAP, Allegro, Shadow (URDFs all on disk under `DexTrack/as
 a shared object set spanning size, aspect ratio and mass. For each (hand, object): search grasp
 poses, record max achievable ε, and measure physical hold in sim. Produces δ per cell.
 
-Budget: MJX on Modal, ~$0.30 per 100 M steps, so this is compute-cheap and porting-expensive.
-The real cost is getting three more hands into the MJX-compatible primitive-collision scene;
-`assets.py`'s `_simplify_collision` path is the template and its gotchas are documented.
+Budget: scored in mesh mode on CPU per `EXPERIMENTS.md` §2 — a 100 k-pose grasp search is
+~5 minutes on one core and 10 k hold tests ~70 minutes at 16 process workers. No cloud spend.
+The real cost is porting: three more hands into the mesh scene, and `assets.py`'s URDF-repair
+path is the template. MJX is used here only to screen wide sweeps before mesh scores them.
 
 **Kill:** if δ does not collapse the four hands onto one success curve, there is no
 instrument. Say so, and the project becomes a per-hand characterization — much smaller.
