@@ -59,6 +59,8 @@ augmentation was self-defeating.
     tests/               invariants -- each one is a bug that actually happened
     attic/               superseded code, with a table saying why
     results/             live results; results/retracted/ may NOT be quoted
+    docs/                goal, plan, protocol, next steps
+    NOTES.md             the measurement log -- the only authoritative numbers
 
 ## Running
 

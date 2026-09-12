@@ -904,3 +904,44 @@ there is headroom, the obvious cloning approach does not claim it.
   alone.
 - `figures/17_bc_policy.gif` -- the BC policy, not the scripted expert,
   extracting the peg: 12.67 cm, base lift +0.78 cm, success.
+
+## 2026-09-12: restructured into a package
+
+The repo was 19 live scripts reaching each other through `sys.path.insert`, with
+external paths hard-coded in five of them. A refactor in that state could
+silently invalidate any published number, and adding anything meant guessing
+which file owned what.
+
+    src/oppdef/      library code -- no CLI, no path games
+      paths.py       menagerie / vega urdf / dextrack, one place, env-overridable
+      metrics/ hands/ envs/ control/ sim/ learning/ viz/
+    experiments/     every runnable thing: python -m experiments.<name>
+    tests/           13 invariants
+    attic/           superseded code, with the table of reasons
+    docs/            goal, plan, protocol, next
+    NOTES.md         this file -- the only authoritative numbers
+
+`pyproject.toml` + `Makefile`; editable install verified; all 13 modules import;
+the axis figure regenerates through the new entry point; `make expert` still
+reproduces 12.98 / 9.07 cm.
+
+**The tests are the point.** Each one is a bug that actually happened this
+session, written so it cannot happen again silently:
+
+- epsilon's five analytic ground truths, including monotonicity in mu -- the
+  reason cone edges are scaled to unit NORMAL component rather than unit length
+- the object rests ON its support rather than 4 cm inside it, and the
+  do-nothing baseline is zero (the defect that made three PPO runs look like
+  they had learned a 4 cm lift)
+- the two hands do not touch at reset (they did, at a 2.5 cm flange)
+- extraction costs more upward force than the base weighs, so the task IS
+  bimanual by construction rather than by assertion
+- the peg's graspable face lies inside LEAP's closure range (a face below it is
+  infeasible and the fingers close straight past)
+- the visual strip is bit-identical, so the MJX port cannot start changing
+  physics unnoticed
+- the expert succeeds and the one-handed control fails BY LIFTING THE BASE
+- f5d6's opposition floor separates it from LEAP
+
+Two stale-path bugs surfaced during the move and were caught by those tests
+rather than by a later wrong number, which is the whole argument for having them.
