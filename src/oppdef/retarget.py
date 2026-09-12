@@ -422,9 +422,28 @@ def retargeter_for(hand_key, prefix="", free_base=True):
     emb = make(hand=hand_key, free_base=free_base)
     m = emb.model
     pfx = list(emb.palm_bid)[0]
+    # Only the hand's own joints, plus the floating base. Selected by BODY
+    # DESCENT rather than by name: f5d6's file is the whole Vega robot, and a
+    # name-blind sweep handed the optimiser 47 joints including the head, the
+    # torso lift and the LEFT hand. Descent also survives every hand's own
+    # naming scheme, which no prefix rule does.
+    palm = emb.palm_bid[pfx]
+    base = {f"{pfx}{d}" for d in ("x", "y", "z", "rx", "ry", "rz")}
+
+    def in_hand(j):
+        b = int(m.jnt_bodyid[j])
+        while b > 0:
+            if b == palm:
+                return True
+            b = int(m.body_parentid[b])
+        return False
+
     jids = [j for j in range(m.njnt)
             if m.jnt_type[j] not in (mujoco.mjtJoint.mjJNT_FREE,
-                                     mujoco.mjtJoint.mjJNT_BALL)]
+                                     mujoco.mjtJoint.mjJNT_BALL)
+            and (in_hand(j)
+                 or (mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j) or "")
+                 in base)]
     rt = Retargeter(m, emb.tip_bid[pfx], jids, wrist_bid=emb.palm_bid[pfx])
 
     # The closing posture is DERIVED (specs.derive_flex solves the closure over

@@ -120,6 +120,32 @@ class Embodiment:
                 if m.actuator_trntype[a] == mujoco.mjtTrn.mjTRN_JOINT]
 
 
+def _mount_dof(body, prefix):
+    """Three slides and three hinges on a carrier body, so a hand can float.
+
+    Ranges are written in DEGREES for the hinges because that is the unit these
+    specs compile angles in -- writing radians there silently limited the
+    bimanual env's wrist to 3.2 degrees. See NOTES 2026-09-12.
+    """
+    # A moving body needs mass, and MuJoCo derives it from the subtree. The
+    # f5d6 hand comes from a URDF whose bodies carry no inertials, so the
+    # carrier compiled at zero mass and was rejected. Stating a small inertia
+    # explicitly makes the carrier self-sufficient for every hand.
+    body.mass = 1e-3
+    body.inertia = [1e-6, 1e-6, 1e-6]
+    body.explicitinertial = True
+    axes = dict(x=[1, 0, 0], y=[0, 1, 0], z=[0, 0, 1],
+                rx=[1, 0, 0], ry=[0, 1, 0], rz=[0, 0, 1])
+    for d, axis in axes.items():
+        slide = d in ("x", "y", "z")
+        body.add_joint(
+            name=f"{prefix}{d}", axis=axis,
+            type=mujoco.mjtJoint.mjJNT_SLIDE if slide else mujoco.mjtJoint.mjJNT_HINGE,
+            range=[-0.6, 0.6] if slide else [-180.0, 180.0],
+            damping=8.0 if slide else 1.0, armature=0.02)
+    return body
+
+
 def make(hand="leap", arm=None, count=1, prefixes=None, positions=None,
          quats=None, free_base=False, add_actuators=True):
     """Compose an embodiment.
@@ -155,12 +181,12 @@ def make(hand="leap", arm=None, count=1, prefixes=None, positions=None,
                 break
 
     attached_prefix = []
+    floating = free_base and a is None
     for pfx, pos, quat in zip(prefixes, positions, quats):
         child = hand_spec(h)
         kw = dict(pos=list(pos))
         if quat is not None:
             kw["quat"] = list(quat)
-        frame = None if mount_site is not None else parent.worldbody.add_frame(**kw)
         # A prefix is required whenever anything else is in the scene: MuJoCo
         # namespaces bodies and joints on attach but NOT assets, so a hand and an
         # arm that both define a material called "black" collide. An empty
@@ -168,8 +194,17 @@ def make(hand="leap", arm=None, count=1, prefixes=None, positions=None,
         eff = pfx or ("hand_" if (a is not None or len(prefixes) > 1) else "")
         if mount_site is not None:
             parent.attach(child, prefix=eff, site=mount_site)
+        elif floating:
+            # The six base DoF get their OWN body, with the hand as its child.
+            # Adding them to the palm works only for a palm that has no joints
+            # of its own: MuJoCo allows at most 6 DoF per body, and Shadow's
+            # palm already carries a 2-DoF wrist while f5d6's sits inside a
+            # whole robot, so both failed to compile with "more than 6 dofs".
+            mount = parent.worldbody.add_body(name=f"{eff}base", **kw)
+            _mount_dof(mount, eff)
+            parent.attach(child, prefix=eff, frame=mount.add_frame())
         else:
-            parent.attach(child, prefix=eff, frame=frame)
+            parent.attach(child, prefix=eff, frame=parent.worldbody.add_frame(**kw))
         attached_prefix.append(eff)
 
     prefixes = tuple(attached_prefix)
@@ -179,7 +214,8 @@ def make(hand="leap", arm=None, count=1, prefixes=None, positions=None,
     if free_base:
         from oppdef.envs.bimanual import _add_base_dof, BASE_DOF
         for pfx in prefixes:
-            _add_base_dof(parent, f"{pfx}{h.palm}", pfx, None)
+            if not floating:
+                _add_base_dof(parent, f"{pfx}{h.palm}", pfx, None)
             if add_actuators:
                 for d in BASE_DOF:
                     slide = d in ("x", "y", "z")

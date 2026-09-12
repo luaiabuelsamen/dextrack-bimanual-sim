@@ -129,16 +129,58 @@ def test_object_is_placed_where_the_hand_can_reach():
 
 
 @pytest.mark.slow
-def test_base_hinges_are_free_for_search_but_model_is_untouched():
-    """The bimanual env limits the base hinges to +/-0.06 rad because its hand
-    starts pointed at the task. A retargeter must be able to turn the hand
-    over -- but widening the MODEL would silently change that env's results."""
+def test_base_hinges_are_specified_in_the_unit_the_spec_compiles():
+    """These specs compile angles in DEGREES.
+
+    `_add_base_dof` wrote `range=[-3.2, 3.2]` intending radians, against an
+    actuator `ctrlrange` of +/-3.2 radians. It compiled to 3.2 DEGREES, so every
+    commanded wrist rotation past 3.2 degrees saturated at the joint limit in
+    silence -- and `expert.best_rz`, which sweeps rz across the full circle, was
+    choosing among poses the hand could not take. The number to guard is the
+    compiled one, in radians, because that is where the bug was visible.
+    """
     rt = retargeter_for("leap", free_base=True)
     names = [mujoco.mj_id2name(rt.m, mujoco.mjtObj.mjOBJ_JOINT, j)
              for j in rt.jids]
     assert {"x", "y", "z", "rx", "ry", "rz"} <= set(names)
     for i, n in enumerate(names):
         if n in ("rx", "ry", "rz"):
-            assert rt.hi[i] == pytest.approx(np.pi)      # search bound opened
-            jr = rt.m.jnt_range[rt.jids[i]]
-            assert jr[1] == pytest.approx(0.06)          # model bound intact
+            lo, hi = rt.m.jnt_range[rt.jids[i]]
+            assert hi == pytest.approx(np.pi, rel=1e-3), (
+                f"{n} compiled to +/-{hi:.4f} rad; 0.0559 means degrees were "
+                f"written where radians were meant")
+            assert rt.hi[i] == pytest.approx(np.pi)
+
+
+@pytest.mark.slow
+def test_bimanual_wrist_actually_reaches_a_commanded_rotation():
+    """The end-to-end version of the same defect: command, then measure."""
+    from oppdef.envs.bimanual import BimanualBox
+    e = BimanualBox()
+    j = mujoco.mj_name2id(e.m, mujoco.mjtObj.mjOBJ_JOINT, "rh_rz")
+    mujoco.mj_resetData(e.m, e.d)
+    c = np.zeros(e.m.nu)
+    c[e.act["rh_rz_act"]] = 1.0
+    for _ in range(800):
+        e.d.ctrl[:] = c
+        mujoco.mj_step(e.m, e.d)
+    assert e.d.qpos[e.m.jnt_qposadr[j]] == pytest.approx(1.0, abs=0.02)
+
+
+@pytest.mark.slow
+def test_every_hand_builds_with_a_floating_base():
+    """Shadow's palm carries a 2-DoF wrist and f5d6's sits inside a whole robot,
+    so bolting six more DoF onto the palm exceeded MuJoCo's 6-per-body limit.
+    The base needs its own carrier body."""
+    from oppdef.embodiment import HANDS
+    for hk in HANDS:
+        if hk == "leap_left":
+            continue
+        rt = retargeter_for(hk, free_base=True)
+        names = [mujoco.mj_id2name(rt.m, mujoco.mjtObj.mjOBJ_JOINT, j)
+                 for j in rt.jids]
+        assert {"x", "y", "z", "rx", "ry", "rz"} <= set(names), hk
+        # and the optimiser must not be handed the rest of the robot: f5d6's
+        # file is the whole Vega, head and left hand included
+        assert not any(n.startswith("L_") or n.startswith("head") for n in names), hk
+        assert len(rt.jids) <= 32, f"{hk} exposes {len(rt.jids)} joints"
