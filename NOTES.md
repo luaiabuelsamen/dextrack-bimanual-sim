@@ -1366,3 +1366,84 @@ monotone figure and a quotable headline, and was wrong. Nothing caught it until
 an object was placed in a simulator and pushed. That is the whole argument for
 the physics gate, and it is now a standing requirement: no epsilon enters a
 finding until the pose behind it has been held against a wrench in MuJoCo.
+
+## 2026-09-12 — the second hand, measured in physics
+
+The retracted retargeting result was geometric. This one is not: every grasp
+below is produced by CLOSING a hand in simulation (pre-grasp -> close ->
+squeeze), its epsilon comes from real MuJoCo contacts, and it is then validated
+by pushing the object in 14 directions until it slips.
+
+### First: does epsilon predict holding at all?
+
+57 LEAP grasps on a 5 cm box, approach sampled at random, each hold-tested:
+
+    eps bin        n    mean force sustained in the worst direction
+    0.00-0.15     21    0.55 N
+    0.15-0.25     11    1.14 N
+    0.25-0.35     15    1.87 N
+    > 0.35        10    2.64 N
+
+Monotone, ~5x across the range. Per-grasp it is noisy (Spearman +0.39, and the
+force ladder is coarse), but the instrument tracks the physics in aggregate.
+This is the check the geometric epsilon never had.
+
+### Then: what does a second hand buy?
+
+Approach searched by CEM (6 iterations x 24 samples) per hand per width, once
+with one hand and once with two, then hold-tested.
+
+    hand        w    eps_1   eps_2   hold_1  hold_2
+    allegro   3.0   0.1774  0.6308    0.50    2.00
+    allegro   4.0   0.3982  0.6200    0.50    4.00
+    allegro   5.0   0.6438  0.6563    2.00    4.00
+    allegro   6.0   0.6390  0.6241    2.00    8.00
+    allegro   7.0   0.4686  0.6518    2.00    4.00
+    allegro   8.0   0.4562  0.6692    1.00    8.00
+    allegro   9.0   0.3980  0.5761    0.50    8.00
+    leap      4.0   0.5214  0.6313    4.00    8.00
+    leap      7.0   0.5946  0.7882    4.00    8.00
+    leap      8.0   0.4197  0.6798    4.00    8.00
+    shadow    3.0   0.5591  0.6350    1.00    4.00
+    shadow    6.0   0.5759  0.7103    2.00    2.00
+    ...
+    mean sustained force   one hand 2.33 N    two hands 4.54 N   (1.95x)
+    two hands >= one in 22/23 cells, strictly greater in 16
+
+Figure: `figures/deficit_repair.png` (`make deficit-fig`).
+
+**No human data is involved anywhere in this result.** The wrench requirement is
+the specification and the hands are fitted to it. That is the half of the thesis
+that does not need the ARCTIC/Dexonomy registration to be answered, and it is
+now answered in physics.
+
+### The boundary, which is as informative as the claim
+
+f5d6 grasps a 3 cm box (eps 0.65) and a 4 cm box (0.43) and then fails
+completely from 5 cm up -- with ONE hand and with TWO. Its open hand cannot
+admit the object at all; every sampled approach is rejected as starting inside
+it. So:
+
+**A second identical hand repairs a WRENCH deficit, not an APERTURE deficit.**
+
+Where a hand can reach around the object but cannot oppose well enough to
+resist the wrench, the second hand supplies the missing directions and the
+sustained force roughly doubles. Where the hand cannot admit the object in the
+first place, a second copy of the same hand adds nothing. That distinction was
+not in the thesis as written and it sharpens it.
+
+### Caveats carried with these numbers
+
+* The force ladder tops out at 8 N, so cells where both conditions saturate
+  understate the gain (leap reaches the ceiling at 6 of 7 widths).
+* CEM is stochastic and was run at ONE seed per cell. Shadow at 8 cm is the
+  single regression (1.00 -> 0.50 N) and is most likely search variance, not a
+  property of the hand.
+* Penetration is gated at 3 mm and reported per cell; at kp = 3 the search had
+  been finding "grasps" buried 5-19 mm deep carrying 40-310 N, which is how
+  epsilon gets manufactured out of buried fingers. At kp = 1 the same
+  approaches sit near 2 mm and 16 N.
+* Objects are boxes. Two hands of the same type only; no arm, no torso.
+* The keypoint-vs-wrench comparison has NOT been redone on this pipeline. That
+  half of the thesis still rests on the retracted geometric run and has to be
+  rebuilt here.

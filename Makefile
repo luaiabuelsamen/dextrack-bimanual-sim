@@ -56,6 +56,12 @@ figures-retarget: ## retargeting figure, from out/retarget
 chunk:            ## action chunking vs the one-step MLP, several train seeds
 	$(PY) experiments/chunk_bc.py
 
+deficit:          ## single vs two hands, searched and hold-tested in physics
+	$(PY) experiments/deficit_repair.py
+
+deficit-fig:      ## the second-hand figure, from results/deficit_*.json
+	$(PY) experiments/fig_deficit.py
+
 clean:
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +
 
