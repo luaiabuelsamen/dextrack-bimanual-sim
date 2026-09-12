@@ -1033,3 +1033,101 @@ Menagerie sparse checkout widened to include franka_emika_panda,
 universal_robots_ur5e, trs_so_arm100 and ufactory_xarm7. `menagerie_xml` now
 resolves any `meshdir` spelling against the model's own directory -- the
 previous version matched two known spellings and `trs_so_arm100` uses a third.
+
+## 2026-09-12 — retargeting (front 2), and a units defect in the bimanual env
+
+### Defect found in already-validated infra: the wrist could not rotate
+
+`envs/bimanual._add_base_dof` wrote `range=[-3.2, 3.2]` for the three base
+hinges, intending radians, into a spec that compiles angles in **degrees**. The
+matching actuator `ctrlrange` stayed ±3.2 **radians**. Compiled:
+
+    rh_rz_act   ctrlrange [-3.2, 3.2]   jnt_range [-0.0559, 0.0559]
+
+So every commanded wrist rotation past 3.2° saturated at the joint limit, with
+no error anywhere. `control/expert.best_rz` sweeps rz over `linspace(-pi, pi,
+48)` and scores each — it was selecting among poses the hand could not take.
+
+**Retraction:** any statement that the expert's wrist angle was *optimised* is
+withdrawn. The expert's measured numbers were measured and stand.
+
+Fixed to `[-180, 180]` (degrees, matching the spec's unit). Verified: a
+commanded `rz = 1.0 rad` now reaches `qpos = 1.0000 rad`; before it would have
+clamped at 0.0559.
+
+Re-measured after the fix, same protocol:
+
+| run | peg out | base moved | base z | tilt | ok |
+|---|---|---|---|---|---|
+| two-handed expert (was 12.98 cm) | **13.49 cm** | 3.03 cm | +0.44 cm | 3.1° | yes |
+| one-handed control | 5.32 cm | 12.36 cm | +10.26 cm | 43.1° | no |
+
+The claim the task rests on — it requires two hands — survives the fix, and the
+expert is slightly better with a wrist that can actually turn.
+
+### Retargeting: six corrections before the comparison measured anything
+
+The first run reported `eps = 0.0000, 0 contacts` for all four hands under both
+objectives. Causes, in the order they were found — each produced plausible
+output while being wrong:
+
+1. **Epsilon is exactly flat before first contact.** With no fingertip
+   touching, eps is 0 in every direction, so L-BFGS-B's numerical gradient is
+   zero and the search terminates where it started. Not a tuning problem — the
+   shape of the function. Fixed with the DexGraspNet/BODex decomposition
+   (E_fc + E_dis + E_pen): a reach term gives gradient before contact, a
+   penetration term keeps tips out of the interior. Epsilon is still what is
+   reported, measured by the same hard geometric test.
+2. **Thumb correspondence was inverted.** The reference stacked the thumb
+   first, `Hand.tip_names` stacks it last, so the frame fit paired the human's
+   thumb with the robot's index finger and dropped the robot's thumb entirely.
+3. **Wrist-relative vectors are not comparable across hands.** The body a model
+   calls the wrist is a modelling choice; Shadow's palm body sits 25 cm from its
+   own fingertips (it includes the forearm), LEAP's 8 cm. **Rendered, the object
+   came out buried inside LEAP's palm.** Now fitted on inter-fingertip vectors,
+   which is what DexPilot and AnyTeleop optimise and what has no origin to
+   disagree about.
+4. **Every way of fitting a scale was wrong.** Least squares collapsed toward
+   zero when the shapes differed (0.50 for LEAP, whose fingers are ~0.8× the
+   reference's) and buried the object 2 cm into the palm; a span ratio gave
+   3.26 because it compared a *closed* human grasp against the robot at its
+   *open* zero posture. Not fitted at all now: the demonstration held a box of
+   known width, so testing width `w` scales it by exactly `w / w_ref`, and `w`
+   is swept. Scale became a measurement instead of a fudge factor.
+5. **Fingertips are near-planar**, so inter-tip vectors are blind to which side
+   of that plane the palm is on — the one DoF deciding whether the fingers point
+   at the object or away from it. LEAP's palm was placed *above* the box with
+   its fingers extending further above, and every keypoint fit hovered ~15 cm
+   clear. The rotation fit now includes a unit palm direction.
+6. **The base hinges could not turn** (the units defect above), so the hand
+   could not face the object at all. The optimiser's bounds are opened in
+   `retargeter_for`; the model is left alone so the env keeps the limits its
+   results were measured under.
+
+**Guard added:** every row now reports the DEMONSTRATION's own epsilon beside
+the fits. Without it there was no way to see that the question was ill-posed
+rather than the hands bad. The synthetic reference scores eps ≈ 0.21 with 4/5
+contacts on its own object, so it is a real grasp — `test_demonstration_is_
+itself_a_grasp` locks that in.
+
+### Convergence control — is this measuring retargeting or my optimiser?
+
+Asked before reporting anything, because BLEND was beating pure EPSILON
+(0.2614 vs 0.1400), which is only possible if the epsilon search is failing.
+
+    leap keypoint   restarts  4: kp 3.23 cm  eps 0.0000  cts 0
+                    restarts 12: kp 1.41 cm  eps 0.0000  cts 0
+                    restarts 24: kp 1.41 cm  eps 0.0000  cts 0
+                    restarts 24, maxiter 2000: kp 1.41 cm  eps 0.0000  cts 0
+    leap epsilon    restarts  4: kp 4.64 cm  eps 0.1400  cts 3
+                    restarts 12: kp 7.53 cm  eps 0.4026  cts 4
+
+Keypoint is **converged** — error plateaus at 1.41 cm from 12 restarts on, and
+contacts stay 0. That result is real. Epsilon at 4 restarts was **not**
+converged (0.1400 → 0.4026 at 12), which is what produced the BLEND inversion.
+**Comparison runs must use >= 12 restarts**; the 4-restart smoke numbers are not
+reportable.
+
+Nothing about the keypoint-vs-epsilon comparison is claimed yet: the reference
+is `SyntheticSource`, an analytic stand-in, not MANO. Any result carries that
+caveat until ARCTIC/Dexonomy lands.
