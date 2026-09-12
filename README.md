@@ -1,5 +1,8 @@
 # opposition-deficit
 
+[![tests](https://img.shields.io/badge/tests-13%20passing-2a78d6)](tests/)
+[![license](https://img.shields.io/badge/license-MIT-2a78d6)](LICENSE)
+
 **Question.** When a robot hand cannot oppose the way a human hand does, what
 should human hand-object interaction data be retargeted *to*?
 
@@ -62,6 +65,23 @@ augmentation was self-defeating.
     docs/                goal, plan, protocol, next steps
     NOTES.md             the measurement log -- the only authoritative numbers
 
+## Setup
+
+    make vendor       # MuJoCo Menagerie hand models (sparse clone, ~30 MB)
+    make install      # editable install
+    make test         # 13 invariants, ~10 s
+
+Three of the four hands (Shadow, Allegro, LEAP) come from Menagerie and need
+nothing else. The Dexmate f5d6 rows additionally need that robot's URDF, which
+is not redistributed here:
+
+    export OPPDEF_VEGA_URDF=/path/to/vega_1u_f5d6-obj.urdf
+    export OPPDEF_DEXTRACK=/path/to/a/urdf-to-mjcf-compiler   # strips .glb visuals
+
+GPU work is optional (`pip install -e '.[gpu]'`) and goes through `mjx_env.sh`,
+which puts the venv's own CUDA libraries on `LD_LIBRARY_PATH` -- the one thing
+JAX needs to find a Jetson's GPU.
+
 ## Running
 
     make install      # editable install
@@ -73,9 +93,6 @@ augmentation was self-defeating.
     make bc           # collect, train, evaluate
     make parity       # CPU vs warp, outcome level (GPU)
     make figures
-
-GPU work goes through `./mjx_env.sh`, which puts the venv's own CUDA libraries on
-`LD_LIBRARY_PATH` -- the one thing JAX needs to find the Orin's GPU.
 
 ## House rules these follow
 

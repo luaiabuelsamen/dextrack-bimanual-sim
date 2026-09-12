@@ -15,16 +15,27 @@ REPO = Path(__file__).resolve().parents[2]
 MENAGERIE = Path(os.environ.get("OPPDEF_MENAGERIE",
                                 REPO / "vendor" / "mujoco_menagerie"))
 
-#: Dexmate Vega upper body with two f5d6 hands
-VEGA_URDF = Path(os.environ.get(
-    "OPPDEF_VEGA_URDF",
+#: Dexmate Vega upper body with two f5d6 hands. Only needed for the f5d6 rows of
+#: the opposition axis -- every other hand comes from Menagerie. Not redistributed
+#: here; set OPPDEF_VEGA_URDF to your own copy.
+VEGA_URDF = Path(os.environ.get("OPPDEF_VEGA_URDF", "")) if os.environ.get(
+    "OPPDEF_VEGA_URDF") else Path(
     "/home/jetson3/projects/dexmate/dexmate-urdf/robots/humanoid/vega_1u/"
-    "vega_1u_f5d6-obj.urdf"))
+    "vega_1u_f5d6-obj.urdf")
 
-#: dextrack_vega, for its URDF->MJCF compiler (it strips the .glb visual meshes
-#: MuJoCo cannot decode; the local compiler choked on them)
+#: A URDF->MJCF compiler that strips the .glb visual meshes MuJoCo cannot decode.
+#: Only needed alongside VEGA_URDF. Set OPPDEF_DEXTRACK to your own checkout.
 DEXTRACK = Path(os.environ.get("OPPDEF_DEXTRACK",
                                "/home/jetson3/projects/dextrack_vega"))
+
+
+def require(path: Path, what: str, env: str) -> Path:
+    """Fail with the fix rather than a stack trace three frames deep."""
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{what} not found at {path}.\n"
+            f"  Set {env} to your copy, or run `make vendor` for the Menagerie models.")
+    return path
 
 RESULTS = REPO / "results"
 FIGURES = REPO / "figures"
@@ -41,7 +52,7 @@ def compile_urdf(urdf: Path) -> str:
 
 def menagerie_xml(rel: str) -> str:
     """Read a Menagerie model and absolutise its meshdir."""
-    p = MENAGERIE / rel
+    p = require(MENAGERIE / rel, "MuJoCo Menagerie model", "OPPDEF_MENAGERIE")
     xml = p.read_text()
     assets = (p.parent / "assets").as_posix()
     return (xml.replace('meshdir="./assets/"', f'meshdir="{assets}/"')

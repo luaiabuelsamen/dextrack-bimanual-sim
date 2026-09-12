@@ -1,5 +1,7 @@
 # Everything runs locally. No Modal.
-PY  ?= /home/jetson3/projects/dextrack_vega/.venv/bin/python
+# Override for your environment, e.g.
+#   make test PY=/path/to/venv/bin/python
+PY  ?= python3
 # a stale system-site anyio plugin breaks collection; this venv needs none
 export PYTEST_DISABLE_PLUGIN_AUTOLOAD := 1
 GPU ?= ./mjx_env.sh python
@@ -37,3 +39,9 @@ figures:          ## regenerate the figures
 
 clean:
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +
+
+vendor:           ## fetch the MuJoCo Menagerie hand models (sparse, ~30 MB)
+	@test -d vendor/mujoco_menagerie || git clone --depth 1 --filter=blob:none --sparse \
+	  https://github.com/google-deepmind/mujoco_menagerie.git vendor/mujoco_menagerie
+	@cd vendor/mujoco_menagerie && git sparse-checkout set leap_hand shadow_hand wonik_allegro
+	@echo "menagerie ready"
