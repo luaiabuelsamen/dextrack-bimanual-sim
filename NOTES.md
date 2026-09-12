@@ -381,3 +381,57 @@ Clean result, 0.05 kg, all criteria including the new ones:
 1/12 configurations pass the full criterion now, against 24/48 before the
 transient and start-penetration bounds were added. That drop is the point: most
 of the earlier "successes" were riding on initialisation artifacts.
+
+## 2026-09-11: MPPI -- what it is and is not good for here
+
+Built `scripts/mppi_grasp.py`: sampling MPC on `mujoco.rollout` (threaded, 48
+samples, horizon 25 x 10 substeps), one cost function for every hand. The reason
+for a planner is methodological: every grasp result so far uses a closure I
+designed for LEAP, so carrying it to Allegro/Shadow/f5d6 would make my scripting
+a confound. A shared cost removes that.
+
+**Three findings, in the order they were forced.**
+
+1. **Position tracking alone is reward-hackable.** The planner discovered it can
+   BAT the object upward: 13 cm of lift, epsilon 0 at the top, 28-40 kN of
+   contact force. Ballistic motion satisfies a height target inside a short
+   horizon. Adding a velocity-tracking term took peak force from 40 kN to 12 N.
+
+2. **A fixed MPPI temperature collapsed the weights completely.** Effective
+   sample size was 1.0 at lambda = 0.08, 2 and 50 alike, because random finger
+   perturbations destroy the grasp: cost minimum ~7e2, maximum ~1e5-1e6. The plan
+   never moved (drift 0.0000) and the planner produced results **bit-identical**
+   to a no-planner baseline holding the pre-grasp pose -- in 59 s instead of 1 s.
+   Scaling the temperature to the cost spread (lambda = rho * std(cost), rho = 1,
+   sigma 0.15 -> 0.02) took the effective sample size to 26-38 and the plan
+   started moving. **Without the trivial baseline this would have been written up
+   as "MPPI lifts 10.6 cm".**
+
+3. **MPPI refines; it does not discover.** Started from the pre-grasp it makes
+   small local adjustments (drift ~0.03 rad, healthy sample size, seeds now
+   differ) and still lands on the baseline outcome. This is expected of a local
+   method and is exactly why BODex uses bilevel optimisation with a
+   force-closure energy and Dexonomy starts from human-annotated templates.
+
+**Where it does earn its cost.** Seed the planner with a grasp already seated by
+the (hand-agnostic) gap closure, and give it the lift to stabilise:
+
+    condition          lift        eps_top      F sustained   F peak
+    seated + MPPI      5.7+-0.1cm  0.11-0.87    24-46 N       85-123 N
+    seated, no planner 5.9+-0.0cm  0.446        1300 N        1300 N
+
+Same lift, **~15x less peak grip force** (1213 N vs 79 N in the rendered pair,
+`figures/10_mppi_lift.gif` vs `figures/10_baseline_lift.gif`). Both survive the
+downward jerk (33 m/s^2, follow 0.93-0.99, 4-7 contacts after) and the shake
+(+0.2 to +0.4 cm). Neither reaches the 10 cm bar: both slip about 5 cm during the
+rise, so the lift lands at 5.7 cm.
+
+**Answer to "should we use MPC/MPPI":** yes for stabilisation and force
+regulation, no for grasp discovery. Synthesise the grasp (BODex/Dexonomy), let
+MPPI hold it.
+
+**Bugs found and fixed along the way,** both by instrumenting rather than
+sweeping: the shake referenced `lift_h` while the hand ends lower after the
+in-task jerk, so it RAISED the hand 5 cm and scored a -4 cm drop; and a patch
+using an empty string slice made `str.replace("")` insert text at every position
+and destroyed the file, which is why it was rewritten rather than patched.
