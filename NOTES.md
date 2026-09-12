@@ -556,3 +556,53 @@ this is not a knife-edge. `figures/13_expert_two.gif`, `13_expert_one.gif`,
 needs both, and a scripted expert that solves it with its control failing. Step 4
 (MJX port) and step 5 (BC then RL) are next. Nothing has been learned yet, and
 the expert is the warm start when it is.
+
+## 2026-09-11: MJX port, without degrading the physics
+
+Two results, one of which overturns a claim carried since May.
+
+**1. JAX CUDA works on this Jetson.** The note that "JAX has NO working CUDA
+build on aarch64/Tegra" is out of date. `jax_cuda12_pjrt-0.6.2-manylinux2014_aarch64`
+and `jax_cuda12_plugin-0.6.2-cp310-manylinux2014_aarch64` exist and are genuine
+aarch64 ELF objects. They fail out of the box only because the plugin looks for
+CUDA libraries in the standard locations and Jetson does not use them. Putting
+the venv's own `site-packages/nvidia/*/lib` directories on `LD_LIBRARY_PATH`
+yields `backend: gpu, devices: [CudaDevice(id=0)]`. Launcher: `mjx_env.sh`,
+venv `.venv-mjx` (jax 0.6.2, mujoco 3.9.0, mujoco-mjx). Modal is therefore for
+SCALE, not for access -- MJX can be iterated on the Orin.
+
+**2. The port needs no physics substitutions.** The May recipe deleted collision
+meshes, replaced fingertips with spheres, swapped Newton for CG and added
+armature until it stopped diverging. That changes contact physics, which is why
+it could only claim "parity within primitive mode" -- a policy trained there is
+about a different world.
+
+The distinction that recipe missed: on this scene the 252,089 mesh vertices are
+almost entirely **visual** geoms (contype=0, conaffinity=0, density=0 in
+Menagerie's `visual` class). They generate no contacts and carry no mass.
+Deleting them is provably a no-op; deleting collision meshes is not. The actual
+collision meshes here are the eight fingertips at 52 vertices each.
+
+`scripts/mjx_port.py` strips only visual-only geoms (both conditions checked:
+no collision AND no mass, since a contype=0 geom still contributes inertia
+unless its density is zero) plus any mesh asset left unreferenced, and then
+PROVES the strip is neutral by replaying an identical 400-step control sequence
+through the full and stripped models on CPU:
+
+    full     ngeom 179  nmesh 21  meshvert 252089
+    stripped ngeom 145  nmesh  4  meshvert     208
+    max |state difference| over 400 steps : 0.000e+00
+
+Bit-identical. 1200x fewer mesh vertices, zero change to the dynamics, no
+collision geometry touched, no solver swapped.
+
+`mjx.put_model` then succeeds in **2.1 s** on the stripped model with Newton and
+the elliptic cone left exactly as the expert was validated with.
+
+**Open at time of writing:** the first `jax.jit(mjx.step)` compile has been
+running over 10 minutes on this scene. That is an XLA compile cost over ~145
+collision geoms, not a physics problem, and it is a one-time cost per shape --
+but it needs measuring before the training loop is designed around it. The
+honest next number is compile time and steps/s under `vmap` + `lax.scan`, which
+is how MJX is actually used; stepping one environment from Python, as the parity
+check does, is the worst case for compilation.

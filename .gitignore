@@ -5,3 +5,5 @@ runs/
 data/
 *.npz
 MUJOCO_LOG.TXT
+.venv-mjx/
+vendor/mujoco_menagerie/
