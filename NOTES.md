@@ -290,3 +290,63 @@ from Dexonomy for a box-like object, replay pre-grasp -> grasp -> squeeze on the
 Menagerie model, and score it with DexGraspBench. If that holds and lifts, the
 paired working reference exists and f5d6 can be measured against it on the same
 bench, which is the whole point of M2.
+
+## 2026-09-11: LEAP grasps and lifts the 0.05 kg block
+
+On the Menagerie model (`vendor/mujoco_menagerie/leap_hand/right_hand.xml`) with
+a vertical slide added to the palm, mid-air bench, nothing supporting the block:
+
+    block 4.5 x 5 x 5 cm, 0.05 kg, friction 2.0
+    closure   flex [0.9, 1.2, 0.6]  thumb [1.6, 0.9, 1.0, 0.6]
+    net lift            +16.7 cm
+    epsilon at the top   0.330          <- force closure, not resting contact
+    contacts at the top  5
+    shake test           4 cycles of +-3.5 cm, drop 1.5 cm, 3 contacts after
+    sustained grip force 16.5 N
+    sweep                24/48 configurations pass the full criterion
+
+Rendered: `figures/9_leap_grasp_005kg.gif`, still at `figures/9_leap_grasp_top.png`,
+which shows the block pinched between the thumb tip and the index tip.
+
+**Caveat that travels with the number.** During the pinned closure the transient
+contact force reaches 4812 N, a penetration artifact of driving position targets
+onto a pinned object. The sustained holding force after release is 16.5 N, which
+is what the lift and shake are carried by. The closure fraction saturates
+(`f_touch = 1.0`), meaning the planner never found an intermediate closure with a
+4.5 cm gap and clamped to full flex. A Dexonomy pre-grasp/grasp/squeeze triple
+would remove both artifacts; this is a working reference, not a clean one.
+
+**The criterion had to be fixed first, twice.** The first version (lift >= 10 cm
+and contacts > 0) was satisfied by the block RIDING ON TOP of the hand: +14.5 cm
+with epsilon = 0.000, visible in `figures/8_leap_pick_top.png` as the block
+perched on the thumb tip and the outside of the fingers. Carrying is not
+grasping. The criterion now also requires epsilon > 0.01 at the top, survival of
+a shake, and a sustained force under 100 N.
+
+## 2026-09-11: post-mortem on how this session was worked
+
+Written because the same failure repeated all day and is worth not repeating.
+
+**Every bug today was found by looking, never by sweeping.** The spawn-inside-
+table (rendered), the balled fist sunk in the table (rendered), the pedestal
+impaling the palm (contact dump: 45 contacts at reset), the inverted lift sign
+(instrumented actuator force vs qpos), the block perched on the thumb (rendered).
+Before each of those, a parameter sweep had already been run and had produced
+nothing but rows of False. **Render one frame and dump the contact list the first
+time a scene is built, before any sweep.**
+
+**Prior art before implementation.** MuJoCo Menagerie, DexGraspBench and Dexonomy
+all existed; four hand-written closures were written and thrown away first. The
+user had to ask twice for a literature check.
+
+**Frames and signs need a unit test, not an assumption.** The lift joint's axis is
+expressed in the palm's body frame and the palm carries a 180 deg quat, so
+positive ctrl raises and negative lowers. Four runs commanded the wrong sign and
+two "fixes" adjusted the range without ever testing the direction. A three-line
+test (command +x, command -x, print world z) settled it immediately.
+
+**Pre-registered degenerate solutions must be checked against, not just written
+down.** EXPERIMENTS.md 5 names this exact failure class. Two were still shipped:
+`drop < 1 cm` satisfied by a box lying on the floor (3/48 false holds at 1.35 m
+displacement), and a full-marks lift with epsilon = 0 because the block was
+riding on the hand.

@@ -38,7 +38,12 @@ THUMB = ["th_cmc", "th_axl", "th_mcp", "th_ipl"]
 
 
 def build(block_half, block_mass, block_pos, friction="1.0 0.02 0.001",
-          lift_range=(-0.06, 0.40)):
+          lift_range=(-0.45, 0.06)):
+    """NOTE on lift_range: the slide axis is 0 0 -1, so NEGATIVE ctrl raises the
+    hand. An earlier version used (-0.06, 0.40), which clamped every lift
+    command to -0.06 -- the hand could rise 6 cm and no further, which is why
+    grasps that were actually gripping (eps 0.377, 14 contacts) still "failed"
+    the >= 10 cm criterion."""
     """Menagerie right hand + a vertical slide on the palm + a free block."""
     xml = (MEN / "right_hand.xml").read_text()
     xml = xml.replace('meshdir="./assets/"', f'meshdir="{(MEN / "assets").as_posix()}/"')
