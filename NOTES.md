@@ -1221,3 +1221,41 @@ Smoke result (allegro, 5 cm box, palm fixed):
 
 2.8x the epsilon, bought by letting keypoint error roughly double. Still on
 `SyntheticSource`, which is an analytic stand-in and not MANO.
+
+## 2026-09-12 — retargeting result: four hands, four widths, palm fixed
+
+Protocol: the palm is fixed at the hand's own pose with the object at the
+midpoint of its opposition axis, identically for every condition, so only the
+finger angles differ. The demonstration is scaled to the box under test
+(`w / w_ref`). Contacts are geometric (nearest point on the box surface, that
+face's normal), so these are grasp-synthesis-style predictions to be validated
+in simulation, not physical results.
+
+    mean Ferrari-Canny epsilon over 16 hand x width cells
+
+      human demo            0.1194     eps = 0 in  0/16
+      keypoint              0.0451     eps = 0 in 11/16
+      keypoint + squeeze    0.0511     eps = 0 in 10/16
+      epsilon-optimised     0.3570     eps = 0 in  0/16
+
+Per hand, keypoint achieves force closure at NO width on **leap** and **f5d6**;
+on **allegro** at three of four; on **shadow** at two of four. The
+epsilon objective achieves it everywhere, at 0.19-0.47.
+
+The sharpest single cell is leap at a 3 cm box: keypoint matches the
+demonstration's inter-fingertip geometry to **0.01 cm** -- essentially exactly --
+and gets **epsilon = 0 with zero contacts**, while the epsilon objective from
+the same palm pose reaches 0.246. Reproducing the human's hand shape to a
+tenth of a millimetre produces no grasp at all.
+
+Squeezing barely helps: it rescues one cell of eleven (f5d6 at 3 cm, 0 ->
+0.096). So this is not "the keypoint pose just needed closing".
+
+Figure: `figures/retarget_epsilon.png` (`make figures-retarget`).
+
+**Caveats that travel with every number above.** The reference is
+`SyntheticSource`, an analytic stand-in, NOT MANO -- ARCTIC/Dexonomy
+registration is still pending. Contacts are geometric, not simulated. And the
+epsilon condition is an optimiser given the epsilon objective, so it should win
+on epsilon; what is informative is the SIZE of the gap and that keypoint lands
+at exactly zero, which is a qualitative failure rather than a smaller number.

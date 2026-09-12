@@ -50,6 +50,12 @@ parity-mjx:       ## CPU MuJoCo vs MJX, per-step state divergence (needs GPU)
 figures:          ## regenerate the figures
 	$(PY) -m experiments.fig_axis
 
+figures-retarget: ## retargeting figure, from out/retarget
+	$(PY) experiments/fig_retarget.py
+
+chunk:            ## action chunking vs the one-step MLP, several train seeds
+	$(PY) experiments/chunk_bc.py
+
 clean:
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +
 

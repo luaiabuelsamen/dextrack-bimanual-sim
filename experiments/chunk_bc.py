@@ -16,6 +16,15 @@ sim step instead would consume a chunk H times too fast.
 
 Baselines are run every time. A learned policy that does not beat do-nothing
 and random has not been shown to do anything.
+
+EVERY HORIZON IS TRAINED FROM SEVERAL SEEDS, because one run per horizon does
+not measure the horizon. Run once each, this comparison reported horizon 8 at
+0/8 with the peg driven 6.9 cm the WRONG way, sitting between horizon 1 and
+horizon 16 at 8/8 -- a hole that no property of chunking explains. Retrained
+with a different torch seed on the same demonstrations, horizon 8 scored 8/8.
+The spread across seeds is larger than any difference between horizons, so a
+single-seed table would have reported initialisation luck as an architecture
+result.
 """
 from __future__ import annotations
 
@@ -112,6 +121,8 @@ def main():
     ap.add_argument("--epochs", type=int, default=300)
     ap.add_argument("--stride", type=int, default=4)
     ap.add_argument("--horizons", type=int, nargs="+", default=[1, 8, 16])
+    ap.add_argument("--train-seeds", type=int, nargs="+", default=[0, 1, 2])
+    ap.add_argument("--ensemble-m", type=float, default=0.01)
     ap.add_argument("--out", default="results/chunk_bc.json")
     a = ap.parse_args()
 
@@ -139,11 +150,28 @@ def main():
                      peg_std_cm=float(np.std(ex_peg))))
 
     for h in a.horizons:
-        name = "MLP (horizon 1)" if h == 1 else f"chunked (horizon {h})"
-        print(f"\n=== {name} ===", flush=True)
-        p = train(eps, horizon=h, epochs=a.epochs)
-        rows.append(evaluate(name, seeds, policy=p, mode="policy",
-                             stride=a.stride))
+        base = "MLP (horizon 1)" if h == 1 else f"chunked (horizon {h})"
+        print(f"\n=== {base} ===", flush=True)
+        per_seed = []
+        for ts in a.train_seeds:
+            p = train(eps, horizon=h, epochs=a.epochs, seed=ts,
+                      m=a.ensemble_m, log=None)
+            r = evaluate(f"{base} seed {ts}", seeds, policy=p, mode="policy",
+                         stride=a.stride)
+            r["horizon"], r["train_seed"] = h, ts
+            rows.append(r)
+            per_seed.append(r)
+        sc = np.array([r["success"] for r in per_seed])
+        pg = np.array([r["peg_mean_cm"] for r in per_seed])
+        print(f"  {'-> across seeds':22s} success {sc.mean()*100:5.1f}% "
+              f"+/- {sc.std()*100:4.1f}   peg {pg.mean():6.2f} +/- "
+              f"{pg.std():5.2f} cm", flush=True)
+        rows.append(dict(label=f"{base} SUMMARY", horizon=h,
+                         success_mean=float(sc.mean()),
+                         success_std=float(sc.std()),
+                         peg_mean_cm=float(pg.mean()),
+                         peg_std_cm=float(pg.std()),
+                         n_seeds=len(a.train_seeds)))
 
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(rows, indent=2))
