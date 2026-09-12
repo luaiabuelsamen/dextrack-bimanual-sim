@@ -101,7 +101,7 @@ def _add_base_dof(spec, palm, prefix, home):
 
 
 def build(hinge_friction=HINGE_FRICTION, base_mass=BASE_MASS, two_handed=True,
-          peg_friction=1.0):
+          peg_friction=1.0, tactile=False):
     spec = mujoco.MjSpec()
     spec.option.timestep = 0.002
     spec.option.integrator = mujoco.mjtIntegrator.mjINT_IMPLICITFAST
@@ -158,6 +158,15 @@ def build(hinge_friction=HINGE_FRICTION, base_mass=BASE_MASS, two_handed=True,
                 ctrllimited=1,
                 ctrlrange=[-0.6, 0.6] if slide else [-3.2, 3.2])
 
+    if tactile:
+        # touch sensors need geom names, which only exist after a first compile
+        probe = spec.compile()
+        from oppdef.sensing import add_touch_sensors, fingertip_geoms
+        tips = [mujoco.mj_name2id(probe, mujoco.mjtObj.mjOBJ_BODY, f"{p}{b}")
+                for p in ("rh_", "lh_")
+                for b in ("if_ds", "mf_ds", "rf_ds", "th_ds")]
+        add_touch_sensors(spec, fingertip_geoms(probe, tips))
+
     model = spec.compile()
     return model, spec
 
@@ -166,9 +175,9 @@ class BimanualBox:
     """Handles for the scripted expert."""
 
     def __init__(self, hinge_friction=HINGE_FRICTION, base_mass=BASE_MASS,
-                 peg_friction=1.0):
+                 peg_friction=1.0, tactile=False):
         self.m, self.spec = build(hinge_friction, base_mass,
-                                  peg_friction=peg_friction)
+                                  peg_friction=peg_friction, tactile=tactile)
         self.d = mujoco.MjData(self.m)
         n2 = lambda t, s: mujoco.mj_name2id(self.m, t, s)
         self.act = {mujoco.mj_id2name(self.m, mujoco.mjtObj.mjOBJ_ACTUATOR, a): a
@@ -181,6 +190,30 @@ class BimanualBox:
         self.hinge_q = self.m.jnt_qposadr[n2(mujoco.mjtObj.mjOBJ_JOINT, "peg_slide")]
         self.palms = {p: n2(mujoco.mjtObj.mjOBJ_BODY, f"{p}palm")
                       for p in ("rh_", "lh_")}
+        self.touch_sensors = [
+            mujoco.mj_id2name(self.m, mujoco.mjtObj.mjOBJ_SENSOR, i)
+            for i in range(self.m.nsensor)
+            if self.m.sensor_type[i] == mujoco.mjtSensor.mjSENS_TOUCH]
+        self.ctrl_qadr = np.array(
+            [self.m.jnt_qposadr[int(self.m.actuator_trnid[a, 0])]
+             for a in range(self.m.nu)
+             if self.m.actuator_trntype[a] == mujoco.mjtTrn.mjTRN_JOINT])
+        self.ctrl_dofadr = np.array(
+            [self.m.jnt_dofadr[int(self.m.actuator_trnid[a, 0])]
+             for a in range(self.m.nu)
+             if self.m.actuator_trntype[a] == mujoco.mjtTrn.mjTRN_JOINT])
+
+    def observer(self, spec=None):
+        """An `oppdef.sensing.Observer` wired to this env."""
+        from oppdef.sensing import Observer, FULL
+        return Observer(self.m, self.d, spec or FULL,
+                        joint_qadr=self.ctrl_qadr, joint_dofadr=self.ctrl_dofadr,
+                        touch_sensors=self.touch_sensors,
+                        object_qadr=self.box_q,
+                        object_dofadr=self.m.jnt_dofadr[
+                            mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_JOINT,
+                                              "box_free")],
+                        task_fn=lambda: np.array([self.peg_out()]))
 
     # ---- state ----
     def peg_out(self):

@@ -974,3 +974,29 @@ own config:
 With those, the history pushed in chunks of three commits and then completed in
 one. Anyone hitting a stalled push from a Tegra board should try this before
 assuming the pack is too large.
+
+## 2026-09-12: infra front 4 -- sensing
+
+`src/oppdef/sensing.py`. An observation is now a declared `ObsSpec` instead of
+52 numbers assembled inline, and every channel states whether it is ONBOARD or
+PRIVILEGED:
+
+    FULL      137d  [proprio_pos=44 proprio_vel=44 tactile=32 object_pose=7*
+                     object_vel=6* task=1* phase=3]
+    ONBOARD   123d  [proprio_pos=44 proprio_vel=44 tactile=32 phase=3]
+    LEGACY     55d  [proprio_pos=44 object_pose=7* task=1* phase=3]
+
+`LEGACY` is exactly what the first BC saw, kept so the gap is legible: no
+velocities, no tactile, and three privileged channels including `task`, which IS
+the success metric. `ObsSpec.onboard_only()` makes the sim-to-real question an
+ablation you run rather than a caveat you write.
+
+**Tactile now exists and is role-discriminative.** 32 touch sensors, one per
+fingertip collision pad. Over an expert episode:
+
+    right hand (grasps the peg)   5/16 pads active, peak 10.78 N
+    left hand  (presses the base) 3/16 pads active, peak  2.91 N
+
+The two hands' roles are visible in the tactile channel alone. Adding the
+sensors does not perturb the dynamics -- the expert still extracts 12.98 cm --
+which is asserted in `tests/test_sensing.py` rather than assumed.
