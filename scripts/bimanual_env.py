@@ -99,7 +99,8 @@ def _add_base_dof(spec, palm, prefix, home):
     return body
 
 
-def build(hinge_friction=HINGE_FRICTION, base_mass=BASE_MASS, two_handed=True):
+def build(hinge_friction=HINGE_FRICTION, base_mass=BASE_MASS, two_handed=True,
+          peg_friction=1.0):
     spec = mujoco.MjSpec()
     spec.option.timestep = 0.002
     spec.option.integrator = mujoco.mjtIntegrator.mjINT_IMPLICITFAST
@@ -135,7 +136,8 @@ def build(hinge_friction=HINGE_FRICTION, base_mass=BASE_MASS, two_handed=True):
                   frictionloss=hinge_friction, damping=0.05, armature=0.002)
     peg.add_geom(name="peg_geom", type=mujoco.mjtGeom.mjGEOM_BOX,
                  size=list(PEG_HALF), mass=PEG_MASS,
-                 rgba=[0.85, 0.75, 0.30, 1], friction=[1.0, 0.02, 0.001])
+                 rgba=[0.85, 0.75, 0.30, 1],
+                 friction=[peg_friction, 0.02, 0.001])
 
     # ---- floating base DoF + actuators ----
     for prefix, home in (("rh_", RH_HOME), ("lh_", LH_HOME)):
@@ -162,8 +164,10 @@ def build(hinge_friction=HINGE_FRICTION, base_mass=BASE_MASS, two_handed=True):
 class BimanualBox:
     """Handles for the scripted expert."""
 
-    def __init__(self, hinge_friction=HINGE_FRICTION, base_mass=BASE_MASS):
-        self.m, self.spec = build(hinge_friction, base_mass)
+    def __init__(self, hinge_friction=HINGE_FRICTION, base_mass=BASE_MASS,
+                 peg_friction=1.0):
+        self.m, self.spec = build(hinge_friction, base_mass,
+                                  peg_friction=peg_friction)
         self.d = mujoco.MjData(self.m)
         n2 = lambda t, s: mujoco.mj_name2id(self.m, t, s)
         self.act = {mujoco.mj_id2name(self.m, mujoco.mjtObj.mjOBJ_ACTUATOR, a): a

@@ -8,7 +8,7 @@ Fixed before starting, so progress can be checked rather than claimed.
 | B | M2 second dimension: what each hand can HOLD | grasp bench across 4 hands, one shared object set | **DONE** — shadow 7, leap 5, allegro 3, f5d6 0; monotone in the opposition floor |
 | C | BC from the scripted expert | trained policy vs do-nothing/random/expert, 3 seeds, spread | **DONE** — 67%+/-47% vs 0%/0%/100%; phase input was essential |
 | D | RL residual on the BC policy | beats BC and all trivial baselines, 3 seeds, or is reported as not beating them | |
-| E | Retract or re-run the superseded Vega tables | final_table.py's A row was order-dependent; either re-run or mark retracted | |
+| E | Retract or re-run the superseded Vega tables | moved out of quotable results with reasons | **DONE** — results/retracted/ with a per-file table |
 
 Rules carried in: trivial baselines every time (do-nothing, random, scripted
 expert); three seeds with spread; criteria fixed before the run; a 0/N is a

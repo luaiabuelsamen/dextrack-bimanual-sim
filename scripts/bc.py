@@ -55,21 +55,44 @@ def observe(e, phase=0.0):
 
 
 OBS_DIM = 12 + 26 + 1 + 7 + 3 + 3
+# indices of the peg/box position entries in the observation, which is what a
+# perception error corrupts
+_BOXPOS = slice(12 + 26 + 1, 12 + 26 + 1 + 3)
+_PEGPOS = slice(12 + 26 + 1 + 7, 12 + 26 + 1 + 7 + 3)
+
+
+def corrupt(o, delta):
+    """Apply a fixed peg/box position error to an observation."""
+    o = o.copy()
+    o[_BOXPOS] = o[_BOXPOS] + delta
+    o[_PEGPOS] = o[_PEGPOS] + delta
+    return o
 
 
 # ---------------------------------------------------------------- collection
-def rollout_expert(seed, two_handed=True, record=True):
-    """One randomised episode. Returns (obs, act) arrays and the outcome."""
+def rollout_expert(seed, two_handed=True, record=True, perception_cm=0.0):
+    """One randomised episode. Returns (obs, act) arrays and the outcome.
+
+    `perception_cm` corrupts the system's BELIEF about where the peg is. For the
+    scripted expert that is its calibrated grasp offset, which is its only peg
+    knowledge; it is open-loop, so it cannot recover. Demonstrations are always
+    collected CLEAN (a corrupted expert produces bad demos); the noise is
+    applied to what the POLICY observes, so the policy learns to act correctly
+    despite a wrong peg reading.
+    """
     rng = np.random.default_rng(seed)
     kw = dict(hinge_friction=float(rng.uniform(0.9, 1.8)),
               base_mass=float(rng.uniform(0.06, 0.12)))
     ex = Expert(two_handed=two_handed, **kw)
+    if perception_cm > 0:
+        ex.off = ex.off + rng.normal(0, perception_cm / 100.0, 3)
     e = ex.e
     obs, act = [], []
     orig = mujoco.mj_step
 
     step_i = [0]
     N_TOTAL = 3470
+    obs_noise = rng.normal(0, 0.0, 3)
 
     def patched(m, d, nstep=1):
         if record:
@@ -149,7 +172,8 @@ def policy_fn(model):
 
 
 # ---------------------------------------------------------------- evaluation
-def run_policy(seed, act_fn=None, mode="policy", n_steps=None, two_handed=True):
+def run_policy(seed, act_fn=None, mode="policy", n_steps=None, two_handed=True,
+               perception_cm=0.0):
     """One episode under a policy or a trivial baseline, same task draw as the
     expert for that seed so the comparison is paired."""
     rng = np.random.default_rng(seed)
@@ -167,10 +191,12 @@ def run_policy(seed, act_fn=None, mode="policy", n_steps=None, two_handed=True):
     out0 = ex.out0
     N = n_steps or 3470
     rs = np.random.default_rng(seed + 77)
+    delta = (np.random.default_rng(seed).normal(0, perception_cm / 100.0, 3)
+             if perception_cm > 0 else np.zeros(3))
     ctrl = np.zeros(e.m.nu)
     for k in range(N):
         if mode == "policy":
-            ctrl = act_fn(observe(e, k / N))
+            ctrl = act_fn(corrupt(observe(e, k / N), delta))
         elif mode == "random":
             ctrl = ctrl + rs.normal(0, 0.01, e.m.nu)
         elif mode == "donothing":

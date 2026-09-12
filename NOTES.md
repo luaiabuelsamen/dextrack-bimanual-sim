@@ -822,3 +822,42 @@ hyperparameter.
 The obvious next levers for the seed fragility, none of them tried yet: action
 chunking (ACT-style), predicting deltas rather than absolute position targets,
 more demonstrations, or an ensemble.
+
+## 2026-09-12: superseded results moved out of reach
+
+`results/retracted/` now holds 18 result files with a per-file table saying why
+each is there. The two that matter:
+
+- `final_table.json` -- its config-A row was order-dependent (the retargeting
+  optimiser seeded from the robot's current pose). eps = 0 and "never moves the
+  box" survive every ordering; the contact count and exact keypoint distance do
+  not. Never re-run, because the direction it served was abandoned.
+- `hand_bench.json` -- LEAP scoring 0/72 is a bug in my closure, not a property
+  of LEAP. Recorded as such so it can never be misread as a finding.
+
+## 2026-09-12: where RL has headroom, measured rather than assumed
+
+Before running RL it is worth knowing whether there is anything for it to win.
+The scripted expert turns out to be robust on every difficulty axis tried:
+
+    socket friction  1.2 -> 4.4 N     5/5, peg 12.98 cm, unchanged
+    peg friction     1.0 -> 0.15      5/5, peg 12.98 -> 13.86 cm
+    start-pose jitter 0 -> 3 cm       5/5, peg 12.98 cm, unchanged
+
+The last one is not robustness, it is irrelevance: the expert commands absolute
+position targets through kp=4000 servos, so where the hand STARTS does not
+matter. A residual has nothing to improve on any of these.
+
+The axis where it does break is PERCEPTION -- being wrong about where the peg
+is, which is the one thing an open-loop expert cannot absorb:
+
+    perception error   expert success   peg out (cm)
+        0.0 cm             5/5             12.98
+        1.0 cm             5/5             12.65
+        1.5 cm             5/5             12.12
+        2.0 cm             4/5             11.67
+        3.0 cm             2/5              6.57
+
+That is the headroom, and it is the classic case for learning over scripting: a
+closed-loop policy observes the actual peg state and can correct for a wrong
+belief about it. The comparison at 3 cm is the experiment.
