@@ -1314,3 +1314,55 @@ open-loop time-indexed script, which is the regime where committing to a
 multi-step intent buys least. Three seeds is also few: 66.7% vs 33.3% is one
 seed. What the experiment does establish is that the infrastructure works end
 to end and that horizon comparisons on this task need seeds, not one run.
+
+## 2026-09-12 — RETRACTION: the retargeting epsilons are not physical
+
+The hold test (`oppdef.hold`) was built to check whether the epsilon this
+project computes predicts what a hand can physically hold. Run on LEAP's own
+epsilon-optimal pose at a 5 cm box, **every condition failed before the test
+even started**: 44 contacts at t=0, the object interpenetrating the hand by
+19 mm, flung 70 cm away within 0.3 s.
+
+Measured penetration of the fitted poses (box half-extent 25 mm):
+
+    condition           eps      body pen     tip pen
+    keypoint         0.0000     33.65 mm    13.91 mm
+    keypoint+squeeze 0.0000     33.65 mm    13.91 mm
+    blend            0.3598     28.17 mm    34.26 mm
+    epsilon          0.3581     16.38 mm    19.11 mm
+
+The fingers are inside the box. Two compounding defects in
+`geometric_epsilon`, both mine:
+
+1. **Fingertips are treated as POINTS at body origins.** The real fingertip
+   geom has extent and an offset, so a body origin sitting 6 mm outside the
+   surface can have its collision geom 19 mm inside. The "tip distances" this
+   module reported were distances for a point that is not where the finger is.
+2. **Non-fingertip links are not modelled at all.** The optimiser is free to
+   drive proximal and middle phalanges straight through the object, and it
+   does. A fingertip-only penetration term cannot see this, which is why
+   DexGraspNet and BODex carry a whole-hand `E_pen` rather than a fingertip one.
+
+**What is retracted.** Every epsilon in the 2026-09-12 retargeting table, as a
+statement about physically realisable grasps. The comparison remains valid as
+what it literally is -- what each OBJECTIVE optimises under a point-fingertip,
+no-body-collision idealisation -- and the qualitative gap (keypoint lands at
+exactly zero in 11/16) was measured under that idealisation for both
+conditions equally. But no claim that an epsilon-optimised pose is a better
+GRASP survives, because none of these poses is a grasp.
+
+**What replaces it.** The correct contact set already exists in this repo and
+predates the retargeting module: `metrics.epsilon.object_contacts` reads real
+MuJoCo contacts -- true positions, true normals, true friction -- and it is what
+the validated hold bench (M2, the opposition-floor result) uses. The retargeting
+objective must be rebuilt on it: set qpos, run collision, extract contacts,
+compute epsilon. Slower per evaluation, and correct.
+
+`retarget.Penetration` is the first piece: exact whole-hand penetration depth
+from MuJoCo's own collision detection, ready to enter the energy.
+
+**The method worked.** The geometric surrogate looked right, produced a clean
+monotone figure and a quotable headline, and was wrong. Nothing caught it until
+an object was placed in a simulator and pushed. That is the whole argument for
+the physics gate, and it is now a standing requirement: no epsilon enters a
+finding until the pose behind it has been held against a wrench in MuJoCo.

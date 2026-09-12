@@ -533,3 +533,64 @@ def retargeter_for(hand_key, prefix="", free_base=True):
                 rt.lo[i], rt.hi[i] = -np.pi, np.pi
     rt.spec_fn = lambda: make(hand=hand_key, free_base=free_base).spec
     return rt
+
+
+class Penetration:
+    """How far the WHOLE hand passes through the object at a pose.
+
+    `geometric_epsilon` knows only about fingertips. It reads their positions,
+    projects them onto the object surface and builds a wrench set -- and is
+    blind to every other link. Optimised against it, the search happily drives
+    the proximal and middle phalanges straight through the box: poses scoring
+    epsilon = 0.36 were found, on inspection in MuJoCo, to be interpenetrating
+    the object by 19 mm at 44 contact points, and to fling it away the instant
+    physics is switched on.
+
+    Fingertip-only penetration terms do not catch this, which is why the energy
+    used by DexGraspNet and BODex has a whole-hand E_pen and not a fingertip
+    one. This class supplies it, using MuJoCo's own collision detection against
+    a static copy of the object, so the penalty is exact rather than a proxy.
+    """
+
+    def __init__(self, rt, obj_half, obj_pos, hand_key=None):
+        from oppdef.embodiment import make, HANDS
+        hand_key = hand_key or rt.hand_key
+        emb = make(hand=hand_key, free_base=rt.prefix != "" or False)
+        spec = emb.spec
+        b = spec.worldbody.add_body(name="pen_obj",
+                                    pos=[float(x) for x in obj_pos])
+        b.add_geom(name="pen_obj_geom", type=mujoco.mjtGeom.mjGEOM_BOX,
+                   size=[float(x) for x in obj_half], mass=0.05)
+        self.m = spec.compile()
+        self.d = mujoco.MjData(self.m)
+        self.gid = mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_GEOM,
+                                     "pen_obj_geom")
+        h = HANDS[hand_key]
+        self.tip_bodies = {
+            mujoco.mj_name2id(self.m, mujoco.mjtObj.mjOBJ_BODY,
+                              f"{rt.prefix}{t}") for t in h.tip_names}
+        self.qadr = np.array([
+            self.m.jnt_qposadr[mujoco.mj_name2id(
+                self.m, mujoco.mjtObj.mjOBJ_JOINT,
+                mujoco.mj_id2name(rt.m, mujoco.mjtObj.mjOBJ_JOINT, j))]
+            for j in rt.jids])
+
+    def depths(self, q):
+        """(deepest non-fingertip penetration, deepest fingertip), metres >= 0."""
+        d = self.d
+        d.qpos[:] = 0.0
+        d.qpos[self.qadr] = q
+        mujoco.mj_kinematics(self.m, d)
+        mujoco.mj_collision(self.m, d)
+        body_pen = tip_pen = 0.0
+        for i in range(d.ncon):
+            c = d.contact[i]
+            if c.geom1 != self.gid and c.geom2 != self.gid:
+                continue
+            other = c.geom2 if c.geom1 == self.gid else c.geom1
+            depth = max(-float(c.dist), 0.0)
+            if int(self.m.geom_bodyid[other]) in self.tip_bodies:
+                tip_pen = max(tip_pen, depth)
+            else:
+                body_pen = max(body_pen, depth)
+        return body_pen, tip_pen
