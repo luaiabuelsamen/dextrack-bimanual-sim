@@ -1,0 +1,50 @@
+[
+  {
+    "condition": "two-handed expert",
+    "cpu": {
+      "two_handed": true,
+      "rz": 1.4036903345826737,
+      "frac": 0.9056603773584906,
+      "sq_frac": 0.9622641509433962,
+      "gap_cm": 5.994714507681021,
+      "align": 0.9334407374595103,
+      "peg_out_m": 0.12960320861925997,
+      "box_disp_m": 0.015384231444895632,
+      "box_z_rise_m": 0.005929188973205664,
+      "box_tilt_deg": 7.209706067171508,
+      "knob_contacts": 9,
+      "clear_start": true,
+      "success": true
+    },
+    "warp": {
+      "peg_out_m": 0.13420677708144124,
+      "box_disp_m": 0.027477744160361896,
+      "box_z_rise_m": 0.00628312900662422,
+      "success": false
+    }
+  },
+  {
+    "condition": "one-handed control",
+    "cpu": {
+      "two_handed": false,
+      "rz": 1.4036903345826737,
+      "frac": 0.9056603773584906,
+      "sq_frac": 0.9622641509433962,
+      "gap_cm": 5.994714507681021,
+      "align": 0.9334407374595103,
+      "peg_out_m": 0.0902094461065502,
+      "box_disp_m": 0.07085991718373794,
+      "box_z_rise_m": 0.06075470334444843,
+      "box_tilt_deg": 25.485092121452915,
+      "knob_contacts": 7,
+      "clear_start": true,
+      "success": false
+    },
+    "warp": {
+      "peg_out_m": 0.013208632698830325,
+      "box_disp_m": 0.06666795995864153,
+      "box_z_rise_m": 0.039477786421775816,
+      "success": false
+    }
+  }
+]

@@ -695,3 +695,44 @@ and this is a contact-rich system. Step-level agreement is therefore the wrong
 test past the first few dozen steps. **The test that matters is whether the TASK
 OUTCOME survives: the expert succeeding and the one-handed control failing when
 both are run under warp. That is not done yet and is the next thing.**
+
+## 2026-09-12: outcome parity, CPU vs warp -- the gap, stated as a number
+
+Recorded the expert's 3470 control steps on CPU and replayed them verbatim
+through warp (the expert is open-loop, so this is a fair replay).
+
+    condition            backend   peg out   base moved   base LIFT
+    two-handed expert    CPU        12.96 cm     1.54 cm     +0.59 cm
+    two-handed expert    warp       13.42 cm     2.75 cm     +0.63 cm
+    one-handed control   CPU         9.02 cm     7.09 cm     +6.08 cm
+    one-handed control   warp        1.32 cm     6.67 cm     +3.95 cm
+
+**Against the pre-registered criterion (peg >= 8 cm, base displacement < 2 cm,
+tilt < 15 deg) the two-handed expert FAILS under warp** -- not on the peg, which
+comes out further than on CPU (13.42 vs 12.96 cm), but on lateral base
+displacement: 2.75 cm against a 2 cm threshold.
+
+**The honest reading, without moving the goalposts.** Two of the three clauses
+reproduce cleanly and one does not:
+
+- peg extraction: reproduces, and the two-handed/one-handed separation survives
+  (13.42 vs 1.32 cm under warp; 12.96 vs 9.02 on CPU).
+- base LIFT -- the quantity the task is actually built around, since the socket
+  friction exceeds the base weight -- separates by ~6x on CPU (0.59 vs 6.08) and
+  ~6x under warp (0.63 vs 3.95). Reproduces.
+- base LATERAL displacement differs between backends by 1.2 cm on the same
+  control sequence, and the threshold was set at 2.0 cm. **The threshold sits
+  inside the backend noise, so it is not a usable discriminator.** That is a
+  defect in my criterion, not a property of the task.
+
+I am NOT rewriting the criterion to make this pass. The measured transfer gap is
+**1.2 cm of lateral base displacement on an identical open-loop control
+sequence**, and any future criterion has to be chosen with that in mind and
+stated before the run, not after. The next criterion should discriminate on base
+lift, which the task's own force design guarantees and which both backends agree
+on -- but it must be fixed in advance and re-validated on CPU first.
+
+Also worth noting: the one-handed control diverges far more (9.02 vs 1.32 cm of
+peg travel) than the two-handed case. That is expected -- the one-handed run is
+the unstable one, with the base tumbling -- and it is a reminder that the
+divergence is largest exactly where the dynamics are least constrained.
