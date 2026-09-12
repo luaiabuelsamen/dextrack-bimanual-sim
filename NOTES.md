@@ -945,3 +945,32 @@ session, written so it cannot happen again silently:
 
 Two stale-path bugs surfaced during the move and were caught by those tests
 rather than by a later wrong number, which is the whole argument for having them.
+
+## 2026-09-12: published
+
+`github.com/luaiabuelsamen/opposition-deficit`, **private** -- the direction is
+unpublished and aimed at RSS 2027, and private->public is one command while the
+reverse does not un-index anything. `gh repo edit --visibility public` when the
+paper is out or the advisor needs it wider.
+
+Portability work before pushing: the Makefile's interpreter defaults to
+`python3` and is overridable; `paths.py` fails with the fix rather than a stack
+trace, and the author's own checkouts are marked as dev defaults; `make vendor`
+sparse-clones the Menagerie models. Three of the four hands need nothing beyond
+that clone -- only the f5d6 rows need a URDF that is not redistributed here.
+Audited clean for secrets and credentials before the first push.
+
+**A transport gotcha worth keeping.** Pushing 56 MB from this Jetson failed
+every way -- SSH dropped with "unexpected disconnect while reading sideband
+packet" and HTTPS with "GnuTLS recv error (-12)" -- and it was NOT size:
+an 11-commit chunk of text-only commits failed identically while SSH auth
+succeeded. What fixed it was the transport options, now persisted in the repo's
+own config:
+
+    core.sshCommand = ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=8 \
+                          -o IPQoS=throughput -o Compression=no
+    pack.threads = 1
+
+With those, the history pushed in chunks of three commits and then completed in
+one. Anyone hitting a stalled push from a Tegra board should try this before
+assuming the pack is too large.
