@@ -232,6 +232,7 @@ class Retargeter:
         #: object added to the same model the epsilon was computed against
         self.spec_fn = None
         self.hand_key = None
+        self.prefix = ""
 
     # -- reference frame calibration ---------------------------------------
     def calibrate(self, ref_tips, ref_wrist=None):
@@ -275,7 +276,7 @@ class Retargeter:
     def fit(self, ref_vectors, obj_half, objective=KEYPOINT, weight=0.5, mu=1.0,
             obj_pos=None, restarts=6, seed=0, maxiter=400, tol=0.008,
             w_reach=40.0, w_pen=200.0, scale=1.0, wrist_target=None,
-            w_wrist=1.0):
+            w_wrist=1.0, seed_q=None):
         """Fit joints to one grasp under `objective`.
 
         `w_reach`/`w_pen` only shape the SEARCH; the epsilon and contact count
@@ -314,8 +315,20 @@ class Retargeter:
             return (1 - weight) * kp + weight * shaped
 
         # Seeds: the open hand, the derived closure (the only posture known a
-        # priori to bring the fingers together), and random draws in range.
+        # priori to bring the fingers together), anything the caller supplies,
+        # and random draws in range.
+        #
+        # `seed_q` matters more than it looks. Epsilon's landscape is flat
+        # wherever nothing touches and ridged where things do, and from cold
+        # starts the search kept losing to the BLEND objective -- a strict
+        # impossibility if it were converging, since blend optimises epsilon
+        # with a competing term attached. Handing it the keypoint solution also
+        # makes the comparison the one worth running: not two unrelated
+        # searches, but what refining a RETARGETED grasp for epsilon buys.
         seeds = [np.zeros(len(self.jids))]
+        if seed_q is not None:
+            for q0 in np.atleast_2d(seed_q):
+                seeds.append(np.clip(np.asarray(q0, float), self.lo, self.hi))
         if self.q_closure is not None:
             seeds.append(np.clip(self.q_closure, self.lo, self.hi))
             seeds.append(np.clip(0.5 * self.q_closure, self.lo, self.hi))
@@ -385,6 +398,55 @@ def transform_ref(rt, ref, width=None):
     tips = obj + s * ((V - o0) @ rt._align)
     wrist = obj + s_hand * ((np.asarray(ref.wrist, float) - o0) @ rt._align)
     return V, obj, s * half_ref, s, tips, wrist
+
+
+def squeeze(rt, q, obj_half, obj_pos, mu=1.0, tol=0.008, n=60):
+    """Close the fingers from a fitted pose until they grip, and report the best.
+
+    Without this the keypoint comparison is unfair, and obviously so: matching a
+    human's fingertip geometry positions the fingers, it does not press them
+    into anything, so a keypoint pose can match the demonstration to 5 mm and
+    still touch nothing. No practitioner ships that pose -- Dexonomy's data is
+    stored as a pre-grasp / grasp / SQUEEZE triple precisely because the squeeze
+    is a separate step, and every closure written by hand in this project failed
+    until it was structured the same way.
+
+    So the fingers are driven from `q` toward the hand's DERIVED closure and the
+    best epsilon along that path is returned. Only finger joints move; the base
+    stays where the fit put it, because sliding the whole hand would be solving
+    a different problem.
+    """
+    q = np.asarray(q, float).copy()
+    if rt.q_closure is None:
+        return q, *geometric_epsilon(rt.forward(q)[0], obj_half, mu, obj_pos, tol)
+    base = {f"{rt.prefix}{d}" for d in ("x", "y", "z", "rx", "ry", "rz")}
+    moving = np.array([
+        (mujoco.mj_id2name(rt.m, mujoco.mjtObj.mjOBJ_JOINT, j) or "") not in base
+        for j in rt.jids])
+    target = np.clip(rt.q_closure, rt.lo, rt.hi)
+    # Seeded with the pose as GIVEN, scored the same way, so a squeeze can only
+    # ever improve it. Starting from (q, 0, 0) meant that when every candidate
+    # along the path was rejected the function returned zero for a pose that
+    # already had four contacts -- reporting a loss the squeeze did not cause.
+    e0, n0 = geometric_epsilon(rt.forward(q)[0], obj_half, mu, obj_pos, tol)
+    best = (q, e0, n0)
+    for a in np.linspace(0.0, 1.0, n):
+        qa = q.copy()
+        qa[moving] = (1 - a) * q[moving] + a * target[moving]
+        qa = np.clip(qa, rt.lo, rt.hi)
+        tips, _w = rt.forward(qa)
+        _pts, _nrm, mask = contacts_from_tips(tips, obj_half, obj_pos, tol)
+        # reject poses that drive a fingertip deep into the object: a "grasp"
+        # holding a box by passing through it is the reward hacking this
+        # project has already had to fix once (NOTES, MPPI)
+        deep = any(box_surface(t - np.asarray(obj_pos, float), obj_half)[2]
+                   < -0.006 for t in tips)
+        if deep:
+            continue
+        eps, nc = geometric_epsilon(tips, obj_half, mu, obj_pos, tol)
+        if eps > best[1] or (eps == best[1] and nc > best[2]):
+            best = (qa, eps, nc)
+    return best
 
 
 def grasp_centre(rt, q=None):

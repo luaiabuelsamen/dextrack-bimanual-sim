@@ -6,7 +6,8 @@ PY  ?= python3
 export PYTEST_DISABLE_PLUGIN_AUTOLOAD := 1
 GPU ?= ./mjx_env.sh python
 
-.PHONY: help install test test-fast axis hand-axis expert bc parity figures clean
+.PHONY: help install test test-fast axis hand-axis expert bc retarget vec \
+        parity parity-mjx figures clean
 help:
 	@grep -E '^[a-z-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | column -t -s "$$(printf '\t')"
 
@@ -34,8 +35,17 @@ expert:           ## bimanual expert + the one-handed control
 bc:               ## behaviour cloning: collect, train, evaluate
 	$(PY) -m experiments.bc
 
+retarget:         ## keypoint vs epsilon retargeting, four hands (renders need EGL)
+	MUJOCO_GL=egl $(PY) experiments/retarget_compare.py --out out/retarget
+
+vec:              ## batched-stepping throughput, CPU backend
+	$(PY) -m experiments.vec_bench
+
 parity:           ## CPU MuJoCo vs warp, outcome level (needs GPU)
 	$(GPU) -m experiments.warp_parity
+
+parity-mjx:       ## CPU MuJoCo vs MJX, per-step state divergence (needs GPU)
+	PYTHONPATH=src $(GPU) -m experiments.mjx_parity
 
 figures:          ## regenerate the figures
 	$(PY) -m experiments.fig_axis
