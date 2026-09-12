@@ -19,6 +19,9 @@ test-fast:        ## invariants that run in seconds
 test:             ## everything except GPU
 	$(PY) -m pytest -q -m "not gpu"
 
+inventory:        ## what hands and arms this machine can build
+	$(PY) -m experiments.inventory
+
 axis:             ## M2 part 1: opposition floor, four hands
 	$(PY) -m experiments.opposition_axis
 

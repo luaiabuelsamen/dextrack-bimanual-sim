@@ -1000,3 +1000,36 @@ fingertip collision pad. Over an expert episode:
 The two hands' roles are visible in the tactile channel alone. Adding the
 sensors does not perturb the dynamics -- the expert still extracts 12.98 cm --
 which is asserted in `tests/test_sensing.py` rather than assumed.
+
+## 2026-09-12: infra front 3 -- embodiment registry
+
+`src/oppdef/embodiment.py`. One registry replaces three modules that each knew
+about models their own way. Adding a hand was a three-file edit; adding an arm
+was impossible.
+
+    make(hand="leap")                  floating hand
+    make(hand="leap", count=2)         two, prefixed rh_/lh_
+    make(hand="leap", arm="ur5e")      MOUNTED at the arm's attachment site
+    make(hand="leap", free_base=True)  6 position-controlled base DoF
+
+    hand  leap       16 DoF     arm  ur5e        6 DoF
+    hand  leap_left  16         arm  panda       8
+    hand  allegro    16         arm  xarm7       8
+    hand  shadow     24         arm  so_arm100   6  <- the SO-101 family, the
+    hand  f5d6       11                             lab's real hardware
+
+All nine load, asserted in `tests/test_embodiment.py` rather than assumed.
+Composition verified: leap+ur5e (nq 22), shadow+so_arm100 (nq 30), leap+xarm7
+(nq 29), two LEAP hands (nq 32).
+
+**Two traps found by building it.** MuJoCo namespaces bodies and joints on
+`MjSpec.attach` but NOT assets, so a hand and an arm that both define a material
+called "black" fail to compile -- every hand+arm build died on that until each
+attach got a prefix. And attaching to the worldbody puts the hand at the origin
+*beside* the arm rather than on it; mounting needs the arm's declared site, so
+`arm=` now means mounted and a test asserts the palm is not at the origin.
+
+Menagerie sparse checkout widened to include franka_emika_panda,
+universal_robots_ur5e, trs_so_arm100 and ufactory_xarm7. `menagerie_xml` now
+resolves any `meshdir` spelling against the model's own directory -- the
+previous version matched two known spellings and `trs_so_arm100` uses a third.

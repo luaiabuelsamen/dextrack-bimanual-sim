@@ -50,9 +50,20 @@ def compile_urdf(urdf: Path) -> str:
 
 
 def menagerie_xml(rel: str) -> str:
-    """Read a Menagerie model and absolutise its meshdir."""
+    """Read a Menagerie model and absolutise its meshdir.
+
+    Models spell it several ways (`assets`, `./assets/`, `assets/`), so this
+    rewrites whatever is there against the model's own directory rather than
+    matching known spellings -- `trs_so_arm100` uses a form the first version
+    missed and failed to open a single mesh.
+    """
+    import re
     p = require(MENAGERIE / rel, "MuJoCo Menagerie model", "OPPDEF_MENAGERIE")
     xml = p.read_text()
-    assets = (p.parent / "assets").as_posix()
-    return (xml.replace('meshdir="./assets/"', f'meshdir="{assets}/"')
-               .replace('meshdir="assets"', f'meshdir="{assets}"'))
+
+    def abso(match):
+        raw = match.group(1)
+        target = (p.parent / raw).resolve()
+        return f'meshdir="{target.as_posix()}"'
+
+    return re.sub(r'meshdir="([^"]+)"', abso, xml)
