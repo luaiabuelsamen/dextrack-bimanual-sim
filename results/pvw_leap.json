@@ -1,0 +1,122 @@
+[
+  {
+    "hand": "leap",
+    "width": 0.03,
+    "condition": "pose",
+    "epsilon": 0.5547399039954545,
+    "n_contacts": 7,
+    "hold_N": 4.0,
+    "penetration_mm": 0.4421128561724755,
+    "keypoint_err_m": 4.590871382014487e-09
+  },
+  {
+    "hand": "leap",
+    "width": 0.03,
+    "condition": "wrench",
+    "epsilon": 0.5299780627248888,
+    "n_contacts": 9,
+    "hold_N": 4.0,
+    "penetration_mm": 0.2909949871208013,
+    "keypoint_err_m": 4.590871382014487e-09
+  },
+  {
+    "hand": "leap",
+    "width": 0.04,
+    "condition": "pose",
+    "epsilon": 0.593911783055313,
+    "n_contacts": 11,
+    "hold_N": 4.0,
+    "penetration_mm": 0.6114491806461725,
+    "keypoint_err_m": 0.0009732024690647861
+  },
+  {
+    "hand": "leap",
+    "width": 0.04,
+    "condition": "wrench",
+    "epsilon": 0.5214326667839714,
+    "n_contacts": 6,
+    "hold_N": 4.0,
+    "penetration_mm": 0.10532040267563281,
+    "keypoint_err_m": 0.0009732024690647861
+  },
+  {
+    "hand": "leap",
+    "width": 0.05,
+    "condition": "pose",
+    "epsilon": 0.6397687938562476,
+    "n_contacts": 8,
+    "hold_N": 8.0,
+    "penetration_mm": 0.2072762848742844,
+    "keypoint_err_m": 0.00659221024390356
+  },
+  {
+    "hand": "leap",
+    "width": 0.05,
+    "condition": "wrench",
+    "epsilon": 0.5385363184382159,
+    "n_contacts": 5,
+    "hold_N": 8.0,
+    "penetration_mm": 0.06893835154855722,
+    "keypoint_err_m": 0.00659221024390356
+  },
+  {
+    "hand": "leap",
+    "width": 0.06,
+    "condition": "pose",
+    "epsilon": 0.5053264076226075,
+    "n_contacts": 6,
+    "hold_N": 0.0,
+    "penetration_mm": 0.8571024637863012,
+    "keypoint_err_m": 0.012254433388090381
+  },
+  {
+    "hand": "leap",
+    "width": 0.06,
+    "condition": "wrench",
+    "epsilon": 0.5695139196863629,
+    "n_contacts": 9,
+    "hold_N": 4.0,
+    "penetration_mm": 0.5565772484728673,
+    "keypoint_err_m": 0.012254433388090381
+  },
+  {
+    "hand": "leap",
+    "width": 0.07,
+    "condition": "pose",
+    "epsilon": 0.6188147026119939,
+    "n_contacts": 8,
+    "hold_N": 16.0,
+    "penetration_mm": 1.260707194255018,
+    "keypoint_err_m": 0.017820229972586248
+  },
+  {
+    "hand": "leap",
+    "width": 0.07,
+    "condition": "wrench",
+    "epsilon": 0.5945964796546329,
+    "n_contacts": 7,
+    "hold_N": 4.0,
+    "penetration_mm": 0.02052219698319575,
+    "keypoint_err_m": 0.017820229972586248
+  },
+  {
+    "hand": "leap",
+    "width": 0.08,
+    "condition": "pose",
+    "epsilon": 0.439366327158829,
+    "n_contacts": 8,
+    "hold_N": 4.0,
+    "penetration_mm": 1.108684329466666,
+    "keypoint_err_m": 0.02329448340971499
+  },
+  {
+    "hand": "leap",
+    "width": 0.08,
+    "condition": "wrench",
+    "epsilon": 0.4196977062300754,
+    "n_contacts": 7,
+    "hold_N": 4.0,
+    "penetration_mm": 0.06480050260405634,
+    "keypoint_err_m": 0.02329448340971499
+  }
+]

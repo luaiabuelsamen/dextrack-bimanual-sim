@@ -1447,3 +1447,116 @@ not in the thesis as written and it sharpens it.
 * The keypoint-vs-wrench comparison has NOT been redone on this pipeline. That
   half of the thesis still rests on the retracted geometric run and has to be
   rebuilt here.
+
+## 2026-09-12 — review response: two retractions, one control that holds, one null
+
+An external review (`docs/REVIEW_HANDOFF.md`) identified defects in work already
+reported here. Two of them invalidate claims. Acting on them in order of damage.
+
+### RETRACTION 1: the BC and action-chunking results are on a task that needs no feedback
+
+The review supplied the baseline this project never ran: record the expert's
+action sequence once, then replay it indexed ONLY by elapsed time -- no joint,
+object or contact feedback of any kind -- against the standard evaluation seeds.
+
+    seed 9000  peg 13.51 cm   9004  13.43 cm
+    seed 9001  peg 13.52 cm   9005  13.59 cm
+    seed 9002  geg 13.45 cm   9006  13.46 cm
+    seed 9003  peg 13.47 cm   9007  13.49 cm      8/8 success
+
+Open-loop replay averages **13.49 cm and succeeds 8/8** -- better than the BC MLP
+(12.84 cm, 3/3 seeds) and level with the expert (13.42 cm).
+
+**Retracted:** every framing of the BC and action-chunking results as evidence
+about learned control. A policy that matches an open-loop replay has not been
+shown to use its observations. The measurements stand; what they measure is not
+feedback. The chunking null in particular is uninformative: a task solvable by
+replay cannot distinguish architectures.
+
+The evaluation also hands every policy the expert's calibrated pre-grasp, so it
+was never perception-to-action. And `rollout_expert` documents an XY-placement
+randomisation it does not implement -- only friction and mass vary.
+
+### RETRACTION 2: f5d6's "holds 0 of 8 widths" was an invalid fixture
+
+The review's diagnostic of the old hold bench: during closure on a 5 cm box the
+palm MOVED 1.05 m (from ~[0.676, -0.229, 1.110] to [-0.149, -0.206, 0.456]),
+all seven right-arm joints had no actuators, the start state already penetrated
+the object, and every saved row shows `clear_start=False` with ~19.64 m of free
+fall.
+
+That is a hand falling, not a hand failing to grasp. **Retracted:** "f5d6 is the
+only hand that cannot oppose, and the only one that holds nothing." The
+opposition-floor MEASUREMENT (3.4 cm) is untouched; the hold column derived
+from it is not.
+
+The replacement is already in this file: with non-hand joints frozen, actuators
+added (the URDF ships none), and the base able to reach, f5d6 grasps a 3 cm box
+at eps 0.65 and a 4 cm box at 0.43, and fails from 5 cm up because its open hand
+cannot admit the object. A narrow working range, not an incapacity.
+
+### The two-hand claim survives a force-budget control
+
+The review's objection: two hands bring twice the actuators and more contacts,
+so of course they hold more. Normalising the sustained force by the total
+contact normal force actually measured:
+
+    hold per newton of contact force    one hand 0.0849    two hands 0.1685
+                                        (1.98x, better in 18/23 cells)
+    mean contacts                       one hand 9.3       two hands 12.6
+
+Two hands are ~2x better per newton they apply, while bringing only 1.35x the
+contacts. The advantage is not the budget and it is not simply more contact
+points; it is where the contacts are. That is the claim, and it now has its
+control.
+
+### NULL: retargeting the wrench does NOT beat retargeting the pose
+
+The retracted geometric comparison said keypoint retargeting reaches eps = 0 in
+11 of 16 cells. Rebuilt in physics -- both conditions closed in simulation, the
+placement searched with the same budget for each, only the finger angles decided
+differently -- it does not replicate:
+
+    mean force sustained    pose 2.48 N    wrench 1.85 N
+    wrench > pose in 7/24 cells, pose > wrench in 6/24, tied in 11
+    corr(keypoint error, wrench advantage)  Spearman +0.06
+
+**The thesis as stated is not supported by this experiment.** Where both
+conditions produce a grasp, copying the human's fingertip geometry is as good as
+optimising the wrench, and slightly better on average. The predicted
+anti-correlation -- wrench pulling ahead as keypoint error grows -- is absent
+(+0.06).
+
+What survives is narrower and about RELIABILITY, not magnitude: the pose
+condition produced no holdable grasp in 8 of 24 cells against the wrench
+condition's 5, and the cells where it collapses are the informative ones --
+f5d6 at 4 cm (pose eps 0.000 vs wrench 0.434), shadow at 8 cm (0.000 vs 0.519),
+allegro at 8 cm (0.175 vs 0.456). Pose fidelity fails completely on some
+hand-object pairs where a wrench objective still finds a grasp; it is not
+generally worse.
+
+Caveat on the comparison itself: the wrench condition searches one extra
+parameter (closure fraction) that the pose condition has fixed by the human, so
+it has slightly more freedom. That asymmetry favours wrench, and wrench still
+did not win on magnitude.
+
+### Also fixed, from the review
+
+* `WarpVec` passed `nconmax * N` and `njmax * N`; both are PER WORLD (`naconmax`
+  is the total). At N=256 that requested 16.8M contacts instead of 65k.
+* `WarpVec.reset` flattened its argument and used world 0's state for all
+  worlds, silently defeating per-world randomisation, and rebuilt with
+  hardcoded capacities rather than the constructor's.
+* `warp_parity` imported `warp_fix` as a top-level module; the packaged path is
+  `oppdef.sim.warp_fix`.
+* The "MJX is unavailable on this Jetson" note should read **MJX-JAX**: the
+  cuSolver failure is in the JAX linear-algebra path. MJX-Warp routes through
+  MuJoCo Warp, which works here, and is a separate untested candidate.
+
+### Standing limitations this does not fix
+
+The hold test applies 14 translational force directions and gates on
+translation and remaining contact. It applies no pure torques and does not gate
+on orientation, so its "minimum force" is not a measurement of the full 6-D
+epsilon ball. Objects are boxes. Two hands of the same type, no arm, no torso.
+CEM is stochastic at one seed per cell.

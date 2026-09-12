@@ -1,0 +1,122 @@
+[
+  {
+    "hand": "allegro",
+    "width": 0.03,
+    "condition": "pose",
+    "epsilon": 0.6339527523102187,
+    "n_contacts": 16,
+    "hold_N": 4.0,
+    "penetration_mm": 2.889880747006305,
+    "keypoint_err_m": 0.018458016162820248
+  },
+  {
+    "hand": "allegro",
+    "width": 0.03,
+    "condition": "wrench",
+    "epsilon": 0.1773952177977792,
+    "n_contacts": 5,
+    "hold_N": 0.5,
+    "penetration_mm": 1.104577804402638,
+    "keypoint_err_m": 0.018458016162820248
+  },
+  {
+    "hand": "allegro",
+    "width": 0.04,
+    "condition": "pose",
+    "epsilon": 0.5029936705151548,
+    "n_contacts": 20,
+    "hold_N": 4.0,
+    "penetration_mm": 2.739871001247715,
+    "keypoint_err_m": 0.024415522735519
+  },
+  {
+    "hand": "allegro",
+    "width": 0.04,
+    "condition": "wrench",
+    "epsilon": 0.3982057794659259,
+    "n_contacts": 8,
+    "hold_N": 0.5,
+    "penetration_mm": 1.5320204889056124,
+    "keypoint_err_m": 0.024415522735519
+  },
+  {
+    "hand": "allegro",
+    "width": 0.05,
+    "condition": "pose",
+    "epsilon": 0.6353119678837222,
+    "n_contacts": 16,
+    "hold_N": 4.0,
+    "penetration_mm": 2.20571007250674,
+    "keypoint_err_m": 0.0302837739759663
+  },
+  {
+    "hand": "allegro",
+    "width": 0.05,
+    "condition": "wrench",
+    "epsilon": 0.6438025699893727,
+    "n_contacts": 15,
+    "hold_N": 2.0,
+    "penetration_mm": 2.507237270389151,
+    "keypoint_err_m": 0.0302837739759663
+  },
+  {
+    "hand": "allegro",
+    "width": 0.06,
+    "condition": "pose",
+    "epsilon": 0.45396130773460336,
+    "n_contacts": 17,
+    "hold_N": 4.0,
+    "penetration_mm": 2.812793958302858,
+    "keypoint_err_m": 0.035922931052114165
+  },
+  {
+    "hand": "allegro",
+    "width": 0.06,
+    "condition": "wrench",
+    "epsilon": 0.639012170229577,
+    "n_contacts": 12,
+    "hold_N": 2.0,
+    "penetration_mm": 2.0360424056021595,
+    "keypoint_err_m": 0.035922931052114165
+  },
+  {
+    "hand": "allegro",
+    "width": 0.07,
+    "condition": "pose",
+    "epsilon": 0.2873919586217757,
+    "n_contacts": 22,
+    "hold_N": 1.0,
+    "penetration_mm": 2.7354305900530904,
+    "keypoint_err_m": 0.04076763788858047
+  },
+  {
+    "hand": "allegro",
+    "width": 0.07,
+    "condition": "wrench",
+    "epsilon": 0.468568403373618,
+    "n_contacts": 12,
+    "hold_N": 2.0,
+    "penetration_mm": 1.5001223724999815,
+    "keypoint_err_m": 0.04076763788858047
+  },
+  {
+    "hand": "allegro",
+    "width": 0.08,
+    "condition": "pose",
+    "epsilon": 0.1749780271284608,
+    "n_contacts": 10,
+    "hold_N": 0.0,
+    "penetration_mm": 2.2317291181813648,
+    "keypoint_err_m": 0.04310674055904197
+  },
+  {
+    "hand": "allegro",
+    "width": 0.08,
+    "condition": "wrench",
+    "epsilon": 0.4562078683983854,
+    "n_contacts": 11,
+    "hold_N": 1.0,
+    "penetration_mm": 1.3859912591021062,
+    "keypoint_err_m": 0.04310674055904197
+  }
+]

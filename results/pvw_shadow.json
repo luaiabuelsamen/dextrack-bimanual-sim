@@ -1,0 +1,122 @@
+[
+  {
+    "hand": "shadow",
+    "width": 0.03,
+    "condition": "pose",
+    "epsilon": 0.37450409740637763,
+    "n_contacts": 6,
+    "hold_N": 0.25,
+    "penetration_mm": 0.4411192132521471,
+    "keypoint_err_m": 0.007406380915695109
+  },
+  {
+    "hand": "shadow",
+    "width": 0.03,
+    "condition": "wrench",
+    "epsilon": 0.5590837187187153,
+    "n_contacts": 9,
+    "hold_N": 1.0,
+    "penetration_mm": 1.1156311505400636,
+    "keypoint_err_m": 0.007406380915695109
+  },
+  {
+    "hand": "shadow",
+    "width": 0.04,
+    "condition": "pose",
+    "epsilon": 0.6372896926494883,
+    "n_contacts": 10,
+    "hold_N": 2.0,
+    "penetration_mm": 1.0794733256207778,
+    "keypoint_err_m": 0.009350427342859364
+  },
+  {
+    "hand": "shadow",
+    "width": 0.04,
+    "condition": "wrench",
+    "epsilon": 0.6753880795599214,
+    "n_contacts": 12,
+    "hold_N": 1.0,
+    "penetration_mm": 0.7758185366984506,
+    "keypoint_err_m": 0.009350427342859364
+  },
+  {
+    "hand": "shadow",
+    "width": 0.05,
+    "condition": "pose",
+    "epsilon": 0.5472221737147422,
+    "n_contacts": 13,
+    "hold_N": 1.0,
+    "penetration_mm": 1.8749949084949538,
+    "keypoint_err_m": 0.012046323653568586
+  },
+  {
+    "hand": "shadow",
+    "width": 0.05,
+    "condition": "wrench",
+    "epsilon": 0.6503638061140017,
+    "n_contacts": 9,
+    "hold_N": 1.0,
+    "penetration_mm": 1.1130605690004443,
+    "keypoint_err_m": 0.012046323653568586
+  },
+  {
+    "hand": "shadow",
+    "width": 0.06,
+    "condition": "pose",
+    "epsilon": 0.6473045374720401,
+    "n_contacts": 16,
+    "hold_N": 2.0,
+    "penetration_mm": 1.446817328620188,
+    "keypoint_err_m": 0.0160953154126286
+  },
+  {
+    "hand": "shadow",
+    "width": 0.06,
+    "condition": "wrench",
+    "epsilon": 0.5968093554242537,
+    "n_contacts": 10,
+    "hold_N": 2.0,
+    "penetration_mm": 1.812975516573795,
+    "keypoint_err_m": 0.0160953154126286
+  },
+  {
+    "hand": "shadow",
+    "width": 0.07,
+    "condition": "pose",
+    "epsilon": 0.5549976069277963,
+    "n_contacts": 12,
+    "hold_N": 1.0,
+    "penetration_mm": 1.7947654573328344,
+    "keypoint_err_m": 0.020797321464050333
+  },
+  {
+    "hand": "shadow",
+    "width": 0.07,
+    "condition": "wrench",
+    "epsilon": 0.43306040724657013,
+    "n_contacts": 11,
+    "hold_N": 2.0,
+    "penetration_mm": 0.7222442831726038,
+    "keypoint_err_m": 0.020797321464050333
+  },
+  {
+    "hand": "shadow",
+    "width": 0.08,
+    "condition": "pose",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.025568762275388457
+  },
+  {
+    "hand": "shadow",
+    "width": 0.08,
+    "condition": "wrench",
+    "epsilon": 0.5187660528802478,
+    "n_contacts": 13,
+    "hold_N": 1.0,
+    "penetration_mm": 2.4377257539514083,
+    "keypoint_err_m": 0.025568762275388457
+  }
+]

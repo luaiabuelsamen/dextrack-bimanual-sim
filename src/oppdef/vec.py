@@ -210,21 +210,41 @@ class WarpVec(VecEnv):
         mujoco.mj_forward(model, d)
         # njmax defaults to 64 and silently DROPS constraints past it; a real
         # episode of the bimanual scene peaks at nefc 167. See NOTES.
+        #
+        # `nconmax` and `njmax` are PER WORLD -- `naconmax` is the separate
+        # total. Multiplying them by the world count (as this did) asks for
+        # n^2 capacity: at n=256 that is 256*256*256 = 16.8M contacts instead
+        # of 65k, which inflates memory enormously and would make GPU scaling
+        # look far worse than it is. Reported by review, 2026-09-12.
         self.mw = mjwarp.put_model(model)
+        self.nconmax, self.njmax = int(nconmax), int(njmax)
         self.dw = mjwarp.put_data(model, d, nworld=self.n,
-                                  nconmax=nconmax * self.n,
-                                  njmax=njmax * self.n)
+                                  nconmax=self.nconmax, njmax=self.njmax)
 
     def reset(self, qpos=None, qvel=None):
+        """Per-world reset, matching the CPU backend's contract.
+
+        This previously flattened whatever it was given and used the FIRST
+        world's state for all of them, so independent initial-state
+        randomisation silently collapsed to a single state -- and it rebuilt
+        with hardcoded capacities instead of the ones the constructor chose.
+        Reported by review, 2026-09-12.
+        """
         d = mujoco.MjData(self.m)
-        if qpos is not None:
-            d.qpos[:] = np.asarray(qpos).reshape(-1)[:self.m.nq]
-        if qvel is not None:
-            d.qvel[:] = np.asarray(qvel).reshape(-1)[:self.m.nv]
         mujoco.mj_forward(self.m, d)
         self.dw = self.mjwarp.put_data(self.m, d, nworld=self.n,
-                                       nconmax=256 * self.n,
-                                       njmax=512 * self.n)
+                                       nconmax=self.nconmax, njmax=self.njmax)
+        if qpos is not None or qvel is not None:
+            qp = self.dw.qpos.numpy().reshape(self.n, self.m.nq)
+            qv = self.dw.qvel.numpy().reshape(self.n, self.m.nv)
+            if qpos is not None:
+                qp[:] = np.broadcast_to(np.asarray(qpos, float),
+                                        (self.n, self.m.nq))
+            if qvel is not None:
+                qv[:] = np.broadcast_to(np.asarray(qvel, float),
+                                        (self.n, self.m.nv))
+            self.dw.qpos = self.wp.array(qp.astype(np.float32), dtype=float)
+            self.dw.qvel = self.wp.array(qv.astype(np.float32), dtype=float)
         return self.state()
 
     def step(self, ctrl):

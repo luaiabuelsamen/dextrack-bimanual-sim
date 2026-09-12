@@ -269,7 +269,8 @@ class GraspScene:
             worst = max(worst, -float(c.dist))
         return worst * 1000.0
 
-    def hold_of(self, ladder=(0.25, 0.5, 1.0, 2.0, 4.0, 8.0), push_steps=300,
+    def hold_of(self, ladder=(0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0),
+                push_steps=300,
                 max_disp=0.02):
         """Push the object in every direction until it slips; report the worst."""
         snap = (self.d.qpos.copy(), self.d.qvel.copy(), self.d.ctrl.copy())
@@ -300,8 +301,15 @@ class GraspScene:
 
     def attempt(self, params, close_steps=500, squeeze_steps=400,
                 start_pen_mm=1.0, do_hold=True, pin=True, release_steps=300,
-                max_pen_mm=3.0):
-        """params per hand: (rx, ry, rz, radial_offset, closure_fraction)."""
+                max_pen_mm=3.0, finger_target=None):
+        """params per hand: (rx, ry, rz, radial_offset, closure_fraction).
+
+        `finger_target` overrides the closure: a dict {joint name: angle} that
+        the fingers are driven to instead of a fraction of the hand's own
+        derived closure. That is what makes a RETARGETED finger pose testable
+        in the same harness as a searched one -- the placement search is
+        identical, and only the thing that decides the finger angles differs.
+        """
         params = np.asarray(params, float).reshape(self.n_hands, 5)
         mujoco.mj_resetData(self.m, self.d)
         self.d.qpos[self.obj_q:self.obj_q + 3] = 0.0
@@ -395,7 +403,9 @@ class GraspScene:
             a = (k + 1) / close_steps
             for p in self.prefixes:
                 for _n, (_qa, act, tgt) in self.finger[p].items():
-                    self.d.ctrl[act] = a * fracs[p] * tgt
+                    goal = (tgt * fracs[p] if finger_target is None
+                            else finger_target.get(_n[len(p):], 0.0))
+                    self.d.ctrl[act] = a * goal
             mujoco.mj_step(self.m, self.d)
             if pin:
                 _pin()

@@ -43,8 +43,9 @@ def record_expert(two_handed=True):
 def replay_warp(model, ctrl_seq, nworld=1, nconmax=256, njmax=512):
     import warp as wp
     import mujoco_warp as mjw
-    import warp_fix
-    warp_fix.apply(verbose=False)
+    from oppdef.sim import warp_fix   # packaged path; a bare
+    warp_fix.apply(verbose=False)     # `import warp_fix` only
+                                      # worked from the repo root
     wp.init()
 
     d = mujoco.MjData(model)
