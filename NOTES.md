@@ -350,3 +350,34 @@ down.** EXPERIMENTS.md 5 names this exact failure class. Two were still shipped:
 `drop < 1 cm` satisfied by a box lying on the floor (3/48 false holds at 1.35 m
 displacement), and a full-marks lift with epsilon = 0 because the block was
 riding on the hand.
+
+## 2026-09-11: the LEAP grasp, cleaned up
+
+`scripts/grasp_bench.py` replaces `leap_final.py`. Three changes, each closing an
+artifact that was recorded with the original result:
+
+1. **Pre-grasp / grasp / squeeze**, the way Dexonomy structures its data, instead
+   of a ramp from fully open. The simulation starts at the pre-grasp pose, so the
+   fingers never travel through the object.
+2. **Feasibility check before running.** The closure family's gap spans
+   5.55-19.26 cm for LEAP, so a 4.5 cm block is *infeasible* and the old code
+   silently clamped to full flex and drove through it. Infeasible widths are now
+   skipped rather than tested.
+3. **Penetration-free start,** and a peak-transient bound in the success
+   criterion. Placing the block at the planned gap midpoint can still overlap the
+   fingers along the block's other two dimensions; MuJoCo resolved that at
+   ~10^5 N. The pre-grasp is now opened until reset has zero contacts.
+
+Clean result, 0.05 kg, all criteria including the new ones:
+
+    block 6.5 x 5 x 5 cm    margin 6 mm
+    penetration-free start   yes
+    peak transient force     495 N     (was 4812 N, then 450662 N before the fix)
+    sustained grip at top    10.6 N
+    net lift                +14.6 cm
+    epsilon at the top       0.127     (force closure)
+    shake                    4 cycles, drop 1.65 cm, 3 contacts after
+
+1/12 configurations pass the full criterion now, against 24/48 before the
+transient and start-penetration bounds were added. That drop is the point: most
+of the earlier "successes" were riding on initialisation artifacts.
