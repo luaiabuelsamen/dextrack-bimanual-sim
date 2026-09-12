@@ -18,15 +18,14 @@ MENAGERIE = Path(os.environ.get("OPPDEF_MENAGERIE",
 #: Dexmate Vega upper body with two f5d6 hands. Only needed for the f5d6 rows of
 #: the opposition axis -- every other hand comes from Menagerie. Not redistributed
 #: here; set OPPDEF_VEGA_URDF to your own copy.
-VEGA_URDF = Path(os.environ.get("OPPDEF_VEGA_URDF", "")) if os.environ.get(
-    "OPPDEF_VEGA_URDF") else Path(
-    "/home/jetson3/projects/dexmate/dexmate-urdf/robots/humanoid/vega_1u/"
-    "vega_1u_f5d6-obj.urdf")
+_DEV_VEGA = ("/home/jetson3/projects/dexmate/dexmate-urdf/robots/humanoid/"
+             "vega_1u/vega_1u_f5d6-obj.urdf")   # the author's checkout; a default, not a requirement
+VEGA_URDF = Path(os.environ.get("OPPDEF_VEGA_URDF") or _DEV_VEGA)
 
 #: A URDF->MJCF compiler that strips the .glb visual meshes MuJoCo cannot decode.
 #: Only needed alongside VEGA_URDF. Set OPPDEF_DEXTRACK to your own checkout.
-DEXTRACK = Path(os.environ.get("OPPDEF_DEXTRACK",
-                               "/home/jetson3/projects/dextrack_vega"))
+_DEV_DEXTRACK = "/home/jetson3/projects/dextrack_vega"   # likewise
+DEXTRACK = Path(os.environ.get("OPPDEF_DEXTRACK") or _DEV_DEXTRACK)
 
 
 def require(path: Path, what: str, env: str) -> Path:

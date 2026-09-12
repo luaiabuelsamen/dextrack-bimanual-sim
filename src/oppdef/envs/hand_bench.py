@@ -46,7 +46,6 @@ def build(key, flex, half, mass, friction="1.0 0.02 0.001"):
         xml = xml.replace('meshdir="./assets/"', f'meshdir="{assets}/"')
         xml = xml.replace('meshdir="assets"', f'meshdir="{assets}"')
     else:
-        sys.path.insert(0, "/home/jetson3/projects/dextrack_vega")
         xml = compile_urdf(cfg['path'])
     root = ET.fromstring(xml)
     act = root.find("actuator")

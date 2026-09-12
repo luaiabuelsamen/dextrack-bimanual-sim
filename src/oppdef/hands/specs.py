@@ -55,7 +55,6 @@ def load(key):
         xml = xml.replace('meshdir="./assets/"', f'meshdir="{assets}/"')
         xml = xml.replace('meshdir="assets"', f'meshdir="{assets}"')
         return mujoco.MjModel.from_xml_string(xml), cfg
-    sys.path.insert(0, "/home/jetson3/projects/dextrack_vega")
     return mujoco.MjModel.from_xml_string(compile_urdf(cfg['path'])), cfg
 
 
