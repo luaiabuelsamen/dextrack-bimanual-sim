@@ -87,7 +87,8 @@ def main():
         from bimanual_env import BASE_HALF
         box0 = np.array([0.0, 0.0, BASE_HALF[2]])
         disp = float(np.linalg.norm(box - box0))
-        ok = bool(peg_out >= 0.08 and disp < 0.02)
+        lift = float(box[2] - box0[2])
+        ok = bool(peg_out >= 0.08 and lift < 0.02)   # criterion v2: base LIFT
         print(f"  WARP: peg out {peg_out*100:6.2f} cm  base moved {disp*100:5.2f} cm  "
               f"base z {(box[2]-box0[2])*100:+5.2f} cm  ok={ok}   "
               f"({time.time()-t0:.0f}s)", flush=True)

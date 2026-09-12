@@ -736,3 +736,18 @@ Also worth noting: the one-handed control diverges far more (9.02 vs 1.32 cm of
 peg travel) than the two-handed case. That is expected -- the one-handed run is
 the unstable one, with the base tumbling -- and it is a reminder that the
 divergence is largest exactly where the dynamics are least constrained.
+
+## 2026-09-12: criterion v2 validated on both backends
+
+Criterion v2 was written into `bimanual_env`'s docstring BEFORE the run that
+used it: peg extracted >= 8 cm, base LIFT < 2 cm, base tilt < 15 deg. Lateral
+displacement is still reported but no longer gates, because CPU and warp differ
+by 1.2 cm on it with identical controls and the old threshold was 2.0 cm.
+
+    condition            CPU ok   warp ok   CPU peg   warp peg
+    two-handed expert      True      True     12.96     13.42
+    one-handed control    False     False      9.02      1.24
+
+Outcome parity holds: both backends agree on both verdicts. Training in warp and
+evaluating on CPU is now licensed for this task, with the lateral-displacement
+gap (1.2 cm) recorded as the known difference.

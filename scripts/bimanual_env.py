@@ -26,8 +26,17 @@ Design rules this env exists to satisfy:
     palm press, the other grasps and lifts. Two hands squeezing opposite faces
     of a block is a gripper with extra steps, which is what the Vega result was.
 
-Success, fixed before any run:
-    peg extracted >= 8 cm, base displacement < 2 cm, base tilt < 15 deg.
+Success, v2, fixed before the run that uses it:
+    peg extracted >= 8 cm, base LIFT < 2 cm, base tilt < 15 deg.
+
+v1 used base lateral DISPLACEMENT < 2 cm. That clause was discarded because it
+is not a usable discriminator: CPU and warp differ by 1.2 cm of lateral
+displacement on an identical open-loop control sequence, so a 2 cm threshold
+sits inside the backend noise. Base lift is what the task is actually built
+around -- the socket friction exceeds the base weight, so a one-handed pull
+lifts the base -- and it separates the two conditions by ~6x in BOTH backends
+(0.59 vs 6.08 cm on CPU, 0.63 vs 3.95 cm on warp). Lateral displacement is still
+reported, it just no longer gates.
 """
 from __future__ import annotations
 

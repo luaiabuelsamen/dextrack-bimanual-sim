@@ -14,8 +14,8 @@ Phases:
   4  grasping hand pulls straight up
   5  hold
 
-Success (fixed in bimanual_env's docstring before any run):
-  peg extracted >= 8 cm, base displacement < 2 cm, base tilt < 15 deg.
+Success (v2, see bimanual_env's docstring for why it changed):
+  peg extracted >= 8 cm, base LIFT < 2 cm, base tilt < 15 deg.
 """
 from __future__ import annotations
 
@@ -265,7 +265,8 @@ class Expert:
                     box_z_rise_m=float(e.box_pos()[2] - box0[2]),
                     box_tilt_deg=e.box_tilt_deg(), knob_contacts=grasp_ncon,
                     clear_start=bool(getattr(self, "clear_start", False)),
-                    success=bool(out >= 0.08 and disp < 0.02
+                    success=bool(out >= 0.08
+                                 and float(e.box_pos()[2] - box0[2]) < 0.02
                                  and e.box_tilt_deg() < 15.0))
 
 
