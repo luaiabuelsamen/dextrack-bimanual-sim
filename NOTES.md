@@ -861,3 +861,35 @@ is, which is the one thing an open-loop expert cannot absorb:
 That is the headroom, and it is the classic case for learning over scripting: a
 closed-loop policy observes the actual peg state and can correct for a wrong
 belief about it. The comparison at 3 cm is the experiment.
+
+## 2026-09-12: does the learned policy beat the expert under perception error? No.
+
+The headroom was real (expert 5/5 at 0 cm error, 2/5 at 3 cm), so the experiment
+is well posed: at 3 cm of peg-position error, does a closed-loop policy that can
+SEE the peg beat an open-loop expert that cannot?
+
+    condition                          success        peg out (cm)
+    expert, 3.0 cm perception error    3/6            11.82 +/- 0.82
+    BC clean-trained, 3.0 cm error     61% +/- 21%    10.32 +/- 8.01
+    BC noise-augmented, 3.0 cm error   50% +/- 41%     4.26 +/- 8.46
+
+**No result.** Clean-trained BC is nominally ahead of the expert, 61% against
+50%, but the seed spread is 21 points against an 11-point gap. By RULES.md #3
+that is not a result and must not be reported as one. Noise augmentation, which
+was meant to be the fix, is if anything WORSE -- 50% with a 41-point spread.
+
+**Why the augmentation failed, which is the useful part.** I duplicated the
+dataset with corrupted peg observations but the SAME actions. That teaches the
+policy that the action is independent of the peg reading -- i.e. it trains the
+policy to ignore the observation it was supposed to learn to use, making it more
+open-loop rather than less. The augmentation was self-defeating by construction.
+
+Doing it properly needs the policy's own visited states labelled by the expert
+(DAgger), so that a wrong peg reading is paired with the CORRECTIVE action
+rather than the nominal one. That is the next experiment, not a tuning change.
+
+**So the honest status of learning in this project:** BC reproduces the expert
+on a clean task (67% +/- 47% against 0% baselines) and does not yet beat it
+anywhere. No RL has been run, and the measurements above are the reason -- there
+is no headroom on the axes the expert already handles, and on the one axis where
+there is headroom, the obvious cloning approach does not claim it.
