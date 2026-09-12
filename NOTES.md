@@ -1259,3 +1259,58 @@ registration is still pending. Contacts are geometric, not simulated. And the
 epsilon condition is an optimiser given the epsilon objective, so it should win
 on epsilon; what is informative is the SIZE of the gap and that keypoint lands
 at exactly zero, which is a qualitative failure rather than a smaller number.
+
+## 2026-09-12 — action chunking: a null, and a nearly-reported artefact
+
+Three training seeds per horizon, eight evaluation episodes each, identical
+demonstrations and evaluation seeds throughout. Policy queried every `stride`
+sim steps and its action held in between, matching the rate it was fitted at.
+
+    with temporal ensembling (m = 0.01)
+      do-nothing                    0%
+      random                        0%
+      expert                      100%          peg 13.42 +/- 0.15 cm
+      MLP (horizon 1)             100% +/-  0.0  peg 12.84 +/- 0.41 cm   3/3 seeds
+      chunked (horizon 8)        66.7% +/- 47.1  peg  6.58 +/- 9.52 cm   2/3 seeds
+      chunked (horizon 16)       66.7% +/- 47.1  peg  6.85 +/- 9.17 cm   2/3 seeds
+
+    without ensembling (m = 50, newest chunk only)
+      chunked (horizon 8)        66.7% +/- 47.1  peg  6.58 +/- 9.57 cm
+      chunked (horizon 16)       33.3% +/- 47.1  peg -0.11 +/- 8.92 cm
+
+**Action chunking does not help on this task and destabilises it.** The
+one-step MLP succeeds on 3/3 seeds; both chunked horizons lose a seed, and the
+lost seeds do not degrade gracefully -- they drive the peg ~6-7 cm the WRONG
+way, the same signature as the phase-less MLP failure.
+
+### The artefact this nearly became
+
+Run once per horizon, the table read: horizon 1 -> 8/8, horizon **8 -> 0/8**,
+horizon 16 -> 8/8. A hole at 8 between two working horizons is not something
+any property of chunking explains, and it was tempting to report it as one.
+Retraining horizon 8 with a different torch seed on the same demonstrations
+gave 8/8. **The spread across training seeds is larger than any difference
+between horizons**, so the single-seed table would have reported initialisation
+luck as an architecture result. Every horizon is now trained from several seeds;
+`chunk_bc.py` documents why.
+
+### A hypothesis that was wrong
+
+The natural explanation was temporal ensembling: it averages predictions made
+up to H queries ago, and the demonstrator is open-loop and time-indexed, so lag
+should hurt. A single-seed probe agreed (m = 50 gave the best number seen).
+Run properly across three seeds it does not hold -- the failing seed fails
+either way, at -6.88 cm with ensembling and -6.95 cm without, so **the
+instability is in the trained chunk predictor, not in the ensembler.**
+Ensembling does help horizon 16 (66.7% vs 33.3%), but it does not fix the
+failure mode.
+
+### What this is not
+
+A claim about action chunking in general. This task is SATURATED -- the
+one-step MLP already matches the expert (12.84 vs 13.42 cm), so there is no
+headroom for a better architecture to show value in, and the demonstrator is an
+open-loop time-indexed script, which is the regime where committing to a
+multi-step intent buys least. Three seeds is also few: 66.7% vs 33.3% is one
+seed. What the experiment does establish is that the infrastructure works end
+to end and that horizon comparisons on this task need seeds, not one run.
