@@ -643,3 +643,55 @@ degrade the scene -- it is a reason to size the experiment to the device.
    one-handed control in the substituted scene and report how the numbers move.
    That is the difference between a quantified approximation and May's
    unmeasured one.
+
+## 2026-09-11: both MJX blockers fixed -- the scene runs on the Orin GPU
+
+**Blocker 1, mujoco_warp's CCD crash, diagnosed and fixed.** It is an upstream
+bug, and the diagnosis is what made it fixable. `convex_narrowphase` builds a
+SEPARATE specialised CCD kernel for each convex geom-type pair (box-box,
+box-mesh, mesh-mesh, ...) and asks warp for a launch block size for each. That
+query does `module.load(device)` and reads `module_exec.meta[<kernel>_smem_bytes]`.
+Once the module is loaded for the FIRST pair, warp returns the cached
+`ModuleExec`, whose binary and metadata both predate the later kernels -- so the
+SECOND distinct pair type raises
+
+    KeyError: ..._ccd_kernel_<hash>_cuda_kernel_forward_smem_bytes
+
+That is why a single-mesh toy scene works (tested: boxes-only OK, one convex
+mesh OK) and two LEAP hands plus a box does not. Isolating it that way was the
+step that turned "warp is broken here" into a one-line cause.
+
+`scripts/warp_fix.py` unloads the kernel's module on the missing key, so the
+next load rebuilds with every kernel currently registered, and falls back to
+`naconmax` if that still fails. Returning a grid size ALONE is not sufficient --
+the kernel is genuinely absent from the loaded module and the following
+`wp.launch` then fails with `CUDA error 500: named symbol not found`. Both
+branches touch only module compilation and launch width, never the simulation.
+
+**Blocker 2, the XLA compile, is sidestepped rather than fought.** With warp the
+same unmodified scene compiles in ~1 s (48 s cold, then cached) against an XLA
+compile that exceeded 15 minutes for one environment and OOM-killed at 64.
+
+**A capacity bug found on the way, which matters more than the speed.** warp's
+default `njmax` is 64. The real expert episode peaks at **ncon 44, nefc 167**, so
+constraints were being silently dropped -- `nefc overflow - please increase njmax
+beyond 64`. That is a physics error, not a performance one. Sized to
+`nconmax=256, njmax=512`.
+
+**Where it lands, with correct capacity:**
+
+    nworld      compile      throughput
+         1      48 s cold        35 env-steps/s
+       256      cached        2,655 env-steps/s
+      2048      cached        2,098 env-steps/s
+
+2048 is slower per env-step than 256, consistent with memory pressure on the
+Orin's 15 GB unified memory at njmax=512. 256 worlds is the current sweet spot.
+
+**Parity, CPU MuJoCo vs warp, 300 steps of identical controls:** max qpos
+difference 3.3e-7 through step 50, then chaotic divergence (1.0e-2 by step 100,
+3.1e-1 by step 200). That is expected -- warp is float32, MuJoCo CPU is float64,
+and this is a contact-rich system. Step-level agreement is therefore the wrong
+test past the first few dozen steps. **The test that matters is whether the TASK
+OUTCOME survives: the expert succeeding and the one-handed control failing when
+both are run under warp. That is not done yet and is the next thing.**
