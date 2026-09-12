@@ -1131,3 +1131,93 @@ reportable.
 Nothing about the keypoint-vs-epsilon comparison is claimed yet: the reference
 is `SyntheticSource`, an analytic stand-in, not MANO. Any result carries that
 caveat until ARCTIC/Dexonomy lands.
+
+## 2026-09-12 — policy (front 5) and scale (front 6)
+
+### MJX is unavailable on this machine, and the reason is specific
+
+The note carried since May said JAX had no working CUDA build on aarch64/Tegra.
+That was overturned earlier: `mjx_env.sh` gets `backend gpu`, and GEMM runs.
+The correction to the correction is that **not all of JAX works**:
+
+    matmul          ok
+    jnp.linalg.cholesky   INTERNAL: cuSolver internal error
+    jnp.linalg.solve      gpusolverDnCreate(&handle) failed: cuSolver internal error
+
+`gpusolverDnCreate` cannot create a handle at all, so this is not about scene
+size or MJX: any MJX step fails, including on a two-body cart-pole. Tried and
+rejected:
+
+* system CUDA (`/usr/local/cuda/targets/aarch64-linux/lib`) ahead of the pip
+  wheels — cuSPARSE then fails to load and JAX falls back to CPU entirely;
+* `LD_PRELOAD` of JetPack's `libcusolver.so.11` (145 MB) over the pip wheel's
+  (298 MB), keeping the pip path order — same cuSolver error.
+
+**So MJX is not a usable backend here and no MJX number should be quoted from
+this machine.** `mujoco_warp` is the GPU path that works, and it is what the
+`warp` backend in `oppdef.vec` uses.
+
+### Batched stepping
+
+`oppdef.vec` puts CPU, MJX and warp behind one interface, each reporting its
+divergence from single-world CPU MuJoCo rather than being trusted.
+
+    scene: nq 52  nv 51  nu 44  ngeom 145  (bimanual, visual geoms stripped)
+
+    AGREEMENT (8 worlds, identical controls, 60 steps)
+      world-to-world           0.000e+00     (bitwise)
+      vs single-world mj_step  1.261e-08
+
+    THROUGHPUT (cpu, 8 cores)
+      n=  1     2206 steps/s   1.00x
+      n=  8     9035 steps/s   4.10x
+      n= 32    13435 steps/s   6.09x
+      n=128    15212 steps/s   6.90x
+      n=256    17022 steps/s   7.72x
+
+The 1.26e-08 is not error in the batch: the vec backend re-seeds state each
+step, so the solver warm-start does not carry across steps the way it does in a
+continuous `mj_step` loop. Worlds agree bitwise with each other.
+
+    warp vs cpu, cart-pole, 40 steps:  max 4.060e-07   final 2.187e-07
+
+which is float32-vs-float64, the expected size.
+
+Bugs fixed on the way: `mujoco.rollout` takes one `MjData` per THREAD (the
+worlds are a work queue through that pool), so seeding the batch from that pool
+made it infer the batch size as `nthread`; passing a list of N models made it
+infer N. Both raise the moment `n != nthread`, which is the normal case.
+
+### Action chunking
+
+`oppdef.policy` adds an ACT-style chunked policy: predict the next H actions,
+execute with temporal ensembling. `horizon=1` reproduces the MLP baseline
+exactly so the comparison is measurable rather than asserted.
+
+The ensembler was wrong first: it kept only each chunk's FIRST element, which
+is a moving average of fresh predictions, not an ensemble. The prediction about
+NOW made i steps ago is element i of the chunk emitted then. With identical
+chunks `[1,2,3,4]` it settled on 1.0 where the answer is 2.5.
+
+Episodes are chunked separately — a window running off one demonstration into
+the next teaches the policy to follow a trajectory with a different peg pose,
+and it looks exactly like ordinary training noise.
+
+### Retargeting: the palm is now fixed for every condition
+
+Letting the palm float and placing it at the human's wrist offset rescaled by
+finger length landed it ~2 cm out, and 2 cm is the difference between every
+contact and none — so the comparison was measuring wrist placement, not the
+objective. With the palm fixed at the hand's own pose and the object at its
+opposition-axis midpoint, only the fingers differ, and a `+squeeze` condition
+gives the keypoint baseline what practitioners actually ship.
+
+Smoke result (allegro, 5 cm box, palm fixed):
+
+    demo        eps 0.1059  3 contacts
+    keypoint    eps 0.1603  4 contacts   kp err 3.03 cm
+    +squeeze    eps 0.1603  4 contacts   (never worse than its input)
+    epsilon     eps 0.4537  4 contacts   kp err 5.93 cm
+
+2.8x the epsilon, bought by letting keypoint error roughly double. Still on
+`SyntheticSource`, which is an analytic stand-in and not MANO.
