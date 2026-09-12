@@ -239,3 +239,54 @@ wrists wedging a box, which was already recorded in this file as not a grasp, an
 the third clause rests on a number that is not reproducible. Satisfying the
 letter of a condition whose premise the same day's work invalidated is not a
 result. Recorded here rather than quietly dropped.
+
+## 2026-09-11: I rebuilt a solved problem. What the field actually uses.
+
+Prompted by the user: "please do some research i think youre wasting time on a
+solved problem". They were right. Findings, with what each one replaces.
+
+**1. MuJoCo Menagerie already has tuned hand models.** `leap_hand/right_hand.xml`
+ships named joints with real semantics (`if_mcp`/`if_pip`/`if_dip` per finger,
+`th_cmc`/`th_axl`/`th_mcp`/`th_ipl`), position actuators at kp=3, elliptic
+friction cone with impratio=100, and simplified fingertip collision meshes.
+Cloned to `vendor/mujoco_menagerie` (sparse: leap_hand, wonik_allegro,
+shadow_hand). This replaces `hand_bench.compile_mjcf`, which compiled the raw
+DexTrack URDF and invented gains.
+
+**2. DexGraspBench (ICRA 2025) is a MuJoCo benchmark for exactly this.**
+github.com/JYChen18/DexGraspBench. Supports Allegro, Shadow, **Leap**, UR10e+Shadow,
+with assets from Menagerie. Replays open-loop grasp poses in parallel and
+computes simulation success rate, **analytic force-closure metrics**, penetration
+depth and contact quality. That is a superset of `analysis/epsilon.py` plus the
+hold test, done properly and already used for cross-method comparison. Our
+epsilon is not wrong -- it passes its analytic self-test -- but it is redundant,
+and using theirs makes any number we publish comparable to other papers.
+
+**3. Dexonomy (RSS 2025) supplies the grasps, for LEAP, in MuJoCo.**
+pku-epic.github.io/Dexonomy, dataset on Hugging Face (JiayiChenPKU/Dexonomy).
+9.5M grasps over 10.7k objects and 31 grasp types, hands including Shadow,
+Allegro, **Leap**, MANO, Unitree G1. Critically, **each datapoint has three
+poses: pre-grasp, grasp, and squeeze.** That triple is the thing I kept failing
+to invent -- every closure I wrote went straight from open to closed in one ramp,
+which is why the fingers either missed the object or drove through it.
+
+**4. BODex (ICRA 2025) is the synthesiser** behind DexGraspBench, bilevel
+optimisation with a differentiable force-closure energy, GPU, MuJoCo-validated.
+If a grasp for a new object is needed, this generates it; hand-rolling a closure
+does not.
+
+**Cost of not looking this up first.** Four distinct hand-written closures, all
+failed, each for its own reason, all recorded above: fingertips-to-a-point (the
+fingers crushed each other, dip_2 vs dip_3 at 44 N), pinch-by-gap (hand jammed
+into the table, thumb_temp_base vs world at 182 N), position targets past the
+object (26 N, 114 N, 6836 N on a 50 g block), and constant closing torque (free
+gap settles at 7-18 cm, never touches a 4 cm block). The one thing that did work
+-- LEAP holding a 4 cm cube at 0.02 kg with epsilon 0.84, `figures/7_leap_grasp.gif`
+-- came from the fingertips-to-a-point closure on a small object, which is luck,
+not method.
+
+**Revised plan for the LEAP goal.** Do not synthesise a grasp. Pull a LEAP grasp
+from Dexonomy for a box-like object, replay pre-grasp -> grasp -> squeeze on the
+Menagerie model, and score it with DexGraspBench. If that holds and lifts, the
+paired working reference exists and f5d6 can be measured against it on the same
+bench, which is the whole point of M2.
