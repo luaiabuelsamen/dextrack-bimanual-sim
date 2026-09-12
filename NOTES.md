@@ -751,3 +751,40 @@ by 1.2 cm on it with identical controls and the old threshold was 2.0 cm.
 Outcome parity holds: both backends agree on both verdicts. Training in warp and
 evaluating on CPU is now licensed for this task, with the lateral-displacement
 gap (1.2 cm) recorded as the known difference.
+
+## 2026-09-12: M2 complete -- the opposition axis gains its second dimension
+
+`opposition_axis.py` measured REACH (how close the thumb gets to the fingers).
+`hand_axis_bench.py` adds HOLD: across a shared set of block widths, which can
+each hand actually close on and hold against gravity, nothing underneath.
+
+Everything mechanical is derived per hand by one identical procedure, never
+hard-coded. `hand_specs.derive_flex` solves for the closure over ALL joints at
+once, using the same thumb-to-finger objective as the axis. Two cheaper versions
+were tried and both got LEAP's sign backwards -- deriving `if_mcp = -0.31` where
+the validated closure uses +0.9 -- because a closure is a joint COMBINATION and
+single-joint probes cannot see it.
+
+    hand      closed gap   gap range      feasible   HELD   widths held (cm)
+    shadow       0.25 cm                        8      7    2,3,4,5,6,7,9
+    leap         0.80 cm                        8      5    3,6,7,9,11
+    allegro      2.41 cm                        7      3    6,7,11
+    f5d6         3.40 cm   3.4 - 7.8 cm         4      0    none
+
+**The ordering is monotone in the opposition floor.** The hand that can bring
+its thumb closest to its fingers is feasible on the most widths and holds the
+most of them; f5d6, with the highest floor and much the narrowest gap range,
+holds nothing at all -- not even the four widths it can nominally close on. So
+the floor is not merely a necessary condition, it predicts the outcome.
+
+f5d6 holding 0/4 is a 0/N, and it is allowed to stand as a boundary here because
+the pairing protocol is satisfied by construction: three other hands were run
+through the identical procedure on the identical widths and held 3, 5 and 7 of
+them.
+
+**A bug worth recording.** The first run reported every hand as infeasible
+everywhere, with shadow's gap curve spanning 10.8-12.0 cm when its closed gap is
+0.25 cm. The Menagerie hands ship their own actuators (`if_mcp_act`), and the
+bench looked only for `act_<joint>`, so it found none and swept a completely
+unactuated hand. Now every flex joint is mapped to whatever actuator drives it,
+with an assertion that at least four are wired.

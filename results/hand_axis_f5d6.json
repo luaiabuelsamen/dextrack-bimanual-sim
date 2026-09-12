@@ -1,0 +1,88 @@
+{
+  "f5d6": {
+    "note": "Dexmate f5d6, 11 joints (underactuated)",
+    "closed_gap_m": 0.03401055886357691,
+    "rows": [
+      {
+        "width": 0.02,
+        "gap_min": 0.03401055886357691,
+        "gap_max": 0.0776673074307704,
+        "feasible": false
+      },
+      {
+        "width": 0.03,
+        "gap_min": 0.03401055886357691,
+        "gap_max": 0.0776673074307704,
+        "feasible": false
+      },
+      {
+        "width": 0.04,
+        "mass": 0.05,
+        "clear_start": false,
+        "eps": 0.0,
+        "n": 0,
+        "f_grip": 0.0,
+        "drop_m": 19.63961999999988,
+        "n_after": 0,
+        "held": false,
+        "gap_min": 0.03401055886357691,
+        "gap_max": 0.0776673074307704,
+        "feasible": true
+      },
+      {
+        "width": 0.05,
+        "mass": 0.05,
+        "clear_start": false,
+        "eps": 0.0,
+        "n": 0,
+        "f_grip": 0.0,
+        "drop_m": 19.63961999999988,
+        "n_after": 0,
+        "held": false,
+        "gap_min": 0.03401055886357691,
+        "gap_max": 0.0776673074307704,
+        "feasible": true
+      },
+      {
+        "width": 0.06,
+        "mass": 0.05,
+        "clear_start": false,
+        "eps": 0.0,
+        "n": 0,
+        "f_grip": 0.0,
+        "drop_m": 19.639619999999873,
+        "n_after": 0,
+        "held": false,
+        "gap_min": 0.03401055886357691,
+        "gap_max": 0.0776673074307704,
+        "feasible": true
+      },
+      {
+        "width": 0.07,
+        "mass": 0.05,
+        "clear_start": false,
+        "eps": 0.0,
+        "n": 0,
+        "f_grip": 0.0,
+        "drop_m": 19.639619999999873,
+        "n_after": 0,
+        "held": false,
+        "gap_min": 0.03401055886357691,
+        "gap_max": 0.0776673074307704,
+        "feasible": true
+      },
+      {
+        "width": 0.09,
+        "gap_min": 0.03401055886357691,
+        "gap_max": 0.0776673074307704,
+        "feasible": false
+      },
+      {
+        "width": 0.11,
+        "gap_min": 0.03401055886357691,
+        "gap_max": 0.0776673074307704,
+        "feasible": false
+      }
+    ]
+  }
+}
