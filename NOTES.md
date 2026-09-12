@@ -473,3 +473,26 @@ and the grasp bench already provides the second.
 **Next for M2**: run the clean grasp bench across all four hands on a shared
 object set, so the axis gains a second dimension -- what each hand can actually
 hold, not just what it can reach.
+
+## 2026-09-11: the opposition floor, rendered
+
+`scripts/render_axis.py` puts each hand at its measured floor pose and marks the
+thumb tip (blue) and the finger-tip mean (green), joined by a capsule.
+
+- `figures/11_floor_f5d6.png` -- floor 3.08 cm. The thumb rests ON TOP of the
+  four-finger stack and points the same direction as they do. It never rotates
+  round to face them, so at the closest configuration the joint limits allow, the
+  two markers remain about 3 cm apart. This is the mechanism behind the number.
+- `figures/11_floor_leap.png` -- floor 0.00 cm. Only one marker is visible,
+  because the thumb tip is exactly coincident with the finger mean.
+
+**Stated plainly, because it is easy to misread the axis table as a claim about
+grasping:** f5d6 has never grasped anything in this project and is not claimed to
+have. The rendered pose is the closest approach, not a grasp.
+
+**Two rendering notes worth keeping.** `MjvLight` has no `directional` field in
+this MuJoCo build, so adding a scene light raises AttributeError whose traceback
+is then buried under an EGL_NOT_INITIALIZED error from the Renderer destructor --
+the EGL message is a symptom, not the cause. And a second EGL Renderer cannot be
+created in a process after the first is closed, so the script renders one hand
+per invocation.
