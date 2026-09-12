@@ -1,0 +1,34 @@
+[
+  {
+    "hand": "shadow",
+    "note": "Shadow Hand, 24 DoF",
+    "n_joints": 24,
+    "opposition_floor_m": 1.3497863924846808e-09,
+    "aperture_m": 0.20256225620155513,
+    "span_m": 0.20256225485176874
+  },
+  {
+    "hand": "allegro",
+    "note": "Wonik Allegro, 16 DoF",
+    "n_joints": 16,
+    "opposition_floor_m": 8.147127170811041e-10,
+    "aperture_m": 0.23758399227683855,
+    "span_m": 0.23758399146212583
+  },
+  {
+    "hand": "leap",
+    "note": "LEAP, 16 DoF",
+    "n_joints": 16,
+    "opposition_floor_m": 1.4584379666921637e-09,
+    "aperture_m": 0.22929242475528275,
+    "span_m": 0.2292924232968448
+  },
+  {
+    "hand": "f5d6",
+    "note": "Dexmate f5d6, 11 joints (underactuated)",
+    "n_joints": 11,
+    "opposition_floor_m": 0.030774834505875356,
+    "aperture_m": 0.10216907389117512,
+    "span_m": 0.07139423938529976
+  }
+]

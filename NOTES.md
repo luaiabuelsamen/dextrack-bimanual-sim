@@ -435,3 +435,41 @@ sweeping: the shake referenced `lift_h` while the hand ends lower after the
 in-task jerk, so it RAISED the hand 5 cm and scored a -4 cm drop; and a patch
 using an empty string slice made `str.replace("")` insert text at every position
 and destroyed the file, which is why it was rewritten rather than patched.
+
+## 2026-09-11: M2 first result -- the opposition axis, four hands
+
+`scripts/opposition_axis.py`. Purely kinematic, hand-agnostic, multi-start
+L-BFGS-B over joint limits:
+
+    opposition floor = min_q || thumb_tip(q) - mean(finger_tips(q)) ||
+    aperture         = max_q of the same quantity
+
+    hand      joints   floor(cm)   aperture(cm)   span(cm)
+    shadow        24       0.00          20.26      20.26
+    allegro       16       0.00          23.76      23.76
+    leap          16       0.00          22.93      22.93
+    f5d6          11       3.08          10.22       7.14
+
+**The f5d6 number independently replicates.** `dextrack_vega` measured 3.1 cm in
+May by a completely different method -- an exhaustive sweep of the three thumb
+joints in the assembled Vega scene. This is a continuous optimisation over all
+eleven hand joints in a separately compiled model, and it lands on 3.08 cm. Two
+methods, one number; the opposition floor is a real property of the hand.
+
+**What the axis shows.** Three of the four hands have a floor of exactly zero --
+the thumb can be brought to the finger mean, so there is no object too small to
+pinch. f5d6 is the only hand with a nonzero floor, and its aperture is also less
+than half the others'. It is not "a worse dexterous hand"; it is a different kind
+of device, one that cannot oppose at all and can therefore only press objects
+against an external surface or against a second hand.
+
+**Caveat on the metric.** Thumb-tip-to-finger-MEAN reaching zero does not prove a
+useful pinch -- the thumb could be reaching into the middle of the palm between
+spread fingers. The floor is a necessary condition for opposition, not a
+sufficient one. A per-pair version (min over thumb-to-each-finger) and a
+grasp-quality version (max epsilon over object sizes) are the natural refinements,
+and the grasp bench already provides the second.
+
+**Next for M2**: run the clean grasp bench across all four hands on a shared
+object set, so the axis gains a second dimension -- what each hand can actually
+hold, not just what it can reach.
