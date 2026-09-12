@@ -16,5 +16,9 @@ VENV="$ROOT/.venv-mjx"
 NVLIBS="$(find "$VENV/lib/python3.10/site-packages/nvidia" -name lib -type d 2>/dev/null | tr '\n' ':')"
 export LD_LIBRARY_PATH="${NVLIBS}/usr/local/cuda/targets/aarch64-linux/lib:${LD_LIBRARY_PATH}"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
+# Persistent XLA compile cache. MJX compiles are long on contact-rich scenes and
+# are otherwise repeated every process start.
+export JAX_COMPILATION_CACHE_DIR="${JAX_COMPILATION_CACHE_DIR:-$ROOT/.xla_cache}"
+mkdir -p "$JAX_COMPILATION_CACHE_DIR"
 if [ "$1" = "python" ]; then shift; exec "$VENV/bin/python" "$@"; fi
 exec "$@"

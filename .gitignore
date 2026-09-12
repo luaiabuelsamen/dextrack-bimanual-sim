@@ -7,3 +7,4 @@ data/
 MUJOCO_LOG.TXT
 .venv-mjx/
 vendor/mujoco_menagerie/
+.xla_cache/

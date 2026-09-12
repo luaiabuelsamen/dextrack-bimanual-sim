@@ -606,3 +606,40 @@ but it needs measuring before the training loop is designed around it. The
 honest next number is compile time and steps/s under `vmap` + `lax.scan`, which
 is how MJX is actually used; stepping one environment from Python, as the parity
 check does, is the worst case for compilation.
+
+## 2026-09-11: MJX status -- what works, what does not
+
+**Works.**
+- JAX on the Orin GPU: `backend: gpu, devices: [CudaDevice(id=0)]`, reproducible
+  via `mjx_env.sh`. Overturns the May claim. Modal is for scale, not access.
+- The physics-neutral strip: visual-only geoms removed, 252089 -> 208 mesh
+  vertices, bit-identical over 400 steps of identical controls (max difference
+  0.000e+00). No collision geometry touched, no solver swapped.
+- `mjx.put_model` on the stripped model: 2.1 s, Newton + elliptic cone intact.
+
+**Does not work.**
+- `jax.jit(mjx.step)` on this scene: a single-environment compile exceeded 15
+  minutes and was abandoned; a 64-world `vmap` compile died silently, almost
+  certainly OOM (the Orin has 15 GB of UNIFIED memory shared with the GPU, and
+  ~6 GB was free). So the blocker is the XLA compile and memory, not the model.
+- `mujoco_warp`: `KeyError` on the CCD kernel's shared-memory metadata
+  (`..._cuda_kernel_forward_smem_bytes`) on sm_87. Reproduces on warp 1.16 and
+  1.17, with mujoco aligned to 3.13, and after clearing the kernel cache. It is
+  triggered by the four fingertip convex meshes. This is an upstream bug, not a
+  configuration error.
+
+**Read on why.** 145 collision geoms is a lot for MJX-JAX, which compiles a
+whole-program kernel over a static collision-pair list. The Orin's 15 GB unified
+memory makes the compile itself the constraint. None of this is a reason to
+degrade the scene -- it is a reason to size the experiment to the device.
+
+**Next measurements, in order, before any design decision:**
+1. Compile time vs geom count -- one LEAP hand alone (~73 geoms) versus two.
+   If it is superlinear, the bimanual scene is simply past this device's budget
+   and the answer is Modal for training, Orin for development.
+2. The smallest `nworld` that compiles and runs here, with its throughput.
+3. Only if 1 and 2 both fail: substitute the eight fingertip collision meshes
+   with fitted primitives AND MEASURE THE COST -- re-run the expert and the
+   one-handed control in the substituted scene and report how the numbers move.
+   That is the difference between a quantified approximation and May's
+   unmeasured one.
