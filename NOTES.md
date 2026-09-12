@@ -496,3 +496,63 @@ is then buried under an EGL_NOT_INITIALIZED error from the Renderer destructor -
 the EGL message is a symptom, not the cause. And a second EGL Renderer cannot be
 created in a process after the first is closed, so the script renders one hand
 per invocation.
+
+## 2026-09-11: bimanual environment + scripted expert, with the one-handed control
+
+`scripts/bimanual_env.py`, `scripts/bimanual_expert.py`. Two Menagerie LEAP
+hands combined with `MjSpec.attach` (prefixes rh_/lh_, 46 joints, 44 actuators),
+each on six position-controlled base DoF. Not f5d6 (3.08 cm opposition floor) and
+not on the Vega arms (their reachable-orientation set would confound every result
+with a limitation of the robot rather than of the hands).
+
+**Task.** A peg stands in a socket in a free-standing base. The socket carries
+1.20 N of joint friction; the base weighs 0.78 N. Extraction therefore needs more
+upward force than the base weighs, so a one-handed pull lifts the whole base
+instead. One hand presses the base flange, the other grasps the peg and pulls.
+
+**Result.**
+
+    condition            peg out   base moved   base lifted   tilt    success
+    two-handed expert    12.98 cm     1.50 cm      +0.57 cm    6.9 deg   yes
+    one-handed control    9.07 cm     7.15 cm      +6.10 cm   26.0 deg   no
+
+The control fails in the designed way: it lifts the base 6.1 cm off the table.
+Across six (socket friction, base mass) combinations spanning margins of
+1.27x to 2.04x, **6/6 have the expert succeeding and the control failing**, so
+this is not a knife-edge. `figures/13_expert_two.gif`, `13_expert_one.gif`,
+`15_final_two.png`.
+
+**What had to be fixed, all found by looking rather than sweeping.**
+
+1. *Hands collided with each other* at reset (rh_palm vs lh_if_ds). The exposed
+   flange was 2.5 cm wide, forcing the hands together; widened the base in y to
+   give 6 cm strips and moved the stabilising hand to -y, away from the right
+   hand's thumb.
+2. *The stabilising hand never touched the box* -- 0.00 N, and two-handed and
+   one-handed runs were identical. The palm's contact surface is ~5 mm below its
+   origin, not the 2.8 cm assumed. Calibrated: z=0.052 gives 0.9 N and the box
+   slides 8.66 cm under a 3 N tug; z=0.048 gives 7.6 N and 0.57 cm; z=0.044
+   gives 14.3 N and no movement.
+3. *The grasp closure did not match the object.* LEAP's closure gap spans
+   5.32-19.26 cm, so the first knob's 4.4 cm faces were infeasible -- the fingers
+   closed straight past it onto the lid. Replaced the hard-coded grasp offset
+   with a per-run calibration that fits the closure fraction to the object width
+   and measures the grasp-centre offset kinematically.
+4. *The hand closed on itself.* Squeezing to frac 1.0 put rh_rf_tip against
+   rh_th_tip at 12.8 N after the object escaped. The squeeze now stops at the
+   hand's own gap floor plus a margin.
+5. *The original task was a hinged lid, and the arc beat me.* The hand had to
+   track a rotating target, and instead pressed the lid closed (85 N on the
+   knob's top face, lid going 5.9 deg -> 2.2 deg). A peg is a pure vertical pull.
+   Equivalent in principle, far less fragile to script.
+6. *The approach motion was the problem, not the grasp.* Descending from above
+   drove the fingers onto the peg's top face (163 N, gripping nothing); sweeping
+   in laterally shoved the base 8 cm. The expert now STARTS from a
+   penetration-free pre-grasp, which is what grasp_bench does and how Dexonomy
+   structures its data -- pre-grasp / grasp / squeeze, not a reach. Reaching is a
+   separate problem and is not what this environment exists to test.
+
+**Status against NEXT.md.** Steps 1-3 are done: hands that grasp, a task that
+needs both, and a scripted expert that solves it with its control failing. Step 4
+(MJX port) and step 5 (BC then RL) are next. Nothing has been learned yet, and
+the expert is the warm start when it is.
