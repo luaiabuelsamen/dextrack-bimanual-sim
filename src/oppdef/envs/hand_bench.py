@@ -30,10 +30,11 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from analysis.epsilon import grasp_metrics, object_contacts   # noqa: E402
-from hand_specs import SPECS, derive_flex                      # noqa: E402
+from oppdef.paths import (MENAGERIE, VEGA_URDF,  # noqa: E402
+                          compile_urdf, menagerie_xml)
+
+from oppdef.metrics.epsilon import grasp_metrics, object_contacts   # noqa: E402
+from oppdef.hands.specs import SPECS, derive_flex                      # noqa: E402
 
 
 def build(key, flex, half, mass, friction="1.0 0.02 0.001"):
@@ -46,8 +47,7 @@ def build(key, flex, half, mass, friction="1.0 0.02 0.001"):
         xml = xml.replace('meshdir="assets"', f'meshdir="{assets}"')
     else:
         sys.path.insert(0, "/home/jetson3/projects/dextrack_vega")
-        from dextrack_vega.assets import _compile_to_mjcf
-        xml = _compile_to_mjcf(cfg["path"])
+        xml = compile_urdf(cfg['path'])
     root = ET.fromstring(xml)
     act = root.find("actuator")
     if act is None:

@@ -25,9 +25,7 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from bimanual_env import (BimanualBox, RH_HOME, LH_HOME, BASE_HALF,  # noqa: E402
+from oppdef.envs.bimanual import (BimanualBox, RH_HOME, LH_HOME, BASE_HALF,  # noqa: E402
                           PEG_HALF, SOCKET_FRICTION)
 
 PALM_DZ = -0.102                     # palm sits this far below its attach frame

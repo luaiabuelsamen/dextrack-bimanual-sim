@@ -29,8 +29,6 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 
 def is_visual(g):
@@ -79,7 +77,7 @@ def rollout_cpu(model, ctrl_seq, seed_qpos=None):
 
 
 if __name__ == "__main__":
-    from bimanual_env import build
+    from oppdef.envs.bimanual import build
 
     full, spec_full = build()
     stripped, spec_strip = build()

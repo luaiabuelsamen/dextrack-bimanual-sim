@@ -42,9 +42,10 @@ from __future__ import annotations
 
 import numpy as np
 import mujoco
+
+from oppdef.paths import MENAGERIE
 from pathlib import Path
 
-MEN = Path(__file__).resolve().parents[1] / "vendor/mujoco_menagerie/leap_hand"
 
 # --- task geometry (metres, kg) ---
 BASE_HALF = (0.060, 0.110, 0.025)     # wide in y so the stabilising palm has room:
@@ -116,8 +117,8 @@ def build(hinge_friction=HINGE_FRICTION, base_mass=BASE_MASS, two_handed=True,
                 rgba=[0.55, 0.55, 0.58, 1], friction=[0.4, 0.02, 0.001])
 
     # ---- the two hands ----
-    for prefix, xml, home in (("rh_", MEN / "right_hand.xml", RH_HOME),
-                              ("lh_", MEN / "left_hand.xml", LH_HOME)):
+    for prefix, xml, home in (("rh_", MENAGERIE / "leap_hand" / "right_hand.xml", RH_HOME),
+                              ("lh_", MENAGERIE / "leap_hand" / "left_hand.xml", LH_HOME)):
         child = mujoco.MjSpec.from_file(str(xml))
         frame = wb.add_frame(pos=list(home), quat=[0, 1, 0, 0])   # palms down
         spec.attach(child, prefix=prefix, frame=frame)

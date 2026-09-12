@@ -8,3 +8,7 @@ MUJOCO_LOG.TXT
 .venv-mjx/
 vendor/mujoco_menagerie/
 .xla_cache/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+build/

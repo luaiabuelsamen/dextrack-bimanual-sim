@@ -19,27 +19,25 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+from oppdef.paths import (MENAGERIE, VEGA_URDF,  # noqa: E402
+                          compile_urdf, menagerie_xml)
 
-MEN = Path(__file__).resolve().parents[1] / "vendor/mujoco_menagerie"
-VEGA = Path("/home/jetson3/projects/dexmate/dexmate-urdf/robots/humanoid/"
-            "vega_1u/vega_1u_f5d6-obj.urdf")
+
 
 # name-level facts only; everything mechanical is measured
 SPECS = {
-    "leap": dict(kind="mjcf", path=MEN / "leap_hand/right_hand.xml",
+    "leap": dict(kind="mjcf", path=MENAGERIE / "leap_hand/right_hand.xml",
                  palm="palm", tips=["if_ds", "mf_ds", "rf_ds"],
                  thumb="th_ds", note="LEAP, 16 DoF"),
-    "allegro": dict(kind="mjcf", path=MEN / "wonik_allegro/right_hand.xml",
+    "allegro": dict(kind="mjcf", path=MENAGERIE / "wonik_allegro/right_hand.xml",
                     palm="palm", tips=["ff_tip", "mf_tip", "rf_tip"],
                     thumb="th_tip", note="Wonik Allegro, 16 DoF"),
-    "shadow": dict(kind="mjcf", path=MEN / "shadow_hand/right_hand.xml",
+    "shadow": dict(kind="mjcf", path=MENAGERIE / "shadow_hand/right_hand.xml",
                    palm="rh_palm",
                    tips=["rh_ffdistal", "rh_mfdistal", "rh_rfdistal",
                          "rh_lfdistal"],
                    thumb="rh_thdistal", note="Shadow Hand, 24 DoF"),
-    "f5d6": dict(kind="urdf", path=VEGA, palm="R_arm_l7",
+    "f5d6": dict(kind="urdf", path=VEGA_URDF, palm="R_arm_l7",
                  tips=["R_ff_l2", "R_mf_l2", "R_rf_l2", "R_lf_l2"],
                  thumb="R_th_l2",
                  joints=["R_th_j0", "R_th_j1", "R_th_j2",
@@ -58,8 +56,7 @@ def load(key):
         xml = xml.replace('meshdir="assets"', f'meshdir="{assets}"')
         return mujoco.MjModel.from_xml_string(xml), cfg
     sys.path.insert(0, "/home/jetson3/projects/dextrack_vega")
-    from dextrack_vega.assets import _compile_to_mjcf
-    return mujoco.MjModel.from_xml_string(_compile_to_mjcf(cfg["path"])), cfg
+    return mujoco.MjModel.from_xml_string(compile_urdf(cfg['path'])), cfg
 
 
 def hand_joints(m, cfg):

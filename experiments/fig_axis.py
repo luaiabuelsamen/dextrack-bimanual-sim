@@ -15,8 +15,9 @@ HELD      = "#2a78d6"   # series 1
 DROPPED   = "#eb6834"   # series 2  (validated vs series 1: CVD dE 24.7, normal 33.6)
 INFEAS    = "#e4e3df"
 
-a = json.load(open("results/hand_axis.json"))
-a.update(json.load(open("results/hand_axis_f5d6.json")))
+from oppdef.paths import RESULTS, FIGURES
+a = json.load(open(RESULTS / "hand_axis.json"))
+a.update(json.load(open(RESULTS / "hand_axis_f5d6.json")))
 order = sorted(a, key=lambda k: a[k]["closed_gap_m"])
 widths = [r["width"] * 100 for r in a[order[0]]["rows"]]
 LABEL = {"shadow": "Shadow\n24 DoF", "leap": "LEAP\n16 DoF",
@@ -94,6 +95,6 @@ fig.text(0.008, 0.90,
          "Ordering is the same on both panels.",
          fontsize=9.5, color=INK_2, va="top")
 fig.subplots_adjust(left=0.105, right=0.975, top=0.70, bottom=0.235)
-Path("figures").mkdir(exist_ok=True)
-fig.savefig("figures/16_opposition_axis.png", dpi=200, facecolor=SURFACE)
-print("wrote figures/16_opposition_axis.png")
+FIGURES.mkdir(exist_ok=True)
+fig.savefig(FIGURES / "16_opposition_axis.png", dpi=200, facecolor=SURFACE)
+print(f"wrote {FIGURES / '16_opposition_axis.png'}")

@@ -2,9 +2,8 @@
 import sys
 from pathlib import Path
 import numpy as np, mujoco, imageio.v2 as imageio
-sys.path.insert(0,"scripts"); sys.path.insert(0,".")
-import bimanual_expert as BE
-from bimanual_expert import Expert
+from oppdef.control import expert as BE
+from oppdef.control.expert import Expert
 
 def main(two=True, out=None, w=640, h=480, stride=16, fps=25):
     out = out or f"figures/13_expert_{'two' if two else 'one'}.gif"

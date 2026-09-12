@@ -19,13 +19,11 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 
 def record_expert(two_handed=True):
     """Run the expert on CPU, capturing every ctrl it applies."""
-    from bimanual_expert import Expert
+    from oppdef.control.expert import Expert
     ex = Expert(two_handed=two_handed)
     seq = []
     orig = mujoco.mj_step
@@ -84,7 +82,7 @@ def main():
         peg_out = float(qpos[e.hinge_q]) - ex.out0
         box = qpos[e.box_q:e.box_q + 3]
         box0 = np.array([0.0, 0.0, 0.060])       # BASE_HALF[2] = 0.025 -> set below
-        from bimanual_env import BASE_HALF
+        from oppdef.envs.bimanual import BASE_HALF
         box0 = np.array([0.0, 0.0, BASE_HALF[2]])
         disp = float(np.linalg.norm(box - box0))
         lift = float(box[2] - box0[2])

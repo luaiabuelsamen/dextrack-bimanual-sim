@@ -11,8 +11,7 @@ import sys
 from pathlib import Path
 import numpy as np, mujoco, imageio.v2 as imageio
 from scipy.optimize import minimize
-sys.path.insert(0, "scripts"); sys.path.insert(0, ".")
-from opposition_axis import load, tip_ids, joint_set
+from oppdef.hands.axis import load, tip_ids, joint_set
 
 
 def floor_pose(key, restarts=24, seed=0):

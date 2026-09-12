@@ -23,10 +23,8 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from bimanual_env import BASE_HALF, BASE_DOF                       # noqa: E402
-from bimanual_expert import Expert, FINGER_JOINTS, _amp_vector, GRASP  # noqa: E402
+from oppdef.envs.bimanual import BASE_HALF, BASE_DOF                       # noqa: E402
+from oppdef.control.expert import Expert, FINGER_JOINTS, _amp_vector, GRASP  # noqa: E402
 
 
 # ---------------------------------------------------------------- observation
@@ -183,8 +181,8 @@ def run_policy(seed, act_fn=None, mode="policy", n_steps=None, two_handed=True,
     e = ex.e
     # start from the same penetration-free pre-grasp the expert uses
     lh_press = None
-    from bimanual_expert import palm_ctrl
-    from bimanual_env import LH_HOME
+    from oppdef.control.expert import palm_ctrl
+    from oppdef.envs.bimanual import LH_HOME
     lh_press = palm_ctrl(LH_HOME, [0.0, -0.085, 0.044])
     ex.pre_frac, _ = ex.start_at_pregrasp(lh_press)
     box0 = np.array([0.0, 0.0, BASE_HALF[2]])

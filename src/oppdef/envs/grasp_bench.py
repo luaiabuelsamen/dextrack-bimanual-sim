@@ -31,16 +31,15 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from analysis.epsilon import grasp_metrics, object_contacts    # noqa: E402
+from oppdef.paths import (MENAGERIE, VEGA_URDF,  # noqa: E402
+                          compile_urdf, menagerie_xml)
 
-MEN = Path(__file__).resolve().parents[1] / "vendor/mujoco_menagerie"
+from oppdef.metrics.epsilon import grasp_metrics, object_contacts    # noqa: E402
 
-# Per hand: model file, the three finger-tip bodies + thumb tip, the joints that
 # flex, and a closure direction per joint. Everything else is derived.
 HANDS = {
     "leap": dict(
-        xml=MEN / "leap_hand/right_hand.xml",
+        xml=MENAGERIE / "leap_hand/right_hand.xml",
         palm="palm",
         tips=["if_ds", "mf_ds", "rf_ds"], thumb_tip="th_ds",
         flex={"if_mcp": 0.9, "if_pip": 1.2, "if_dip": 0.6,

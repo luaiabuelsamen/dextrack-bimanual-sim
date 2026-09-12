@@ -26,30 +26,26 @@ from pathlib import Path
 
 import numpy as np
 import mujoco
+
+from oppdef.paths import (MENAGERIE, VEGA_URDF,  # noqa: E402
+                          compile_urdf, menagerie_xml)
 from scipy.optimize import minimize
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, "/home/jetson3/projects/dextrack_vega")
-from dextrack_vega.assets import _compile_to_mjcf          # noqa: E402
 
-MEN = Path(__file__).resolve().parents[1] / "vendor/mujoco_menagerie"
-VEGA = Path("/home/jetson3/projects/dexmate/dexmate-urdf/robots/humanoid/"
-            "vega_1u/vega_1u_f5d6-obj.urdf")
 
 HANDS = {
-    "leap": dict(kind="mjcf", path=MEN / "leap_hand/right_hand.xml",
+    "leap": dict(kind="mjcf", path=MENAGERIE / "leap_hand/right_hand.xml",
                  thumb="th_ds", fingers=["if_ds", "mf_ds", "rf_ds"],
                  joints=None, note="LEAP, 16 DoF"),
-    "allegro": dict(kind="mjcf", path=MEN / "wonik_allegro/right_hand.xml",
+    "allegro": dict(kind="mjcf", path=MENAGERIE / "wonik_allegro/right_hand.xml",
                     thumb="th_tip", fingers=["ff_tip", "mf_tip", "rf_tip"],
                     joints=None, note="Wonik Allegro, 16 DoF"),
-    "shadow": dict(kind="mjcf", path=MEN / "shadow_hand/right_hand.xml",
+    "shadow": dict(kind="mjcf", path=MENAGERIE / "shadow_hand/right_hand.xml",
                    thumb="rh_thdistal",
                    fingers=["rh_ffdistal", "rh_mfdistal", "rh_rfdistal",
                             "rh_lfdistal"],
                    joints=None, note="Shadow Hand, 24 DoF"),
-    "f5d6": dict(kind="urdf", path=VEGA,
+    "f5d6": dict(kind="urdf", path=VEGA_URDF,
                  thumb="R_th_l2",
                  fingers=["R_ff_l2", "R_mf_l2", "R_rf_l2", "R_lf_l2"],
                  joints=["R_th_j0", "R_th_j1", "R_th_j2",
@@ -71,7 +67,7 @@ def load(key):
     else:
         # dextrack_vega's compiler strips the .glb visual meshes MuJoCo cannot
         # decode; the local one only handled <visual> elements and choked.
-        m = mujoco.MjModel.from_xml_string(_compile_to_mjcf(cfg["path"]))
+        m = mujoco.MjModel.from_xml_string(compile_urdf(cfg['path']))
     return m, cfg
 
 

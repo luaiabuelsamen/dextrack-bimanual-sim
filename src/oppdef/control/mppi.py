@@ -44,9 +44,7 @@ import numpy as np
 import mujoco
 from mujoco import rollout as mj_rollout
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from grasp_bench import Bench, HANDS                          # noqa: E402
+from oppdef.envs.grasp_bench import Bench, HANDS                          # noqa: E402
 
 FULL = mujoco.mjtState.mjSTATE_FULLPHYSICS
 
