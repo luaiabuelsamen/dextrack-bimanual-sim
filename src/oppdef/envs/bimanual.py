@@ -84,7 +84,16 @@ BASE_DOF = ["x", "y", "z", "rx", "ry", "rz"]
 
 
 def _add_base_dof(spec, palm, prefix, home):
-    """Six position-controlled DoF so the hand floats: 3 slides + 3 hinges."""
+    """Six position-controlled DoF so the hand floats: 3 slides + 3 hinges.
+
+    The hinge range is written in DEGREES, because that is the unit this spec
+    compiles angles in. It previously read `[-3.2, 3.2]` -- intended as radians,
+    compiled as 3.2 DEGREES -- while the matching actuator `ctrlrange` stayed
+    +/-3.2 in radians. Every commanded wrist rotation past 3.2 degrees therefore
+    saturated at the joint limit without any error, and `expert.best_rz`, which
+    sweeps rz across the full circle, was selecting among poses the hand could
+    not actually take. See NOTES 2026-09-12.
+    """
     body = spec.body(palm)
     axes = dict(x=[1, 0, 0], y=[0, 1, 0], z=[0, 0, 1],
                 rx=[1, 0, 0], ry=[0, 1, 0], rz=[0, 0, 1])
@@ -94,7 +103,7 @@ def _add_base_dof(spec, palm, prefix, home):
             name=f"{prefix}{d}",
             type=mujoco.mjtJoint.mjJNT_SLIDE if slide else mujoco.mjtJoint.mjJNT_HINGE,
             axis=axes[d],
-            range=[-0.6, 0.6] if slide else [-3.2, 3.2],
+            range=[-0.6, 0.6] if slide else [-180.0, 180.0],
             damping=8.0 if slide else 1.0,
             armature=0.02)
     return body
