@@ -788,3 +788,37 @@ everywhere, with shadow's gap curve spanning 10.8-12.0 cm when its closed gap is
 bench looked only for `act_<joint>`, so it found none and swept a completely
 unactuated hand. Now every flex joint is mapped to whatever actuator drives it,
 with an assertion that at least four are wired.
+
+## 2026-09-12: behaviour cloning -- the first learned policy in this project
+
+`scripts/bc.py`, collect -> train -> evaluate, entirely local. 20 randomised
+expert demos (socket friction 0.9-1.8 N, base mass 0.06-0.12 kg), 17360
+(obs, act) pairs, 52-dim observation, 44-dim action. Plain MLP 52-512-512-44,
+ReLU, MSE on z-normalised data, Adam 1e-3, 240 epochs, torch on the Orin GPU.
+Six held-out episodes, drawn with seeds the demos never used.
+
+    method          success                peg out (cm)
+    do-nothing      0/6                   -0.00 +/- 0.00
+    random          0/6                   -0.00 +/- 0.00
+    expert          6/6                   12.89 +/- 0.08
+    BC (3 seeds)    67% +/- 47%            8.01 +/- 6.65
+
+**BC beats both trivial baselines and, when it works, matches the expert**
+(seeds 0 and 2: 6/6 at 12.71 and 12.70 cm against the expert's 12.89). **Seed 1
+collapses completely** -- 0/6, driving the peg 1.4 cm the wrong way. The seed
+spread is 47 percentage points against a 67-point gap to baseline, so by
+RULES.md #3 this is a real but marginal result and must be reported with the
+spread, never as "BC solves the task".
+
+**The phase input is what made it work at all.** Without it BC scored 0/6 on
+every seed and pushed the peg 2.9 cm backwards. The scripted expert is open-loop
+once calibrated, so its action is a function of TIME as well as state: two
+moments with near-identical states -- descending versus holding -- demand
+different actions, and a state-only policy can only average them. Adding
+[phase, sin 2*pi*phase, cos 2*pi*phase] is what let the policy represent the
+demonstrator at all. That is a property of cloning a time-indexed expert, not a
+hyperparameter.
+
+The obvious next levers for the seed fragility, none of them tried yet: action
+chunking (ACT-style), predicting deltas rather than absolute position targets,
+more demonstrations, or an ensemble.
