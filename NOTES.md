@@ -893,3 +893,14 @@ on a clean task (67% +/- 47% against 0% baselines) and does not yet beat it
 anywhere. No RL has been run, and the measurements above are the reason -- there
 is no headroom on the axes the expert already handles, and on the one axis where
 there is headroom, the obvious cloning approach does not claim it.
+
+## 2026-09-12: figures
+
+- `figures/16_opposition_axis.png` -- the project's central result in one frame:
+  closing distance per hand against which block widths it holds. Same ordering on
+  both panels. Palette validated (blue/orange, CVD dE 24.7, normal-vision 33.6
+  against a #fcfcfb surface); the first attempt used green/red and FAILED CVD
+  separation at dE 4.1, so the states also carry glyphs and are never colour
+  alone.
+- `figures/17_bc_policy.gif` -- the BC policy, not the scripted expert,
+  extracting the peg: 12.67 cm, base lift +0.78 cm, success.
