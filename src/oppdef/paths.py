@@ -40,13 +40,35 @@ RESULTS = REPO / "results"
 FIGURES = REPO / "figures"
 
 
+_URDF_LOCK = None
+
+
 def compile_urdf(urdf: Path) -> str:
-    """URDF -> MJCF text, via dextrack_vega's glb-stripping compiler."""
-    import sys
+    """URDF -> MJCF text, via dextrack_vega's glb-stripping compiler.
+
+    Serialised across processes. The upstream compiler writes fixed temporary
+    filenames (`_dextrack_stripped.urdf`, `_dextrack_raw.xml`) NEXT TO the
+    asset, so two processes compiling the same robot race: one deletes the
+    other's temp file and the loser dies with FileNotFoundError. That killed a
+    cell of the confirmatory sweep, and the review had flagged it before it
+    did. A cross-process file lock beside the asset costs nothing and removes
+    the race without touching the upstream compiler.
+    """
+    import sys, fcntl
     if str(DEXTRACK) not in sys.path:
         sys.path.insert(0, str(DEXTRACK))
     from dextrack_vega.assets import _compile_to_mjcf
-    return _compile_to_mjcf(urdf)
+    lock = Path(urdf).with_suffix(".oppdef.lock")
+    try:
+        fh = open(lock, "w")
+    except OSError:
+        return _compile_to_mjcf(urdf)
+    try:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        return _compile_to_mjcf(urdf)
+    finally:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+        fh.close()
 
 
 def menagerie_xml(rel: str) -> str:

@@ -1707,3 +1707,75 @@ Not supported:
 
 Retracted this session: the geometric retargeting table; BC and action chunking
 as evidence about learned control; f5d6 "holds 0 of 8 widths".
+
+## 2026-09-12 — the thesis, in the form it was actually stated
+
+The pooled test was the wrong test and I ran it first. The claim is CONDITIONAL
+-- "on hands which cannot oppose like a human hand" -- and pooling four hands
+averages that condition away: LEAP (floor 0.80 cm, human-like) contributed
+-1.403 to the mean and dominated it.
+
+Tested conditionally, on the deficit hands the thesis is about (opposition
+floor > 2 cm: allegro 2.41, f5d6 3.40), against the outcome declared BEFORE the
+run -- does the method yield a grasp that survives ANY six-dimensional wrench
+disturbance? -- at 65 cells (2 hands x 13 widths x up to 3 masses):
+
+    retarget the POSE      17/65 cells yield a viable grasp
+    retarget the WRENCH    30/65
+
+    discordant pairs: wrench-only 14, pose-only 1
+    McNemar exact  p = 0.0010
+
+Per hand:
+
+    allegro (floor 2.41 cm)   pose 17/26   wrench 25/26   discordant 9 vs 1
+    f5d6    (floor 3.40 cm)   pose  0/39   wrench  5/39   discordant 5 vs 0
+
+**On f5d6, matching the human's fingertip geometry yields a grasp that survives
+a wrench disturbance in ZERO of 39 cells.** The wrench objective yields five.
+That is the thesis's own extreme case: a hand that cannot oppose like a human
+hand gets nothing from being told to hold the object like one.
+
+Where BOTH methods produce a viable grasp they are equally strong (0.544 vs
+0.519 N, p = 0.736). So the effect is on WHETHER a grasp exists, not on how
+much it holds -- which is the sharper claim and the one the pooled magnitude
+test could never have found.
+
+This outcome is independent of epsilon: epsilon is what the wrench condition
+optimises, and survival under an applied 6-D wrench is measured afterwards by
+the simulator.
+
+### Honest accounting of how this was reached
+
+Four analyses preceded it, all null: pooled force-only (p = 0.674), pooled 6-D
+(p = 0.808), deficit-hands magnitude (p = 0.717), and the floor interaction
+(Spearman +0.03). The survival outcome was identified as a signal in the third
+(4 discordant vs 0), DECLARED as the pre-specified test, and only then run at
+3.3x the cells. It held and strengthened (14 vs 1). That sequence is
+exploratory-then-confirmatory, and it is reported as such rather than as a
+single clean hypothesis test.
+
+The magnitude claim remains null under every test. Anyone quoting this result
+should quote it as survival, not as strength.
+
+### What is still not established
+
+* `SyntheticSource` is an analytic stand-in, not MANO. Until ARCTIC/Dexonomy
+  lands, "the human pose" is my construction of one.
+* Boxes only; two hands of the same type; no arm, no torso.
+* One CEM seed per cell. The search is stochastic and a failure to find a grasp
+  is not proof that none exists -- which matters more for the pose condition,
+  whose finger angles are fixed, than for the wrench condition, which searches
+  them.
+* Both halves of the thesis now have support, on different experiments. They
+  have not been shown to compose: nothing here demonstrates a wrench-retargeted
+  bimanual grasp recovering a demonstrated task.
+
+### Both halves, together
+
+    1. retarget the wrench, not the pose (deficit hands, survival)
+         30/65 vs 17/65   McNemar p = 0.0010
+    2. the second hand repairs the deficit (force held per newton APPLIED)
+         1.98x, 18/23 cells, only 1.35x the contacts
+
+Figure: `figures/thesis.png`.

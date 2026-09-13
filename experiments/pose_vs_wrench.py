@@ -136,6 +136,9 @@ def main():
     ap.add_argument("--iters", type=int, default=6)
     ap.add_argument("--pop", type=int, default=24)
     ap.add_argument("--kp", type=float, default=1.0)
+    ap.add_argument("--masses", type=float, nargs="+", default=[0.05])
+    ap.add_argument("--conditions", nargs="+",
+                    default=["pose", "closure", "wrench"])
     ap.add_argument("--out", default="results/pose_vs_wrench.json")
     a = ap.parse_args()
 
@@ -144,11 +147,13 @@ def main():
     print(hdr); print("-" * len(hdr), flush=True)
     rows = []
     for hk in a.hands:
+      for mass in a.masses:
         for w in a.widths:
             tgt, kperr = keypoint_pose(hk, w)
-            for cond in ("pose", "closure", "wrench"):
+            for cond in a.conditions:
                 t0 = time.time()
-                sc = GraspScene(hk, (w / 2,) * 3, n_hands=1, kp_finger=a.kp)
+                sc = GraspScene(hk, (w / 2,) * 3, n_hands=1, kp_finger=a.kp,
+                                mass=mass)
                 use = tgt if cond == "pose" else None
                 if cond == "wrench":
                     # same number of simulated attempts as the other two, spent
@@ -168,7 +173,7 @@ def main():
                 print(f"{hk:8s} {w*100:5.1f} {cond:10s} {e:7.4f} {nc:4d} "
                       f"{hold:7.2f} {pen:6.2f} {kperr*100:6.2f}cm "
                       f"{time.time()-t0:6.1f}", flush=True)
-                rows.append(dict(hand=hk, width=w, condition=cond,
+                rows.append(dict(hand=hk, width=w, mass=mass, condition=cond,
                                  epsilon=float(e), n_contacts=int(nc),
                                  hold_N=float(hold), penetration_mm=float(pen),
                                  keypoint_err_m=kperr))
