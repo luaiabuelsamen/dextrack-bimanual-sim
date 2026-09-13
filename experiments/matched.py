@@ -118,8 +118,22 @@ def cem(cell, objective, iters, pop, seed):
             # non-grasp is not the baseline anyone ships, so the contact
             # requirement is applied identically to both.
             if not a.valid or a.n_contacts < 2:
-                key = ("few_contacts" if a.valid
-                       else a.reason.split("(")[0].strip()[:40] or "invalid")
+                # bucket by REASON, not by the measured value: keying on
+                # the raw text made "object pushed 12.2 cm out of the hand" a
+                # distinct category from "...12.0 cm" and produced a
+                # 47-entry histogram of one-offs
+                if a.valid:
+                    key = "few_contacts"
+                elif "pushed" in a.reason:
+                    key = "object_ejected"
+                elif "buried" in a.reason:
+                    key = "fingers_buried"
+                elif "cannot reach" in a.reason:
+                    key = "unreachable"
+                elif "starts inside" in a.reason:
+                    key = "pregrasp_penetrating"
+                else:
+                    key = "invalid"
                 tally[key] = tally.get(key, 0) + 1
                 scored.append((-1e9, c)); continue
             tally["valid"] += 1

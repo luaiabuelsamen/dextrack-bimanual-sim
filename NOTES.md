@@ -2098,3 +2098,30 @@ ships), 7 (the second-hand claim under an enforced budget DURING the
 disturbance) and 8 (every original scientific endpoint) are open. The
 second-hand figure remains withdrawn rather than fixed. Nothing in this entry
 moves the thesis; it makes the repository honest about where the thesis stands.
+
+### Selection, not search: the diagnostic the audit asked for
+
+The audit's sharpest doubt about the matched experiment was that it "mostly
+distinguishes which score guides a small stochastic search through a sparse
+feasible set" -- i.e. that wrench wins by finding more grasps, not better ones.
+The per-run rejection histograms now settle it:
+
+    valid candidates found, out of 144      pose 28.0     wrench 29.2
+
+Both objectives reach the feasible set at the same rate. They then select
+differently from it, and the selection is what separates them:
+
+    survives the probe                      pose 3/60     wrench 21/60
+
+So the effect is SELECTION, not search luck. That is a stronger statement than
+the one made yesterday, and it is the one the diagnostic supports.
+
+The replayable re-run reproduces the earlier run exactly (same seeds,
+deterministic): keypoint error 7.96 vs 12.64 cm, hold 0.025 vs 0.223 N,
+Wilcoxon p = 0.00018, survival 3/60 vs 21/60, discordant 18-0, p = 7.6e-06.
+
+What this still is not: 60 independent task instances (it is 20 configurations
+at 3 optimiser seeds); an evaluation independent of the contact model the
+objective is scored on; or a comparison against the baseline a practitioner
+ships, which is a keypoint retarget followed by a budgeted squeeze. Those
+remain owed.
