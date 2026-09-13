@@ -1,0 +1,374 @@
+{
+  "review_date_local": "2026-09-12",
+  "reviewed_head": "d4df676bf48fc17cfbae713d1d3aff5fc5038c6f",
+  "environment": {
+    "python": "3.10.12",
+    "machine": "aarch64",
+    "mujoco": "3.8.0",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3"
+  },
+  "urdf_source": {
+    "path": "/home/jetson3/projects/dexmate/dexmate-urdf/robots/humanoid/vega_1u/vega_1u_f5d6-obj.urdf",
+    "sha256": "3239b241d8a8cb443b5239d5a6148544de2642253038107d112d3800577df69e"
+  },
+  "existing_uncommitted_files": [
+    "results/bimanual_expert.json",
+    "src/oppdef/hold.py"
+  ],
+  "non_gpu_tests": {
+    "passed": 56,
+    "seconds": 20.4
+  },
+  "saved_result_statistics": {
+    "all": {
+      "n_cells": 65,
+      "pose_positive": 17,
+      "wrench_positive": 30,
+      "wrench_only": 14,
+      "pose_only": 1,
+      "nominal_two_sided_exact_p": 0.0009765625
+    },
+    "by_hand": {
+      "allegro": {
+        "n_cells": 26,
+        "pose_positive": 17,
+        "wrench_positive": 25,
+        "wrench_only": 9,
+        "pose_only": 1,
+        "nominal_two_sided_exact_p": 0.021484375
+      },
+      "f5d6": {
+        "n_cells": 39,
+        "pose_positive": 0,
+        "wrench_positive": 5,
+        "wrench_only": 5,
+        "pose_only": 0,
+        "nominal_two_sided_exact_p": 0.0625
+      }
+    },
+    "excluding_pilot_overlap": {
+      "n_cells": 57,
+      "pose_positive": 17,
+      "wrench_positive": 28,
+      "wrench_only": 12,
+      "pose_only": 1,
+      "nominal_two_sided_exact_p": 0.00341796875
+    },
+    "overlapping_cells": [
+      [
+        "f5d6",
+        0.03,
+        0.05
+      ],
+      [
+        "f5d6",
+        0.035,
+        0.05
+      ],
+      [
+        "f5d6",
+        0.04,
+        0.05
+      ],
+      [
+        "f5d6",
+        0.05,
+        0.05
+      ],
+      [
+        "f5d6",
+        0.06,
+        0.05
+      ],
+      [
+        "f5d6",
+        0.07,
+        0.05
+      ],
+      [
+        "f5d6",
+        0.08,
+        0.05
+      ],
+      [
+        "f5d6",
+        0.09,
+        0.05
+      ]
+    ],
+    "all_overlapping_outcomes_exactly_identical": true,
+    "inference_note": "Nominal p-values reproduce the cell-level calculation; they do not repair search-budget confounding, adaptive selection, or dependence/generalization concerns."
+  },
+  "f5d6_35mm_50g_reproduction": [
+    {
+      "hand": "f5d6",
+      "width": 0.035,
+      "mass": 0.05,
+      "condition": "pose",
+      "seed": 0,
+      "iters": 6,
+      "pop": 24,
+      "epsilon": 0.38900721178734116,
+      "n_contacts": 5,
+      "hold_N": 0.0,
+      "penetration_mm": 0.8878746606164967,
+      "params": [
+        -0.07124937098669509,
+        0.27952053896610163,
+        2.689057628761377,
+        -0.02688101096186362,
+        0.8520952232635282
+      ],
+      "finger_targets": {
+        "R_arm_j7": 1.1960393291430143,
+        "R_th_j0": -0.0158,
+        "R_th_j1": -0.273684099367286,
+        "R_th_j2": 0.0,
+        "R_ff_j1": -0.7109333192089883,
+        "R_ff_j2": 0.0,
+        "R_mf_j1": -1.0822948652597209,
+        "R_mf_j2": 0.0,
+        "R_rf_j1": -1.0154,
+        "R_rf_j2": 0.0,
+        "R_lf_j1": -1.0118,
+        "R_lf_j2": 0.0
+      },
+      "per_direction_N": [
+        0.0,
+        0.686,
+        1.345,
+        0.0,
+        0.49,
+        0.0,
+        0.686,
+        0.96,
+        0.0,
+        0.0,
+        1.345,
+        0.49,
+        0.25,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seconds": 42.44
+    },
+    {
+      "hand": "f5d6",
+      "width": 0.035,
+      "mass": 0.05,
+      "condition": "wrench",
+      "seed": 0,
+      "iters": 6,
+      "pop": 30,
+      "epsilon": 0.4751587086429416,
+      "n_contacts": 8,
+      "hold_N": 0.96,
+      "penetration_mm": 2.3690777558116203,
+      "params": [
+        0.4170075985071037,
+        -0.04071250670806966,
+        -0.235272810954133,
+        -0.004458669849565299,
+        0.9083047462370331
+      ],
+      "finger_targets": {
+        "R_th_j0": 1.4854528323077503,
+        "R_th_j1": -0.3468,
+        "R_th_j2": -0.4298,
+        "R_ff_j1": -0.541210785077328,
+        "R_ff_j2": -0.42401210676523654,
+        "R_mf_j1": -0.6208301609792555,
+        "R_mf_j2": -0.1791697878051087,
+        "R_rf_j1": -1.0154,
+        "R_rf_j2": -0.4439731783239598,
+        "R_lf_j1": -1.0118,
+        "R_lf_j2": 0.4014
+      },
+      "per_direction_N": [
+        1.882,
+        1.882,
+        1.882,
+        1.882,
+        1.345,
+        1.882,
+        1.345,
+        1.345,
+        1.882,
+        1.345,
+        1.345,
+        5.165,
+        1.345,
+        1.345,
+        1.882,
+        2.635,
+        1.345,
+        1.345,
+        1.882,
+        1.345,
+        1.345,
+        2.635,
+        1.882,
+        0.96,
+        2.635,
+        1.882,
+        0.96,
+        1.345
+      ],
+      "seconds": 74.35
+    }
+  ],
+  "f5d6_reproduced_grasp_model_audit": {
+    "neq": 0,
+    "mimic_deviations": [
+      {
+        "joint": "R_th_j2",
+        "parent": "R_th_j1",
+        "actual_q": -0.407736662948345,
+        "urdf_expected_q": -0.28783882431978675,
+        "deviation_rad": -0.11989783862855824
+      },
+      {
+        "joint": "R_ff_j2",
+        "parent": "R_ff_j1",
+        "actual_q": -0.39814605475382214,
+        "urdf_expected_q": -0.5466656196506088,
+        "deviation_rad": 0.14851956489678664
+      },
+      {
+        "joint": "R_mf_j2",
+        "parent": "R_mf_j1",
+        "actual_q": -0.17916460555821453,
+        "urdf_expected_q": -0.6698284036365797,
+        "deviation_rad": 0.49066379807836513
+      },
+      {
+        "joint": "R_rf_j2",
+        "parent": "R_rf_j1",
+        "actual_q": -0.443972673032035,
+        "urdf_expected_q": -1.1460883997920084,
+        "deviation_rad": 0.7021157267599734
+      },
+      {
+        "joint": "R_lf_j2",
+        "parent": "R_lf_j1",
+        "actual_q": 0.40140026231210957,
+        "urdf_expected_q": -1.162083122424718,
+        "deviation_rad": 1.5634833847368275
+      }
+    ],
+    "valid": true,
+    "epsilon": 0.4751587086429416
+  },
+  "f5d6_coupled_tip_axis_diagnostic": {
+    "current_link_origins": {
+      "floor_m": 0.03572013686047093,
+      "actuated_joint_names": [
+        "R_th_j0",
+        "R_th_j1",
+        "R_ff_j1",
+        "R_mf_j1",
+        "R_rf_j1",
+        "R_lf_j1"
+      ],
+      "q": [
+        1.3,
+        -0.3232803216175471,
+        -1.070150759103939,
+        -1.0606295946554172,
+        -0.9884004073139415,
+        -0.9641767431348175
+      ],
+      "other_metric_m": 0.06225245779757293
+    },
+    "urdf_fingertip_locations": {
+      "floor_m": 0.018110880610459228,
+      "actuated_joint_names": [
+        "R_th_j0",
+        "R_th_j1",
+        "R_ff_j1",
+        "R_mf_j1",
+        "R_rf_j1",
+        "R_lf_j1"
+      ],
+      "q": [
+        1.3,
+        -0.3232803216175471,
+        0.16745359449520272,
+        -0.4426898577386141,
+        -0.6619872980524967,
+        -0.6852744439472959
+      ],
+      "other_metric_m": 0.05400046049204273
+    },
+    "protocol": {
+      "restarts": 12,
+      "seed": 0,
+      "cap_rad": 1.3,
+      "mimic_constraints": "URDF affine equalities enforced by parameterization",
+      "seconds": 1.2551429271697998
+    }
+  },
+  "keypoint_nullspace_diagnostic": {
+    "width_m": 0.035,
+    "changed_joints": [
+      "R_th_j2",
+      "R_ff_j2",
+      "R_mf_j2",
+      "R_rf_j2",
+      "R_lf_j2"
+    ],
+    "change": "Replace zero distal targets in reproduced pose fit with distal targets from reproduced wrench result; hold other retargeter joints fixed.",
+    "original_keypoint_error_m": 0.020700794850280736,
+    "modified_keypoint_error_m": 0.020700794850280736,
+    "maximum_tracked_tip_displacement_m": 0.0
+  },
+  "synthetic_reference_diagnostic": {
+    "tested_widths_m": [
+      0.03,
+      0.05,
+      0.09
+    ],
+    "half_extents_reference": "[width/2, 0.025, 0.025]",
+    "half_extents_simulator": "[width/2, width/2, width/2]",
+    "distance_outside_reference_box_mm": [
+      12.561690601773131,
+      0.0,
+      0.0,
+      7.438309398226872,
+      0.5029208843735731
+    ],
+    "declared_contact_flags": [
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "second_hand_ratio_recalculation": {
+    "n_cells": 23,
+    "mean_one_hand_ratio": 0.08494591031695745,
+    "mean_two_hand_ratio": 0.16845520081986426,
+    "ratio_of_means": 1.983087828375843,
+    "strict_improvements": 17,
+    "strict_declines": 5,
+    "ties": 1,
+    "contact_count_ratio": 1.3551401869158877,
+    "saved_probe_directions": 14,
+    "force_budget_note": "f_total is pre-disturbance contact normal force; no equal budget is enforced during the disturbance."
+  }
+}

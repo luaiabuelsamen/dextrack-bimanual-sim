@@ -1779,3 +1779,95 @@ should quote it as survival, not as strength.
          1.98x, 18/23 cells, only 1.35x the contacts
 
 Figure: `figures/thesis.png`.
+
+## 2026-09-12 — RETRACTION: the f5d6 model was wrong, and the opposition floor with it
+
+A completion review (`docs/COMPLETION_REVIEW.md`) found that the f5d6 simulated
+throughout this project is not the f5d6 in the URDF. I verified every claim
+before acting on it. All three hold.
+
+**1. The tracked fingertips were distal JOINT ORIGINS.** Each finger's terminal
+joint rotates about the exact point being tracked, so moving it displaced the
+tracked position by **0.0000 mm** -- measured, all five fingers. Every objective
+reading those points was blind to the last joint of every finger. The URDF
+carries real tip frames 27.6-50.0 mm further out (`R_*_tip`); MuJoCo's importer
+merges them away because they hang off fixed joints, and nothing here noticed.
+
+**2. The five mimic couplings were dropped.** In the URDF each distal joint
+follows its proximal one (x1.13 to x1.35), so the right hand has **six**
+independent joints. The compiled model had `neq = 0` and this project actuated
+all **eleven** independently -- roughly twice the true freedom.
+
+**3. No actuator force limits**, against 0.5 N*m per finger joint and 1.0 at
+the thumb in the URDF.
+
+### What that does to the headline number
+
+Recomputed with the real tips and the mimic coupling enforced:
+
+    f5d6 opposition floor    3.40 cm  ->  1.44 cm
+
+and the ordering this project is built on inverts:
+
+    shadow  0.25      shadow  0.25
+    leap    0.80      leap    0.80
+    allegro 2.41  ->  f5d6    1.44
+    f5d6    3.40      allegro 2.41
+
+**RETRACTED:**
+
+* "f5d6 is the only hand that cannot oppose" -- it opposes better than Allegro.
+  The README still says it holds nothing; that is now wrong twice over (the
+  hold bench was already retracted as an invalid fixture).
+* The claim that the 3.1 cm floor measured in May was "independently replicated
+  by a completely different method". Both measurements used the same wrong
+  marker convention, so the second replicated the first's error. Agreement
+  between two methods that share a defect is not corroboration.
+* **The deficit cohort, and with it the McNemar headline.** The cohort was
+  "opposition floor > 2 cm" = {allegro 2.41, f5d6 3.40}. Corrected, f5d6 is
+  1.44 cm and does not qualify. **39 of the 65 cells behind
+  p = 0.0010 were f5d6.** The pooled result does not stand.
+
+What remains of it is Allegro alone: 17/26 vs 25/26, discordant 9 vs 1,
+nominal p = 0.0215 -- one hand, and still confounded by the search-budget
+defect below. It is a lead, not a result.
+
+### Other confirmed defects in the same result
+
+* **Unequal search budget.** The runner gives wrench `pop * 5 // 4` and pose
+  `pop`: **180 versus 144 candidate attempts**, while the adjacent comment
+  claims they are equal. The outcome measured is whether search finds a passing
+  grasp, so extra attempts go straight to the endpoint. I had named this
+  confound in conversation and then shipped the result without checking my own
+  code for it.
+* **Object geometry mismatch.** `SyntheticSource` describes half-extents
+  `[w/2, 0.025, 0.025]`; the comparison builds a cube `(w/2, w/2, w/2)`. Only
+  w = 50 mm agrees. Two points declared contacts in the reference sit 12.56 and
+  7.44 mm outside even the reference box.
+* **The second-hand figure is mislabelled and miscounted.** Its saved
+  per-direction arrays are length **14 -- force only** -- while the axis says
+  "wrench". The counts are **17 improvements, 5 declines, 1 tie**, not the
+  18/23 recorded earlier. The 1.983x ratio reproduces, but dividing by
+  `f_total` measured BEFORE the disturbance does not hold the actuation budget
+  fixed during it, so it is a descriptive efficiency ratio, not a demonstration
+  that allocation causes the advantage.
+* **The figure hardcodes its p-value and discordant counts** rather than
+  deriving them from the data it plots.
+* **"Survives ANY 6-D wrench" overstates the probe.** It tests 14 pure-force
+  and 14 pure-torque directions, not arbitrary combined wrenches, and a pass
+  means every sampled direction survives at least the smallest rung.
+
+### Status
+
+Standing, unaffected: epsilon from real contacts predicts physical holding
+(~5x across its range); the geometric-retargeting, BC/chunking and f5d6-hold
+retractions.
+
+Not standing: the wrench-over-pose headline (invalid cohort, unequal budget);
+the opposition-floor ordering; the second-hand claim as stated (mislabelled
+probe, budget not held fixed during the disturbance).
+
+Repaired in code: `hands/f5d6.py` adds the real tip frames and the mimic
+couplings and records the effort limits; `paths.compile_urdf` applies it;
+`specs` and `embodiment` now name the real tips. `tests/test_f5d6_model.py`
+locks all three defects.

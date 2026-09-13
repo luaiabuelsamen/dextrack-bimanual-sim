@@ -58,14 +58,15 @@ def compile_urdf(urdf: Path) -> str:
     if str(DEXTRACK) not in sys.path:
         sys.path.insert(0, str(DEXTRACK))
     from dextrack_vega.assets import _compile_to_mjcf
+    from oppdef.hands.f5d6 import repair_mjcf as _repair
     lock = Path(urdf).with_suffix(".oppdef.lock")
     try:
         fh = open(lock, "w")
     except OSError:
-        return _compile_to_mjcf(urdf)
+        return _repair(_compile_to_mjcf(urdf))
     try:
         fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
-        return _compile_to_mjcf(urdf)
+        return _repair(_compile_to_mjcf(urdf))
     finally:
         fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
         fh.close()

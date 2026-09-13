@@ -38,8 +38,13 @@ SPECS = {
                          "rh_lfdistal"],
                    thumb="rh_thdistal", note="Shadow Hand, 24 DoF"),
     "f5d6": dict(kind="urdf", path=VEGA_URDF, palm="R_arm_l7",
-                 tips=["R_ff_l2", "R_mf_l2", "R_rf_l2", "R_lf_l2"],
-                 thumb="R_th_l2",
+                 # the REAL tips, 27.6-50.0 mm beyond the distal joint
+                 # origins that were tracked before. Those origins are the
+                 # axes the terminal joints rotate about, so tracking them
+                 # made the last joint of every finger invisible: measured
+                 # displacement exactly 0.0000 mm. See hands/f5d6.py.
+                 tips=["R_ff_tip", "R_mf_tip", "R_rf_tip", "R_lf_tip"],
+                 thumb="R_th_tip",
                  joints=["R_th_j0", "R_th_j1", "R_th_j2",
                          "R_ff_j1", "R_ff_j2", "R_mf_j1", "R_mf_j2",
                          "R_rf_j1", "R_rf_j2", "R_lf_j1", "R_lf_j2"],

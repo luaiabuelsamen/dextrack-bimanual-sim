@@ -11,20 +11,17 @@ before quoting any number.
 
 ## Results
 
-**The opposition floor predicts what a hand can hold.** Four hands, one derived
-closure procedure, one shared set of block widths. Same ordering on both axes.
-
-| hand | closest thumb-finger gap | widths feasible | **widths held** |
-|---|---|---|---|
-| Shadow (24 DoF) | 0.25 cm | 8 | **7** |
-| LEAP (16 DoF) | 0.80 cm | 8 | **5** |
-| Allegro (16 DoF) | 2.41 cm | 7 | **3** |
-| Dexmate f5d6 (11 DoF) | 3.40 cm | 4 | **0** |
-
-f5d6 is the only hand that cannot oppose, and the only one that holds nothing --
-not even the four widths it can nominally close on. Its uncapped floor, 3.08 cm,
-replicates 3.1 cm measured months earlier by a completely different method.
-Figure: `figures/16_opposition_axis.png`.
+**RETRACTED 2026-09-12 — the opposition floor table below was measured on the
+wrong points.** For f5d6 the tracked "fingertips" were distal joint origins,
+which the terminal joints rotate about: moving them displaced the tracked point
+by exactly 0.0000 mm. The URDF's real tip frames sit 27.6–50.0 mm further out,
+and the model also dropped five mimic couplings and every torque limit.
+Recomputed correctly, f5d6's floor is **1.44 cm, not 3.40 cm**, and it opposes
+*better* than Allegro — so the ordering this table reports does not hold, and
+the "widths held" column was separately retracted as an invalid fixture (the
+palm fell 1.05 m during closure). See NOTES.md. The corrected floors are
+shadow 0.25, leap 0.80, f5d6 1.44, allegro 2.41 cm; what they predict has not
+been re-measured.
 
 **A bimanual task that provably needs two hands.** Two LEAP hands; a peg whose
 socket friction (1.20 N) exceeds the base weight (0.78 N), so a one-handed pull

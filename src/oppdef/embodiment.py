@@ -63,9 +63,13 @@ HANDS = {
     "shadow": Hand("shadow", "menagerie", "shadow_hand/right_hand.xml", "rh_palm",
                    ("rh_ffdistal", "rh_mfdistal", "rh_rfdistal", "rh_lfdistal"),
                    "rh_thdistal", 24, "Shadow Hand, 24 DoF"),
+    # tips are the URDF's real tip frames, not the distal joint origins that
+    # were tracked before (those do not move when the distal joint moves).
+    # Six INDEPENDENT joints; the other five follow by mimic. See hands/f5d6.py.
     "f5d6": Hand("f5d6", "urdf", str(VEGA_URDF), "R_arm_l7",
-                 ("R_ff_l2", "R_mf_l2", "R_rf_l2", "R_lf_l2"), "R_th_l2", 11,
-                 "Dexmate f5d6, 11 joints (underactuated)", joint_prefix="R_"),
+                 ("R_ff_tip", "R_mf_tip", "R_rf_tip", "R_lf_tip"), "R_th_tip",
+                 6, "Dexmate f5d6, 6 independent joints (5 mimic-coupled)",
+                 joint_prefix="R_"),
 }
 
 ARMS = {
