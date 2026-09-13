@@ -67,7 +67,7 @@ HANDS = {
     # were tracked before (those do not move when the distal joint moves).
     # Six INDEPENDENT joints; the other five follow by mimic. See hands/f5d6.py.
     "f5d6": Hand("f5d6", "urdf", str(VEGA_URDF), "R_arm_l7",
-                 ("R_ff_tip", "R_mf_tip", "R_rf_tip", "R_lf_tip"), "R_th_tip",
+                 ("R_ff_l2", "R_mf_l2", "R_rf_l2", "R_lf_l2"), "R_th_l2",
                  6, "Dexmate f5d6, 6 independent joints (5 mimic-coupled)",
                  joint_prefix="R_"),
 }

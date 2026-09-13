@@ -11,17 +11,26 @@ before quoting any number.
 
 ## Results
 
-**RETRACTED 2026-09-12 — the opposition floor table below was measured on the
-wrong points.** For f5d6 the tracked "fingertips" were distal joint origins,
-which the terminal joints rotate about: moving them displaced the tracked point
-by exactly 0.0000 mm. The URDF's real tip frames sit 27.6–50.0 mm further out,
-and the model also dropped five mimic couplings and every torque limit.
-Recomputed correctly, f5d6's floor is **1.44 cm, not 3.40 cm**, and it opposes
-*better* than Allegro — so the ordering this table reports does not hold, and
-the "widths held" column was separately retracted as an invalid fixture (the
-palm fell 1.05 m during closure). See NOTES.md. The corrected floors are
-shadow 0.25, leap 0.80, f5d6 1.44, allegro 2.41 cm; what they predict has not
-been re-measured.
+**RETRACTED 2026-09-12 — there is no opposition deficit.** The fingertips were
+tracked at distal joint origins on *every* hand; the most distal joint of every
+finger moves those bodies by 0.000 mm. Re-derived with the fingertip taken from
+each distal link's own collision geometry (validated against f5d6's URDF tip
+frames to 0.4 mm), with the hand's mimic couplings enforced and self-collision
+scoped to the fingers, and measured thumb-to-nearest-fingertip rather than to
+their mean:
+
+| hand | corrected floor | previously reported |
+|---|---|---|
+| Allegro | 0.06 cm | 2.41 cm |
+| Shadow | 0.21 cm | 0.25 cm |
+| Dexmate f5d6 | **0.26 cm** | **3.40 cm** |
+| LEAP | 0.34 cm | 0.80 cm |
+
+All four hands oppose within 2.8 mm of one another, and f5d6 — the hand that
+motivated this project — opposes better than LEAP. The "widths held" column was
+separately retracted as an invalid fixture (the palm fell 1.05 m during
+closure). See NOTES.md; every result that conditioned on a deficit cohort is
+withdrawn.
 
 **A bimanual task that provably needs two hands.** Two LEAP hands; a peg whose
 socket friction (1.20 N) exceeds the base weight (0.78 N), so a one-handed pull

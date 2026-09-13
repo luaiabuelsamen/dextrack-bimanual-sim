@@ -92,18 +92,32 @@ class GraspScene:
         _flex_probe = derive_flex(hand_key)[2]
         have = {a.target for a in spec.actuators}
         kpf = float(kp_finger or 3.0)
+        from oppdef.hands.f5d6 import is_dependent, effort_of
         for pfx in prefixes:
             for j in _flex_probe:
                 name = f"{pfx}{j}"
                 if name in have:
                     continue
+                # a joint driven by a mimic coupling must NOT get its own
+                # actuator: it would fight the equality constraint that defines
+                # it. f5d6's right hand has six independent joints, not eleven.
+                if is_dependent(name):
+                    continue
                 gp = [0.0] * 10; gp[0] = kpf
                 bp = [0.0] * 10; bp[1], bp[2] = -kpf, -0.05
-                spec.add_actuator(name=f"fing_{name}", target=name,
-                                  trntype=mujoco.mjtTrn.mjTRN_JOINT,
-                                  gainprm=gp, biasprm=bp,
-                                  gaintype=mujoco.mjtGain.mjGAIN_FIXED,
-                                  biastype=mujoco.mjtBias.mjBIAS_AFFINE)
+                act = spec.add_actuator(
+                    name=f"fing_{name}", target=name,
+                    trntype=mujoco.mjtTrn.mjTRN_JOINT,
+                    gainprm=gp, biasprm=bp,
+                    gaintype=mujoco.mjtGain.mjGAIN_FIXED,
+                    biastype=mujoco.mjtBias.mjBIAS_AFFINE)
+                # torque limits from the URDF: 0.5 N*m per finger joint, 1.0 at
+                # the thumb. Without them the simulated hand squeezes as hard
+                # as the controller asks.
+                eff = effort_of(name)
+                if eff is not None:
+                    act.forcelimited = 1
+                    act.forcerange = [-eff, eff]
         # Everything that is not the hand or its floating base is FROZEN. f5d6's
         # file is the whole Vega robot, and its torso, lift, head and both arms
         # are unactuated: hung off a floating base they flop, and the hand was
@@ -145,9 +159,19 @@ class GraspScene:
         for pfx in prefixes:
             keep |= {f"{pfx}{d}" for d in ("x", "y", "z", "rx", "ry", "rz")}
             keep |= {f"{pfx}{j}" for j in _flex_probe}
+        removed = set()
         for jt in list(spec.joints):
             if jt.name not in keep:
+                removed.add(jt.name)
                 spec.delete(jt)
+        # An equality constraint naming a deleted joint does not disappear with
+        # it -- the model then fails to compile with "unknown element in
+        # equality constraint". The mimic couplings cover BOTH hands, so
+        # freezing the left one strands five of them.
+        for eq in list(spec.equalities):
+            if getattr(eq, "name1", "") in removed or \
+                    getattr(eq, "name2", "") in removed:
+                spec.delete(eq)
 
         # The floating base's slides are limited to +/-0.6 m by the bimanual
         # env they come from. f5d6's grasp centre sits 1.4 m from the origin --

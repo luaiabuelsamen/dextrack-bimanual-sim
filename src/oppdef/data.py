@@ -76,9 +76,10 @@ class SyntheticSource(GraspSource):
     """
     name = "synthetic"
 
-    def __init__(self, widths=(0.04, 0.05, 0.06, 0.07), height=0.05, n_per=3,
-                 seed=0):
-        self.widths, self.height, self.n_per = widths, height, n_per
+    def __init__(self, widths=(0.04, 0.05, 0.06, 0.07), height=None, n_per=3,
+                 seed=0, cube=True):
+        self.widths, self.n_per, self.cube = widths, n_per, bool(cube)
+        self.height = height
         self.rng = np.random.default_rng(seed)
 
     def available(self):
@@ -92,16 +93,24 @@ class SyntheticSource(GraspSource):
             for k in range(self.n_per):
                 jitter = self.rng.normal(0, 0.004, 3)
                 hx = w / 2
-                th = np.array([+hx, 0.0, 0.010]) + jitter
+                # The fingers are spread over the box's ACTUAL height. They
+                # used to sit at fixed z = +/-0.035 and +/-0.012 regardless of
+                # the object, so on the cube the comparison actually tests, two
+                # of the five "contacts" were 12.56 and 7.44 mm OUTSIDE the
+                # box -- a reference grasp that does not touch what it claims
+                # to hold.
+                hz = hx if (self.cube or self.height is None) \
+                    else min(self.height / 2, hx)
+                th = np.array([+hx, 0.0, 0.4 * hz]) + jitter
                 fingers = np.stack([
-                    np.array([-hx, 0.0, z]) + jitter
-                    for z in (0.035, 0.012, -0.012, -0.035)])
+                    np.array([-hx, 0.0, z * hz]) + jitter
+                    for z in (0.85, 0.28, -0.28, -0.85)])
                 yield GraspRef(
                     wrist=np.array([0.0, -0.10, 0.02]),
                     wrist_quat=np.array([1.0, 0, 0, 0]),
                     fingertips=np.vstack([fingers, th[None, :]]),
                     obj_pos=np.zeros(3), obj_quat=np.array([1.0, 0, 0, 0]),
-                    obj_half=np.array([hx, 0.025, self.height / 2]),
+                    obj_half=np.array([hx, hz, hz]),
                     contacts=np.ones(5, bool),
                     label=f"box{int(w*1000)}mm_{k}", source=self.name)
 

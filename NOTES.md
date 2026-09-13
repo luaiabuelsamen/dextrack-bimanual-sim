@@ -1871,3 +1871,79 @@ Repaired in code: `hands/f5d6.py` adds the real tip frames and the mimic
 couplings and records the effort limits; `paths.compile_urdf` applies it;
 `specs` and `embodiment` now name the real tips. `tests/test_f5d6_model.py`
 locks all three defects.
+
+## 2026-09-12 — the opposition axis, re-derived. There is no deficit.
+
+The completion review established that f5d6's fingertips were tracked at distal
+joint origins. Auditing the other three hands found the same defect in all of
+them: on shadow, leap and allegro the most distal joint of every finger moves
+the tracked body by **0.000 mm**. The opposition axis -- the measurement this
+project is named after -- was taken at the wrong point on every hand.
+
+### The rule, derived rather than tabled
+
+`hands/tips.py` takes the fingertip to be the point of the distal link's own
+collision geometry lying furthest from that body's origin. No per-hand offsets
+to maintain, and it works for a capsule, a box or a mesh.
+
+It can be checked against ground truth exactly once, on f5d6, whose URDF names
+its own tip frames. The rule recovers them to **0.4 mm**:
+
+    R_ff_l2 -> tip   derived 50.4 mm    URDF 50.0 mm
+    R_th_l2 -> tip   derived 27.8 mm    URDF 27.6 mm
+
+### Three further corrections, each found by the previous one failing
+
+* **Thumb-to-MEAN-of-fingertips is not a distance the hand can close.** With
+  true tips, shadow, leap and allegro all measured 0.00 cm with zero
+  self-penetration: a thumb sitting in the middle of splayed fingers scores
+  zero while touching nothing. The floor is now thumb to NEAREST fingertip.
+* **Self-collision has to be scoped to the fingers.** An unscoped penalty was
+  dominated by a 6.57 mm overlap between `head_l1` and `head_l3` -- the robot's
+  HEAD -- plus palm/thumb-base overlaps present at rest. Constant across poses,
+  so they penalised nothing and masked everything.
+* **Reporting the penalised objective as a distance** gave f5d6 a "floor" of
+  34.57 cm, which is a penalty, not a gap.
+
+### The corrected axis
+
+    hand      corrected    as previously reported
+    allegro     0.06 cm         2.41 cm
+    shadow      0.21 cm         0.25 cm
+    f5d6        0.26 cm         3.40 cm
+    leap        0.34 cm         0.80 cm
+
+**All four hands oppose within 0.06-0.34 cm of each other -- a spread of
+2.8 mm.** f5d6, the hand this project is named around and the one that
+motivated the whole thesis, opposes BETTER than LEAP.
+
+### The cohort cannot be defined
+
+The conditional thesis needs hands that "cannot oppose like a human hand". On
+the corrected axis no such hand is present, and there is no ordering to
+condition on: the spread across four hands is smaller than the measurement's
+own sensitivity to how a fingertip is defined. **The deficit cohort is
+withdrawn, and with it every result that used it.**
+
+That includes the last standing headline (30/65 vs 17/65, McNemar p = 0.0010):
+its cohort was {allegro, f5d6} on floors of 2.41 and 3.40 cm, both of which
+were artifacts.
+
+### What replaces it
+
+One budget-matched experiment across all four hands, with the cohort removed
+rather than redefined -- if opposition does not vary, the comparison should be
+run unconditioned and reported as such. `experiments/matched.py`: both
+conditions search the SAME space (placement + every finger angle), with the
+SAME candidate count and the SAME seeds, on the same cube, and differ only in
+the scalar they maximise. Both are required to produce an actual grasp, because
+fidelity alone is maximised by a hand matching the human's shape in mid-air
+holding nothing -- which is exactly what the pose condition did on its first
+run.
+
+Also corrected in the physical model: mimic-driven joints are no longer given
+their own actuators (they fought the constraint that defines them), f5d6 now
+has **6** finger actuators rather than 11, and the URDF's torque limits
+(1.0 N*m thumb, 0.5 fingers) are applied. `SyntheticSource` now builds its
+reference grasp on the cube actually tested; previously two of its five
+declared contacts were 12.56 and 7.44 mm outside the box.

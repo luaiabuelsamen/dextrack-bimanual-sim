@@ -43,8 +43,13 @@ SPECS = {
                  # axes the terminal joints rotate about, so tracking them
                  # made the last joint of every finger invisible: measured
                  # displacement exactly 0.0000 mm. See hands/f5d6.py.
-                 tips=["R_ff_tip", "R_mf_tip", "R_rf_tip", "R_lf_tip"],
-                 thumb="R_th_tip",
+                 # the distal LINKS, whose tips hands/tips.py derives from
+                 # their collision geometry -- the same rule every other hand
+                 # uses. The URDF's own tip frames are massless and geomless,
+                 # so a floor measured between them can close to 0.6 mm while
+                 # the actual links interpenetrate by 6.6 mm.
+                 tips=["R_ff_l2", "R_mf_l2", "R_rf_l2", "R_lf_l2"],
+                 thumb="R_th_l2",
                  joints=["R_th_j0", "R_th_j1", "R_th_j2",
                          "R_ff_j1", "R_ff_j2", "R_mf_j1", "R_mf_j2",
                          "R_rf_j1", "R_rf_j2", "R_lf_j1", "R_lf_j2"],
@@ -94,6 +99,13 @@ def derive_flex(key, restarts=12, seed=0, cap=1.3):
     tip_names = list(cfg["tips"]) + [cfg["thumb"]]
     tips = [mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, t) for t in tip_names]
     fg, th = tips[:-1], tips[-1]
+    # The tips are the far end of each distal link, DERIVED from its collision
+    # geometry -- not the body origin. Every hand's most distal joint rotates
+    # about its tip body's origin, so tracking origins measured this gap at a
+    # point that moves 0.000 mm with the last joint of every finger and is not
+    # the part that touches anything. See hands/tips.py.
+    from oppdef.hands.tips import tip_offset, tip_points
+    offs = [tip_offset(m, b) for b in tips]
     ids = hand_joints(m, cfg)
     qadr = np.array([m.jnt_qposadr[j] for j in ids])
     rng_ = m.jnt_range[ids]
@@ -102,11 +114,65 @@ def derive_flex(key, restarts=12, seed=0, cap=1.3):
     lo[bad], hi[bad] = -np.pi, np.pi
     lo, hi = np.clip(lo, -cap, cap), np.clip(hi, -cap, cap)
 
+    # Which bodies belong to the FINGERS. The self-collision penalty has to be
+    # scoped to them: f5d6's file is a whole robot, and an unscoped penalty was
+    # dominated by a 6.57 mm overlap between head_l1 and head_l3 -- the robot's
+    # HEAD -- plus palm/thumb-base overlaps that are present at rest. Those are
+    # constant across poses, so they biased nothing and masked everything.
+    finger_bodies = set()
+    for t in tips:
+        b = int(t)
+        while b > 0:
+            finger_bodies.add(b)
+            nb = int(m.body_parentid[b])
+            if nb == 0 or mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_BODY, nb) == \
+                    cfg["palm"]:
+                break
+            b = nb
+
+    def _self_pen():
+        mujoco.mj_collision(m, d)
+        worst = 0.0
+        for i in range(d.ncon):
+            c = d.contact[i]
+            if c.dist >= 0:
+                continue
+            b1 = int(m.geom_bodyid[c.geom1]); b2 = int(m.geom_bodyid[c.geom2])
+            if b1 in finger_bodies and b2 in finger_bodies:
+                worst = max(worst, -float(c.dist))
+        return worst
+
+    from oppdef.hands.f5d6 import MIMIC
+    dep = [(mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, dj),
+            mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, ij), mult)
+           for dj, (ij, mult) in MIMIC.items()
+           if mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, dj) >= 0]
+
     def gap(x):
         d.qpos[:] = 0.0
         d.qpos[qadr] = x
+        # equality constraints bind the SOLVER, not mj_kinematics, so a purely
+        # kinematic search would silently use coupled joints independently --
+        # freedom the real hand does not have.
+        for dj, ij, mult in dep:
+            jr = m.jnt_range[dj]
+            d.qpos[m.jnt_qposadr[dj]] = float(np.clip(
+                d.qpos[m.jnt_qposadr[ij]] * mult, jr[0], jr[1]))
         mujoco.mj_kinematics(m, d)
-        return float(np.linalg.norm(d.xpos[th] - d.xpos[fg].mean(0)))
+        P = tip_points(m, d, tips, offs)
+        # Distance from the thumb tip to the NEAREST fingertip, not to their
+        # mean. The mean is not a physical location: a thumb sitting in the
+        # middle of splayed fingers scores zero while touching nothing, which
+        # is how shadow, leap and allegro all read 0.00 cm with no
+        # self-penetration whatsoever. What the floor is meant to capture is
+        # the narrowest thing the hand can pinch, and that is thumb-to-finger.
+        g = float(np.linalg.norm(P[:-1] - P[-1][None, :], axis=1).min())
+        # SELF-COLLISION is what makes this a floor rather than a tautology.
+        # Measured at the true fingertips with the fingers free to pass through
+        # one another, shadow, leap and allegro all reported 0.00 cm: the
+        # optimiser simply drives the thumb tip into coincidence with the
+        # others. The quantity only means something if the hand is solid.
+        return g + 50.0 * _self_pen()
 
     rs = np.random.default_rng(seed)
     best = None
@@ -118,7 +184,18 @@ def derive_flex(key, restarts=12, seed=0, cap=1.3):
             best = r
     names = [mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j) for j in ids]
     flex = {n: float(v) for n, v in zip(names, np.clip(best.x, lo, hi))}
-    return m, cfg, flex, tip_names, float(best.fun)
+    # report the GAP at the solution, not the penalised objective -- mixing the
+    # two reported f5d6 at 34.57 cm, which is a penalty, not a distance
+    d.qpos[:] = 0.0
+    d.qpos[qadr] = np.clip(best.x, lo, hi)
+    for dj, ij, mult in dep:
+        jr = m.jnt_range[dj]
+        d.qpos[m.jnt_qposadr[dj]] = float(np.clip(
+            d.qpos[m.jnt_qposadr[ij]] * mult, jr[0], jr[1]))
+    mujoco.mj_kinematics(m, d)
+    P = tip_points(m, d, tips, offs)
+    true_gap = float(np.linalg.norm(P[:-1] - P[-1][None, :], axis=1).min())
+    return m, cfg, flex, tip_names, true_gap
 
 
 if __name__ == "__main__":
