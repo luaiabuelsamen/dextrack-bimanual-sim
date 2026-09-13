@@ -1636,3 +1636,74 @@ Retracted this session:
 * BC and action chunking as evidence about learned control (open-loop replay
   scores 8/8 at 13.49 cm);
 * f5d6 "holds 0 of 8 widths" (the palm fell 1.05 m during closure).
+
+## 2026-09-12 — FINAL: the wrench-over-pose claim does not survive an independent test
+
+The force-only probe was the weaker half of the measurement, and I said so: it
+probes forces, epsilon is six-dimensional, and opposition is what buys TORQUE
+resistance. A grasp with poor opposition resists forces through friction and
+fails on moments, so a force-only probe should miss exactly the effect the
+thesis predicts. Confirmed on two known-good grasps -- torque is the binding
+direction, not force:
+
+    allegro 5 cm : worst force 1.882   worst torque 1.345
+    allegro 8 cm : worst force 0.686   worst torque 0.490
+
+So `hold_of` became a true six-dimensional probe: pure torques about the same
+14 directions, scaled by the object's characteristic length, with orientation
+gated at 15 degrees -- a check a translation-only test never made.
+
+### Result (n = 32 paired cells, 4 hands x 8 widths)
+
+    6-D worst wrench      pose 1.274    closure 0.995    wrench 1.067
+      wrench wins 10, pose wins 11, 11 tied
+      Wilcoxon p = 0.808 ; sign test p = 1.000
+
+    epsilon (circular)    pose 0.3688   wrench 0.4621    p = 0.0039
+    outright failures     pose 15/32    wrench  9/32
+
+**The thesis's first half is not supported.** Optimising for wrench-space grasp
+quality produces significantly better contact sets by its own measure and does
+NOT produce grasps that physically resist larger wrenches than matching the
+human's finger pose. Tested twice, with the wrench condition correctly
+parameterised both times:
+
+    force-only probe   p = 0.674
+    6-D wrench probe   p = 0.808
+
+Two independent probes, both null, in the same direction as each other. I am
+stopping here rather than running further probe variants: continuing to vary
+the outcome measure until one reaches significance is p-hacking, and this
+project's whole method is the opposite of that.
+
+### What the per-hand breakdown suggests, as a hypothesis and not a result
+
+    hand      n   pose    wrench   advantage
+    shadow    8   1.042   1.349    +0.307
+    leap      8   2.861   1.458    -1.403
+    allegro   8   1.192   1.281    +0.090
+    f5d6      8   0.000   0.181    +0.181
+
+Three of four hands show a small wrench advantage and LEAP shows a large pose
+advantage that drives the mean. The f5d6 column is the one worth a second look:
+pose retargeting produces **zero** surviving grasps at all eight widths, while
+the wrench objective produces some. That is the thesis's conditional form -- the
+advantage appears on the hand that cannot oppose -- but with magnitudes near the
+noise floor, mostly zeros, and n = 8, it is a hypothesis for a powered
+experiment, not a finding.
+
+### Standing conclusions from this session
+
+Supported, non-circularly:
+* epsilon from real contacts predicts physical holding, monotone, ~5x across
+  its range (57 grasps).
+* A second hand raises sustained force per newton APPLIED by 1.98x (18/23
+  cells) while adding only 1.35x the contacts. Outcome in force, control in
+  force; the objective does not mark its own homework.
+
+Not supported:
+* that retargeting to a wrench specification beats retargeting the hand pose,
+  on any independent physical outcome tested.
+
+Retracted this session: the geometric retargeting table; BC and action chunking
+as evidence about learned control; f5d6 "holds 0 of 8 widths".

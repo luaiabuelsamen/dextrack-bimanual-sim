@@ -274,28 +274,57 @@ class GraspScene:
     #: because the measurement could not tell them apart.
     LADDER = tuple(round(0.25 * (1.4 ** k), 3) for k in range(15))
 
-    def hold_of(self, ladder=None,
-                push_steps=300,
-                max_disp=0.02):
-        """Push the object in every direction until it slips; report the worst."""
+    def hold_of(self, ladder=None, push_steps=300, max_disp=0.02,
+                max_tilt_deg=15.0, torque=True):
+        """Push AND twist the object until it slips; report the worst direction.
+
+        Forces alone are not the test epsilon deserves. Epsilon is the radius of
+        the largest ball in a six-dimensional wrench space, and the half of that
+        space this project cares about is torque: a grasp with poor opposition
+        can still resist forces through friction, and fails on moments. Probing
+        only the 14 force directions measures the half of the ball where the
+        difference is smallest, and the earlier force-only comparison duly found
+        nothing (p = 0.67).
+
+        So pure torques are applied about the same directions, scaled by the
+        object's characteristic length so a newton and a newton-metre are
+        comparable rungs of one ladder, and the pose must survive them without
+        rotating away: orientation is gated at `max_tilt_deg`, which a
+        translation-only gate never checked.
+        """
         ladder = ladder or self.LADDER
+        lam = float(np.linalg.norm(self.obj_half)) or 0.05
         snap = (self.d.qpos.copy(), self.d.qvel.copy(), self.d.ctrl.copy())
-        per = np.zeros(len(DIRECTIONS))
-        for i, u in enumerate(DIRECTIONS):
+        modes = [("f", u) for u in DIRECTIONS]
+        if torque:
+            modes += [("t", u) for u in DIRECTIONS]
+        per = np.zeros(len(modes))
+
+        def _tilt(q0, q1):
+            dq = np.zeros(4)
+            mujoco.mju_mulQuat(dq, q1, np.array([q0[0], -q0[1], -q0[2], -q0[3]]))
+            return float(np.degrees(2.0 * np.arccos(np.clip(abs(dq[0]), -1, 1))))
+
+        for i, (kind, u) in enumerate(modes):
             best = 0.0
             for f in ladder:
                 self.d.qpos[:], self.d.qvel[:] = snap[0].copy(), snap[1].copy()
                 self.d.ctrl[:] = snap[2]
                 mujoco.mj_forward(self.m, self.d)
                 p0 = self.d.qpos[self.obj_q:self.obj_q + 3].copy()
+                q0 = self.d.qpos[self.obj_q + 3:self.obj_q + 7].copy()
                 for _ in range(push_steps):
-                    self.d.xfrc_applied[self.obj_bid, :3] = u * f
+                    if kind == "f":
+                        self.d.xfrc_applied[self.obj_bid, :3] = u * f
+                    else:
+                        self.d.xfrc_applied[self.obj_bid, 3:] = u * f * lam
                     mujoco.mj_step(self.m, self.d)
                 self.d.xfrc_applied[self.obj_bid, :] = 0.0
                 moved = float(np.linalg.norm(
                     self.d.qpos[self.obj_q:self.obj_q + 3] - p0))
+                tilt = _tilt(q0, self.d.qpos[self.obj_q + 3:self.obj_q + 7])
                 touching = len(object_contacts(self.m, self.d, self.obj_gid)[0])
-                if moved < max_disp and touching > 0:
+                if moved < max_disp and tilt < max_tilt_deg and touching > 0:
                     best = f
                 else:
                     break
@@ -303,6 +332,7 @@ class GraspScene:
         self.d.qpos[:], self.d.qvel[:] = snap[0], snap[1]
         self.d.ctrl[:] = snap[2]
         mujoco.mj_forward(self.m, self.d)
+        nf = len(DIRECTIONS)
         return float(per.min()), per
 
     def attempt(self, params, close_steps=500, squeeze_steps=400,
