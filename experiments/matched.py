@@ -36,6 +36,8 @@ from oppdef.synth import GraspScene
 from oppdef.data import SyntheticSource
 from oppdef.hands.tips import tip_offset, tip_points
 from oppdef.retarget import retargeter_for, transform_ref, tip_graph, correspond
+from oppdef.hold import DIRECTIONS
+from oppdef.hands.axis import provenance
 
 POSE, WRENCH = "pose", "wrench"
 
@@ -100,6 +102,7 @@ def cem(cell, objective, iters, pop, seed):
                          [cell.base[n] for n in cell.names]])
     sd = np.concatenate([[1.6, 1.6, 1.6, 0.015, 0.15], [0.45] * nf])
     best, best_score, best_t = None, -np.inf, None
+    tally = {"valid": 0, "few_contacts": 0}
     for _it in range(iters):
         cand = rng.normal(mu, sd, size=(pop, 5 + nf))
         cand[:, 3] = np.clip(cand[:, 3], -0.03, 0.055)
@@ -115,7 +118,11 @@ def cem(cell, objective, iters, pop, seed):
             # non-grasp is not the baseline anyone ships, so the contact
             # requirement is applied identically to both.
             if not a.valid or a.n_contacts < 2:
+                key = ("few_contacts" if a.valid
+                       else a.reason.split("(")[0].strip()[:40] or "invalid")
+                tally[key] = tally.get(key, 0) + 1
                 scored.append((-1e9, c)); continue
+            tally["valid"] += 1
             sc = a.epsilon if objective == WRENCH else cell.fidelity()
             scored.append((sc, c))
             if sc > best_score:
@@ -127,7 +134,7 @@ def cem(cell, objective, iters, pop, seed):
             sd = np.maximum(top.std(0),
                             np.concatenate([[0.25, 0.25, 0.25, 0.004, 0.03],
                                             [0.08] * nf]))
-    return best, best_score, best_t
+    return best, best_score, best_t, tally
 
 
 def main():
@@ -148,19 +155,23 @@ def main():
            f"{'kp_err_cm':>9s} {'hold':>7s} {'cts':>4s} {'pen':>5s} {'s':>6s}")
     print(hdr); print("-" * len(hdr), flush=True)
     rows = []
+    prov = provenance()
+    print(f"provenance: commit {prov['commit'][:10]} dirty={prov['dirty']} "
+          f"mujoco {prov['mujoco']}\n", flush=True)
     for hk in a.hands:
         for w in a.widths:
             for sd in a.seeds:
                 cell = Cell(hk, w, a.mass, a.kp)
                 for cond in (POSE, WRENCH):
                     t0 = time.time()
-                    best, _score, tgt = cem(cell, cond, a.iters, a.pop, sd)
-                    hold, kp_err = 0.0, float("nan")
+                    best, _score, tgt, tally = cem(cell, cond, a.iters,
+                                                   a.pop, sd)
+                    hold, kp_err, per = 0.0, float("nan"), None
                     if best is not None and best.n_contacts >= 2:
                         cell.scene.attempt(best.params, do_hold=False,
                                            finger_target=tgt)
                         kp_err = -cell.fidelity()
-                        hold, _per = cell.scene.hold_of()
+                        hold, per = cell.scene.hold_of()
                     e = best.epsilon if best else 0.0
                     nc = best.n_contacts if best else 0
                     pen = best.penetration_mm if best else 0.0
@@ -172,9 +183,23 @@ def main():
                                      hold_N=float(hold),
                                      keypoint_err_m=float(kp_err),
                                      penetration_mm=float(pen),
-                                     candidates=a.iters * a.pop))
+                                     candidates=a.iters * a.pop,
+                                     # everything needed to replay the chosen
+                                     # grasp without repeating the search
+                                     params=(best.params.tolist() if best
+                                             is not None else None),
+                                     finger_target=tgt,
+                                     per_direction_N=(per.tolist()
+                                                      if per is not None else None),
+                                     n_force_dirs=len(DIRECTIONS),
+                                     n_torque_dirs=len(DIRECTIONS),
+                                     rejections=tally,
+                                     mass=a.mass, kp_finger=a.kp,
+                                     seconds=round(time.time() - t0, 2)))
                     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-                    Path(a.out).write_text(json.dumps(rows, indent=2))
+                    Path(a.out).write_text(json.dumps(
+                        dict(provenance=prov, args=vars(a), rows=rows),
+                        indent=2))
     print(f"\nwrote {a.out}")
 
 

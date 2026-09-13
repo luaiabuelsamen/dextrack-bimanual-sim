@@ -190,3 +190,71 @@ For the f5d6 diagnostic, build `HandBench` at width 0.05 m and mass 0.05 kg usin
 That diagnostic initially exposed a separate concurrency issue: the external URDF compiler uses shared filenames `_dextrack_stripped.urdf` and `_dextrack_raw.xml` beside the original asset. A concurrent compile failed while another process was using them. The successful diagnostic compiled an isolated temporary URDF with absolute mesh paths, applying the same GLB stripping, and supplied its MJCF only within the diagnostic process. Make compiler temporaries unique before parallelizing f5d6 scene construction. Do not disturb active result writers to reproduce this review.
 
 All external stack documentation linked here was checked on 2026-09-12. Backend support and APIs are version-dependent. The literature references establish relevant prior work; they are not a comprehensive novelty assessment or an assertion that the proposed narrower contribution has already been published.
+
+## Follow-up audit after the claimed resolution
+
+Reviewed 2026-09-13 at commit `247a62ff7926aaddb4bf7817a9dcd06620dbbe26`. The short verdict is: **the implementation repairs several concrete defects from the completion review, but the original project goal is still not achieved.** The new experiment earns a narrower synthetic result about fixed-budget grasp search. It does not establish opposition deficit, human-interaction retargeting, the claimed anti-correlation, or bimanual repair of a demonstrated task.
+
+### What was actually fixed
+
+The response handled the most serious model errors candidly:
+
+- The old f5d6 results and the deficit cohort were retracted. The README now says that the previous opposition ordering was an artifact.
+- The f5d6 compiler repair restores five mimic constraints. A fresh `GraspScene` has `neq=5`, six independently actuated finger joints, and no actuator on the five dependent joints.
+- The six independent f5d6 actuators now have force limits: ±1.0 N·m on the two independent thumb joints and ±0.5 N·m on the four independent finger joints.
+- Fingertip measurement was moved from distal-body origins to points derived from collision geometry. Regression tests now cover the observed f5d6 tip, coupling, and effort-limit failures.
+- `SyntheticSource` now describes the same cube used by the physical experiment and places the analytic reference points on its faces.
+- The replacement comparison in [matched.py](../experiments/matched.py) gives both conditions the same parameter space, 144 attempted candidates, and the same three random seeds for each hand/width.
+- The replacement log uses the accurate phrase “survives the probe” and explicitly withdraws the claim that the sampled pure-force/pure-torque test represents every possible six-dimensional wrench.
+
+I reran the complete non-GPU suite after these changes: **61 tests passed in 52.14 seconds**. I also inspected a newly built f5d6 scene and confirmed the five equalities, six actuators, and their force limits directly.
+
+### What the replacement result supports
+
+The saved arithmetic is correct. Across four hand models, five cube widths, and three CEM seeds, the stored results contain 60 paired search runs:
+
+| Outcome | Pose objective | Wrench objective | Paired result |
+|---|---:|---:|---|
+| Mean fingertip-graph error | 7.96 cm | 12.64 cm | Pose is more faithful |
+| Mean epsilon | 0.0544 | 0.2124 | Wrench wins, but this is its optimized score |
+| Mean sampled-probe threshold | 0.025 N | 0.223 N | 19 wrench wins, 1 pose win, 40 ties |
+| Positive sampled-probe threshold | 3/60 | 21/60 | 18 wrench-only, 0 pose-only |
+
+The nominal exact discordant-pair calculation is `p=7.63e-6`, and the stored magnitudes reproduce the reported Wilcoxon value of approximately `0.000183`. The effect is also visible at stricter ladder thresholds: at 0.49 N the counts are 2 pose versus 14 wrench, and at 0.96 N they are 0 versus 6.
+
+The defensible claim is:
+
+> In this synthetic, assisted-formation cube benchmark, CEM guided by contact epsilon finds grasps that survive the sampled disturbance probe more often than the same CEM guided by fingertip-shape fidelity, at 144 candidates.
+
+That is useful evidence that the optimization objective affects search efficiency. It is not yet a result about retargeting human interaction or opposition-deficient hands.
+
+### What remains unresolved
+
+1. **The pose condition is not the baseline proposed in the review or used by a normal retargeting pipeline.** Both conditions search every finger angle freely, and both discard candidates with fewer than two contacts. The pose condition then selects the contact-producing candidate with the smallest synthetic fingertip-graph error. This is a constrained grasp-synthesis objective. It is not keypoint retargeting followed by squeeze/contact refinement, and the log acknowledges that baseline is still owed. Because only 3/60 pose searches survive even the smallest 0.25 N rung and Shadow is 0/15 under both methods, the comparison mostly distinguishes which score guides a small stochastic search through a sparse feasible set.
+
+2. **The new objective and evaluation remain closely aligned.** Epsilon rewards worst-direction capacity of the measured contact wrench set. The evaluation applies pure forces and pure torques to the same simulated contact model. The dynamic rollout is more informative than scoring epsilon twice, but it is not independent in the strong scientific sense of a held-out task, object family, physical system, or demonstrated wrench trajectory. Friction, geometry, contact placement, and actuator assumptions are shared.
+
+3. **The 60 “cells” are not 60 diverse task instances.** They are 20 hand/width configurations, each repeated with three optimizer seeds. The synthetic reference is one analytic grasp family scaled with cube width; its random jitter is a common translation of every fingertip and cancels from the inter-fingertip objective. Seed-level variation is relevant to an algorithm-success estimand, but the nominal cell-level test should not be presented as evidence of transfer across demonstrations, shapes, or tasks. Report seed-stratified results as well: the survival discordances are 4/0, 6/0, and 8/0 for seeds 0, 1, and 2, with nominal two-sided exact p-values 0.125, 0.03125, and 0.0078125.
+
+4. **The corrected opposition-axis implementation is not the repository's canonical axis command.** [hands/axis.py](../src/oppdef/hands/axis.py) still uses the retracted body-origin markers, thumb-to-finger-mean distance, eleven independent f5d6 joints, and no self-collision penalty. Running it still produces the old kind of answer. The corrected calculation lives inside `derive_flex` in [hands/specs.py](../src/oppdef/hands/specs.py), even though a closure pose and an embodiment metric are different concepts. Consolidate this into one tested axis implementation, make the CLI call it, and store the selected configuration, optimizer settings, actual gap, and collision margin. Until then, `results/opposition_axis_corrected.json` is a six-number summary without sufficient provenance.
+
+5. **The replacement result artifacts are not independently replayable.** Each `results/matched_*.json` row saves the summary, seed, and candidate count, but omits the selected placement parameters, selected finger targets, per-direction probe results, failure reasons, elapsed time, model/asset hashes, and package versions. A deterministic full rerun may regenerate them on this machine, but a reviewer cannot replay the chosen grasp or audit which direction set the zero. Save these fields before treating the experiment as a frozen result.
+
+6. **The claim that the matched figure derives its statistics is not backed by checked-in code.** `figures/matched.png` is committed, but the repository contains no plotting/statistics script that references it or computes the reported McNemar/Wilcoxon values. By contrast, the older [fig_thesis.py](../experiments/fig_thesis.py) still hardcodes the withdrawn `p=0.0010` result and labels its force-only second-hand data as wrench. Move withdrawn figures/results under `results/retracted` or clearly watermark them, and check in the generator for every live figure.
+
+7. **The second-hand causal claim remains unfixed.** The new commits did not rerun the two-hand comparison with a controlled force/torque budget during disturbance. The old 1.983× ratio is still a descriptive normalization by pre-disturbance contact force, based on 14 force directions. It does not establish that contact allocation, rather than resources or controller response, causes the gain. The old strict count remains 17 improvements, 5 declines, and 1 tie.
+
+8. **The original scientific endpoints remain open.** There is no real human corpus, no held-out demonstrated object trajectories, no task-specific required wrench sequence, no evidence that lower pose error harms task success, no transferable `delta=1` curve, and no experiment in which deficit prediction triggers a measured amount of second-hand assistance that recovers the same demonstrated task. The corrected axis currently removes the project's defining independent variable: these four hands do not span an opposition-deficit range under the revised metric.
+
+### Recommended handoff to Claude
+
+Treat `247a62f` as a useful recovery checkpoint, not completion.
+
+1. Consolidate and validate the embodiment metric. Delete or redirect the stale axis path, separate axis estimation from closure synthesis, save complete provenance, and add tests that the public command produces the reported values. More fundamentally, choose an opposition measure tied to task wrench capability; nearest fingertip distance alone can say a hand “opposes” even when the resulting contact normals, reachable object placement, and force limits cannot support the task.
+2. Build the missing practical baseline: keypoint/contact-state retargeting followed by a fixed, budgeted squeeze or contact refinement. Compare this with wrench-conditioned refinement and generic epsilon grasp synthesis. Keep candidate counts and executor identical, and report valid candidates per budget as a diagnostic.
+3. Save replayable artifacts for every selected grasp: input reference ID, object geometry, seed, full search settings, model/asset hashes, placement, joint targets, settled state, contacts, forces, per-direction traces, and rejection reasons.
+4. Freeze a held-out evaluation before looking at outcomes. Use multiple reference grasps and object shapes, group inference by held-out demonstration/object rather than treating optimizer seeds as new task instances, and include sensitivity to the 0.25 N pass threshold.
+5. Run one complete task chain: demonstration → required object wrench/trajectory → retargeted contacts → matched executor → task outcome. Then add the second hand under an enforced total resource budget. This is the experiment that can reconnect the useful objective-search signal to C3/C4.
+6. Keep CPU MuJoCo as the reference while these questions are unresolved. MJX, Warp, or PufferLib may reduce runtime later, but current failures concern model semantics, baselines, provenance, and experimental design.
+
+The local minimum has shifted. Earlier, the risk was explaining simulator defects as hand anatomy. Now it is stopping at a statistically strong comparison between two synthetic search scores and calling that the representation thesis. The new experiment is a solid ablation for a future paper; it is not yet the paper's central result.

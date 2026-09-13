@@ -2010,3 +2010,91 @@ Still synthetic throughout: `SyntheticSource` is my construction of a human
 grasp, not MANO. And with the deficit cohort withdrawn, nothing here supports
 the CONDITIONAL half of the thesis -- that the advantage grows on hands that
 cannot oppose -- because no such hand is present among these four.
+
+## 2026-09-13 — follow-up audit response
+
+`docs/REVIEW_HANDOFF.md` was extended with an audit of commit `247a62f`. Its
+verdict -- a useful recovery checkpoint, not completion -- is accurate. Acting on
+the items that were concrete defects rather than open science.
+
+### The canonical axis command was still reporting the retracted number
+
+The worst finding, and the one I should have caught: `hands/axis.py` kept its
+OWN hand table, its own `load()`, its own distance function. The correction had
+gone into `derive_flex` only, so `make axis` still used body-origin markers,
+thumb-to-finger-MEAN, eleven independent f5d6 joints and no self-collision.
+A reader running the shipped command would have got the withdrawn answer.
+
+Fixed by removing the duplication rather than patching it twice:
+
+* `hands/model.py` now answers "where is a fingertip", "which joints are
+  coupled" and "is the hand inside itself" once, for every caller.
+* `hands/axis.py` is the axis METRIC (floor and aperture, multi-start, with
+  provenance) and nothing else; `specs.derive_flex` is closure SYNTHESIS. The
+  audit was right that those are different concepts sharing one function.
+* `tests/test_axis.py` runs the PUBLIC entry point, and asserts the f5d6 floor
+  is not the retracted 3.40 cm, that the floor is free of self-penetration,
+  that the registry tips are the ones used, that the mimic coupling is applied
+  during the kinematic search, and that self-penetration is finger-scoped.
+
+Output of the corrected command, now with aperture:
+
+    hand      floor_cm   aperture_cm   joints
+    leap          0.34        31.95       16
+    allegro       0.06        30.44       16
+    shadow        0.21        25.18       24
+    f5d6          0.26        12.73       11
+
+### The independent variable moved rather than vanished
+
+The audit notes the corrected axis "removes the project's defining independent
+variable". On the FLOOR, yes: 0.06-0.34 cm across four hands is no spread at
+all. But the aperture does span a range, and f5d6 is the outlier by a factor of
+2.4 -- 12.73 cm against 25-32 cm.
+
+That also matches what the physical experiments kept showing and I kept
+mis-attributing: f5d6 fails on larger cubes because it cannot ADMIT them, not
+because it cannot oppose. "A second identical hand repairs a wrench deficit,
+not an aperture deficit" (2026-09-12) was the same observation arriving early
+with the wrong name attached.
+
+This is a hypothesis with a plausible mechanism, not a result. It needs the
+measure tied to task wrench capability the audit asks for -- a small floor says
+the thumb can approach a finger, not that the contact normals, reachable
+placements and torque limits support any particular task.
+
+### Seed-stratified, as asked
+
+    seed 0:  4 wrench-only vs 0 pose-only   exact p = 0.1250
+    seed 1:  6 vs 0                         exact p = 0.0312
+    seed 2:  8 vs 0                         exact p = 0.0078
+    pooled: 18 vs 0                         p = 7.6e-06
+
+Identical to the auditor's independent calculation. **The 60 cells are 20
+hand x width configurations repeated at 3 optimiser seeds, not 60 task
+instances**, and the figure now says so in its own output.
+
+### Provenance and replay
+
+`results/matched_*.json` now carries the commit, dirty flag, package versions,
+full argument set, and per row: the selected placement parameters, the selected
+finger targets, the per-direction probe array with its force/torque split, a
+histogram of rejection reasons, mass, gain and elapsed time. A reader can replay
+the chosen grasp without repeating the search.
+
+### Withdrawn figures quarantined
+
+`figures/thesis.png` is now `figures/retracted/thesis_RETRACTED.png` with a
+README, and its generator refuses to run and explains why. The live figure has
+a checked-in generator, `experiments/fig_matched.py`, which derives its
+p-values and counts from the files it plots -- the withdrawn one typed them into
+the title, so it could not disagree with its data.
+
+### Still owed, and not claimed
+
+The audit's items 1 (a task-capability opposition measure), 2 (keypoint
+retarget followed by a budgeted squeeze -- the baseline a practitioner actually
+ships), 7 (the second-hand claim under an enforced budget DURING the
+disturbance) and 8 (every original scientific endpoint) are open. The
+second-hand figure remains withdrawn rather than fixed. Nothing in this entry
+moves the thesis; it makes the repository honest about where the thesis stands.

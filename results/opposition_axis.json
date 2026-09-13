@@ -1,34 +1,83 @@
-[
-  {
-    "hand": "shadow",
-    "note": "Shadow Hand, 24 DoF",
-    "n_joints": 24,
-    "opposition_floor_m": 1.3497863924846808e-09,
-    "aperture_m": 0.20256225620155513,
-    "span_m": 0.20256225485176874
+{
+  "provenance": {
+    "commit": "247a62ff7926aaddb4bf7817a9dcd06620dbbe26",
+    "dirty": true,
+    "mujoco": "3.8.0",
+    "numpy": "2.2.6",
+    "python": "3.10.12",
+    "machine": "aarch64",
+    "when": "2026-09-13T00:39:52"
   },
-  {
-    "hand": "allegro",
-    "note": "Wonik Allegro, 16 DoF",
-    "n_joints": 16,
-    "opposition_floor_m": 8.147127170811041e-10,
-    "aperture_m": 0.23758399227683855,
-    "span_m": 0.23758399146212583
-  },
-  {
-    "hand": "leap",
-    "note": "LEAP, 16 DoF",
-    "n_joints": 16,
-    "opposition_floor_m": 1.4584379666921637e-09,
-    "aperture_m": 0.22929242475528275,
-    "span_m": 0.2292924232968448
-  },
-  {
-    "hand": "f5d6",
-    "note": "Dexmate f5d6, 11 joints (underactuated)",
-    "n_joints": 11,
-    "opposition_floor_m": 0.030774834505875356,
-    "aperture_m": 0.10216907389117512,
-    "span_m": 0.07139423938529976
-  }
-]
+  "hands": [
+    {
+      "hand": "leap",
+      "floor_m": 0.003413649821778181,
+      "aperture_m": 0.3194785460090085,
+      "floor_self_pen_mm": 0.0,
+      "n_joints": 16,
+      "restarts": 24,
+      "cap_rad": 1.3,
+      "pen_weight": 50.0,
+      "tips": [
+        "if_ds",
+        "mf_ds",
+        "rf_ds",
+        "th_ds"
+      ],
+      "note": "LEAP, 16 DoF"
+    },
+    {
+      "hand": "allegro",
+      "floor_m": 0.0006186232052870501,
+      "aperture_m": 0.3043826029756086,
+      "floor_self_pen_mm": 0.0,
+      "n_joints": 16,
+      "restarts": 24,
+      "cap_rad": 1.3,
+      "pen_weight": 50.0,
+      "tips": [
+        "ff_tip",
+        "mf_tip",
+        "rf_tip",
+        "th_tip"
+      ],
+      "note": "Wonik Allegro, 16 DoF"
+    },
+    {
+      "hand": "shadow",
+      "floor_m": 0.0021196014078247445,
+      "aperture_m": 0.2517587247241106,
+      "floor_self_pen_mm": 0.0,
+      "n_joints": 24,
+      "restarts": 24,
+      "cap_rad": 1.3,
+      "pen_weight": 50.0,
+      "tips": [
+        "rh_ffdistal",
+        "rh_mfdistal",
+        "rh_rfdistal",
+        "rh_lfdistal",
+        "rh_thdistal"
+      ],
+      "note": "Shadow Hand, 24 DoF"
+    },
+    {
+      "hand": "f5d6",
+      "floor_m": 0.0025619944310489072,
+      "aperture_m": 0.12729582200170894,
+      "floor_self_pen_mm": 0.0,
+      "n_joints": 11,
+      "restarts": 24,
+      "cap_rad": 1.3,
+      "pen_weight": 50.0,
+      "tips": [
+        "R_ff_l2",
+        "R_mf_l2",
+        "R_rf_l2",
+        "R_lf_l2",
+        "R_th_l2"
+      ],
+      "note": "Dexmate f5d6, 11 joints (underactuated)"
+    }
+  ]
+}

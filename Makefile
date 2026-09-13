@@ -23,8 +23,8 @@ test:             ## everything except GPU
 inventory:        ## what hands and arms this machine can build
 	$(PY) -m experiments.inventory
 
-axis:             ## M2 part 1: opposition floor, four hands
-	$(PY) -m experiments.opposition_axis
+axis:             ## the opposition axis, corrected (floor + aperture, with provenance)
+	$(PY) -m oppdef.hands.axis
 
 hand-axis:        ## M2 part 2: which block widths each hand holds
 	$(PY) -m experiments.hand_axis
@@ -61,6 +61,12 @@ deficit:          ## single vs two hands, searched and hold-tested in physics
 
 deficit-fig:      ## the second-hand figure, from results/deficit_*.json
 	$(PY) experiments/fig_deficit.py
+
+matched:          ## budget-matched pose-vs-wrench comparison
+	$(PY) experiments/matched.py
+
+matched-fig:      ## figure for the matched comparison (stats derived, not typed)
+	$(PY) experiments/fig_matched.py
 
 clean:
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +

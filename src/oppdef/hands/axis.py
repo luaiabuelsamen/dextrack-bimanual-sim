@@ -1,158 +1,146 @@
-"""M2: the opposition axis. How closely can each hand's thumb meet its fingers?
+"""The opposition axis: how closely can a hand's thumb meet its fingers?
 
-This is the project's spine. `dextrack_vega` measured one number the hard way --
-the Dexmate f5d6's thumb cannot come closer than 3.1 cm to its finger mean, at
-any pose, which is why it cannot grasp. That number only means something next to
-other hands measured the same way.
+RESTATED 2026-09-13. The previous implementation of this file measured the
+distance from a thumb BODY ORIGIN to the MEAN of finger body origins, with no
+self-collision, no joint coupling, and f5d6's eleven joints treated as
+independent. Every one of those was wrong, and the numbers it produced --
+including the 3.1-3.4 cm f5d6 "deficit" this project was named for -- are
+retracted. See NOTES 2026-09-12.
 
-The measurement is purely kinematic and hand-agnostic:
+What is measured now:
 
-    opposition floor = min over joint configurations of
-                       || thumb_tip(q) - mean(finger_tips(q)) ||
+    floor    = min over poses of || thumb_tip(q) - nearest fingertip(q) ||
+    aperture = max of the same quantity
 
-subject to joint limits, multi-start to avoid local minima. Also reported: the
-maximum of the same quantity (the aperture, i.e. the largest object the hand can
-straddle) and the actuated DoF count.
+subject to joint limits, with the hand's mimic couplings enforced, penalising
+any pose in which two finger bodies interpenetrate, and with the fingertip
+taken to be the far end of each distal link's own collision geometry rather
+than a body origin. Multi-start.
 
-A hand whose floor is 0 can pinch anything down to zero width. A hand whose floor
-is 3.1 cm cannot oppose at all -- it can only press objects against something
-else. That is the deficit the project is named for, and this puts a number on it
-for every hand on disk.
+The measurement and the hand registry both live elsewhere now (`hands.model`,
+`hands.specs`) so this file cannot drift away from the solver again -- which is
+exactly what it did.
+
+A caveat the number cannot carry by itself: a small floor says the thumb can
+approach a finger, not that the resulting contact normals, reachable object
+placements and torque limits can support any particular task.
 """
 from __future__ import annotations
 
-import argparse, json, sys, time
+import argparse
+import json
+import platform
+import subprocess
+import time
+from dataclasses import dataclass, asdict
 from pathlib import Path
 
 import numpy as np
 import mujoco
-
-from oppdef.paths import (MENAGERIE, VEGA_URDF,  # noqa: E402
-                          compile_urdf, menagerie_xml)
 from scipy.optimize import minimize
 
+from oppdef.hands.specs import SPECS, load, hand_joints
+from oppdef.hands.model import (tip_bodies, finger_body_set, mimic_pairs,
+                                apply_mimic, self_penetration, thumb_gap)
+
+PEN_WEIGHT = 50.0
 
 
-HANDS = {
-    "leap": dict(kind="mjcf", path=MENAGERIE / "leap_hand/right_hand.xml",
-                 thumb="th_ds", fingers=["if_ds", "mf_ds", "rf_ds"],
-                 joints=None, note="LEAP, 16 DoF"),
-    "allegro": dict(kind="mjcf", path=MENAGERIE / "wonik_allegro/right_hand.xml",
-                    thumb="th_tip", fingers=["ff_tip", "mf_tip", "rf_tip"],
-                    joints=None, note="Wonik Allegro, 16 DoF"),
-    "shadow": dict(kind="mjcf", path=MENAGERIE / "shadow_hand/right_hand.xml",
-                   thumb="rh_thdistal",
-                   fingers=["rh_ffdistal", "rh_mfdistal", "rh_rfdistal",
-                            "rh_lfdistal"],
-                   joints=None, note="Shadow Hand, 24 DoF"),
-    "f5d6": dict(kind="urdf", path=VEGA_URDF,
-                 thumb="R_th_l2",
-                 fingers=["R_ff_l2", "R_mf_l2", "R_rf_l2", "R_lf_l2"],
-                 joints=["R_th_j0", "R_th_j1", "R_th_j2",
-                         "R_ff_j1", "R_ff_j2", "R_mf_j1", "R_mf_j2",
-                         "R_rf_j1", "R_rf_j2", "R_lf_j1", "R_lf_j2"],
-                 note="Dexmate f5d6, 11 joints (underactuated)"),
-}
+@dataclass
+class Axis:
+    hand: str
+    floor_m: float
+    aperture_m: float
+    floor_self_pen_mm: float
+    n_joints: int
+    restarts: int
+    cap_rad: float
+    pen_weight: float
+    tips: tuple
+    note: str = ""
 
 
-def load(key):
-    cfg = HANDS[key]
-    if cfg["kind"] == "mjcf":
-        xml = cfg["path"].read_text()
-        xml = xml.replace('meshdir="./assets/"',
-                          f'meshdir="{(cfg["path"].parent / "assets").as_posix()}/"')
-        xml = xml.replace('meshdir="assets"',
-                          f'meshdir="{(cfg["path"].parent / "assets").as_posix()}"')
-        m = mujoco.MjModel.from_xml_string(xml)
-    else:
-        # dextrack_vega's compiler strips the .glb visual meshes MuJoCo cannot
-        # decode; the local one only handled <visual> elements and choked.
-        m = mujoco.MjModel.from_xml_string(compile_urdf(cfg['path']))
-    return m, cfg
-
-
-def tip_ids(m, cfg):
-    th = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, cfg["thumb"])
-    fg = [mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, b) for b in cfg["fingers"]]
-    assert th >= 0 and all(f >= 0 for f in fg), f"missing tip bodies for {cfg}"
-    return th, fg
-
-
-def joint_set(m, cfg):
-    if cfg["joints"] is not None:
-        ids = [mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_JOINT, j)
-               for j in cfg["joints"]]
-        ids = [i for i in ids if i >= 0]
-    else:
-        ids = [j for j in range(m.njnt)
-               if m.jnt_type[j] in (mujoco.mjtJoint.mjJNT_HINGE,
-                                    mujoco.mjtJoint.mjJNT_SLIDE)]
-    qadr = np.array([m.jnt_qposadr[j] for j in ids])
-    rng = m.jnt_range[ids]
-    lo, hi = rng[:, 0].copy(), rng[:, 1].copy()
-    bad = hi <= lo
-    lo[bad], hi[bad] = -np.pi, np.pi
-    return ids, qadr, lo, hi
-
-
-def extremes(key, restarts=24, seed=0):
+def _extreme(key, sign, restarts, seed, cap):
     m, cfg = load(key)
     d = mujoco.MjData(m)
-    th, fg = tip_ids(m, cfg)
-    ids, qadr, lo, hi = joint_set(m, cfg)
-    rng = np.random.default_rng(seed)
+    names, ids, offs = tip_bodies(m, cfg)
+    bodies = finger_body_set(m, cfg, ids)
+    pairs = mimic_pairs(m)
+    jids = hand_joints(m, cfg)
+    qadr = np.array([m.jnt_qposadr[j] for j in jids])
+    r = m.jnt_range[jids]
+    lo, hi = r[:, 0].copy(), r[:, 1].copy()
+    bad = hi <= lo
+    lo[bad], hi[bad] = -np.pi, np.pi
+    lo, hi = np.clip(lo, -cap, cap), np.clip(hi, -cap, cap)
 
-    def gap(x):
-        q = np.zeros(m.nq)
-        q[qadr] = x
-        d.qpos[:] = q
+    def obj(x):
+        d.qpos[:] = 0.0
+        d.qpos[qadr] = x
+        apply_mimic(m, d, pairs)
         mujoco.mj_kinematics(m, d)
-        return float(np.linalg.norm(d.xpos[th] - d.xpos[fg].mean(0)))
+        g = thumb_gap(m, d, ids, offs)
+        return sign * g + PEN_WEIGHT * self_penetration(m, d, bodies)
 
-    def opt(sign):
-        best = None
-        for i in range(restarts):
-            x0 = 0.5 * (lo + hi) if i == 0 else lo + rng.random(len(lo)) * (hi - lo)
-            r = minimize(lambda x: sign * gap(x), x0, method="L-BFGS-B",
-                         bounds=list(zip(lo, hi)), options=dict(maxiter=800))
-            if best is None or r.fun < best.fun:
-                best = r
-        return sign * best.fun, best.x
+    rng = np.random.default_rng(seed)
+    best = None
+    for i in range(restarts):
+        x0 = np.zeros(len(jids)) if i == 0 else lo + rng.random(len(jids)) * (hi - lo)
+        res = minimize(obj, x0, method="L-BFGS-B", bounds=list(zip(lo, hi)),
+                       options=dict(maxiter=600))
+        if best is None or res.fun < best.fun:
+            best = res
+    d.qpos[:] = 0.0
+    d.qpos[qadr] = np.clip(best.x, lo, hi)
+    apply_mimic(m, d, pairs)
+    mujoco.mj_kinematics(m, d)
+    # the GAP at the solution, never the penalised objective -- conflating them
+    # once reported a 34.57 cm "floor" that was a penalty
+    return (thumb_gap(m, d, ids, offs), self_penetration(m, d, bodies) * 1000.0,
+            len(jids), names)
 
-    floor, q_lo = opt(+1.0)
-    aper, q_hi = opt(-1.0)
-    return dict(hand=key, note=cfg["note"], n_joints=len(ids),
-                opposition_floor_m=float(floor), aperture_m=float(aper),
-                span_m=float(aper - floor))
+
+def opposition_axis(key, restarts=24, seed=0, cap=1.3):
+    floor, pen, nj, names = _extreme(key, +1.0, restarts, seed, cap)
+    aperture, _p, _n, _t = _extreme(key, -1.0, restarts, seed, cap)
+    return Axis(hand=key, floor_m=floor, aperture_m=aperture,
+                floor_self_pen_mm=pen, n_joints=nj, restarts=restarts,
+                cap_rad=cap, pen_weight=PEN_WEIGHT, tips=tuple(names),
+                note=SPECS[key].get("note", ""))
+
+
+def provenance():
+    def _git(*a):
+        try:
+            return subprocess.check_output(["git", *a], text=True).strip()
+        except Exception:
+            return "unknown"
+    return dict(commit=_git("rev-parse", "HEAD"),
+                dirty=bool(_git("status", "--porcelain")),
+                mujoco=mujoco.__version__, numpy=np.__version__,
+                python=platform.python_version(), machine=platform.machine(),
+                when=time.strftime("%Y-%m-%dT%H:%M:%S"))
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="results/opposition_axis.json")
+    ap.add_argument("--hands", nargs="+", default=list(SPECS))
     ap.add_argument("--restarts", type=int, default=24)
-    a = ap.parse_args(); t0 = time.time()
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--out", default="results/opposition_axis.json")
+    a = ap.parse_args()
     rows = []
-    print(f"{'hand':<10}{'joints':>8}{'floor(cm)':>12}{'aperture(cm)':>14}"
-          f"{'span(cm)':>11}   note")
-    for k in ("shadow", "allegro", "leap", "f5d6"):
-        try:
-            r = extremes(k, restarts=a.restarts)
-        except Exception as e:
-            print(f"{k:<10}   FAILED: {type(e).__name__}: {str(e)[:80]}")
-            continue
-        rows.append(r)
-        print(f"{k:<10}{r['n_joints']:>8}{r['opposition_floor_m']*100:>12.2f}"
-              f"{r['aperture_m']*100:>14.2f}{r['span_m']*100:>11.2f}   {r['note']}",
-              flush=True)
+    print(f"{'hand':9s} {'floor_cm':>9s} {'aperture_cm':>12s} "
+          f"{'self_pen_mm':>12s} {'joints':>7s}")
+    for k in a.hands:
+        ax = opposition_axis(k, restarts=a.restarts, seed=a.seed)
+        rows.append(asdict(ax))
+        print(f"{k:9s} {ax.floor_m*100:9.2f} {ax.aperture_m*100:12.2f} "
+              f"{ax.floor_self_pen_mm:12.2f} {ax.n_joints:7d}", flush=True)
+    out = dict(provenance=provenance(), hands=rows)
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-    Path(a.out).write_text(json.dumps(rows, indent=2, default=float))
-    print(f"\nwrote {a.out}  ({time.time()-t0:.0f} s)")
-    if rows:
-        f = {r["hand"]: r["opposition_floor_m"] * 100 for r in rows}
-        print("\nOpposition floor is the smallest object the hand can pinch.")
-        for k, v in sorted(f.items(), key=lambda kv: kv[1]):
-            bar = "#" * int(round(v * 6))
-            print(f"  {k:<9}{v:>6.2f} cm  {bar}")
+    Path(a.out).write_text(json.dumps(out, indent=2))
+    print(f"\nwrote {a.out}")
 
 
 if __name__ == "__main__":
