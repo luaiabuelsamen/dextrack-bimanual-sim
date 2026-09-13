@@ -1947,3 +1947,66 @@ has **6** finger actuators rather than 11, and the URDF's torque limits
 (1.0 N*m thumb, 0.5 fingers) are applied. `SyntheticSource` now builds its
 reference grasp on the cube actually tested; previously two of its five
 declared contacts were 12.56 and 7.44 mm outside the box.
+
+## 2026-09-12 — the budget-matched experiment
+
+Cohort removed rather than redefined, because the corrected opposition axis has
+no spread to condition on. All four hands, five widths, three CEM seeds.
+
+Both conditions are identical except for the scalar they maximise: the same
+search space (placement + every finger angle), the same 144 candidates, the
+same seeds cell by cell, the same cube, and both required to produce an actual
+grasp. Every confound named in `docs/COMPLETION_REVIEW.md` -- 180 vs 144
+candidates, mismatched parameter spaces, a reference grasp whose contacts sat
+outside the box -- is closed.
+
+    n = 60 paired cells
+
+    keypoint error       pose  7.96 cm    wrench 12.64 cm
+      the pose condition is the more faithful one, as it must be: a manipulation
+      check that each objective is in fact optimising what it claims
+
+    epsilon              pose 0.0544     wrench 0.2124    p < 0.0001  (circular)
+
+    hold, 6-D probe      pose 0.025 N    wrench 0.223 N
+      wrench wins 19, pose wins 1, of 20 non-tied
+      Wilcoxon p = 0.0002    sign test p < 0.0001
+
+    yields a grasp that survives the probe
+      pose 3/60    wrench 21/60    discordant 18 vs 0    McNemar p < 0.0001
+
+Per hand:
+
+    shadow    survives  0 vs  0
+    leap      survives  3 vs 11
+    allegro   survives  0 vs  8
+    f5d6      survives  0 vs  2
+
+**Under a matched budget the objective decides the outcome, and the outcome is
+independent of the objective's own scorecard.** Optimising the wrench yields a
+grasp that survives a disturbance seven times more often than optimising
+fidelity to the human's fingertip geometry, and the one metric where pose wins
+is fidelity itself.
+
+### What this does and does not say
+
+It is a statement about SEARCH EFFICIENCY toward viable grasps at a fixed
+budget, not about the best grasp each objective could reach given unlimited
+compute. Both conditions are weak in absolute terms -- the pose condition finds
+a surviving grasp in 3 of 60 cells -- and 144 candidates is a small budget for a
+29-dimensional space. Shadow, the highest-DoF hand, fails under BOTH conditions
+at this budget; that is a power limit, not a property of the hand.
+
+The pose condition is "the most faithful grasp this search found", not
+"keypoint retarget followed by a contact refinement", which is what a
+practitioner ships and what the review asked for. That baseline is still owed.
+
+The probe tests 14 pure-force and 14 pure-torque directions, not arbitrary
+combined wrenches; "survives the probe" means every sampled direction holds at
+the smallest rung, and is not the same as "survives any 6-D wrench" -- language
+this log used incorrectly before.
+
+Still synthetic throughout: `SyntheticSource` is my construction of a human
+grasp, not MANO. And with the deficit cohort withdrawn, nothing here supports
+the CONDITIONAL half of the thesis -- that the advantage grows on hands that
+cannot oppose -- because no such hand is present among these four.

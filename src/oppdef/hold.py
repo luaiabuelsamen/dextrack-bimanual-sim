@@ -99,7 +99,7 @@ def _contacts(m, d, geom_name="held_geom"):
 
 def hold_test(hand_key, q, joint_names_expected, obj_half, obj_pos, mass=0.05,
               squeeze=0.12, settle_steps=600, push_steps=400,
-              ladder=(0.25, 0.5, 1.0, 2.0, 4.0, 8.0), max_disp=0.02,
+              ladder=(0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0), max_disp=0.02,
               model_cache=None):
     """Squeeze onto the object, then push it in every direction until it slips.
 
