@@ -1,0 +1,182 @@
+[
+  {
+    "hand": "f5d6",
+    "width": 0.03,
+    "condition": "pose",
+    "epsilon": 0.38726454404526683,
+    "n_contacts": 5,
+    "hold_N": 0.25,
+    "penetration_mm": 1.793941188509113,
+    "keypoint_err_m": 0.01871184963243447
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.03,
+    "condition": "closure",
+    "epsilon": 0.6536901545242159,
+    "n_contacts": 10,
+    "hold_N": 0.5,
+    "penetration_mm": 2.6098770990131057,
+    "keypoint_err_m": 0.01871184963243447
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.03,
+    "condition": "wrench",
+    "epsilon": 0.6293276783179621,
+    "n_contacts": 7,
+    "hold_N": 1.0,
+    "penetration_mm": 2.4666829912957278,
+    "keypoint_err_m": 0.01871184963243447
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.04,
+    "condition": "pose",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.023136328926073948
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.04,
+    "condition": "closure",
+    "epsilon": 0.4342941117566107,
+    "n_contacts": 8,
+    "hold_N": 0.0,
+    "penetration_mm": 2.6817894097500266,
+    "keypoint_err_m": 0.023136328926073948
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.04,
+    "condition": "wrench",
+    "epsilon": 0.34472807835546193,
+    "n_contacts": 6,
+    "hold_N": 0.25,
+    "penetration_mm": 2.344303113156019,
+    "keypoint_err_m": 0.023136328926073948
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.05,
+    "condition": "pose",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.025062870988627174
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.05,
+    "condition": "closure",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.025062870988627174
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.05,
+    "condition": "wrench",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.025062870988627174
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.06,
+    "condition": "pose",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.02678336743048196
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.06,
+    "condition": "closure",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.02678336743048196
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.06,
+    "condition": "wrench",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.02678336743048196
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.07,
+    "condition": "pose",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.028770172049914427
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.07,
+    "condition": "closure",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.028770172049914427
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.07,
+    "condition": "wrench",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.028770172049914427
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.08,
+    "condition": "pose",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.03061439144115205
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.08,
+    "condition": "closure",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.03061439144115205
+  },
+  {
+    "hand": "f5d6",
+    "width": 0.08,
+    "condition": "wrench",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.03061439144115205
+  }
+]

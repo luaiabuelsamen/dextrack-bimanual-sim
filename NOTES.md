@@ -1560,3 +1560,79 @@ translation and remaining contact. It applies no pure torques and does not gate
 on orientation, so its "minimum force" is not a measurement of the full 6-D
 epsilon ball. Objects are boxes. Two hands of the same type, no arm, no torso.
 CEM is stochastic at one seed per cell.
+
+## 2026-09-12 — the null was my own experiment's fault; the corrected result, and its limit
+
+### The flaw
+
+The "wrench" condition in the first pose-vs-wrench run was not a wrench
+objective. It drove the fingers along the hand's single DERIVED CLOSURE with
+only a scalar fraction free, while the pose condition received a full 16-DoF
+finger specification from the human. One free number against sixteen. NOTES
+even recorded the opposite ("the wrench condition searches one extra
+parameter"), which was wrong.
+
+That condition is now labelled `closure`, which is what it is, and a real
+wrench condition was added: placement AND every finger angle chosen to maximise
+the epsilon of the contact set MEASURED in simulation. Free-space joint search
+is safe here in a way it was not for the geometric retargeter -- a pose that
+buries its fingers is rejected by the penetration gate before it can score.
+
+    Wilcoxon, wrench vs closure (hold force):  p = 0.0498
+
+So the mislabelled condition was materially weaker, and the earlier null was an
+artefact of my own parameterisation.
+
+### The corrected comparison (n = 32 cells: 4 hands x 8 widths)
+
+Finer force ladder (1.4x per rung; the doubling ladder had tied 11 of 24 cells
+for want of resolution).
+
+    EPSILON (real MuJoCo contacts)   pose 0.3688    wrench 0.4621
+      Wilcoxon p = 0.0039                                      SIGNIFICANT
+
+    HOLD FORCE (independent outcome) pose 2.66 N    wrench 2.96 N
+      Wilcoxon p = 0.674 ; 12 wins vs 8 losses, sign test p = 0.503   NOT
+
+    outright failures (held 0 N)     pose 12/32     wrench 6/32
+      sign test p = 0.238                                            NOT
+
+### What this does and does not establish
+
+Retargeting to a wrench specification produces significantly better contact
+sets than retargeting the hand pose, measured in wrench space (p = 0.004).
+
+**That result is circular and must be reported as such.** The wrench condition
+optimises epsilon and is then scored on epsilon. The review warned about
+exactly this -- "validate predictions on held-out physical outcomes rather than
+using the optimized score as its own validation" -- and it is the right warning.
+
+The non-circular test is the hold force, and it is **not significant**
+(2.96 vs 2.66 N, p = 0.67). Outright failures halve (12 -> 6) in the right
+direction and also fail significance (p = 0.24). So:
+
+**The thesis is supported on the metric it is stated in, and not yet
+demonstrated on an independent physical outcome.** The effect direction is
+consistent across both independent measures; the experiment is underpowered to
+call it.
+
+What would settle it, in order of cost: more cells (widths, shapes, masses,
+several CEM seeds per cell) to lift n; a task-level outcome (lift, carry,
+insert) instead of a static wrench probe, which is both independent of epsilon
+and closer to what a paper claims; and real demonstrations in place of
+`SyntheticSource`, without which "retargeting" is still a stand-in.
+
+### Standing, from this session
+
+Supported, with controls:
+* epsilon from real contacts predicts physical holding, monotone, ~5x across
+  its range (57 grasps).
+* A second hand raises sustained force per newton APPLIED by 1.98x (18/23
+  cells) while adding only 1.35x the contacts -- allocation, not budget. This
+  one is not circular: the outcome is force, the control is force.
+
+Retracted this session:
+* the geometric retargeting table (fingers inside the object);
+* BC and action chunking as evidence about learned control (open-loop replay
+  scores 8/8 at 13.49 cm);
+* f5d6 "holds 0 of 8 widths" (the palm fell 1.05 m during closure).

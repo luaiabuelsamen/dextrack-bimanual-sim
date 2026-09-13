@@ -1,0 +1,242 @@
+[
+  {
+    "hand": "shadow",
+    "width": 0.03,
+    "condition": "pose",
+    "epsilon": 0.37450409740637763,
+    "n_contacts": 6,
+    "hold_N": 0.25,
+    "penetration_mm": 0.4411192132521471,
+    "keypoint_err_m": 0.007406380915695109
+  },
+  {
+    "hand": "shadow",
+    "width": 0.03,
+    "condition": "closure",
+    "epsilon": 0.5590837187187153,
+    "n_contacts": 9,
+    "hold_N": 1.345,
+    "penetration_mm": 1.1156311505400636,
+    "keypoint_err_m": 0.007406380915695109
+  },
+  {
+    "hand": "shadow",
+    "width": 0.03,
+    "condition": "wrench",
+    "epsilon": 0.600033189696797,
+    "n_contacts": 10,
+    "hold_N": 1.345,
+    "penetration_mm": 1.0084924231654988,
+    "keypoint_err_m": 0.007406380915695109
+  },
+  {
+    "hand": "shadow",
+    "width": 0.035,
+    "condition": "pose",
+    "epsilon": 0.5318936817168334,
+    "n_contacts": 11,
+    "hold_N": 1.345,
+    "penetration_mm": 1.6805227414643484,
+    "keypoint_err_m": 0.008303804827671055
+  },
+  {
+    "hand": "shadow",
+    "width": 0.035,
+    "condition": "closure",
+    "epsilon": 0.5966701670669924,
+    "n_contacts": 11,
+    "hold_N": 1.882,
+    "penetration_mm": 0.5195085369496792,
+    "keypoint_err_m": 0.008303804827671055
+  },
+  {
+    "hand": "shadow",
+    "width": 0.035,
+    "condition": "wrench",
+    "epsilon": 0.6512412311839503,
+    "n_contacts": 10,
+    "hold_N": 1.345,
+    "penetration_mm": 1.5811003738835623,
+    "keypoint_err_m": 0.008303804827671055
+  },
+  {
+    "hand": "shadow",
+    "width": 0.04,
+    "condition": "pose",
+    "epsilon": 0.6372896926494883,
+    "n_contacts": 10,
+    "hold_N": 1.882,
+    "penetration_mm": 1.0794733256207778,
+    "keypoint_err_m": 0.009350427342859364
+  },
+  {
+    "hand": "shadow",
+    "width": 0.04,
+    "condition": "closure",
+    "epsilon": 0.6753880795599214,
+    "n_contacts": 12,
+    "hold_N": 1.345,
+    "penetration_mm": 0.7758185366984506,
+    "keypoint_err_m": 0.009350427342859364
+  },
+  {
+    "hand": "shadow",
+    "width": 0.04,
+    "condition": "wrench",
+    "epsilon": 0.7041763565623518,
+    "n_contacts": 16,
+    "hold_N": 1.882,
+    "penetration_mm": 1.7004522260415083,
+    "keypoint_err_m": 0.009350427342859364
+  },
+  {
+    "hand": "shadow",
+    "width": 0.05,
+    "condition": "pose",
+    "epsilon": 0.5472221737147422,
+    "n_contacts": 13,
+    "hold_N": 1.882,
+    "penetration_mm": 1.8749949084949538,
+    "keypoint_err_m": 0.012046323653568586
+  },
+  {
+    "hand": "shadow",
+    "width": 0.05,
+    "condition": "closure",
+    "epsilon": 0.6503638061140017,
+    "n_contacts": 9,
+    "hold_N": 1.882,
+    "penetration_mm": 1.1130605690004443,
+    "keypoint_err_m": 0.012046323653568586
+  },
+  {
+    "hand": "shadow",
+    "width": 0.05,
+    "condition": "wrench",
+    "epsilon": 0.7075599983488178,
+    "n_contacts": 16,
+    "hold_N": 1.345,
+    "penetration_mm": 1.3294999178260292,
+    "keypoint_err_m": 0.012046323653568586
+  },
+  {
+    "hand": "shadow",
+    "width": 0.06,
+    "condition": "pose",
+    "epsilon": 0.6473045374720401,
+    "n_contacts": 16,
+    "hold_N": 1.882,
+    "penetration_mm": 1.446817328620188,
+    "keypoint_err_m": 0.0160953154126286
+  },
+  {
+    "hand": "shadow",
+    "width": 0.06,
+    "condition": "closure",
+    "epsilon": 0.5968093554242537,
+    "n_contacts": 10,
+    "hold_N": 1.882,
+    "penetration_mm": 1.812975516573795,
+    "keypoint_err_m": 0.0160953154126286
+  },
+  {
+    "hand": "shadow",
+    "width": 0.06,
+    "condition": "wrench",
+    "epsilon": 0.6375515704560962,
+    "n_contacts": 11,
+    "hold_N": 1.882,
+    "penetration_mm": 1.978732345011083,
+    "keypoint_err_m": 0.0160953154126286
+  },
+  {
+    "hand": "shadow",
+    "width": 0.07,
+    "condition": "pose",
+    "epsilon": 0.5549976069277963,
+    "n_contacts": 12,
+    "hold_N": 1.345,
+    "penetration_mm": 1.7947654573328344,
+    "keypoint_err_m": 0.020797321464050333
+  },
+  {
+    "hand": "shadow",
+    "width": 0.07,
+    "condition": "closure",
+    "epsilon": 0.43306040724657013,
+    "n_contacts": 11,
+    "hold_N": 1.882,
+    "penetration_mm": 0.7222442831726038,
+    "keypoint_err_m": 0.020797321464050333
+  },
+  {
+    "hand": "shadow",
+    "width": 0.07,
+    "condition": "wrench",
+    "epsilon": 0.38720831589342786,
+    "n_contacts": 8,
+    "hold_N": 1.345,
+    "penetration_mm": 1.3699547399602923,
+    "keypoint_err_m": 0.020797321464050333
+  },
+  {
+    "hand": "shadow",
+    "width": 0.08,
+    "condition": "pose",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.025568762275388457
+  },
+  {
+    "hand": "shadow",
+    "width": 0.08,
+    "condition": "closure",
+    "epsilon": 0.5187660528802478,
+    "n_contacts": 13,
+    "hold_N": 0.96,
+    "penetration_mm": 2.4377257539514083,
+    "keypoint_err_m": 0.025568762275388457
+  },
+  {
+    "hand": "shadow",
+    "width": 0.08,
+    "condition": "wrench",
+    "epsilon": 0.43281331906618203,
+    "n_contacts": 11,
+    "hold_N": 0.96,
+    "penetration_mm": 2.344093255619969,
+    "keypoint_err_m": 0.025568762275388457
+  },
+  {
+    "hand": "shadow",
+    "width": 0.09,
+    "condition": "pose",
+    "epsilon": 0.0,
+    "n_contacts": 0,
+    "hold_N": 0.0,
+    "penetration_mm": 0.0,
+    "keypoint_err_m": 0.029621761934021832
+  },
+  {
+    "hand": "shadow",
+    "width": 0.09,
+    "condition": "closure",
+    "epsilon": 0.2449500603200779,
+    "n_contacts": 10,
+    "hold_N": 0.49,
+    "penetration_mm": 1.7323494059154516,
+    "keypoint_err_m": 0.029621761934021832
+  },
+  {
+    "hand": "shadow",
+    "width": 0.09,
+    "condition": "wrench",
+    "epsilon": 0.34282218163007616,
+    "n_contacts": 15,
+    "hold_N": 0.686,
+    "penetration_mm": 2.0590563969706412,
+    "keypoint_err_m": 0.029621761934021832
+  }
+]

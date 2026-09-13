@@ -269,10 +269,16 @@ class GraspScene:
             worst = max(worst, -float(c.dist))
         return worst * 1000.0
 
-    def hold_of(self, ladder=(0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0),
+    #: geometric force ladder at ~1.4x per rung. A doubling ladder left 11 of
+    #: 24 comparison cells TIED -- not because the grasps were equal but
+    #: because the measurement could not tell them apart.
+    LADDER = tuple(round(0.25 * (1.4 ** k), 3) for k in range(15))
+
+    def hold_of(self, ladder=None,
                 push_steps=300,
                 max_disp=0.02):
         """Push the object in every direction until it slips; report the worst."""
+        ladder = ladder or self.LADDER
         snap = (self.d.qpos.copy(), self.d.qvel.copy(), self.d.ctrl.copy())
         per = np.zeros(len(DIRECTIONS))
         for i, u in enumerate(DIRECTIONS):

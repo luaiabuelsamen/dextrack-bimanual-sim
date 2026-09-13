@@ -9,9 +9,17 @@ physical harness, where a pose that cannot be realised simply does not score.
               PLACEMENT is then searched, so the condition is given every
               chance -- only the finger angles are dictated by the human.
 
-    wrench    the finger angles and the placement are both chosen to maximise
-              the Ferrari-Canny epsilon of the resulting contact set. No human
-              data is used.
+    closure   placement searched, fingers driven along the hand's own derived
+              closure with only a scalar fraction free. This is NOT a wrench
+              objective -- it is the hand's canonical grasp -- and it was
+              mislabelled "wrench" in the first version of this comparison,
+              which gave the wrench side ONE free number against the pose
+              side's full finger specification and produced a null.
+
+    wrench    placement AND all finger angles chosen to maximise the
+              Ferrari-Canny epsilon of the contact set actually measured in
+              simulation. No human data is used. This is the condition the
+              thesis is about.
 
 Both are closed in simulation, measured on real MuJoCo contacts, and pushed in
 14 directions until they slip. The placement search is identical and gets the
@@ -43,6 +51,52 @@ def keypoint_pose(hand_key, width):
         n = mujoco.mj_id2name(rt.m, mujoco.mjtObj.mjOBJ_JOINT, j) or ""
         out[n] = float(r.q[i])
     return out, float(r.keypoint_err_m)
+
+
+def search_fingers(scene, iters=8, pop=32, seed=0):
+    """Optimise placement AND every finger angle for measured epsilon.
+
+    The geometric retargeter could not do this: free-space joint search put
+    fingers 19 mm inside the object. Here the same search is safe, because a
+    pose that buries its fingers is rejected by the penetration gate before it
+    can score -- the simulator enforces what the surrogate could not.
+    """
+    base = {n[len(scene.prefixes[0]):]: t
+            for n, (_qa, _a, t) in scene.finger[scene.prefixes[0]].items()}
+    names = list(base)
+    lo, hi = {}, {}
+    for n in names:
+        jid = mujoco.mj_name2id(scene.m, mujoco.mjtObj.mjOBJ_JOINT,
+                                f"{scene.prefixes[0]}{n}")
+        a_, b_ = scene.m.jnt_range[jid]
+        lo[n], hi[n] = (a_, b_) if b_ > a_ else (-np.pi, np.pi)
+    nf = len(names)
+    rng = np.random.default_rng(seed)
+    mu = np.concatenate([[0.0, 0.0, 0.0, 0.005, 0.9],
+                         [base[n] for n in names]])
+    sd = np.concatenate([[1.6, 1.6, 1.6, 0.015, 0.15],
+                         [0.45] * nf])
+    best, best_t = None, None
+    for _it in range(iters):
+        cand = rng.normal(mu, sd, size=(pop, 5 + nf))
+        cand[:, 3] = np.clip(cand[:, 3], -0.03, 0.055)
+        cand[:, 4] = np.clip(cand[:, 4], 0.45, 1.0)
+        scored = []
+        for c in cand:
+            tgt = {n: float(np.clip(c[5 + i], lo[n], hi[n]))
+                   for i, n in enumerate(names)}
+            a = scene.attempt(c[:5], do_hold=False, finger_target=tgt)
+            scored.append(((a.epsilon if a.valid else -1.0), c))
+            if a.valid and (best is None or a.epsilon > best.epsilon):
+                best, best_t = a, tgt
+        scored.sort(key=lambda t: -t[0])
+        top = np.array([c for _s, c in scored[:8]])
+        if scored[0][0] > -1:
+            mu = top.mean(0)
+            sd = np.maximum(top.std(0),
+                            np.concatenate([[0.25, 0.25, 0.25, 0.004, 0.03],
+                                            [0.08] * nf]))
+    return best, best_t
 
 
 def search(scene, n_hands, finger_target=None, iters=6, pop=24, seed=0):
@@ -92,15 +146,21 @@ def main():
     for hk in a.hands:
         for w in a.widths:
             tgt, kperr = keypoint_pose(hk, w)
-            for cond in ("pose", "wrench"):
+            for cond in ("pose", "closure", "wrench"):
                 t0 = time.time()
                 sc = GraspScene(hk, (w / 2,) * 3, n_hands=1, kp_finger=a.kp)
-                best = search(sc, 1, finger_target=(tgt if cond == "pose" else None),
-                              iters=a.iters, pop=a.pop)
+                use = tgt if cond == "pose" else None
+                if cond == "wrench":
+                    # same number of simulated attempts as the other two, spent
+                    # on fingers as well as placement
+                    best, use = search_fingers(sc, iters=a.iters,
+                                               pop=a.pop * 5 // 4)
+                else:
+                    best = search(sc, 1, finger_target=use,
+                                  iters=a.iters, pop=a.pop)
                 hold = 0.0
                 if best is not None and best.n_contacts >= 2:
-                    sc.attempt(best.params, do_hold=False,
-                               finger_target=(tgt if cond == "pose" else None))
+                    sc.attempt(best.params, do_hold=False, finger_target=use)
                     hold, _per = sc.hold_of()
                 e = best.epsilon if best else 0.0
                 nc = best.n_contacts if best else 0
