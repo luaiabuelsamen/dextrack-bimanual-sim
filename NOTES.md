@@ -2125,3 +2125,85 @@ at 3 optimiser seeds); an evaluation independent of the contact model the
 objective is scored on; or a comparison against the baseline a practitioner
 ships, which is a keypoint retarget followed by a budgeted squeeze. Those
 remain owed.
+
+## 2026-09-13 — G1: the wrench objective wins, the human data does not
+
+Pre-registered in `docs/G1_PREREGISTRATION.md` (commit `84715fd`), with the
+analysis script committed at `58e7326` **before any result existed**. Three
+arms, identical budget (144 executor calls each), identical executor and probe.
+n = 60 cells: 4 hands x 5 widths x 3 optimiser seeds.
+
+    arm              survives   hold_N     eps   kp_err_cm   valid/144
+    pose_squeeze       9/60      0.118   0.0972      7.12       23.9
+    eps_synth         21/60      0.223   0.2124     12.64       29.2
+    wrench_refine     21/60      0.525   0.1931      9.60       19.8
+
+**H1 (the thesis): supported.** `wrench_refine` beats the pipeline people
+actually ship -- keypoint retarget followed by a budgeted squeeze:
+
+    survival    discordant 15 (wrench only) vs 3 (pose only)   p = 0.0075
+    magnitude   18 wins vs 6 of 24 non-tied, Wilcoxon           p = 0.0018
+
+**H2 (does the demonstration help?): NO.** `eps_synth` uses no human data
+anywhere -- it starts from the hand's own closure -- and matches
+`wrench_refine` exactly:
+
+    survival    21/60 vs 21/60, discordant 7 vs 7, McNemar p = 1.0000
+
+The pre-declared decision rule for this branch, quoted from the
+pre-registration without modification:
+
+> **H1 significant, H2 not:** a wrench objective beats the shipped pipeline,
+> but the human demonstration contributes nothing beyond initialisation -- the
+> contribution is the objective, not the retargeting.
+
+### What this settles
+
+The project's thesis is "human hand-object data should be retargeted as a
+wrench specification on the object, not as a hand pose". G1 splits that claim
+in two and the halves go opposite ways:
+
+* *as a wrench specification, not as a hand pose* -- **supported**, against the
+  real baseline this time (p = 0.0075).
+* *human hand-object data* -- **not supported**. Generic wrench-space synthesis
+  with no demonstration at all does exactly as well. Whatever the demonstration
+  contributes, it is not the ability to find a grasp that holds.
+
+Selection, not search, again and more sharply: `wrench_refine` finds the
+FEWEST valid grasps of the three arms (19.8 per 144, against pose_squeeze's
+23.9) and yet survives more than twice as often (21 vs 9). It is not looking
+harder. It is choosing better.
+
+### Exploratory, labelled as such -- not pre-registered
+
+On magnitude rather than survival, `wrench_refine` does beat `eps_synth`
+(0.525 vs 0.223 N; 17 wins vs 9 of 26 non-tied, Wilcoxon p = 0.0163). So the
+demonstration may buy a *stronger* grasp while not buying a *more reliable*
+one. That was not the declared outcome, it is one comparison among several
+looked at after the fact, and it needs its own pre-registered test before it
+means anything.
+
+Per hand the ordering is inconsistent, which is consistent with H2's null:
+
+    allegro   pose  3   synth  8   refine 12
+    leap      pose  6   synth 11   refine  6
+    f5d6      pose  0   synth  2   refine  3
+    shadow    pose  0   synth  0   refine  0
+
+Shadow fails under all three arms at this budget -- 144 candidates in a 29-D
+space -- as it did in the matched experiment. That is a power limit, not a
+property of the hand.
+
+### Consequence for the project's framing
+
+The name `opposition-deficit` already encoded a retracted claim (there is no
+deficit on the corrected axis). G1 removes the other half: the contribution
+that survives is about the OBJECTIVE used to select a grasp, not about
+transferring human demonstrations. Reframing is now the honest move, and the
+remaining goals (G2-G5) should be re-derived against the claim that actually
+holds rather than the one the repository is named after.
+
+What would still rescue the original framing is a demonstration-conditioned
+quantity the object-side objective cannot reconstruct -- a required task wrench
+TRAJECTORY, not a static grasp. That is G4's task chain, and G1 says it has to
+carry the whole weight of the "human data" half of the thesis.
