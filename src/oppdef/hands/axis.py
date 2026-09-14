@@ -109,6 +109,60 @@ def opposition_axis(key, restarts=24, seed=0, cap=1.3):
                 note=SPECS[key].get("note", ""))
 
 
+_APERTURE_CACHE = {}
+
+
+def aperture_pose(key, restarts=10, seed=0, cap=1.3):
+    """The hand's most OPEN posture: joints that maximise thumb-to-finger reach.
+
+    Derived, like the closure, and for the same reason. `qpos = 0` is not an
+    open hand -- it is whatever zero happens to mean in a given model file, and
+    for Shadow it leaves the hand occupying its own grasp volume. Using it as
+    the pre-grasp made every placement either overlap the object (when the
+    fingers could reach it) or sit too far away to touch it at all: Shadow
+    produced 0 valid grasps out of 320 for this reason, twice, and I attributed
+    it to search power both times.
+
+    Cached per hand: the solve is a multi-start optimisation and a scene is
+    built thousands of times in a sweep.
+    """
+    if key in _APERTURE_CACHE:
+        return _APERTURE_CACHE[key]
+    m, cfg = load(key)
+    d = mujoco.MjData(m)
+    _names, ids, offs = tip_bodies(m, cfg)
+    bodies = finger_body_set(m, cfg, ids)
+    pairs = mimic_pairs(m)
+    jids = hand_joints(m, cfg)
+    qadr = np.array([m.jnt_qposadr[j] for j in jids])
+    r = m.jnt_range[jids]
+    lo, hi = r[:, 0].copy(), r[:, 1].copy()
+    bad = hi <= lo
+    lo[bad], hi[bad] = -np.pi, np.pi
+    lo, hi = np.clip(lo, -cap, cap), np.clip(hi, -cap, cap)
+
+    def obj(x):
+        d.qpos[:] = 0.0
+        d.qpos[qadr] = x
+        apply_mimic(m, d, pairs)
+        mujoco.mj_kinematics(m, d)
+        return -thumb_gap(m, d, ids, offs) + PEN_WEIGHT * self_penetration(
+            m, d, bodies)
+
+    rng = np.random.default_rng(seed)
+    best = None
+    for i in range(restarts):
+        x0 = np.zeros(len(jids)) if i == 0 else lo + rng.random(len(jids)) * (hi - lo)
+        res = minimize(obj, x0, method="L-BFGS-B", bounds=list(zip(lo, hi)),
+                       options=dict(maxiter=400))
+        if best is None or res.fun < best.fun:
+            best = res
+    names = [mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j) for j in jids]
+    pose = {n: float(v) for n, v in zip(names, np.clip(best.x, lo, hi))}
+    _APERTURE_CACHE[key] = pose
+    return pose
+
+
 def provenance():
     def _git(*a):
         try:

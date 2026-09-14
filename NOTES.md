@@ -2294,3 +2294,65 @@ what, a sequence of subgoals. G2 tested one operationalisation of "specifies
 the task", not the idea.
 
 Still synthetic throughout; still two of four hands unable to be placed.
+
+## 2026-09-14 — G3 Part 1: the placement bug, fixed
+
+Two of four hands had contributed nothing to any experiment in this repository.
+Shadow produced **0 valid grasps out of 320** and f5d6 **3 of 320**, with 98.4%
+and 95.1% of candidates rejected before a finger ever moved. I called that a
+search-power limit twice. It was a placement bug, and fixing it took four
+attempts, each of which traded one hand against another.
+
+### What was actually wrong -- two faults, not one
+
+**1. `qpos = 0` is not an open hand.** It is whatever zero means in a given
+model file. For Shadow it leaves the hand occupying its own grasp volume, so
+*no placement existed* that was both clear when open and touching when closed:
+wherever the closed fingers could reach the object, the open hand already
+overlapped it by 11-35 mm. `hands/axis.aperture_pose` now derives the maximally
+open posture the same way the closure is derived -- multi-start, mimic enforced,
+self-collision scoped -- and caches it per hand.
+
+**2. The grasp centre is computed at the CLOSED pose**, so for a hand with a
+large palm, or a forearm as Shadow's model has, that point lies inside the
+hand's own volume; placing the object there puts the object inside the hand.
+Penetration is also not monotone in standoff -- f5d6 measured 0.5 mm, then
+10 mm, then 26 mm, then 0 as the object passes the fingers -- so a bisection
+finds nothing.
+
+### Four attempts, and what each one cost
+
+Recorded because the pattern is the lesson: each fix was a *heuristic standing
+in for a search*, and each suited one hand at another's expense.
+
+    deepest clear placement        shadow 32.5%  leap 47.5%  allegro 10.0%  f5d6 0%
+    most predicted contacts        shadow  2.5%  leap 20.0%  allegro 22.5%  f5d6 0%
+    index the clear set uniformly  shadow 16.7%  leap  0.0%  allegro  0.0%  f5d6 3.3%
+    nearest feasible + adaptive open  -- below
+
+The version that works keeps the original rule (grasp centre at the object plus
+a searched standoff) and falls back to the ray scan **only when that overlaps**,
+taking the nearest feasible placement; and it opens the hand by the SMALLEST
+fraction toward the aperture that clears, rather than always maximally. A hand
+that needs no extra opening gets none, which is why Allegro stopped regressing.
+
+### Acceptance, measured as the experiments actually run (CEM, 144 candidates)
+
+    hand        3.0 cm        4.5 cm        6.0 cm
+    shadow    23/144 16.0%  50/144 34.7%  55/144 38.2%
+    leap      84/144 58.3%  81/144 56.2%  89/144 61.8%
+    allegro   31/144 21.5%  73/144 50.7%  74/144 51.4%
+    f5d6      94/144 65.3%  74/144 51.4%   0/144  0.0%
+
+Best epsilon found ranges 0.36-0.65 for every hand. **Shadow went from 0.0/320
+to 16-38%.** The single remaining zero is f5d6 at 6 cm, which is the physical
+limit measured independently -- it failed at 5 cm and above consistently, and
+its aperture is the narrowest of the four at 12.73 cm. That is a finding, not a
+bug.
+
+### What this invalidates
+
+Nothing is retracted by this fix, but G1 and G2 were both effectively
+**allegro and leap on 18 cells**, not four hands on 60 and 36. Both are worth
+re-running now that all four hands can be placed, and Part 1's acceptance was
+the precondition for doing so.

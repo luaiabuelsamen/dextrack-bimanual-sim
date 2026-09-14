@@ -235,11 +235,44 @@ class GraspScene:
                 if dof in ("x", "y", "z"):
                     self.m.actuator_ctrlrange[a] = [-2.5, 2.5]
 
+        # The pre-grasp posture is DERIVED, not assumed to be zero. `qpos = 0`
+        # is whatever zero means in a model file; for Shadow it leaves the hand
+        # occupying its own grasp volume, so no placement existed that was both
+        # clear when open and touching when closed. See hands/axis.aperture_pose.
+        from oppdef.hands.axis import aperture_pose
+        _open = aperture_pose(hand_key)
+        # The aperture pose is how WIDE the hand can open; how wide it SHOULD
+        # open is decided per attempt. Opening maximally rescued Shadow, whose
+        # zero pose occupies its own grasp volume, and starved Allegro, which
+        # then closed from a fully splayed pose and missed the object. The
+        # pre-grasp is the LEAST opening that clears -- `open_q(alpha)`
+        # interpolates zero -> aperture and the attempt takes the smallest
+        # alpha that works, so a hand that needs nothing gets nothing.
+        self.aperture_q = {}
+        for p_ in self.prefixes:
+            self.aperture_q[p_] = {n: float(_open.get(n[len(p_):], 0.0))
+                                   for n in self.finger[p_]}
+        self.open_q = {p_: {n: 0.0 for n in self.finger[p_]}
+                       for p_ in self.prefixes}
+
         if kp_finger:
             for p in self.prefixes:
                 for _n, (_qa, a, _t) in self.finger[p].items():
                     self.m.actuator_gainprm[a, 0] = kp_finger
                     self.m.actuator_biasprm[a, 1] = -kp_finger
+
+    def set_open_fraction(self, alpha):
+        """Pre-grasp posture: `alpha` of the way from zero toward the aperture.
+
+        How wide the hand SHOULD open is a per-attempt decision. Opening
+        maximally rescued Shadow, whose zero pose occupies its own grasp
+        volume, and starved Allegro, which then closed from a fully splayed
+        pose and missed the object. The attempt takes the smallest alpha that
+        clears, so a hand that needs no extra opening gets none.
+        """
+        a = float(np.clip(alpha, 0.0, 1.0))
+        for p_ in self.prefixes:
+            self.open_q[p_] = {n: a * v for n, v in self.aperture_q[p_].items()}
 
     # ------------------------------------------------------------------
     def _grasp_centre(self, prefix):
@@ -392,54 +425,92 @@ class GraspScene:
                                reason="hand cannot reach the object: base "
                                       "translation hit its joint limit")
 
-        # start open
+        # start at the DERIVED open posture
         for p in self.prefixes:
             for _n, (qa, _a, _t) in self.finger[p].items():
-                self.d.qpos[qa] = 0.0
+                self.d.qpos[qa] = self.open_q[p][_n]
         mujoco.mj_forward(self.m, self.d)
 
-        # If the open hand starts inside the object, RETRACT it along its own
-        # approach axis rather than throwing the sample away. f5d6's palm
-        # overlapped by 1.6 mm at every orientation sampled, so a fixed
-        # tolerance rejected 30 of 30 approaches for a hand that grasps
-        # perfectly well 4 mm further back. Standoff is a free parameter of the
-        # approach; the search should not be asked to guess it to the
-        # millimetre.
-        def _set_offsets(deltas):
-            for p_, pr_, dd in zip(self.prefixes, params, deltas):
-                rot_, off_, frac_ = pr_[:3], pr_[3], fracs[p_]
+        # APPROACH ALONG A RAY, rather than placing the grasp centre at the
+        # object and retracting from there.
+        #
+        # The grasp centre is computed at the CLOSED pose, so for a hand with a
+        # large palm -- or a forearm, as Shadow's model has -- that point lies
+        # inside the hand's own volume, and putting the object there puts the
+        # object inside the hand. Retracting did not rescue it: 98.4% of
+        # Shadow's candidates and 95.1% of f5d6's were rejected as pre-grasp
+        # penetrating, so two of four hands contributed nothing to any
+        # experiment in this repository (NOTES 2026-09-13).
+        #
+        # Penetration is also NOT monotone in standoff -- f5d6 measured 0.5 mm,
+        # then 10 mm, then 26 mm, then 0 as the object passes the fingers -- so
+        # a bisection finds nothing. The whole ray is scanned and the DEEPEST
+        # clear placement is taken, which is "as enclosed as the open hand can
+        # be without overlapping", for any hand.
+        def _pen_at(t_by_hand):
+            for p_, pr_, t_ in zip(self.prefixes, params, t_by_hand):
+                rot_, frac_ = pr_[:3], fracs[p_]
                 self.place(p_, rot_, np.zeros(3), closure_frac_for_centre=frac_)
                 palm_ = self.d.xpos[self.palm_bid[p_]]
                 ax_ = self._grasp_centre(p_) - palm_
                 nn = np.linalg.norm(ax_)
                 ax_ = ax_ / nn if nn > 1e-9 else np.array([0.0, 0, 1.0])
-                self.place(p_, rot_, -ax_ * (off_ + dd),
-                           closure_frac_for_centre=frac_)
+                self.place(p_, rot_, -ax_ * t_, closure_frac_for_centre=frac_)
             for p_ in self.prefixes:
                 for _n, (qa, _a, _t) in self.finger[p_].items():
-                    self.d.qpos[qa] = 0.0
+                    self.d.qpos[qa] = self.open_q[p_][_n]
             mujoco.mj_forward(self.m, self.d)
             return self._penetration_mm()
 
-        pen0 = self._penetration_mm()
-        # Which way to retract is not obvious and is not the same for every
-        # hand. Backing off along the palm->fingertip axis drags a short-fingered
-        # hand's TIPS through the object -- f5d6 went from 0.5 mm of overlap to
-        # 26 mm by "retracting" 6 cm. So both directions are tried and the one
-        # that actually reduces overlap is taken.
-        step = 0.0
-        while pen0 > start_pen_mm and step < 0.06:
-            step += 0.006
-            cand = []
-            for sgn in (+1.0, -1.0):
-                cand.append((_set_offsets([sgn * step] * self.n_hands), sgn))
-            best_sgn = min(cand)[1]
-            pen0 = _set_offsets([best_sgn * step] * self.n_hands)
-        if pen0 > start_pen_mm:
-            return Attempt(params=params.ravel(), valid=False,
-                           penetration_mm=pen0,
-                           reason=f"pre-grasp starts inside the object "
-                                  f"({pen0:.1f} mm) even retracted 5 cm")
+        def _closed_contacts(t_by_hand):
+            """Contacts the object would have if the fingers closed from here."""
+            _pen_at(t_by_hand)
+            for p_ in self.prefixes:
+                for _n, (qa, _a, tgt) in self.finger[p_].items():
+                    goal = (tgt * fracs[p_] if finger_target is None
+                            else finger_target.get(_n[len(p_):], 0.0))
+                    self.d.qpos[qa] = goal
+            mujoco.mj_forward(self.m, self.d)
+            n = 0
+            for i in range(self.d.ncon):
+                c = self.d.contact[i]
+                if c.geom1 == self.obj_gid or c.geom2 == self.obj_gid:
+                    n += 1
+            return n
+
+        # Place where the search asks, and fall back to the ray only if that
+        # overlaps. The original rule -- grasp centre at the object plus a
+        # searched standoff -- works for hands whose grasp centre lies in front
+        # of the palm, and replacing it wholesale traded one hand against
+        # another every time I tried (deepest-clear suited Shadow and starved
+        # Allegro; most-contacts reversed it; indexing the clear set uniformly
+        # starved both). So it is kept, and the scan supplies the NEAREST
+        # feasible placement only when the requested one is inside the object.
+        #
+        # That is what rescues the hands whose grasp centre sits inside their
+        # own volume: Shadow's model includes a forearm, and 98.4% of its
+        # candidates used to be rejected before a finger ever moved.
+        t_want = float(np.mean([pr[3] for pr in params]))
+        pen_want, alpha_used = None, 0.0
+        for alpha in (0.0, 0.25, 0.5, 0.75, 1.0):
+            self.set_open_fraction(alpha)
+            pen_want = _pen_at([t_want] * self.n_hands)
+            alpha_used = alpha
+            if pen_want <= start_pen_mm:
+                break
+        if pen_want <= start_pen_mm:
+            t_pick = t_want
+        else:
+            reach = float(np.linalg.norm(self.obj_half)) + 0.20
+            clear = [t for t in np.linspace(0.0, reach, 40)
+                     if _pen_at([t] * self.n_hands) <= start_pen_mm]
+            if not clear:
+                return Attempt(params=params.ravel(), valid=False,
+                               penetration_mm=pen_want,
+                               reason="no penetration-free placement along the "
+                                      "approach ray")
+            t_pick = min(clear, key=lambda t: abs(t - t_want))
+        pen0 = _pen_at([t_pick] * self.n_hands)
 
         # hold the base where it was placed
         for p in self.prefixes:
@@ -465,7 +536,10 @@ class GraspScene:
                 for _n, (_qa, act, tgt) in self.finger[p].items():
                     goal = (tgt * fracs[p] if finger_target is None
                             else finger_target.get(_n[len(p):], 0.0))
-                    self.d.ctrl[act] = a * goal
+                    # ramp FROM the open posture, not from zero: starting the
+                    # ramp at zero makes the fingers jump to a pose the
+                    # pre-grasp was never checked at
+                    self.d.ctrl[act] = (1 - a) * self.open_q[p][_n] + a * goal
             mujoco.mj_step(self.m, self.d)
             if pin:
                 _pin()
