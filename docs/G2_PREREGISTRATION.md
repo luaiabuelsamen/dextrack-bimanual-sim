@@ -132,4 +132,48 @@ all arms in G1 at this budget; if it does so again the cause is search power at
 
 ## Amendments
 
-*(none)*
+### Amendment 1 — 2026-09-13, after run 1 returned an uninterpretable null
+
+**Run 1 is reported as null and uninterpretable.** Its pre-declared rule fired
+the H1-null branch, which requires the contradiction with G1 to be explained
+before anything is claimed. The mandated diagnosis found two defects, one of
+them a bug in my own objective:
+
+    arm             P1 task   P2 hold_N   margin    eps   valid/budget
+    pose_squeeze     5/36       0.154      8.22   0.1008     21.8
+    task_generic     7/36       0.253     11.01   0.1862     31.1
+    task_demo        4/36       0.185     39.50   0.1402     30.4
+
+    H1  discordant 3 vs 4   p = 1.00000
+    H2  discordant 1 vs 4   p = 0.37500
+
+1. **Half the cells were empty.** 17-18 of 36 produced no grasp at all, and
+   those are exactly shadow (9/9) and f5d6 (9/9). Shadow is the 29-DoF search
+   power limit already seen in G1 (0/60 there). f5d6 cannot grasp cubes of
+   4.5-7.5 cm — a structural limit of a hand whose aperture is 12.73 cm, not a
+   budget artifact.
+
+2. **`task_demo`'s objective was dominated by squeeze force.** The margin is
+   `support x f_total`, hence linear in contact force: `corr(margin, f_total) =
+   +0.961`. Maximising it rewards squeezing rather than contact placement, and
+   the arm duly learned to squeeze 3.6x harder than `task_generic` (29.3 N vs
+   8.1 N). That is a defect in how I formulated the objective, not a property
+   of task-conditioned specification.
+
+The quantities were nonetheless predictive of task success — successes averaged
+margin 35.9 against failures' 16.7, epsilon 0.367 against 0.103 — which is what
+makes run 1 a broken experiment rather than a negative result.
+
+**Changes for run 2**, fixed before it is executed:
+
+* the `task_demo` objective uses the margin **per unit contact force**
+  (`f_total = 1`), isolating contact geometry from squeeze strength. The
+  reported margin still includes force, so the two remain distinguishable.
+* the candidate budget rises from 144 to 320 for every arm equally, to give
+  Shadow a fair chance at 29 DoF. **No hand is dropped**: excluding hands after
+  seeing which ones failed would be cherry-picking, and f5d6's structural
+  failure at these widths is itself worth reporting.
+* everything else — task, arms, co-primaries, analysis, decision rule — is
+  unchanged.
+
+Run 1's results are kept at `results/retracted/g2_run1_*.json`.

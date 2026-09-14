@@ -90,7 +90,12 @@ def search(cell, arm, kp_vec, req, iters, pop, seed):
                 continue
             tally["valid"] += 1
             if arm == DEMO:
-                sc, _e, _f = grasp_wrench_capacity(cell.scene, req)
+                # per UNIT contact force: the margin is support x f_total,
+                # so scoring it raw rewards squeezing rather than contact
+                # placement -- run 1's demo arm squeezed 3.6x harder than the
+                # generic arm and corr(margin, f_total) was +0.961.
+                _m, _e, _f = grasp_wrench_capacity(cell.scene, req)
+                sc = _m / max(_f, 1e-9)
             elif arm == GENERIC:
                 sc = a.epsilon
             else:
