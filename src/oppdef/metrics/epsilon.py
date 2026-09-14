@@ -90,6 +90,68 @@ def epsilon_from_wrenches(W):
     return eps if eps > EPS_TOL else 0.0
 
 
+def wrench_hull(W):
+    """Facets of conv(W u {0}) as (a, b), with a.x + b <= 0 inside, or None."""
+    if W is None or len(W) < 7:
+        return None
+    pts = np.vstack([W, np.zeros((1, 6))])
+    for opts in (None, "QJ"):
+        try:
+            hull = ConvexHull(pts, qhull_options=opts)
+            break
+        except QhullError:
+            hull = None
+    if hull is None:
+        return None
+    return hull.equations[:, :6], hull.equations[:, 6]
+
+
+def support_along(hull, d):
+    """Largest magnitude of `d` the contact set can resist, per unit contact force.
+
+    Epsilon is the radius of the largest ball inside the wrench hull -- the
+    worst case over EVERY direction. This is the same hull queried along ONE
+    direction, which is what a task needs: a grasp only has to resist the
+    wrenches its task actually demands, and those may lie in a narrow cone that
+    the worst-case radius says nothing about.
+    """
+    if hull is None:
+        return 0.0
+    a, b = hull
+    d = np.asarray(d, float)
+    nd = np.linalg.norm(d)
+    if nd < 1e-12:
+        return float("inf")
+    u = d / nd
+    proj = a @ u
+    ok = proj > 1e-12
+    if not ok.any():
+        return float("inf")          # unbounded in this direction
+    lam = (-b[ok] / proj[ok]).min()
+    return float(max(lam, 0.0))
+
+
+def task_margin(W, required, f_total=1.0):
+    """How much headroom the contact set has against a required wrench sequence.
+
+    Returns min over the sequence of (resistible / required). Below 1 means the
+    task demands a wrench this grasp cannot supply. `required` rows are 6-D
+    wrenches in the same frame and scaling as `wrench_set` produced W.
+    """
+    hull = wrench_hull(W)
+    if hull is None:
+        return 0.0
+    worst = float("inf")
+    for w in np.atleast_2d(required):
+        need = float(np.linalg.norm(w))
+        if need < 1e-9:
+            continue
+        # the contacts must resist w, i.e. supply -w
+        cap = support_along(hull, -w) * float(f_total)
+        worst = min(worst, cap / need)
+    return 0.0 if worst == float("inf") else float(worst)
+
+
 # --------------------------------------------------------------------------
 # MuJoCo extraction
 # --------------------------------------------------------------------------
