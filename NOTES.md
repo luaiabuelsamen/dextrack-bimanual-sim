@@ -2356,3 +2356,74 @@ Nothing is retracted by this fix, but G1 and G2 were both effectively
 **allegro and leap on 18 cells**, not four hands on 60 and 36. Both are worth
 re-running now that all four hands can be placed, and Part 1's acceptance was
 the precondition for doing so.
+
+## 2026-09-14 — G3 Part 2: standard grasp metrics do not predict task success
+
+Pre-registered in `docs/G3_PREREGISTRATION.md` (commit `f8257b7`), analysis
+committed before any data existed. **158 sampled grasps** across 4 hands x 4
+object shapes, each run on two carry tasks with different required wrench
+profiles: 316 observations, 102 successes (32.3%).
+
+Grasps are SAMPLED rather than optimised, because the question is whether a
+metric ranks grasps across the quality range; a search would truncate exactly
+the variation under test.
+
+    metric            Spearman         p    p(Holm)     AUC
+    epsilon             +0.074    0.1921     0.7684   0.544
+    hold_N              +0.181    0.0012     0.0075   0.545
+    margin              +0.004    0.9369     1.0000   0.503
+    margin_per_N        -0.027    0.6364     1.0000   0.484
+    n_contacts          +0.105    0.0615     0.3077   0.564
+    f_total             +0.057    0.3139     0.9416   0.535
+    penetration_mm      -0.272    0.0000     0.0000   0.332
+
+**No metric reaches the pre-declared rho = 0.3 with Holm p < 0.05.**
+
+Ferrari-Canny epsilon -- the field's standard grasp metric, and the thing this
+project spent weeks optimising -- has **AUC 0.544**. A coin flip is 0.500.
+
+The strongest signal among the seven is **penetration depth, negatively**
+(rho -0.272, AUC 0.332): grasps whose fingers press further into the object
+fail more often. That is a statement about contact realism in the simulator,
+not about grasp quality, and it being the best available predictor is itself
+the finding.
+
+The task-conditioned margin -- the quantity G2 built and optimised -- is
+`rho = +0.004`. It carries no information about whether the task succeeds.
+
+### This explains the G1/G2 disagreement exactly
+
+G1 established that a wrench objective beats the shipped pipeline **on a static
+worst-case probe**. G2 found no such advantage **on a carry task**. G3 says why:
+the static probe and the task rank grasps almost independently (`hold_N` at
+AUC 0.545), so a result established on one has no reason to appear on the other.
+
+Every optimisation in this repository has been against a target that does not
+predict the outcome anyone cares about.
+
+### Not uniform across shapes, which is worth stating
+
+    metric          box    capsule   cylinder   sphere
+    epsilon      +0.067    -0.139     +0.016   +0.451
+    hold_N       +0.149    +0.295     +0.060      nan
+
+Epsilon is a decent predictor on spheres (+0.451) and slightly inverted on
+capsules (-0.139). A metric that works on one object family and not another is
+consistent with the pooled null and suggests the failure is about contact
+GEOMETRY rather than about wrench-space reasoning in general.
+
+### Limitations, stated rather than discovered later
+
+158 grasps at one object size and one mass, four hands, two task variants of a
+single carry family, simulation only. **f5d6 contributed 4 grasps** -- one per
+shape, each cell hitting the 400-draw cap -- so it is effectively absent and
+its column is undefined. Sampled grasps are low quality on average (32.3% task
+success), so the range tested is wide but bottom-heavy. epsilon, the margin and
+the static probe share a contact model with one another; task success does not,
+which is the entire point of the comparison.
+
+A null here is a statement about **these metrics on these tasks**. It is not a
+proof that no grasp metric can predict manipulation success.
+
+Figure: `figures/g3_metrics.png` (`make g3-fig`); statistics derived from the
+saved rows, not typed in.

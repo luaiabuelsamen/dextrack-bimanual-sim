@@ -1,0 +1,168 @@
+{
+  "provenance": {
+    "commit": "81ce3d82a68158b80da73dc0f5c7eac22dd2db66",
+    "dirty": false,
+    "mujoco": "3.8.0",
+    "numpy": "2.2.6",
+    "python": "3.10.12",
+    "machine": "aarch64",
+    "when": "2026-09-14T01:02:18"
+  },
+  "args": {
+    "hands": [
+      "f5d6"
+    ],
+    "shapes": [
+      "box",
+      "cylinder",
+      "sphere",
+      "capsule"
+    ],
+    "half": [
+      0.022,
+      0.022,
+      0.03
+    ],
+    "mass": 0.05,
+    "kp": 1.0,
+    "per_cell": 15,
+    "max_draws": 400,
+    "seed": 0,
+    "out": "results/g3_f5d6.json"
+  },
+  "preregistration": "docs/G3_PREREGISTRATION.md",
+  "rows": [
+    {
+      "hand": "f5d6",
+      "shape": "box",
+      "draw": 7,
+      "epsilon": 0.11603131280964397,
+      "hold_N": 0.0,
+      "margin": 0.5985455812292719,
+      "margin_per_N": 1.143886447376843,
+      "margin_b": 0.46487863792399725,
+      "n_contacts": 5,
+      "f_total": 0.523256117424815,
+      "penetration_mm": 0.5652648339155527,
+      "task_a": false,
+      "task_b": false,
+      "slip_a": NaN,
+      "slip_b": NaN,
+      "reason_a": "dropped before the motion started",
+      "reason_b": "dropped before the motion started",
+      "params": [
+        -0.8181259309644622,
+        2.3048391111399784,
+        0.32045256429491653,
+        0.014612197520881227,
+        0.9705018877041456
+      ],
+      "mass": 0.05,
+      "kp_finger": 1.0,
+      "half": [
+        0.022,
+        0.022,
+        0.03
+      ]
+    },
+    {
+      "hand": "f5d6",
+      "shape": "cylinder",
+      "draw": 8,
+      "epsilon": 0.005559056337363873,
+      "hold_N": 0.0,
+      "margin": 0.25042192062423213,
+      "margin_per_N": 0.30302029437235517,
+      "margin_b": 0.19721698805836707,
+      "n_contacts": 5,
+      "f_total": 0.8264196335196958,
+      "penetration_mm": 0.7161498528217686,
+      "task_a": false,
+      "task_b": false,
+      "slip_a": NaN,
+      "slip_b": NaN,
+      "reason_a": "dropped before the motion started",
+      "reason_b": "dropped before the motion started",
+      "params": [
+        1.8435564697831053,
+        2.3507516616505777,
+        -1.643722023808224,
+        -0.0008171775411202654,
+        0.5823645420917842
+      ],
+      "mass": 0.05,
+      "kp_finger": 1.0,
+      "half": [
+        0.022,
+        0.022,
+        0.03
+      ]
+    },
+    {
+      "hand": "f5d6",
+      "shape": "sphere",
+      "draw": 9,
+      "epsilon": 0.0,
+      "hold_N": 0.0,
+      "margin": 1.3351710206241655e-09,
+      "margin_per_N": 2.027075176700296e-09,
+      "margin_b": 9.254256358478177e-10,
+      "n_contacts": 2,
+      "f_total": 0.6586687242638812,
+      "penetration_mm": 1.1534077201805528,
+      "task_a": false,
+      "task_b": false,
+      "slip_a": NaN,
+      "slip_b": NaN,
+      "reason_a": "dropped before the motion started",
+      "reason_b": "dropped before the motion started",
+      "params": [
+        2.068315526181327,
+        2.768545234041164,
+        1.4034870154979986,
+        0.028171438238944704,
+        0.7597079215493239
+      ],
+      "mass": 0.05,
+      "kp_finger": 1.0,
+      "half": [
+        0.022,
+        0.022,
+        0.03
+      ]
+    },
+    {
+      "hand": "f5d6",
+      "shape": "capsule",
+      "draw": 1,
+      "epsilon": 0.001614878371391515,
+      "hold_N": 0.0,
+      "margin": 0.004004635082306776,
+      "margin_per_N": 0.007772837493518087,
+      "margin_b": 0.002915730124396416,
+      "n_contacts": 4,
+      "f_total": 0.5152089035241397,
+      "penetration_mm": 0.8299540295252893,
+      "task_a": false,
+      "task_b": false,
+      "slip_a": NaN,
+      "slip_b": NaN,
+      "reason_a": "dropped before the motion started",
+      "reason_b": "dropped before the motion started",
+      "params": [
+        1.1157415404080746,
+        -1.1232110049678683,
+        -2.0605301340646482,
+        0.03980581415934861,
+        0.7199772610275282
+      ],
+      "mass": 0.05,
+      "kp_finger": 1.0,
+      "half": [
+        0.022,
+        0.022,
+        0.03
+      ]
+    }
+  ]
+}
