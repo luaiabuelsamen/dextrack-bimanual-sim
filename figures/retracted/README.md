@@ -1,6 +1,6 @@
-# Retracted figures
+# Retracted and superseded figures
 
-`thesis_RETRACTED.png` reported a result whose cohort was withdrawn: both
-hands in it were assigned by an opposition floor measured at distal joint
-origins. Its generator is `experiments/retracted_fig_thesis.py`, which now
-refuses to run. See NOTES.md.
+Every figure here illustrates a result that has been withdrawn or superseded.
+`thesis_RETRACTED.png` additionally hardcoded its own p-value and labelled
+force-only data as wrench; its generator (`experiments/retracted/`) refuses to
+run. See `NOTES.md`.

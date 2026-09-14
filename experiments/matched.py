@@ -32,67 +32,11 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-from oppdef.synth import GraspScene
-from oppdef.data import SyntheticSource
-from oppdef.hands.tips import tip_offset, tip_points
-from oppdef.retarget import retargeter_for, transform_ref, tip_graph, correspond
+from oppdef.bench import Cell, keypoint_pose, reference_graph
 from oppdef.hold import DIRECTIONS
 from oppdef.hands.axis import provenance
 
 POSE, WRENCH = "pose", "wrench"
-
-
-def reference_graph(hand_key, width):
-    """The human's inter-fingertip vectors, in this hand's frame, to scale."""
-    rt = retargeter_for(hand_key, free_base=False)
-    ref = list(SyntheticSource(widths=(width,), n_per=1))[0]
-    V, _obj, _half, sc, _demo, _wrist = transform_ref(rt, ref, width=width)
-    return rt.target_graph(V, sc)
-
-
-class Cell:
-    """One (hand, width) scene plus the machinery both conditions share."""
-
-    def __init__(self, hand_key, width, mass, kp):
-        self.scene = GraspScene(hand_key, (width / 2,) * 3, mass=mass,
-                                n_hands=1, kp_finger=kp)
-        s = self.scene
-        self.pfx = s.prefixes[0]
-        self.tip_b = s.tip_bids[self.pfx]
-        self.tip_off = [tip_offset(s.m, b) for b in self.tip_b]
-        self.palm_b = s.palm_bid[self.pfx]
-        self.names = [n[len(self.pfx):] for n in s.finger[self.pfx]]
-        self.base = {n[len(self.pfx):]: t
-                     for n, (_q, _a, t) in s.finger[self.pfx].items()}
-        self.lo, self.hi = {}, {}
-        for n in self.names:
-            j = mujoco.mj_name2id(s.m, mujoco.mjtObj.mjOBJ_JOINT, f"{self.pfx}{n}")
-            a, b = s.m.jnt_range[j]
-            self.lo[n], self.hi[n] = (a, b) if b > a else (-np.pi, np.pi)
-        self.A_ref = reference_graph(hand_key, width)
-
-    def achieved_graph(self):
-        """Inter-fingertip vectors of the settled pose, in the PALM frame.
-
-        Palm frame, not world: the base is free, so a world-frame graph would
-        change when the hand is merely rotated and the fidelity score would
-        measure placement instead of finger shape.
-        """
-        s = self.scene
-        P = tip_points(s.m, s.d, self.tip_b, self.tip_off)
-        R = s.d.xmat[self.palm_b].reshape(3, 3)
-        G, _pairs = tip_graph((P - s.d.xpos[self.palm_b]) @ R)
-        return G
-
-    def fidelity(self):
-        """Negative mean inter-fingertip vector error, in metres."""
-        G = self.achieved_graph()
-        n = min(len(G), len(self.A_ref))
-        return -float(np.linalg.norm(G[:n] - self.A_ref[:n], axis=1).mean())
-
-    def targets(self, vec):
-        return {n: float(np.clip(vec[i], self.lo[n], self.hi[n]))
-                for i, n in enumerate(self.names)}
 
 
 def cem(cell, objective, iters, pop, seed):

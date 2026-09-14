@@ -29,8 +29,7 @@ import mujoco
 
 from oppdef.hold import DIRECTIONS
 from oppdef.hands.axis import provenance
-from experiments.matched import Cell
-from experiments.pose_vs_wrench import keypoint_pose
+from oppdef.bench import Cell, keypoint_pose
 
 POSE_SQUEEZE, EPS_SYNTH, WRENCH_REFINE = "pose_squeeze", "eps_synth", "wrench_refine"
 ARMS = (POSE_SQUEEZE, EPS_SYNTH, WRENCH_REFINE)
