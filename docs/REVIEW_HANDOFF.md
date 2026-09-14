@@ -1,5 +1,65 @@
 # Review handoff for Claude
 
+**Latest assessment, 2026-09-14 at `07c0f52`:** the earlier G3 numbers below
+are historical and have been withdrawn after a gravity-state leak was found.
+Read [the current recommendation](#recommendation-after-gravity-fix) before
+acting on earlier audit sections. Continue with a bounded task-validation
+milestone; neither the original thesis nor the G3 metric critique is established.
+
+## Recommendation to Claude
+
+Claude: continue the project with one concrete next question: **can selecting
+contacts for a particular task improve successful execution over a practical
+pose-plus-squeeze baseline?** The next milestone should establish a small,
+trustworthy experiment. Check the findings below against the current source
+before acting; the detailed audit records the reviewed commit and evidence.
+
+Recommended order of work:
+
+1. **Repair the task and measurement path.** Ensure task B's requested Y tilt
+   reaches the commanded motion and required-wrench calculation. Pair each
+   task outcome with its own margin. Score object orientation and completion
+   of the requested motion, alongside position retention. Finish stable seed
+   handling and analysis that accounts for repeated outcomes from one grasp.
+   Record protocol corrections explicitly before collecting replacement data.
+2. **Validate a small benchmark.** Use one hand, two objects, and approximately
+   10–20 fixed grasps with known successes and failures. A competent scripted
+   grasp must complete the task; open-hand, no-contact, and missing-tilt controls
+   must fail the appropriate endpoint. Check replay, reused scenes, and task
+   execution order. Save motion traces and inspect representative episodes.
+3. **Separate selection quality from search quality.** Compare pose, epsilon,
+   task-margin, and direct task-rollout scores on the same candidate grasps.
+   Evaluate rollout-based selection on separate perturbations. Then compare
+   complete pose-plus-squeeze, generic synthesis, and task-conditioned pipelines
+   under a common executor and matched search budgets.
+4. **Test whether task information helps.** Compare correct, swapped, and
+   missing task descriptions on tasks requiring different contact choices.
+   Look for changed grasp selection and improved held-out completion. Test
+   actual human demonstrations before claiming a human-data contribution.
+5. **Use G4 to diagnose reliability.** Distinguish exact replay failures from
+   sensitivity to perturbations. Require all declared repeats when reporting
+   unanimity, and report formation failures. Amend the interpretation openly:
+   repeatability does not establish physical realism, and variable outcomes
+   can still have predictable success probabilities.
+6. **Keep the current stack through this milestone.** Retain CPU MuJoCo as the
+   reference. Revisit acceleration or RL tooling after profiling a validated
+   workload. Make the next research decision from held-out task outcomes and
+   uncertainty, with a practical improvement threshold declared in advance.
+
+For the handoff back to the user, report **what you fixed, what remains open,
+what evidence supports each claim, and the next decision**. Include runnable
+checks, saved episode provenance, failure counts, and task-outcome comparisons.
+Label outcomes as supported, ruled out within the tested scope, or inconclusive.
+Keep withdrawn results clearly identified in the current README and goal summary.
+
+The pattern to avoid is promoting an unexpected result into a new thesis before
+checking that the experiment performs and measures its declared task. The
+success criterion for this milestone is a reproducible task comparison whose
+interpretation survives those checks. See the
+[detailed recommendation and diagnostics](#recommendation-after-gravity-fix).
+
+## Review history
+
 Prepared 2026-09-12 from a repository review and a follow-up comparison of the technology stack. The user requested an assessment of the methodology, project direction, possible local minima, and whether alternatives such as PufferLib would help.
 
 **Main assessment.** The research question is worth pursuing, but the main bottleneck is experimental validity. The largest risk is interpreting limitations of a scene, controller, or search procedure as intrinsic limitations of a robot hand. The strongest direction is to estimate which task forces and torques an embodiment cannot reliably supply, then allocate the minimum additional assistance needed. That question remains useful even if f5d6 can sometimes grasp and Ferrari–Canny epsilon does not yield a universal success curve.
@@ -262,3 +322,236 @@ Treat `30df0fe` as a useful recovery checkpoint, not completion.
 6. Keep CPU MuJoCo as the reference while these questions are unresolved. MJX, Warp, or PufferLib may reduce runtime later, but current failures concern model semantics, baselines, provenance, and experimental design.
 
 The local minimum has shifted. Earlier, the risk was explaining simulator defects as hand anatomy. Now it is stopping at a statistically strong comparison between two synthetic search scores and calling that the representation thesis. The new experiment is a solid ablation for a future paper; it is not yet the paper's central result.
+
+## Follow-up audit after G3 and G4 pre-registration
+
+Reviewed 2026-09-14 at local `61a06df` (`G3 RESULT` at `2d7947d`; origin is
+still at that G3 result). This is progress toward an honest benchmark, but it
+does not close the original goal. G3 directly tests task success rather than
+the static probe, and its pooled effect sizes are small: epsilon has AUC 0.544
+and Spearman rho +0.074, while the task-conditioned margin has rho +0.004.
+The result plausibly explains why the static G1 win did not transfer to G2's
+carry task. It remains simulation-only, one object size and mass, two related
+carry variants, and f5d6 contributes only four grasps.
+
+### What changed
+
+The placement repair is now exercised across all four hands and four shapes;
+Shadow is no longer structurally empty. G3 samples grasps before measuring
+metrics, which is the right direction for a predictor study because an
+optimizer would remove the quality variation being tested. The pre-registration
+declares the metric set, Holm correction, task outcome, and null decision rule.
+G4 then pre-registers a useful go/no-go question: whether the same saved grasp
+has a stable task outcome under small mass and placement perturbations. That is
+the right next gate before interpreting a metric null.
+
+### G3 analysis caveats that must be fixed or explicitly re-analyzed
+
+1. `experiments/g3.py` seeds each hand/shape cell with
+   `a.seed + hash(hk + shape) % 9973`. Python's `hash()` is salted per process,
+   so a rerun with the same command and recorded seed can sample different
+   grasps. Replace it with a stable mapping (for example an explicit cell index
+   or a cryptographic digest) and rerun the saved artifacts. The current
+   `dirty=false` provenance does not make the data reproducible while this
+   remains in the protocol.
+2. The analysis duplicates every grasp's metric once for task A and once for
+   task B, then applies ordinary Spearman p-values and AUC calculations. The
+   two outcomes share the same grasp and are therefore clustered. The point
+   estimates are still descriptive, but inferential p-values and Holm decisions
+   should be recomputed with a grasp-level paired permutation, cluster bootstrap,
+   or an equivalent repeated-measures model. The same dependence issue applies
+   to confidence intervals for G4's pair-level unanimity statistic.
+3. The G3 conclusion should be phrased as “these seven metrics did not predict
+   these two carry outcomes in this sampled simulation,” not as a general
+   failure of grasp metrics. The shape breakdown already shows why: epsilon is
+   positive on spheres and slightly negative on capsules. Treat geometry/task
+   interaction as a hypothesis for the next experiment.
+
+### G4 status
+
+`docs/G4_PREREGISTRATION.md` is committed and has a clear stopping rule, but
+the experiment has not been run. `experiments/g4.py` is currently untracked,
+so there is no committed implementation or result to review yet. Before running
+it, verify that the determinism repeat is compared against the exact saved G3
+outcome, that perturbations are applied after grasp formation as intended, and
+that failed/rejected repeats are counted in the declared denominator rather
+than silently removed from unanimity. Report cluster-aware intervals by grasp,
+hand, and task. If the lower unanimity bound fails the pre-registered gate,
+withdraw the G3 metric headline and repair the simulator/contact model before
+another metric sweep.
+
+### Current recommendation
+
+The project is now headed toward a defensible simulator/metric benchmark, not
+yet a demonstration-transfer or opposition-deficit paper. First make G3
+reproducible and reanalyze it at the grasp level; then run G4 and honor its
+go/no-go rule. If G4 passes, build a held-out task/object evaluation and a
+real retargeting baseline. If it fails, stop tuning epsilon and repair the
+contact/task simulator. The MJX-versus-PufferLib decision is still downstream
+of this: neither framework resolves a target that is not predictive or an
+outcome that is not reproducible. Keep the current CPU MuJoCo path as the
+reference until those gates pass.
+
+### Verification on this checkout
+
+`python -m py_compile experiments/g4.py` and `git diff --check` pass. The full
+non-GPU suite currently reports **66 passed, 1 failed** in 87.6 seconds. The
+failure is `tests/test_claims.py::test_opposition_floor_separates_f5d6_from_the_others`,
+which imports the removed `oppdef.hands.axis.extremes` function. That test still
+asserts the retracted f5d6 opposition claim, so it should be rewritten or
+removed alongside the claim rather than restoring the old API. Targeted axis
+and model tests remain the relevant passing coverage; the repository should not
+be called green until the stale test is resolved.
+
+## Recommendation after gravity fix
+
+Reviewed 2026-09-14 at `07c0f52`. My recommendation is to continue with a
+smaller, falsifiable question: **does selecting contacts for a particular task
+improve completion of that task over a practical pose-plus-squeeze baseline?**
+Keep demonstration transfer and additional-hand assistance as hypotheses to
+test after the executor and outcome measure work. The project has useful
+infrastructure and increasingly effective checks; its scientific direction
+still depends on establishing a trustworthy experiment.
+
+The latest commit restores gravity after `run_task`, including early returns,
+and moves the affected G3 data and figure into the retracted directories.
+Finding this through G4's replay check is evidence that the check was useful.
+It also supersedes my earlier interpretation of G3's AUC and correlation
+numbers. Replacement `results/g3_*.json` files are being collected locally;
+their partial contents are not a completed result.
+
+### Immediate issues before another interpretation of G3
+
+- **Task B's tilt is discarded.** `experiments/g3.py:29` puts its Y rotation in
+  `traj.cmd[:, 4]`, but `object_path` and `base_command` in
+  `src/oppdef/task.py:89` and `:110` use only column 3, the X rotation. A direct
+  diagnostic on this checkout produces requested Y rotation **1.0472 rad**,
+  emitted base rotation **0 rad**, object-path rotation **0 rad**, and required
+  torque **0**. Task B currently exercises a faster translation, not the
+  registered Y-tilt task. G4 imports the same helper, so repeating it cannot
+  detect this specification error. Fix the full path from task specification
+  through commands and evaluation, and record the correction before collection.
+- **The task-specific predictor is paired with the wrong outcome.**
+  `experiments/g3.py:96` saves both `margin` for A and `margin_b` for B, but
+  `experiments/g3_analysis.py:73` duplicates A's `margin` and `margin_per_N` for
+  both outcomes. Use B's margin, divided by the matching force for its normalized
+  version, for B observations in both pooled and subgroup analyses. The earlier
+  statement that the margin contains no information is not established by this
+  analysis.
+- **The scored outcome is position retention, with no orientation criterion.**
+  `src/oppdef/task.py:173` measures object position in the palm frame. The success
+  check at `:234`–`:250` tests that displacement and total carried distance; it
+  never checks object orientation or completion of the tilt. Retention is a
+  useful diagnostic, but the manipulation endpoint also needs the intended
+  object translation, orientation, and phase completion. Measure controller
+  tracking separately so a base-control failure is not attributed to a grasp.
+
+These are code-path findings, not guesses about why a particular grasp failed.
+They are reasons to validate a small bank of episodes before repeating a full
+hand/shape sweep. The stable sampling-seed and clustered-inference issues in
+the previous audit also remain. One clarification to that audit: Python's
+salted `hash()` prevents exact resampling from the recorded seed; saved grasp
+parameters can still support replay once simulation state is correctly restored.
+
+### Make G4 a diagnostic, not a verdict on physics
+
+I would revise my earlier endorsement of G4's decision rule. Identical-state
+replay, sensitivity to physical perturbations, and physical realism are three
+different questions. A simulation can reproduce a wrong task perfectly. A
+real grasp near a slip boundary can be sensitive to a millimetre of placement
+change. Neither low unanimity nor high unanimity alone identifies a simulator
+defect or validates a benchmark critique.
+
+Also, a metric can predict a *probability* of success even when individual
+outcomes vary. For illustration, a grasp with independent success probability
+0.8 has five-repeat unanimity probability `0.8^5 + 0.2^5 = 0.328`. That does
+not make its 80% success probability unpredictable. Preserve the registered
+unanimity statistic as a sensitivity diagnostic, but amend its interpretation
+explicitly. Estimate success rates under the declared perturbations, with
+uncertainty, and distinguish exact replay failures from physical sensitivity.
+Five repeats give only a coarse estimate per grasp.
+
+The current untracked G4 implementation also removes `None` repeats before
+calling a pair unanimous and continues after a failed determinism check.
+Require all five valid repeats for the registered statistic; report formation
+failures separately and stop interpretation if exact replay fails. A 1 mm
+object displacement after closure changes contact geometry, so inspect induced
+penetration instead of describing the contact state as unchanged. MuJoCo uses
+a soft-contact model, and penetration by itself does not establish invalid
+physics. [MuJoCo contact-model documentation](https://mujoco.readthedocs.io/en/stable/computation/index.html#soft-contact-model).
+
+The task rollout also uses the same MuJoCo scene and contact solver as the
+static probe. It has a different outcome measure; the claims in the G3 protocol
+and NOTES that it does not share their contact model should be corrected.
+
+### A bounded next milestone
+
+1. **Validate one complete task.** Start with one hand, two object shapes, and a
+   fixed bank of roughly 10–20 grasps spanning known successes and failures.
+   Demonstrate that a scripted competent grasp completes the requested motion,
+   no-contact and open-hand controls fail, and an object carried without the
+   required tilt fails the manipulation endpoint. Check exact replay, fresh
+   versus reused scenes, and A/B execution order. Save command, hand, and object
+   pose traces and inspect representative episodes. This is a validation bank,
+   not the final held-out evaluation.
+2. **Isolate selection from search.** On the same candidate bank, compare pose
+   score, epsilon, task margin, and a more expensive score from direct task
+   rollouts. Use the rollout score as a diagnostic upper comparator on separate
+   evaluation perturbations; do not select and evaluate on the same trials. If
+   successful candidates exist but a cheap score ranks them poorly, there is a
+   concrete predictor problem. If every candidate fails, investigate formation
+   and execution before drawing conclusions about metrics. Then compare full
+   search pipelines with the same executor and budget.
+3. **Test whether the task input changes a useful decision.** Use tasks that
+   require meaningfully different grasps. Compare the correct task description,
+   a swapped description, and a generic objective while holding the candidate
+   set and executor fixed. If correct information changes selection and improves
+   held-out task completion, task conditioning earns its place. Claim a benefit
+   from human demonstrations only after testing actual demonstrations and an
+   appropriate missing/shuffled-input control. Analytic trajectories establish
+   a task-specification experiment.
+4. **Freeze the evaluation and decision before scaling.** Define the smallest
+   success-rate improvement worth the added cost, group repeated trials by
+   grasp/object, and report effect sizes with uncertainty. Hold out objects and
+   task trajectories, not frames. Failure to reach statistical significance
+   does not establish equivalence. Continue a method when its held-out gain
+   exceeds the declared practical threshold with adequate evidence; narrow or
+   stop that method when a valid, sufficiently precise experiment rules the
+   gain out. Treat wide intervals as inconclusive.
+
+I would time-box the validation milestone to about one working week, then
+review the evidence before starting a larger research phase. That is a
+planning recommendation, not an estimate that all tasks can be completed in a
+week. If validation is still failing, continue focused simulator repair and
+defer broad method claims and architecture expansion.
+
+### Direction and stack
+
+The local minimum to avoid is **finding an unexpected null, turning it into a
+new headline, and discovering a protocol defect in the next experiment**.
+Pre-registration and transparent retraction help, but neither replaces
+validating that the code implements the registered task. Use fewer experiments
+with stronger acceptance checks. Update the README and current-goal summary
+with the active claim and its status; retain old claims as labelled history.
+
+Keep CPU MuJoCo as the reference for this milestone. MJX supplies accelerated
+MuJoCo simulation; PufferLib supplies reinforcement-learning tooling and its
+own environment ecosystem. Choosing a trainer does not repair a task command
+or success criterion. My recommendation is to benchmark an acceleration or
+training change only after a valid workload demonstrates a throughput problem,
+using time to a completed, validated experiment as the measure.
+[MJX documentation](https://mujoco.readthedocs.io/en/stable/mjx.html),
+[PufferLib repository](https://github.com/PufferAI/PufferLib).
+
+The promising contribution is a measured improvement in completing a
+manipulation task, with a clear account of what task information made that
+improvement possible. Additional-hand allocation becomes a strong extension
+once the one-hand limit is demonstrated under a controlled resource budget.
+That direction remains worth investigating without assuming the original
+opposition-deficit story will return.
+
+Verification for this addendum: the two new gravity/isolation regression tests
+pass (**2 passed in 48.97 s**). The direct task-helper diagnostic produced the
+rotation and torque values above, and `git diff --check` passed. This follow-up
+did not repeat the full suite or run the G3/G4 experiments. It updates the review
+document; source and actively written result files were not changed.

@@ -10,6 +10,7 @@ high-epsilon grasps would truncate exactly the variation under test.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import time
 from pathlib import Path
@@ -28,10 +29,13 @@ SHAPES = ("box", "cylinder", "sphere", "capsule")
 
 def task_spec(half, mass, seg_s, axis="x"):
     traj = carry(seg_s=seg_s)
-    if axis == "y":                      # tilt about y instead of x
+    if axis != "x":
         traj.cmd = traj.cmd.copy()
-        traj.cmd[:, 4] = traj.cmd[:, 3]
-        traj.cmd[:, 3] = 0.0
+        col = {"x": 3, "y": 4, "z": 5}[axis]
+        traj.cmd[:, col] = traj.cmd[:, 3]
+        if col != 3:
+            traj.cmd[:, 3] = 0.0
+        traj.tilt_axis = axis
     P, Q = object_path(traj, np.zeros(3), np.array([1.0, 0, 0, 0]))
     inertia = mass * (2 * (2 * float(np.mean(half))) ** 2) / 12.0
     lam = float(np.linalg.norm(half))
@@ -65,7 +69,12 @@ def main():
     rows = []
     for hk in a.hands:
         for shape in a.shapes:
-            rng = np.random.default_rng(a.seed + hash(hk + shape) % 9973)
+            # a stable digest, not Python's hash(): hash() is salted per
+            # process, so rerunning the same command with the same recorded
+            # seed sampled DIFFERENT grasps and the saved provenance was not
+            # enough to reproduce the dataset
+            cell_id = int(hashlib.sha256(f"{hk}/{shape}".encode()).hexdigest()[:8], 16)
+            rng = np.random.default_rng(a.seed * 1_000_003 + cell_id)
             sc = GraspScene(hk, tuple(half), mass=a.mass, n_hands=1,
                             kp_finger=a.kp, shape=shape)
             kept, draws = 0, 0

@@ -49,12 +49,23 @@ def test_task_requires_two_hands():
 
 
 @pytest.mark.slow
-def test_opposition_floor_separates_f5d6_from_the_others():
-    """f5d6 is the only hand that cannot bring its thumb to its fingers."""
-    from oppdef.hands.axis import extremes
+def test_opposition_floor_is_the_corrected_one():
+    """RESTATED 2026-09-13. This test used to assert that f5d6 was the only hand
+    that could not bring its thumb to its fingers, with a floor above 2 cm.
 
-    f = extremes("f5d6", restarts=6)
-    leap = extremes("leap", restarts=6)
-    assert f["opposition_floor_m"] > 0.02, f
-    assert leap["opposition_floor_m"] < 0.01, leap
-    assert f["aperture_m"] < leap["aperture_m"]
+    That was measured at distal joint origins, which the terminal joints rotate
+    about, with the hand's mimic couplings dropped. Corrected -- fingertips
+    derived from each distal link's collision geometry, couplings enforced,
+    self-collision scoped to the fingers, distance to the NEAREST fingertip --
+    all four hands oppose within 2.8 mm of one another and f5d6 opposes better
+    than LEAP. See NOTES.md 2026-09-13.
+    """
+    from oppdef.hands.axis import opposition_axis
+
+    f = opposition_axis("f5d6", restarts=8)
+    leap = opposition_axis("leap", restarts=8)
+    # the retracted claim was f.floor > 2 cm; it is under 1 cm
+    assert f.floor_m < 0.01, f
+    assert leap.floor_m < 0.01, leap
+    # what DOES separate f5d6 is its aperture, not its floor
+    assert f.aperture_m < leap.aperture_m

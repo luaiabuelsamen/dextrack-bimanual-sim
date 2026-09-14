@@ -46,6 +46,12 @@ class Trajectory:
     cmd: np.ndarray                 # (T, 6) base targets over time
     dt: float
     name: str = "carry"
+    #: which axis the tilt turns about. Stored, because the path and the base
+    #: command both used to read the rotation out of column 3 regardless, so a
+    #: trajectory that placed its tilt in column 4 silently had NO rotation --
+    #: and the "second wrench profile" it was meant to provide demanded exactly
+    #: zero torque.
+    tilt_axis: str = "x"
 
     @property
     def T(self):
@@ -86,6 +92,17 @@ def carry(dt=0.002, lift=0.08, across=0.08, tilt=np.deg2rad(60.0),
                       name=name)
 
 
+def _axis_vec(name):
+    return {"x": np.array([1.0, 0, 0]), "y": np.array([0.0, 1, 0]),
+            "z": np.array([0.0, 0, 1.0])}[name]
+
+
+def _tilt_angle(traj, c):
+    """The commanded tilt, read from whichever column this trajectory uses."""
+    return float(c[3] if traj.tilt_axis == "x"
+                 else (c[4] if traj.tilt_axis == "y" else c[5]))
+
+
 def object_path(traj, p0, q0):
     """The OBJECT trajectory a demonstration specifies: translation, and
     rotation about the object's own centre.
@@ -97,9 +114,10 @@ def object_path(traj, p0, q0):
     specification at all.
     """
     P, Q = [], []
+    ax = _axis_vec(traj.tilt_axis)
     for c in traj.cmd:
-        ang = float(c[3])
-        qr = np.array([np.cos(ang / 2), np.sin(ang / 2), 0.0, 0.0])
+        ang = _tilt_angle(traj, c)
+        qr = np.concatenate([[np.cos(ang / 2)], np.sin(ang / 2) * ax])
         q = np.zeros(4)
         mujoco.mju_mulQuat(q, qr, q0)
         P.append(p0 + c[0:3])
@@ -115,14 +133,17 @@ def base_command(traj, p0, pivot):
     task is specified on the object; this is the only place the hand enters.
     """
     out = np.zeros((traj.T, 6))
+    ax = _axis_vec(traj.tilt_axis)
+    col = {"x": 3, "y": 4, "z": 5}[traj.tilt_axis]
     for k, c in enumerate(traj.cmd):
-        ang = float(c[3])
-        ca, sa = np.cos(ang), np.sin(ang)
-        R = np.array([[1, 0, 0], [0, ca, -sa], [0, sa, ca]])
+        ang = _tilt_angle(traj, c)
+        R = np.zeros(9)
+        mujoco.mju_axisAngle2Quat(q := np.zeros(4), ax, ang)
+        mujoco.mju_quat2Mat(R, q)
+        R = R.reshape(3, 3)
         # want: R (p0 - pivot) + pivot + t = p0 + delta
-        t = (p0 + c[0:3]) - (R @ (p0 - pivot) + pivot)
-        out[k, 0:3] = t
-        out[k, 3] = ang
+        out[k, 0:3] = (p0 + c[0:3]) - (R @ (p0 - pivot) + pivot)
+        out[k, col] = ang
     return out
 
 
