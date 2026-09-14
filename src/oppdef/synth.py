@@ -63,8 +63,16 @@ class GraspScene:
     one of the test wrench directions.
     """
 
+    #: object shapes the bench can build. A cube is not a manipulation
+    #: benchmark on its own -- every face is identical, so it hides any
+    #: dependence of a metric on where the contacts sit.
+    SHAPES = {"box": mujoco.mjtGeom.mjGEOM_BOX,
+              "cylinder": mujoco.mjtGeom.mjGEOM_CYLINDER,
+              "sphere": mujoco.mjtGeom.mjGEOM_SPHERE,
+              "capsule": mujoco.mjtGeom.mjGEOM_CAPSULE}
+
     def __init__(self, hand_key, obj_half, mass=0.05, friction=(1.0, 0.02, 0.001),
-                 n_hands=1, margin=0.0, kp_finger=1.0):
+                 n_hands=1, margin=0.0, kp_finger=1.0, shape="box"):
         from oppdef.embodiment import make, HANDS
         from oppdef.hands.specs import derive_flex
 
@@ -77,8 +85,15 @@ class GraspScene:
         spec = emb.spec
         b = spec.worldbody.add_body(name="obj", pos=[0.0, 0.0, 0.0])
         b.add_freejoint(name="obj_free")
-        b.add_geom(name="obj_geom", type=mujoco.mjtGeom.mjGEOM_BOX,
-                   size=[float(x) for x in self.obj_half], mass=float(mass),
+        self.shape = shape
+        gtype = self.SHAPES[shape]
+        gsize = [float(x) for x in self.obj_half]
+        if shape in ("cylinder", "capsule"):     # (radius, half-length, _)
+            gsize = [float(self.obj_half[0]), float(self.obj_half[2]), 0.0]
+        elif shape == "sphere":
+            gsize = [float(self.obj_half[0]), 0.0, 0.0]
+        b.add_geom(name="obj_geom", type=gtype,
+                   size=gsize, mass=float(mass),
                    rgba=[0.85, 0.3, 0.2, 1.0],
                    friction=[float(x) for x in friction],
                    margin=float(margin))
