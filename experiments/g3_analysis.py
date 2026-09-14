@@ -46,6 +46,37 @@ def auc(x, y):
     return float((ranks[y].sum() - n1 * (n1 + 1) / 2) / (n1 * n0))
 
 
+def cluster_bootstrap(rows, metric, n_boot=1500, seed=0):
+    """Spearman rho and AUC with a CI that respects clustering by GRASP.
+
+    Each grasp contributes two observations -- task A and task B -- which share
+    the grasp and are not independent. Treating them as 2N independent points
+    understates the variance and inflates significance. The resample unit is
+    the grasp.
+    """
+    rng = np.random.default_rng(seed)
+    n = len(rows)
+    rhos, aucs = [], []
+    for _ in range(n_boot):
+        sel = [rows[i] for i in rng.integers(0, n, n)]
+        x = np.array([r[metric] for r in sel] * 2, float)
+        y = np.array([r["task_a"] for r in sel] + [r["task_b"] for r in sel], bool)
+        if y.all() or not y.any() or np.ptp(x) == 0:
+            continue
+        rhos.append(spearmanr(x, y).correlation)
+        aucs.append(auc(x, y))
+    if not rhos:
+        return dict(rho_lo=np.nan, rho_hi=np.nan, auc_lo=np.nan,
+                    auc_hi=np.nan, p_boot=1.0)
+    rhos, aucs = np.array(rhos), np.array(aucs)
+    frac = float(min((rhos <= 0).mean(), (rhos >= 0).mean()))
+    return dict(rho_lo=float(np.percentile(rhos, 2.5)),
+                rho_hi=float(np.percentile(rhos, 97.5)),
+                auc_lo=float(np.percentile(aucs, 2.5)),
+                auc_hi=float(np.percentile(aucs, 97.5)),
+                p_boot=float(min(2 * frac, 1.0)))
+
+
 def holm(pvals):
     """Holm-Bonferroni corrected p-values, same order as the input."""
     p = np.asarray(pvals, float)
@@ -83,10 +114,21 @@ def main():
         r = spearmanr(X[m], Y)
         rhos.append(r.correlation); ps.append(r.pvalue); aucs.append(auc(X[m], Y))
     hp = holm(ps)
-    print(f"{'metric':16s} {'Spearman':>9s} {'p':>9s} {'p(Holm)':>9s} {'AUC':>7s}")
-    for m, r_, p_, h_, u_ in zip(METRICS, rhos, ps, hp, aucs):
-        flag = "  *" if (h_ < a.alpha and abs(r_) >= RHO_THRESHOLD) else ""
-        print(f"{m:16s} {r_:+9.3f} {p_:9.4f} {h_:9.4f} {u_:7.3f}{flag}")
+    boots = {m: cluster_bootstrap(rows, m) for m in METRICS}
+    hp_boot = holm([boots[m]["p_boot"] for m in METRICS])
+    print("inference clustered BY GRASP: task A and task B share a grasp, so")
+    print("2N independent observations would understate the variance.\n")
+    print(f"{'metric':16s} {'rho':>8s} {'rho 95% CI':>20s} {'p(Holm)':>9s} "
+          f"{'AUC':>7s} {'AUC 95% CI':>16s}")
+    for i, m in enumerate(METRICS):
+        b = boots[m]
+        flag = " *" if (hp_boot[i] < a.alpha and abs(rhos[i]) >= RHO_THRESHOLD) else ""
+        print(f"{m:16s} {rhos[i]:+8.3f} "
+              f"{'[%+.3f,%+.3f]' % (b['rho_lo'], b['rho_hi']):>20s} "
+              f"{hp_boot[i]:9.4f} {aucs[i]:7.3f} "
+              f"{'[%.3f,%.3f]' % (b['auc_lo'], b['auc_hi']):>16s}{flag}")
+    print(f"\n  naive per-observation Holm p (NOT used for the decision): "
+          f"{', '.join('%s %.3f' % (m, h) for m, h in zip(METRICS, hp))}")
 
     print("\nper hand (Spearman with task success, pooled over both tasks):")
     hands = sorted(set(r["hand"] for r in rows))
@@ -115,7 +157,7 @@ def main():
         print(f"{m:16s} " + "".join(f"{c:+10.3f}" for c in cells))
 
     print("\n=== PRE-DECLARED DECISION RULE ===")
-    winners = [(m, r_, h_) for m, r_, h_ in zip(METRICS, rhos, hp)
+    winners = [(m, r_, h_) for m, r_, h_ in zip(METRICS, rhos, hp_boot)
                if h_ < a.alpha and abs(r_) >= RHO_THRESHOLD]
     eps_rho = rhos[METRICS.index("epsilon")]
     if winners:
