@@ -78,16 +78,21 @@ def main():
                                   ("b", trajB, g["task_b"])):
             t0 = time.time()
             rng = np.random.default_rng(a.seed + 1000 * i + (0 if tname == "a" else 1))
+            # one scene, reused: safe now that run_task hands gravity back,
+            # and the regression test asserts a grasp re-forms identically in a
+            # scene a task has already run in
             sc = GraspScene(g["hand"], tuple(half), mass=g["mass"], n_hands=1,
                             kp_finger=g["kp_finger"], shape=g["shape"])
+            base_mass = float(sc.m.body_mass[sc.obj_bid])
             det = one_run(sc, g, traj, rng, perturb=False)
             reps = []
             for _ in range(a.repeats):
-                sc = GraspScene(g["hand"], tuple(half), mass=g["mass"],
-                                n_hands=1, kp_finger=g["kp_finger"],
-                                shape=g["shape"])
+                sc.m.body_mass[sc.obj_bid] = base_mass   # undo the last perturb
+                mujoco.mj_setConst(sc.m, sc.d)
                 r = one_run(sc, g, traj, rng, perturb=True)
                 reps.append(None if r is None else bool(r.success))
+            sc.m.body_mass[sc.obj_bid] = base_mass
+            mujoco.mj_setConst(sc.m, sc.d)
             good = [x for x in reps if x is not None]
             unan = bool(good) and all(x == good[0] for x in good)
             det_ok = (det is not None and bool(det.success) == bool(orig))

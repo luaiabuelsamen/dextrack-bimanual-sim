@@ -2427,3 +2427,78 @@ proof that no grasp metric can predict manipulation success.
 
 Figure: `figures/g3_metrics.png` (`make g3-fig`); statistics derived from the
 saved rows, not typed in.
+
+## 2026-09-14 — G3 re-collected: the earlier null was three bugs, not a finding
+
+The first G3 dataset is **withdrawn**. A codex review plus G4's own smoke run
+found three defects, each of which suppressed real signal:
+
+1. **`run_task` leaked gravity.** `GraspScene` forms grasps weightless on
+   purpose; `run_task` switched gravity on for the carry and never handed it
+   back. Within a cell, grasp #0 was formed weightless and every grasp after it
+   under gravity. Saved grasps did not re-form.
+2. **Task B had no rotation at all.** `task_spec` moved the tilt into
+   `cmd[:,4]`, but `object_path` and `base_command` both read the angle out of
+   `cmd[:,3]` regardless. The "second wrench profile" demanded **exactly zero
+   torque** — it was one task at two speeds. `Trajectory` now carries its
+   `tilt_axis`: task A peaks at 0.01134 about x, task B at 0.03065 about y.
+3. **`hash()` is salted per process**, so the per-cell seed did not reproduce
+   the dataset across runs. Replaced with a SHA-256 digest.
+
+Inference is now clustered **by grasp**: task A and task B share a grasp, so
+316 observations are 158 clusters of 2, and ordinary p-values on the duplicated
+rows understate the variance. Spearman and AUC carry grasp-level bootstrap CIs.
+
+### The clean result (238 grasps, 4 hands x 4 shapes, 2 carry tasks)
+
+    metric              rho          rho 95% CI   p(Holm)     AUC      AUC 95% CI
+    f_total          +0.325     [+0.228,+0.407]    0.0000   0.800  [0.730,0.857] *
+    hold_N           +0.297     [+0.097,+0.472]    0.0040   0.606  [0.531,0.689]
+    margin           +0.274     [+0.162,+0.381]    0.0000   0.753  [0.656,0.843]
+    epsilon          +0.203     [+0.087,+0.323]    0.0000   0.684  [0.582,0.787]
+    margin_per_N     +0.177     [+0.080,+0.271]    0.0000   0.664  [0.575,0.747]
+    n_contacts       +0.138     [+0.027,+0.243]    0.0240   0.625  [0.525,0.720]
+    penetration_mm   -0.136     [-0.261,+0.008]    0.0627   0.375  [0.255,0.508]
+
+**The earlier headline is withdrawn.** It read "no metric predicts task
+success, epsilon at AUC 0.544". On the repaired bench epsilon reaches
+**AUC 0.684** with a CI excluding chance, and the task margin — which the
+contaminated run put at rho +0.004 — reaches **0.753**. The null was three
+bugs.
+
+### What the clean data does say
+
+Exactly one metric crosses the pre-declared rho = 0.3: **total contact force**,
+at rho +0.325 and **AUC 0.800**, the best predictor of the seven. The strongest
+single indicator of whether a grasp completes a carry is **how hard the hand is
+squeezing** — not where its contacts sit. Epsilon, the field's geometric
+quality measure, is genuinely informative but clearly weaker.
+
+That is a deflating result rather than a triumphant one, and it should be
+reported that way. It also sits awkwardly beside G2, where the arm that learned
+to squeeze 3.6x harder did *worse* — but G2 ran on the broken task B, so that
+comparison is not currently worth anything either.
+
+### Geometry interaction, unchanged by the repair
+
+    metric              box   capsule  cylinder    sphere
+    epsilon          +0.261    -0.176    +0.185    +0.226
+    margin           +0.355    -0.097    +0.317    +0.239
+
+Every metric inverts on capsules. Whatever the metrics capture, it does not
+transfer across object geometry, and that survived the bug fixes — which makes
+it the most robust observation here and the obvious next hypothesis.
+
+### f5d6 forms grasps and completes nothing
+
+60 grasps, **0 task successes on either task**. Its per-hand correlation is
+undefined because there is no variation to correlate. The placement repair let
+it grasp; it still cannot carry. Given its aperture is the narrowest of the
+four (12.73 cm) that is plausible, but it is unexplained and should not be
+quietly pooled away.
+
+### Standing caveat
+
+This is one object size, one mass, four hands, two variants of a single carry
+family, in simulation. Whether the task outcome is even reproducible is exactly
+what G4 Part A is testing; until that returns, none of the above is safe.
