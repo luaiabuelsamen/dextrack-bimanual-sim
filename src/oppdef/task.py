@@ -200,7 +200,23 @@ def run_task(scene, traj, slip_tol=0.015, drop=0.06, settle=200,
     pfx = scene.prefixes[0]
     base_q = scene.base_q[pfx]
     base_a = scene.base[pfx]
+    # Gravity is a property of the TASK, not of the scene, and must be handed
+    # back. Left on, it leaked into every subsequent grasp formed in the same
+    # scene: within a G3 cell, grasp #0 was formed weightless and every grasp
+    # after it was formed under gravity, so the dataset was internally
+    # inconsistent and saved grasps did not re-form. Found by G4's
+    # reproducibility check, which is what it was for.
+    _saved_gravity = np.array(m.opt.gravity, float)
     m.opt.gravity[:] = GRAVITY
+    try:
+        return _run_task_inner(scene, traj, m, d, pfx, base_q, base_a,
+                               slip_tol, drop, settle, min_carry)
+    finally:
+        m.opt.gravity[:] = _saved_gravity
+
+
+def _run_task_inner(scene, traj, m, d, pfx, base_q, base_a,
+                    slip_tol, drop, settle, min_carry):
 
     p0 = d.qpos[scene.obj_q:scene.obj_q + 3].copy()
     start = np.array([d.qpos[base_q[dof]] for dof in traj.dof])
