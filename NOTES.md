@@ -2207,3 +2207,90 @@ What would still rescue the original framing is a demonstration-conditioned
 quantity the object-side objective cannot reconstruct -- a required task wrench
 TRAJECTORY, not a static grasp. That is G4's task chain, and G1 says it has to
 carry the whole weight of the "human data" half of the thesis.
+
+## 2026-09-13 — G2: the demonstration does not specify the task either, and a placement bug I mis-diagnosed twice
+
+Pre-registered in `docs/G2_PREREGISTRATION.md` (commit `00a6a4f`), analysis
+committed at `6c88121` before any result existed. Run 1 was uninterpretable and
+is recorded as Amendment 1; run 2 is the result.
+
+### Run 2 (320 candidates per arm, objective normalised)
+
+    arm             P1 task   P2 hold_N   margin     eps   valid/320
+    pose_squeeze    11/36       0.224      5.61   0.1176      42.3
+    task_generic    13/36       0.471     14.25   0.2393      80.3
+    task_demo        8/36       0.180     14.77   0.1439      79.4
+
+    H1  task_demo vs pose_squeeze   discordant 4 vs 7    p = 0.549
+    H2  task_demo vs task_generic   discordant 2 vs 7    p = 0.180
+        P2 magnitude                0.180 vs 0.471 N     p = 0.0026
+
+**H2 is null on reliability and significantly NEGATIVE on magnitude.**
+Conditioning the objective on the demonstrated wrench trajectory does not help
+and makes the grasp measurably weaker. Both G1's and G2's answers to "does the
+demonstration earn its keep" are now no — once for initialisation, once for
+specification.
+
+The likely mechanism, offered as a hypothesis: the task margin is a *minimum
+over the nominal required wrenches*, which is a narrow target. Optimising it
+yields a grasp barely adequate in exactly the demanded directions, while
+execution departs from nominal — contact transitions, slip, controller lag —
+and there is no margin left for the parts the specification did not name.
+Generic epsilon, being worst-case over every direction, keeps that reserve.
+
+### H1 is null too, and the pre-declared rule required explaining why
+
+G1 found wrench objectives beating the shipped pipeline 21/60 vs 9/60 on the
+STATIC probe. On the task they do not (13/36 vs 11/36, n.s.). The diagnosis:
+
+    corr(static probe hold, task success)   Spearman +0.141
+    corr(epsilon,           task success)   Spearman +0.185
+    corr(task margin,       task success)   Spearman -0.157
+
+Group means separate strongly (successes averaged 0.636 N on the static probe
+against failures' 0.146 N), but the *ranking* barely transfers. **The static
+worst-case probe and a carry task are not the same outcome**, and a result
+established on one does not carry to the other. That is worth more than either
+null: this project spent weeks optimising against a static probe.
+
+### RETRACTION: "Shadow is a search-power limit" was wrong, twice
+
+Shadow scored 0/60 in G1 and 0/36 here, and both times I wrote that 144
+candidates in a 29-DoF space was underpowered. At 320 candidates Shadow
+produces **0.0 valid grasps**, and the rejection histogram says why:
+
+    shadow  (8640 candidates)   pregrasp_penetrating  8498  (98.4%)   valid 0
+    f5d6    (8640 candidates)   pregrasp_penetrating  8220  (95.1%)   valid 3
+    allegro (8640 candidates)   valid 3473 (40.2%)
+
+Shadow is not finding poor grasps. It is never being **placed**: the open hand
+starts inside the object and the retraction along the palm→fingertip axis
+cannot clear it — unsurprising for a hand whose model includes a forearm and
+whose grasp centre sits 25 cm from the palm body. f5d6 is the same at 95.1%.
+
+**Retracted:** every statement in this log attributing Shadow's zeros to search
+power. Two of four hands have contributed nothing to G1 or G2, for a reason in
+the placement code, and I labelled it a property of the search twice.
+
+This does not change G1's or G2's statistics — McNemar uses only discordant
+pairs, and structurally empty cells are ties — but the effective comparison in
+both was **allegro and leap**, on 18 cells, not four hands on 36 or 60.
+
+The fix is a placement routine that approaches along a ray from outside the
+object's bounding sphere rather than putting the hand's grasp centre at the
+object and retracting. That is the next thing to build, and until it exists no
+experiment here has evidence about Shadow at all.
+
+### What G2 settles and what it does not
+
+Settles: a demonstration conditioning the *objective* on a required wrench
+trajectory does not improve task success, and costs grasp strength. Together
+with G1, two independent pre-registered tests say the human demonstration is
+not earning its place in this pipeline.
+
+Does not settle: whether a demonstration helps when it supplies something other
+than a wrench requirement — contact semantics, which part of the object affords
+what, a sequence of subgoals. G2 tested one operationalisation of "specifies
+the task", not the idea.
+
+Still synthetic throughout; still two of four hands unable to be placed.
