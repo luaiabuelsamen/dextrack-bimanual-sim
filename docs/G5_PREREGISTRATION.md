@@ -31,6 +31,13 @@ grasp at all**, and a tracking reward alone will not do it.
 object against gravity for 1.0 s in **≥ 50%** of sampled frames, pooled over
 sequences.
 
+> **Amendment 1, made before the confirmatory run produced any results.** The
+> text above did not say which hand H1 is evaluated on, and three hands are
+> being run. Fixing it now rather than after the fact: **H1's gate is decided on
+> the Shadow hand**, which is the hand this pipeline targets and the one DexTrack
+> uses. LEAP and Allegro are H3 (exploratory, no decision attached). The pooled
+> all-hands rate is reported too, but does not decide the gate.
+
 **H2.** The hold rate is lower in the first 20% of the hold window (the human
 closing) than in the middle 60%. Directional, one-sided.
 
