@@ -1,0 +1,58 @@
+G5 -- retargeted grasps under gravity
+config: {'n_frames': 10, 'min_hold': 20, 'hold_s': 1.0, 'settle_s': 0.25, 'drop_m': 0.05, 'stride': 8, 'hands': ['shadow'], 'subjects': ['s1', 's2']}
+
+2730 observations over 273 sequence-clusters, 51 objects, 1 hand(s)
+
+H1  hold rate 697/2730 = 0.255
+    Wilson (ignores clustering) [0.239, 0.272]
+    clustered bootstrap         [0.217, 0.294]
+    threshold 0.50  ->  FAIL
+
+H2  early (<= 20% of window) 0.278  n=572
+    middle                        0.260  n=1612
+    middle - early = -0.018  [-0.060, +0.022]
+    -> not supported
+
+H3  (exploratory; no decision rule attached)
+    shadow     697/2730 = 0.255  [0.217, 0.294]
+
+    by intent:
+      browse         16/  20 = 0.800  (1 sequences)
+      call            8/  20 = 0.400  (1 sequences)
+      clean          17/  20 = 0.850  (1 sequences)
+      cook            3/  20 = 0.150  (2 sequences)
+      drink          81/ 130 = 0.623  (10 sequences)
+      eat             3/  40 = 0.075  (2 sequences)
+      fly             6/  20 = 0.300  (1 sequences)
+      inspect        51/ 330 = 0.155  (19 sequences)
+      lift          153/ 620 = 0.247  (46 sequences)
+      offhand        63/ 380 = 0.166  (38 sequences)
+      open            0/  10 = 0.000  (1 sequences)
+      pass          131/ 610 = 0.215  (44 sequences)
+      peel            9/  20 = 0.450  (1 sequences)
+      play           22/  50 = 0.440  (3 sequences)
+      pour           20/  30 = 0.667  (3 sequences)
+      see             6/  20 = 0.300  (2 sequences)
+      set             1/  20 = 0.050  (2 sequences)
+      squeeze         1/  20 = 0.050  (1 sequences)
+      stamp           1/  20 = 0.050  (1 sequences)
+      staple         23/  40 = 0.575  (2 sequences)
+      switchON        4/  40 = 0.100  (2 sequences)
+      takepicture    16/  40 = 0.400  (3 sequences)
+      toast          16/  30 = 0.533  (2 sequences)
+      use            45/ 170 = 0.265  (11 sequences)
+      wear            1/  10 = 0.100  (1 sequences)
+
+    worst objects (>= 3 sequences):
+      spherelarge    0.000  (70 obs, 4 seqs)
+      spheremedium   0.000  (50 obs, 4 seqs)
+      cubelarge      0.014  (70 obs, 4 seqs)
+      cylindermedium 0.017  (60 obs, 4 seqs)
+      cubemedium     0.020  (50 obs, 3 seqs)
+      stamp          0.020  (50 obs, 4 seqs)
+      toothpaste     0.020  (50 obs, 3 seqs)
+      pyramidlarge   0.029  (70 obs, 5 seqs)
+
+    contacts at reset: held 17.4  fell 0.1
+    contact err (mm):  held 1.6  fell -3.3
+    penetration (mm):  held 12.0  fell 8.0
