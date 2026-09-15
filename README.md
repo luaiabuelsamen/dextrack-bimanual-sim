@@ -227,14 +227,15 @@ hands are within 5 mm of the object at once — `results/grab_inventory.json`:
 the bimanual stage trains on. "Bimanual" here is measured contact, not the fact
 that GRAB happens to track two hands.
 
-![two Shadow hands on a bowl](figures/bimanual_bowl_drink_1.gif)
-
-*`s1/bowl_drink_1` retargeted onto **two** Shadow hands — a real left model from
-Menagerie, not a mirrored right one, since negating a coordinate flips every
-joint axis and the handedness of every collision mesh. 4.1 mm (right) and
-13.9 mm (left) to the human's own contact points, over 131 frames of
-simultaneous two-hand contact. Forearms faded for visibility; kinematic
-playback.*
+The **robot** side of this does not work yet, and there is deliberately no
+picture of it here. Two Shadow hands are built and simulated together
+(`scene.build_bimanual`, real left models from Menagerie rather than a mirrored
+right one), but the two hands are retargeted in separate single-hand scenes, so
+neither solver sees the other: on `gamecontroller_play_1` they interpenetrate by
+11.7 mm across 42 contacts and the left pushes the right clean off the object.
+Separating them along the contact normal removes the interpenetration and makes
+tracking *worse* (105 mm → 255 m), which says the two poses are mutually
+inconsistent rather than merely overlapping. See [NOTES](NOTES.md).
 
 Two things had to be fixed before this picture was honest:
 

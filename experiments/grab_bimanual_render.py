@@ -67,13 +67,13 @@ def render(row, hand_r="shadow", hand_l="shadow_left", stride=8,
     for gi in range(m.ngeom):
         bn = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_BODY,
                                int(m.geom_bodyid[gi])) or ""
-        if "forearm" in bn or "wrist" in bn:
-            m.geom_rgba[gi] = [0.35, 0.35, 0.38, 0.18]
+        if "forearm" in bn:
+            m.geom_rgba[gi] = [0, 0, 0, 0]
     for gi in (g for sd in ("r", "l") for g in []):
         pass
 
     cam = mujoco.MjvCamera()
-    cam.distance, cam.azimuth, cam.elevation = 0.36, 125.0, -18.0
+    cam.distance, cam.azimuth, cam.elevation = 0.62, 145.0, -20.0
     ren = mujoco.Renderer(m, height=h, width=w)
 
     # joint-name mapping from each fitting scene to the bimanual scene
