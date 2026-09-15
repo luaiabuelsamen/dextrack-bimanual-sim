@@ -526,10 +526,10 @@
   "evaluator_replay_max_difference_m": 0.0,
   "model_sha256": "71a57db20fa3d3092777a5e3fce0f75d44839b80a4afd85bebcbb8b3a832d649",
   "gif": "figures/physics_binoculars.gif",
-  "gif_sha256": "5a2b8909a991210ad2283ed214089e7373ae671ba0d91df0d728eac55c04890a",
+  "gif_sha256": "287441718e3229aea46e88be89475ba8144d8c3f065674e1637c5ccc89d7d8ec",
   "gif_frames": 138,
   "gif_duration_ms": 9200,
-  "renderer_sha256": "3c7b6cd6903485baaea3f15eb5c194369b959070230668c546fe1db0c312de98",
+  "renderer_sha256": "f6573de877760327e5bbfb825ea6f144278c5e184a3e94f4df4a456787e06a8a",
   "camera": "Follows the reference object position",
   "presentation": "Display-only hand/object recolouring; forearms hidden; cyan reference path, amber measured object path"
 }

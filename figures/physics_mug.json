@@ -436,10 +436,10 @@
   "evaluator_replay_max_difference_m": 0.0,
   "model_sha256": "664d911610e214ad6a5961788a655c39831254fcdb22ff1a9d7f6b020623e0f2",
   "gif": "figures/physics_mug.gif",
-  "gif_sha256": "0c8b6576aa118454440984938d122b385be35f6d209d291c184eaac5de1cdb9c",
+  "gif_sha256": "8fde6da280993e0a31ae563639bb07769fec492f085950190482f164dcaa82f5",
   "gif_frames": 111,
   "gif_duration_ms": 7400,
-  "renderer_sha256": "3c7b6cd6903485baaea3f15eb5c194369b959070230668c546fe1db0c312de98",
+  "renderer_sha256": "f6573de877760327e5bbfb825ea6f144278c5e184a3e94f4df4a456787e06a8a",
   "camera": "Follows the reference object position",
   "presentation": "Display-only hand/object recolouring; forearms hidden; cyan reference path, amber measured object path"
 }
