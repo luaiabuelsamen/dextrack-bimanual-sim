@@ -154,11 +154,15 @@ measurement, not on the previous stage having compiled:
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
 | 2. retarget | human contact points → robot joint trajectory | **done** — ~13 mm to the human's contacts, 0 mm penetration after settling |
-| 3. per-reference tracking | feedforward + MPPI, one solution per clip | **working** — 11.9 mm over 59 frames; MPPI rescues marginal starts |
-| 4. homotopy curriculum | solve an easier reference, deform it into the hard one | not started |
-| 5. distillation | one neural tracking controller across references | not started |
-| 6. bimanual | both hands on one object | reference + retarget **done** for both hands; 136 of 291 sequences are bimanual |
-| 7. perception | depth → pose estimator → evaluate the *frozen* tracker | not started |
+| 3. per-reference tracking | feedforward + MPPI, one solution per clip | **built** — tracks 116/116 frames at 35.3 mm; 21/24 frames hold unaided |
+| 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
+| 5. distillation | one neural tracking controller across references | **built** — 87-dim object-relative obs, held out by object |
+| 6. bimanual | both hands on one object | **built** — two hands in one physics scene; 136 of 291 sequences are bimanual |
+| 7. perception | depth → pose estimator → evaluate the *frozen* tracker | **built** — and it already says something (below) |
+
+Every number in this section is from the **corrected** pipeline. An earlier set
+was computed with the object's rotation transposed and is
+[retracted](NOTES.md).
 
 ## From human motion to a robot hand
 
@@ -264,6 +268,23 @@ number: the retargeter targeted fingertip **body origins**, and Shadow's real
 tip is 32–36 mm beyond one, so the tip geom was buried by its own radius —
 **4469 N** of contact force on a 0.2 kg mug. Targeting the derived tip gives
 64 N and zero penetration.
+
+### Stage 7: the estimator's error is structured, and that is the finding
+
+The controller is frozen and only the object pose it reads is swapped. Scored on
+the truth in every condition, on `mug_drink_1`:
+
+| pose the controller reads | pose error | tracking error | outcome |
+|---|---|---|---|
+| simulator ground truth | — | 101.5 mm | held |
+| **ICP on rendered depth** | 38.4 mm | **637.3 mm** | **dropped** |
+| ground truth + Gaussian noise | **61.8 mm** | 102.5 mm | held |
+
+Random error *larger* than the estimator's costs almost nothing, while the
+estimator's own error destroys tracking. So ICP's error is **structured** —
+biased and drifting, not random — and the fix is perception, not control. The
+noise condition exists precisely to separate those two, and neither of the other
+two rows can distinguish them alone.
 
 **Retargeting cannot be done in the dataset's world frame.** GRAB puts the
 object 0.8–1.7 m above the origin while the floating hand base has 0.6 m of
