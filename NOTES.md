@@ -3132,3 +3132,33 @@ the second added a wide exponential and a linear term. On the training
 distribution v2 is clearly good (median 7.9 mm); on the long rollout it is worse
 than v1 (12413 vs 10535 mm). Both sit inside the same out-of-distribution
 artifact, so the comparison between them is not worth much.
+
+## 2026-09-15 — DAgger does not fix stage 5, and the reason is the expert
+
+Plain cloning fails in the loop because the training set contains only states
+the expert visited. DAgger is the textbook answer: roll the policy out, relabel
+the states it actually reached, retrain. Ten references, three rounds, held out
+by object:
+
+    round   transitions   gamecontroller   camera   knife
+      0         972           523 mm       1096 mm   164 mm
+      1        1944           664 mm       1330 mm   469 mm
+      2        2916           942 mm       1848 mm  1124 mm
+
+**Every round is worse than the last.** That is not a tuning failure, it is the
+wrong expert. DAgger assumes the expert can say what to do from a state the
+policy wandered into. Mine is the feedforward, which is a function of the frame
+index alone -- it does not observe the object, and its command from a drifted
+state is the same command it would give from a good one. Relabelling
+off-distribution states with an action that does not recover teaches the policy
+that no recovery is needed, and the dataset fills up with exactly that lesson.
+
+So stage 5 needs a CLOSED-LOOP expert, and the cheapness that made this
+attractive -- relabelling costs one FK call because the expert is a function of
+k -- is precisely the property that makes it useless. MPPI and PPO both qualify
+and both cost a real query per label.
+
+Worth recording: round 0 here (plain cloning, 164-1096 mm) is far better than
+the earlier cloning result (3180-23549 mm), because this pipeline establishes a
+grip and synthesises a grasp first. The earlier number was measuring a bad
+starting state as much as a bad policy.

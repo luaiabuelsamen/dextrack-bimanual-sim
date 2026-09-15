@@ -247,3 +247,114 @@ def policy_rollout(rt, model, start=None):
             mujoco.mj_step(m, d)
         errs.append(rt.error(k)[0])
     return np.array(errs)
+
+
+def expert_label(rt, k):
+    """The expert's command at reference frame k, in the policy's output space.
+
+    The expert here is the feedforward, which is a function of the frame index
+    alone. That is what makes DAgger cheap in this setting: relabelling a state
+    the policy wandered into costs one forward-kinematics call, not a fresh run
+    of the trajectory optimiser. The expensive part of DAgger is usually the
+    expert query, and here there isn't one.
+    """
+    import mujoco
+
+    k = int(np.clip(k, 0, rt.T - 1))
+    op, oq = rt.true_obj_pose()
+    R = np.zeros(9)
+    mujoco.mju_quat2Mat(R, oq)
+    R = R.reshape(3, 3)
+    pp = R.T @ (rt.P[k] - op)
+    rel = np.zeros(4)
+    mujoco.mju_mulQuat(rel, np.array([oq[0], -oq[1], -oq[2], -oq[3]]), rt.Q[k])
+    fing = rt.ctrl_for(rt.vals[k]) + rt._grip_offset
+    return np.concatenate([pp, rel, fing])
+
+
+def dagger(refs, rounds=3, epochs=200, holdout_frac=0.3, seed=0,
+           hand="shadow", beta0=1.0, verbose=True):
+    """Iterate behaviour cloning on the states the POLICY visits.
+
+    Plain cloning failed in the loop and the reason is standard: the training
+    set contains only states the expert visited, so the first command error
+    takes the policy somewhere it has never seen and nothing after that is
+    in distribution. Measured, the cloned policy dropped the object on every
+    held-out reference while the expert it cloned tracked them to 18-31 mm.
+
+    Each round rolls the current policy out, relabels every state it actually
+    reached with the expert's command there, and retrains on the union. Round 0
+    is ordinary cloning, so any improvement afterwards is attributable to the
+    on-policy states rather than to more data in general.
+    """
+    import mujoco
+    from oppdef.human import grab, track
+    from oppdef.learning.bc import train as bc_train, policy_fn
+
+    built = []
+    for r in refs:
+        seq = grab.load(f"{r['subject']}/{r['seq']}.npz", verts=True, stride=8)
+        rt = track.ReferenceTracker(seq, hand=hand)
+        rt.synthesize_grasp()
+        gf = rt.grasp_frames()
+        if len(gf) == 0:
+            continue
+        built.append((rt, int(gf[0]), r["object"]))
+    if not built:
+        return None, []
+
+    objs = sorted({o for _rt, _k, o in built})
+    rng = np.random.default_rng(seed)
+    rng.shuffle(objs)
+    n_test = max(1, int(round(holdout_frac * len(objs))))
+    test = set(objs[:n_test])
+    train_set = [(rt, k, o) for rt, k, o in built if o not in test]
+    test_set = [(rt, k, o) for rt, k, o in built if o in test]
+    if verbose:
+        print(f"{len(built)} references, holding out objects {sorted(test)}",
+              flush=True)
+
+    O, A = [], []
+    model, hist = None, []
+    for rnd in range(rounds):
+        for rt, k0, _o in train_set:
+            rt.reset_at(k0)
+            beta = beta0 if rnd == 0 else 0.0
+            act = policy_fn(model) if model is not None else None
+            for k in range(k0, rt.T):
+                o = rt.observe(k)
+                O.append(o)
+                A.append(expert_label(rt, k))
+                if act is None or rng.random() < beta:
+                    rt.apply(k)                      # expert drives
+                else:
+                    y = act(o.astype(np.float32))    # the policy drives
+                    op, oq = rt.true_obj_pose()
+                    R = np.zeros(9)
+                    mujoco.mju_quat2Mat(R, oq)
+                    R = R.reshape(3, 3)
+                    pw = R @ y[:3] + op
+                    qn = y[3:7] / max(np.linalg.norm(y[3:7]), 1e-9)
+                    qw = np.zeros(4)
+                    mujoco.mju_mulQuat(qw, oq, qn)
+                    rt.mh.command(pw, qw)
+                    rt.sim.data.ctrl[:] = np.clip(
+                        y[7:], rt.sim.model.actuator_ctrlrange[:, 0],
+                        rt.sim.model.actuator_ctrlrange[:, 1])
+                for _ in range(rt.ctrl_every):
+                    mujoco.mj_step(rt.sim.model, rt.sim.data)
+
+        Oa = np.array(O, np.float32)
+        Aa = np.array(A, np.float32)
+        model = bc_train(Oa, Aa, seed=seed, epochs=epochs)
+        scores = []
+        for rt, k0, o in test_set:
+            pe = policy_rollout(rt, model, start=k0)
+            scores.append((o, float(pe.mean())))
+        hist.append({"round": rnd, "n": len(Oa),
+                     "held_out": {o: round(v * 1000, 1) for o, v in scores}})
+        if verbose:
+            print(f"  round {rnd}: {len(Oa)} transitions  held-out "
+                  + "  ".join(f"{o} {v*1000:.0f} mm" for o, v in scores),
+                  flush=True)
+    return model, hist
