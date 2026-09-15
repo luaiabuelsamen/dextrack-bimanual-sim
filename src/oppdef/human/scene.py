@@ -81,6 +81,39 @@ def _decimate(v: np.ndarray, f: np.ndarray, n: int = MAX_HULL_VERTS):
         return v[::step], None
 
 
+def _add_object(spec, obj: str, obj_static: bool, convex_parts: bool):
+    """Add a GRAB object as one body with one geom per convex part.
+
+    A single mesh geom would be collided as its convex hull, which for these
+    objects encloses up to 3.5x the true volume -- see oppdef.human.decompose.
+    """
+    from oppdef.human.decompose import decompose
+
+    parts = decompose(obj) if convex_parts else None
+    if parts is None:
+        v, f = grab_mod._ply(
+            paths.GRAB / "tools" / "object_meshes" / "contact_meshes" / f"{obj}.ply")
+        parts = [_decimate(v, f)[0]]
+
+    body = spec.worldbody.add_body()
+    body.name = f"obj_{obj}"
+    if not obj_static:
+        body.add_freejoint()
+    for i, pv in enumerate(parts):
+        if len(pv) < 4:
+            continue
+        mesh = spec.add_mesh()
+        mesh.name = f"grab_{obj}_{i}"
+        mesh.uservert = np.asarray(pv, float).flatten().tolist()
+        g = body.add_geom()
+        g.name = f"objgeom_{obj}_{i}"
+        g.type = mujoco.mjtGeom.mjGEOM_MESH
+        g.meshname = f"grab_{obj}_{i}"
+        g.rgba = [0.75, 0.75, 0.78, 1.0]
+        g.condim = 4
+    return body
+
+
 def _mocap_parent(hand: str):
     """A hand on a FREE joint, driven by a welded mocap body.
 
@@ -149,33 +182,7 @@ def build(hand: str = "shadow", obj: str = "mug", free_base: bool = True,
     spec.visual.global_.offwidth = max(spec.visual.global_.offwidth, 1024)
     spec.visual.global_.offheight = max(spec.visual.global_.offheight, 1024)
 
-    # One body, one geom per convex part. A single mesh geom would be
-    # collided as its convex hull, which for these objects encloses up to 3.5x
-    # the true volume -- see oppdef.human.decompose.
-    from oppdef.human.decompose import decompose
-
-    parts = decompose(obj) if convex_parts else None
-    if parts is None:
-        v, f = grab_mod._ply(
-            paths.GRAB / "tools" / "object_meshes" / "contact_meshes" / f"{obj}.ply")
-        parts = [_decimate(v, f)[0]]
-
-    body = spec.worldbody.add_body()
-    body.name = f"obj_{obj}"
-    if not obj_static:
-        body.add_freejoint()
-    for i, pv in enumerate(parts):
-        if len(pv) < 4:
-            continue
-        mesh = spec.add_mesh()
-        mesh.name = f"grab_{obj}_{i}"
-        mesh.uservert = np.asarray(pv, float).flatten().tolist()
-        g = body.add_geom()
-        g.name = f"objgeom_{obj}_{i}"
-        g.type = mujoco.mjtGeom.mjGEOM_MESH
-        g.meshname = f"grab_{obj}_{i}"
-        g.rgba = [0.75, 0.75, 0.78, 1.0]
-        g.condim = 4
+    _add_object(spec, obj, obj_static, convex_parts)
 
     model = spec.compile()
     data = mujoco.MjData(model)
@@ -248,3 +255,109 @@ def build(hand: str = "shadow", obj: str = "mug", free_base: bool = True,
                        tip_gids=tip_gids, qadr=qadr, jids=jids,
                        base_kind=base, mocap_bid=mocap_bid, base_bid=base_bid,
                        obj_bid=obj_bid)
+
+
+@dataclass
+class BimanualScene:
+    """Two hands and one GRAB object, in the object frame."""
+    model: mujoco.MjModel
+    data: mujoco.MjData
+    spec: mujoco.MjSpec
+    obj_gids: list[int]
+    obj_bid: int
+    #: per side ("r" / "l")
+    palm_bid: dict
+    tip_bids: dict
+    hand_gids: dict
+    jids: dict
+    qadr: dict
+    free_q: dict
+    mocap_bid: dict
+
+    def set_side(self, side: str, q):
+        self.data.qpos[self.qadr[side]] = q
+
+
+def build_bimanual(hand_r: str = "shadow", hand_l: str = "shadow_left",
+                   obj: str = "mug", obj_static: bool = True,
+                   convex_parts: bool = True) -> BimanualScene:
+    """Two free-jointed hands, each welded to its own mocap body.
+
+    Registered left models are used rather than a mirrored right one: negating
+    a coordinate to make a left hand flips the sign of every joint axis and the
+    handedness of every collision mesh, and Menagerie ships real left models.
+
+    136 of GRAB's 291 sequences have both hands on the object at once, and 63
+    hold that for 15 consecutive frames or more, so this is what the bimanual
+    stage is built against.
+    """
+    from oppdef.embodiment import HANDS, hand_spec
+
+    spec = mujoco.MjSpec()
+    spec.visual.global_.offwidth = max(spec.visual.global_.offwidth, 1024)
+    spec.visual.global_.offheight = max(spec.visual.global_.offheight, 1024)
+    spec.worldbody.add_light(
+        pos=[0.2, -0.2, 1.2], dir=[-0.2, 0.2, -1.0],
+        type=int(mujoco.mjtLightType.mjLIGHT_DIRECTIONAL),
+        diffuse=[0.8, 0.8, 0.8], ambient=[0.45, 0.45, 0.45])
+
+    sides = {"r": hand_r, "l": hand_l}
+    for sd, key in sides.items():
+        h = HANDS[key]
+        base = spec.worldbody.add_body(name=f"{sd}_base")
+        base.add_freejoint()
+        base.add_geom(type=mujoco.mjtGeom.mjGEOM_SPHERE, size=[0.005, 0, 0],
+                      rgba=[0, 0, 0, 0], contype=0, conaffinity=0, mass=0.01)
+        spec.attach(hand_spec(h), prefix=f"{sd}_", frame=base.add_frame())
+        mc = spec.worldbody.add_body(name=f"{sd}_mocap", mocap=True)
+        mc.add_geom(type=mujoco.mjtGeom.mjGEOM_BOX, size=[0.01, 0.01, 0.01],
+                    rgba=[0.9, 0.2, 0.2, 0.0], contype=0, conaffinity=0)
+        eq = spec.add_equality()
+        eq.type = mujoco.mjtEq.mjEQ_WELD
+        eq.objtype = mujoco.mjtObj.mjOBJ_BODY
+        eq.name1, eq.name2 = f"{sd}_mocap", f"{sd}_base"
+        eq.data[:7] = [0, 0, 0, 1, 0, 0, 0]
+        eq.solref[:2] = [0.01, 1.0]
+
+    _add_object(spec, obj, obj_static, convex_parts)
+    model = spec.compile()
+    data = mujoco.MjData(model)
+
+    obj_bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, f"obj_{obj}")
+    obj_gids = [i for i in range(model.ngeom) if model.geom_bodyid[i] == obj_bid]
+
+    palm_bid, tip_bids, hand_gids, jids, qadr, free_q, mocap = {}, {}, {}, {}, {}, {}, {}
+    for sd, key in sides.items():
+        h = HANDS[key]
+        palm = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY,
+                                 f"{sd}_{h.palm}")
+        base_bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, f"{sd}_base")
+
+        def under(b, root=palm):
+            while b > 0:
+                if b == root:
+                    return True
+                b = int(model.body_parentid[b])
+            return False
+
+        palm_bid[sd] = palm
+        tip_bids[sd] = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY,
+                                          f"{sd}_{t}") for t in h.tip_names]
+        hand_gids[sd] = [i for i in range(model.ngeom)
+                         if under(int(model.geom_bodyid[i]))]
+        jids[sd] = [j for j in range(model.njnt)
+                    if model.jnt_type[j] not in (mujoco.mjtJoint.mjJNT_FREE,
+                                                 mujoco.mjtJoint.mjJNT_BALL)
+                    and under(int(model.jnt_bodyid[j]))]
+        qadr[sd] = np.array([model.jnt_qposadr[j] for j in jids[sd]])
+        free_q[sd] = int(model.jnt_qposadr[
+            [j for j in range(model.njnt)
+             if model.jnt_type[j] == mujoco.mjtJoint.mjJNT_FREE
+             and int(model.jnt_bodyid[j]) == base_bid][0]])
+        mocap[sd] = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY,
+                                      f"{sd}_mocap")
+
+    return BimanualScene(model=model, data=data, spec=spec, obj_gids=obj_gids,
+                         obj_bid=obj_bid, palm_bid=palm_bid, tip_bids=tip_bids,
+                         hand_gids=hand_gids, jids=jids, qadr=qadr,
+                         free_q=free_q, mocap_bid=mocap)

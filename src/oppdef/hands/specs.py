@@ -37,6 +37,18 @@ SPECS = {
                    tips=["rh_ffdistal", "rh_mfdistal", "rh_rfdistal",
                          "rh_lfdistal"],
                    thumb="rh_thdistal", note="Shadow Hand, 24 DoF"),
+    "leap_left": dict(kind="mjcf", path=MENAGERIE / "leap_hand/left_hand.xml",
+                      palm="palm", tips=["if_ds", "mf_ds", "rf_ds"],
+                      thumb="th_ds", note="LEAP left, 16 DoF"),
+    "allegro_left": dict(kind="mjcf",
+                         path=MENAGERIE / "wonik_allegro/left_hand.xml",
+                         palm="palm", tips=["ff_tip", "mf_tip", "rf_tip"],
+                         thumb="th_tip", note="Allegro left, 16 DoF"),
+    "shadow_left": dict(kind="mjcf", path=MENAGERIE / "shadow_hand/left_hand.xml",
+                        palm="lh_palm",
+                        tips=["lh_ffdistal", "lh_mfdistal", "lh_rfdistal",
+                              "lh_lfdistal"],
+                        thumb="lh_thdistal", note="Shadow left, 24 DoF"),
     "f5d6": dict(kind="urdf", path=VEGA_URDF, palm="R_arm_l7",
                  # the REAL tips, 27.6-50.0 mm beyond the distal joint
                  # origins that were tracked before. Those origins are the

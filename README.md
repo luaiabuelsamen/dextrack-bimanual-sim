@@ -157,7 +157,7 @@ measurement, not on the previous stage having compiled:
 | 3. per-reference tracking | RL + trajectory optimisation, one controller per clip | gated on **G5** |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | not started |
 | 5. distillation | one neural tracking controller across references | not started |
-| 6. bimanual | both hands on one object | **136 of 291** GRAB sequences are bimanual; 63 hold with both hands for ≥15 frames |
+| 6. bimanual | both hands on one object | reference + retarget **done** for both hands; 136 of 291 sequences are bimanual |
 | 7. perception | depth → pose estimator → evaluate the *frozen* tracker | not started |
 
 ## From human motion to a robot hand
@@ -209,6 +209,15 @@ hands are within 5 mm of the object at once — `results/grab_inventory.json`:
 63 of those hold with both hands for ≥15 consecutive frames, which is the subset
 the bimanual stage trains on. "Bimanual" here is measured contact, not the fact
 that GRAB happens to track two hands.
+
+![two Shadow hands on a bowl](figures/bimanual_bowl_drink_1.gif)
+
+*`s1/bowl_drink_1` retargeted onto **two** Shadow hands — a real left model from
+Menagerie, not a mirrored right one, since negating a coordinate flips every
+joint axis and the handedness of every collision mesh. 4.1 mm (right) and
+13.9 mm (left) to the human's own contact points, over 131 frames of
+simultaneous two-hand contact. Forearms faded for visibility; kinematic
+playback.*
 
 Two things had to be fixed before this picture was honest:
 

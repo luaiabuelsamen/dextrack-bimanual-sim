@@ -60,9 +60,21 @@ HANDS = {
     "allegro": Hand("allegro", "menagerie", "wonik_allegro/right_hand.xml", "palm",
                     ("ff_tip", "mf_tip", "rf_tip"), "th_tip", 16,
                     "Wonik Allegro, 16 DoF"),
+    "allegro_left": Hand("allegro_left", "menagerie", "wonik_allegro/left_hand.xml",
+                         "palm", ("ff_tip", "mf_tip", "rf_tip"), "th_tip", 16,
+                         "Wonik Allegro left, 16 DoF"),
     "shadow": Hand("shadow", "menagerie", "shadow_hand/right_hand.xml", "rh_palm",
                    ("rh_ffdistal", "rh_mfdistal", "rh_rfdistal", "rh_lfdistal"),
                    "rh_thdistal", 24, "Shadow Hand, 24 DoF"),
+    # GRAB records both hands and 136 of its 291 sequences have both on the
+    # object at once, so the left hands are registered rather than mirrored at
+    # use time: Menagerie ships a real left model for each of these, and
+    # mirroring a right one by negating a coordinate silently flips the sign of
+    # every joint axis and the handedness of the collision meshes.
+    "shadow_left": Hand("shadow_left", "menagerie", "shadow_hand/left_hand.xml",
+                        "lh_palm",
+                        ("lh_ffdistal", "lh_mfdistal", "lh_rfdistal", "lh_lfdistal"),
+                        "lh_thdistal", 24, "Shadow Hand left, 24 DoF"),
     # tips are the URDF's real tip frames, not the distal joint origins that
     # were tracked before (those do not move when the distal joint moves).
     # Six INDEPENDENT joints; the other five follow by mimic. See hands/f5d6.py.
@@ -70,7 +82,15 @@ HANDS = {
                  ("R_ff_l2", "R_mf_l2", "R_rf_l2", "R_lf_l2"), "R_th_l2",
                  6, "Dexmate f5d6, 6 independent joints (5 mimic-coupled)",
                  joint_prefix="R_"),
+    "f5d6_left": Hand("f5d6_left", "urdf", str(VEGA_URDF), "L_arm_l7",
+                      ("L_ff_l2", "L_mf_l2", "L_rf_l2", "L_lf_l2"), "L_th_l2",
+                      6, "Dexmate f5d6 left, 6 independent joints",
+                      joint_prefix="L_"),
 }
+
+#: right-hand key -> left-hand key, for the bimanual stage
+MIRROR = {"shadow": "shadow_left", "leap": "leap_left",
+          "allegro": "allegro_left", "f5d6": "f5d6_left"}
 
 ARMS = {
     "ur5e": Arm("ur5e", "universal_robots_ur5e/ur5e.xml", "attachment_site", 6,
