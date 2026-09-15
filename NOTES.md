@@ -3162,3 +3162,39 @@ Worth recording: round 0 here (plain cloning, 164-1096 mm) is far better than
 the earlier cloning result (3180-23549 mm), because this pipeline establishes a
 grip and synthesises a grasp first. The earlier number was measuring a bad
 starting state as much as a bad policy.
+
+## 2026-09-15 — stage 5: four DAgger variants, and round 0 wins every time
+
+Held-out-object tracking error (mm), 10 references, objects held out:
+
+    variant                          round 0   round 1   round 2
+    feedforward expert                 594      821      1305
+    MPPI expert (closed loop)          594      672      1396
+    MPPI + drop-lost-states filter   18431    21034        --
+    MPPI + beta decay, no filter       594      751      3012
+
+(means over camera / gamecontroller / knife.)
+
+**Plain cloning is the best of the four, and every iteration makes it worse.**
+That is a reproducible negative across expert choice, beta schedule and state
+filtering, not a tuning accident.
+
+The MPPI expert does help where the theory says it should -- round 1 improves on
+the feedforward expert (672 vs 821, and gamecontroller 443 vs 664 mm) because it
+can say how to get back from a drifted state, which the feedforward cannot. It
+just is not enough to stop the compounding.
+
+The filter row is my own bug and is kept as one. Dropping states whose tracking
+error exceeds 12 cm looked like removing hopeless data; applied in round 0 as
+well, it removed the states the EXPERT visits late in an episode, where its own
+error naturally grows, and left a policy that had never seen the end of a
+trajectory. Held-out error went from 523 mm to 17994 mm on a dataset only 20%
+smaller. Fixed to apply only to policy-driven rounds.
+
+So stage 5 does not work. Round 0 reaches 164-1096 mm on held-out objects
+against an expert that tracks the same references to 18-31 mm, and no DAgger
+variant closes it. What has NOT been tried is distilling the PPO policy itself
+rather than a trajectory optimiser -- which is what DexTrack actually does, and
+which now has a working stage 3 to draw from. That costs one PPO run per
+reference (~50 min here) and is the honest next step rather than another
+relabelling scheme.

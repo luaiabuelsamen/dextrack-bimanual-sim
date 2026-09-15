@@ -272,8 +272,58 @@ def expert_label(rt, k):
     return np.concatenate([pp, rel, fing])
 
 
+def mppi_expert_label(rt, k, horizon=3, samples=12, sigma_pos=0.004,
+                      sigma_rot=0.03, sigma_fin=0.05, rho=1.0, rng=None):
+    """A CLOSED-LOOP expert label: the feedforward plus an MPPI correction
+    optimised from the state the policy actually reached.
+
+    This is the piece DAgger needs and the feedforward cannot supply. The
+    feedforward is a function of the frame index alone, so from a drifted state
+    it recommends exactly what it would recommend from a good one -- relabelling
+    with it taught the policy that no recovery is needed, and every DAgger round
+    got worse (camera 1096 -> 1330 -> 1848 mm). MPPI re-optimises here, from
+    this state, so its label says how to get BACK.
+
+    One label costs one short MPPI solve: horizon x samples x ctrl_every MuJoCo
+    steps, about 0.1 s. That is the honest price of a closed-loop expert, and it
+    is why the cheap version was tried first.
+    """
+    import mujoco
+
+    rng = rng or np.random.default_rng(0)
+    n_fin = rt.n_action - 6
+    scale = np.concatenate([np.full(3, sigma_pos), np.full(3, sigma_rot),
+                            np.full(n_fin, sigma_fin)])
+    state = rt.save()
+    cand = rng.normal(size=(samples, horizon, rt.n_action)) * scale
+    cand[0] = 0.0
+    cost = np.empty(samples)
+    for i in range(samples):
+        rt.restore(state)
+        c = 0.0
+        for h in range(horizon):
+            rt.apply(k + h, cand[i, h])
+            for _ in range(rt.ctrl_every):
+                mujoco.mj_step(rt.sim.model, rt.sim.data)
+            pe, re = rt.error(k + h)
+            c += pe + 0.1 * re + (2.0 if pe > 0.10 else 0.0)
+        cost[i] = c
+    lam = max(rho * float(np.std(cost)), 1e-6)
+    w = np.exp(-(cost - cost.min()) / lam)
+    w /= w.sum()
+    best = np.einsum("i,iha->ha", w, cand)[0]
+    rt.restore(state)
+    lab = expert_label(rt, k)
+    # fold the correction into the absolute command the policy emits
+    lab[:3] = lab[:3] + best[:3]
+    lab[7:] = lab[7:] + best[6:]
+    return lab, best
+
+
 def dagger(refs, rounds=3, epochs=200, holdout_frac=0.3, seed=0,
-           hand="shadow", beta0=1.0, verbose=True):
+           hand="shadow", beta0=1.0, verbose=True, expert="feedforward",
+           mppi_samples=12, mppi_horizon=3, beta_decay=0.5,
+           keep_below_m=None):
     """Iterate behaviour cloning on the states the POLICY visits.
 
     Plain cloning failed in the loop and the reason is standard: the training
@@ -319,12 +369,32 @@ def dagger(refs, rounds=3, epochs=200, holdout_frac=0.3, seed=0,
     for rnd in range(rounds):
         for rt, k0, _o in train_set:
             rt.reset_at(k0)
-            beta = beta0 if rnd == 0 else 0.0
+            # Geometric decay, as DAgger specifies. Dropping straight to 0
+            # after round 0 let the untrained policy drive the whole episode,
+            # so the dataset filled with states where the object was ALREADY
+            # lost -- which no expert can recover and which therefore teach
+            # nothing. Both expert variants collapsed at round 2 that way
+            # (camera 1399 -> 2206 mm).
+            beta = beta0 * (beta_decay ** rnd)
             act = policy_fn(model) if model is not None else None
             for k in range(k0, rt.T):
                 o = rt.observe(k)
-                O.append(o)
-                A.append(expert_label(rt, k))
+                # Filter only the states the POLICY drove into. Applying this
+                # in round 0 as well removed the states the EXPERT visits late
+                # in an episode, where its own error naturally grows, and left
+                # a policy that had never seen the end of a trajectory: held-out
+                # error went from 523 mm to 17994 mm on a 20% smaller dataset.
+                keep = (rnd == 0 or keep_below_m is None
+                        or rt.error(k)[0] < keep_below_m)
+                if keep:
+                    O.append(o)
+                if keep and expert == "mppi" and rnd > 0:
+                    lab, _corr = mppi_expert_label(
+                        rt, k, horizon=mppi_horizon, samples=mppi_samples,
+                        rng=rng)
+                    A.append(lab)
+                elif keep:
+                    A.append(expert_label(rt, k))
                 if act is None or rng.random() < beta:
                     rt.apply(k)                      # expert drives
                 else:
