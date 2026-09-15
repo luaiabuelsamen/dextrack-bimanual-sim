@@ -37,6 +37,22 @@ from oppdef.retarget import correspond, retargeter_for
 MANO_TO_REPO = [1, 2, 3, 4, 0]          # index, middle, ring, pinky, thumb
 REPO_TIP_NAMES = ("index", "middle", "ring", "pinky", "thumb")
 
+#: MANO's joint chains, in the repo's finger order (index, middle, ring, pinky,
+#: thumb): the proximal, middle and distal joint of each finger. Verified
+#: empirically against the tip vertices rather than assumed -- chain (7,8,9) is
+#: the PINKY and (10,11,12) the ring, which is not the order the numbering
+#: suggests.
+MANO_CHAINS = ((1, 2, 3), (4, 5, 6), (10, 11, 12), (7, 8, 9), (13, 14, 15))
+
+#: Weight on the intermediate (non-tip) joints. Lower than a contact, because
+#: these are shape targets rather than contact targets, but not zero: a handle
+#: grasp touches the object with the MIDDLE phalanges while the fingertip sits
+#: in free space inside the hole. Measured on `mug_drink_1`, the human's
+#: fingertips are 5-19 mm off the surface through the grasp and only the thumb
+#: tip touches (1.3-2.4 mm), so a fingertip-only objective has no way to
+#: reproduce the wrap and the retarget slid off the handle onto the body.
+W_JOINT = 0.45
+
 CONTACT_TOL = 0.015     # a human tip within 15 mm of the surface was reaching for it
 W_CONTACT = 1.0
 W_FREE = 0.25
@@ -102,6 +118,14 @@ class _Solver:
         # this project has already been caught by exactly this once.
         self.tip_off = (tip_offsets if tip_offsets is not None else
                         [tip_offset(sc.model, b) for b in self.tips])
+        # the two links proximal to each fingertip, for the shape targets
+        self.chain = []
+        for b in self.tips:
+            up, x = [], int(sc.model.body_parentid[b])
+            while x > 0 and x != sc.wrist_bid and len(up) < 2:
+                up.append(x)
+                x = int(sc.model.body_parentid[x])
+            self.chain.append(up)              # [middle, proximal]
 
     def _tip_world(self, i):
         b = self.tips[i]
@@ -162,9 +186,15 @@ class _Solver:
         return rows, res
 
     def solve(self, q0, targets, weights, wrist_target, q_prev,
-              iters=12, damp=1e-3):
-        """targets/weights are per ROBOT tip (already corresponded)."""
+              iters=12, damp=1e-3, joint_targets=None, weights_scale=None):
+        """targets/weights are per ROBOT tip (already corresponded).
+
+        `joint_targets[i]` is [middle, proximal] world positions for robot tip
+        i, or None entries where the human has no counterpart.
+        """
         q = np.clip(np.asarray(q0, float), self.lo, self.hi)
+        if weights_scale is None:
+            weights_scale = np.ones(len(self.tips))
         for _ in range(iters):
             self._fk(q, collide=self.w_pen > 0)
             rows, res = [], []
@@ -174,6 +204,14 @@ class _Solver:
                     continue
                 rows.append(w * self._jac_tip(i))
                 res.append(w * (self._tip_world(i) - targets[i]))
+            for i, up in enumerate(self.chain):
+                for lvl, bid in enumerate(up):
+                    tg = joint_targets[i][lvl] if joint_targets is not None else None
+                    if tg is None:
+                        continue
+                    w = W_JOINT * weights_scale[i]
+                    rows.append(w * self._jac_body(bid))
+                    res.append(w * (self.d.xpos[bid] - tg))
             if wrist_target is not None:
                 rows.append(W_WRIST * self._jac_body(self.wrist))
                 res.append(W_WRIST * (self.d.xpos[self.wrist] - wrist_target))
@@ -288,8 +326,20 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
         targets[hidx] = tgt_all[ri]
         weights[hidx] = w_all[ri]
 
+        # shape targets: the human's own middle and proximal joints, in the
+        # object frame, for each corresponded finger. These are what carry a
+        # WRAP -- a handle grasp contacts with the middle phalanges while the
+        # fingertip sits in the hole.
+        jt = [None] * len(sc.tip_bids)
+        for a, b in zip(ri, hidx):
+            ch = MANO_CHAINS[a]
+            mid = (human.joints[k, ch[2], :] - p) @ R
+            prox = (human.joints[k, ch[1], :] - p) @ R
+            jt[b] = [mid, prox]
+
         wrist_t = (human.joints[k, 0, :] - p) @ R
-        q, got = solver.solve(q, targets, weights, wrist_t, q_prev, iters=iters)
+        q, got = solver.solve(q, targets, weights, wrist_t, q_prev, iters=iters,
+                              joint_targets=jt)
         q_prev = q.copy()
 
         Q[t] = q
