@@ -157,7 +157,7 @@ measurement, not on the previous stage having compiled:
 | 3. per-reference tracking | RL + trajectory optimisation, one controller per clip | gated on **G5** |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | not started |
 | 5. distillation | one neural tracking controller across references | not started |
-| 6. bimanual | both hands on one object | **75+ GRAB sequences** have both hands in contact |
+| 6. bimanual | both hands on one object | **136 of 291** GRAB sequences are bimanual; 63 hold with both hands for ≥15 frames |
 | 7. perception | depth → pose estimator → evaluate the *frozen* tracker | not started |
 
 ## From human motion to a robot hand
@@ -185,6 +185,21 @@ real GRAB mesh. The handle is a genuine hole, not a filled-in hull.*
 hands share it through the transfer, then the right hand (red) carries it away.
 The `offhand` intent is a genuine hand-to-hand handover, which is what makes the
 bimanual stage a data problem already solved rather than one to be invented.*
+
+Surveying all **291 sequences** (`s1` + `s2`, 51 objects) for frames where both
+hands are within 5 mm of the object at once — `results/grab_inventory.json`:
+
+| | sequences | bimanual | rate |
+|---|---|---|---|
+| `offhand` (hand-to-hand transfer) | 40 | 37 | **92.5%** |
+| `lift` | 62 | 30 | 48.4% |
+| `pass` | 74 | 25 | 33.8% |
+| `inspect` | 33 | 11 | 33.3% |
+| all intents | **291** | **136** | **46.7%** |
+
+63 of those hold with both hands for ≥15 consecutive frames, which is the subset
+the bimanual stage trains on. "Bimanual" here is measured contact, not the fact
+that GRAB happens to track two hands.
 
 Two things had to be fixed before this picture was honest:
 
