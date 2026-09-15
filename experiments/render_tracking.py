@@ -46,8 +46,10 @@ def contact_diagnostics(m, d, obj_gids, obj_bid):
     object. Omitting them is how a gallery of contact artifacts was published
     with only a position-error column: the artifact does not show up there, and
     is unmissable here. `residual` is the net unbalanced wrench on the object
-    including gravity, in multiples of object weight -- ~1x for a configuration
-    that is genuinely at rest, and 100x+ for a penetrated one.
+    including gravity, in multiples of object weight. The scale is: 0x is
+    equilibrium (contacts balance gravity and nothing else), 1x is freefall
+    (nothing supports the object), and 100x+ is a penetrated configuration.
+    Rejecting BOTH failure ends is the property depth alone does not have.
     """
     obj = set(obj_gids)
     weight = float(m.body_mass[obj_bid]) * 9.81

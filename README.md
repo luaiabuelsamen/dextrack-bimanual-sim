@@ -147,11 +147,16 @@ used to detect it. (This is [G3](#earlier-benchmark-which-metrics-predict-task-s
 deflating ε result arriving from a second direction.)
 
 What does detect it is a single cheap scalar: the **net unbalanced wrench on the
-object at the reset configuration, with gravity included**. A configuration that
-is genuinely a grasp at rest nets to ~1× object weight. These measure 194× /
-237× / 142× / 337×. It cannot be gamed by manufacturing contacts, since more
-penetrating contacts worsen the imbalance, and it rejects the non-contacting
-failure too — no contacts means freefall, exactly as unbalanced as burial.
+object at the reset configuration, with gravity included**, in multiples of
+object weight. **0× is equilibrium** — the contacts balance gravity and nothing
+else. **1× is freefall**, nothing supporting the object at all. These four
+configurations measure 194× / 237× / 142× / 337×.
+
+It cannot be gamed by manufacturing contacts, since more penetrating contacts
+worsen the imbalance rather than improving it, and unlike penetration depth it
+rejects *both* failure ends: a non-contacting grasp scores exactly 1× because
+the object is in free fall. Every zero-contact candidate in the sweep below
+scored exactly 1.000×, which is what identifies them.
 
 **Why depth alone cannot be optimised away.** Sampling 40 wrist-offset
 candidates around the `bowl_drink_1` retarget and measuring each at its reset

@@ -815,10 +815,18 @@ Two practical notes. `grasp_metrics` takes a single `obj_geom_id` while the GRAB
 objects are convex-decomposed into 23–42 geoms, so a multi-geom variant is
 needed to run ε here at all — plausibly why `src/oppdef/human/` never imported
 it. And the metric that *does* discriminate is cheap: the net unbalanced wrench
-on the object at reset, gravity included, which should be ~1× object weight for
-a configuration that is genuinely a grasp at rest and measures 142–337× for
-these. One `mj_forward`, ungameable by manufacturing contacts, and it rejects
-the non-contacting failure as well as the buried one.
+on the object at reset, gravity included, in multiples of object weight. The
+scale is **0× equilibrium** (contacts balance gravity and nothing else), **1×
+freefall** (nothing supporting the object), and 142–337× for these four. One
+`mj_forward`, ungameable by manufacturing contacts, and — unlike penetration
+depth — it rejects the non-contacting failure as well as the buried one, since
+a hand that misses the object scores exactly 1×. Every zero-contact candidate
+in the sweep scored exactly 1.000×, which is how they are identified.
+
+(An earlier revision of this document and of the README described 1× as the
+resting value. That was wrong: 1× is freefall and 0× is rest. The ordering and
+every conclusion drawn from it are unaffected — minimising still runs
+142× → 1× → 0× — but the threshold as stated was inverted.)
 
 Candidate sweep supporting the same conclusion: 40 sampled wrist offsets around
 the `bowl_drink_1` retarget, measured at reset. Penetration spans 0.00–21.35 mm
