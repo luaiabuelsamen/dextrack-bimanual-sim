@@ -269,6 +269,7 @@ class BimanualScene:
     palm_bid: dict
     tip_bids: dict
     hand_gids: dict
+    tip_gids: dict
     jids: dict
     qadr: dict
     free_q: dict
@@ -276,6 +277,29 @@ class BimanualScene:
 
     def set_side(self, side: str, q):
         self.data.qpos[self.qadr[side]] = q
+
+    def side_view(self, sd: str, q_closure=None) -> "ObjectScene":
+        """One side, presented as an ObjectScene over the SHARED model.
+
+        This is what lets the two hands be retargeted against each other rather
+        than independently. Fitted in separate single-hand scenes, neither
+        solver can see the other hand: on `gamecontroller_play_1` that produced
+        42 hand-hand contacts and 11.7 mm of inter-hand penetration, and the
+        left hand simply pushed the right off the object (0 object contacts).
+
+        The other hand's geoms are folded into `obj_gids`, so the penetration
+        penalty treats it as one more thing not to pass through.
+        """
+        other = "l" if sd == "r" else "r"
+        return ObjectScene(
+            model=self.model, data=self.data, spec=self.spec,
+            tip_bids=self.tip_bids[sd], wrist_bid=self.palm_bid[sd],
+            q_closure=(np.zeros(len(self.jids[sd])) if q_closure is None
+                       else q_closure),
+            obj_gids=list(self.obj_gids) + list(self.hand_gids[other]),
+            hand_gids=self.hand_gids[sd], tip_gids=self.tip_gids[sd],
+            qadr=self.qadr[sd], jids=self.jids[sd], base_kind="mocap",
+            obj_bid=self.obj_bid)
 
 
 def build_bimanual(hand_r: str = "shadow", hand_l: str = "shadow_left",
@@ -345,6 +369,14 @@ def build_bimanual(hand_r: str = "shadow", hand_l: str = "shadow_left",
                                           f"{sd}_{t}") for t in h.tip_names]
         hand_gids[sd] = [i for i in range(model.ngeom)
                          if under(int(model.geom_bodyid[i]))]
+        tset = set(tip_bids[sd])
+
+        def under_tip(b, ts=tset):
+            while b > 0:
+                if b in ts:
+                    return True
+                b = int(model.body_parentid[b])
+            return False
         jids[sd] = [j for j in range(model.njnt)
                     if model.jnt_type[j] not in (mujoco.mjtJoint.mjJNT_FREE,
                                                  mujoco.mjtJoint.mjJNT_BALL)
@@ -357,7 +389,20 @@ def build_bimanual(hand_r: str = "shadow", hand_l: str = "shadow_left",
         mocap[sd] = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY,
                                       f"{sd}_mocap")
 
+    tip_gids = {sd: [i for i in hand_gids[sd]
+                     if _under_tip(model, int(model.geom_bodyid[i]),
+                                   set(tip_bids[sd]))]
+                for sd in sides}
+
     return BimanualScene(model=model, data=data, spec=spec, obj_gids=obj_gids,
                          obj_bid=obj_bid, palm_bid=palm_bid, tip_bids=tip_bids,
-                         hand_gids=hand_gids, jids=jids, qadr=qadr,
-                         free_q=free_q, mocap_bid=mocap)
+                         hand_gids=hand_gids, tip_gids=tip_gids, jids=jids,
+                         qadr=qadr, free_q=free_q, mocap_bid=mocap)
+
+
+def _under_tip(model, b, tips):
+    while b > 0:
+        if b in tips:
+            return True
+        b = int(model.body_parentid[b])
+    return False

@@ -2851,3 +2851,71 @@ compares a reconstruction against itself validates nothing. The opposition
 deficit died the same way — every hand measured at its own body origin — and
 `hands/tips.py` was written to stop it. Here the external check existed, shipped
 in the dataset, and I did not look for it until a picture forced me to.
+
+## 2026-09-15 — stages 3-7 on the corrected pipeline
+
+Re-measured after the transposed-rotation retraction. All numbers below are from
+the corrected transform.
+
+**Reference pipeline, validated externally.** `experiments/grab_validate.py`
+scores the reconstruction against GRAB's own per-vertex contact labels, over all
+291 sequences: **recall mean 0.840, median 0.890, 282/291 above 0.5**. Restricted
+to hand labels, because GRAB labels face and torso contacts too (16 and 23 sit
+42–50 mm from either hand; 27 and above sit 2–4 mm) and a hand model cannot
+cover them. The unrestricted figure is 0.830.
+
+The corrected inventory reproduces **136/291 bimanual (46.7%)** — the same
+headline as the transposed run, by coincidence. 192 of 291 sequences have a
+different right-hand hold length and 14 bimanual flags flipped.
+
+**Stage 3 is better than the retracted numbers**, because the retargeting
+targets are now right: 21 of 24 sampled frames hold the object unaided (was 17),
+and the open-loop feedforward tracks `mug_drink_1` for **116 of 116 frames at
+35.3 mm** from frame 0 — the whole reference, not a suffix. From frame 65 it is
+14.9 mm with every frame inside 50 mm.
+
+**Stage 4 works.** The homotopy walks λ = 0.35 → 0.70 → 1.0 holding at every
+level (50.9 → 51.7 → 52.9 mm) on a start the feedforward drops. Its value
+against plain MPPI is untested: on this reference MPPI alone already succeeds,
+so the curriculum matches rather than beats it.
+
+**Stage 6 is built and does not work.** Two hands, one physics scene, dynamics
+driven through the welds. Every sequence tried loses the object. Two distinct
+causes, separated by measurement:
+
+* on `gamecontroller_play_1` the hands **interpenetrate** — 42 hand-hand
+  contacts at 11.7 mm — and the left pushes the right off the object entirely
+  (0 object contacts for a hand the human had on it). Each hand is fitted in its
+  own single-hand scene, so neither solver sees the other;
+* on `camera_takepicture_2`, `binoculars_see_1` and `bowl_drink_1` there is **no**
+  inter-hand contact at all, and the object is still lost — the same grasp-quality
+  problem as one hand.
+
+Separating the hands along the contact normal fixes the first and makes tracking
+worse (105 mm → 255 m): clearing the other hand also breaks the grasp. So the
+poses are mutually inconsistent, not merely overlapping, and the real fix is to
+fit both hands against each other. `BimanualScene.side_view` exposes that (it
+folds the other hand's geoms into the obstacle set); the solver cannot yet reach
+the wrist DoF in that scene. **Recorded as not working rather than reported as
+built.**
+
+**Stage 7 already discriminates.** Frozen controller, only its pose input
+swapped, scored on the truth throughout:
+
+    pose the controller reads      pose error   tracking   outcome
+    simulator ground truth               --      101.5 mm   held
+    ICP on rendered depth            38.4 mm     637.3 mm   DROPPED
+    ground truth + Gaussian noise    61.8 mm     102.5 mm   held
+
+Noise **larger** than the estimator's error costs nothing; the estimator's own
+error loses the object. Its error is therefore structured — biased and drifting
+— and the fix is perception, not control. Neither of the other two rows can
+distinguish those, which is why the noise condition was included.
+
+Three perception bugs, each found by measurement: ICP must correspond
+cloud→model (matching a full mesh onto a one-sided cloud drags it until it
+straddles the visible face: 26.9 mm seed → 43.7 mm); model points must be
+sampled over mesh FACES, since a convex part carries 64 vertices and ~12 mm
+spacing caps the achievable pose at ~28 mm; and MuJoCo puts the eye at
+`lookat - distance * forward`, so azimuth and elevation say where the camera
+LOOKS, not where it sits — asking for (0.3, −0.3, 0.3) gave (−0.28, 0.32, −0.30).

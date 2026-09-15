@@ -1214,14 +1214,74 @@ class BimanualTracker:
         d.mocap_pos[m.body_mocapid[self.sim.mocap_bid[sd]]] = bp
         d.mocap_quat[m.body_mocapid[self.sim.mocap_bid[sd]]] = bq
 
-    def reset_at(self, k=0):
+    def inter_hand(self):
+        """(worst penetration between the two hands, number of such contacts)."""
+        d = self.sim.data
+        gr, gl = set(self.sim.hand_gids["r"]), set(self.sim.hand_gids["l"])
+        worst, n, nrm = 0.0, 0, np.zeros(3)
+        for i in range(d.ncon):
+            c = d.contact[i]
+            g1, g2 = int(c.geom1), int(c.geom2)
+            if (g1 in gr and g2 in gl) or (g2 in gr and g1 in gl):
+                n += 1
+                dep = -float(c.dist)
+                if dep > worst:
+                    worst = dep
+                sgn = 1.0 if g1 in gr else -1.0
+                nrm += np.array(c.frame[:3]) * sgn
+        return worst, n, nrm
+
+    def separate(self, offset, iters=8, margin=0.0015):
+        """Push the two hands apart until they stop interpenetrating.
+
+        The two retargets are solved in separate single-hand scenes, so neither
+        sees the other hand. On `gamecontroller_play_1` that left 42 hand-hand
+        contacts and 11.7 mm of interpenetration, and the left hand pushed the
+        right clean off the object -- 0 object contacts for a hand the human had
+        on it. Separating along the contact normal is a correction, not a fix:
+        the proper answer is to fit both hands against each other, which needs
+        the wrist DoF the bimanual scene does not expose to the solver.
+        `offset` accumulates so the shift persists through the rollout.
+
+        Off by default, because it is not a net win: on that sequence it does
+        remove the interpenetration (42 contacts at 11.7 mm -> none) and does
+        give the right hand its object contacts back (0 -> 34), and tracking
+        gets WORSE, 105 mm to 255 m. Shifting a hand rigidly to clear the other
+        one also breaks its grasp. The two facts together say the independently
+        fitted poses are mutually inconsistent rather than merely overlapping,
+        and no rigid correction repairs that -- both hands have to be fitted
+        against each other, which needs the wrist DoF `side_view` exposes but
+        the solver cannot currently reach.
+        """
+        m, d = self.sim.model, self.sim.data
+        for _ in range(iters):
+            mujoco.mj_forward(m, d)
+            worst, n, nrm = self.inter_hand()
+            if n == 0 or worst <= margin:
+                break
+            u = nrm / max(np.linalg.norm(nrm), 1e-9)
+            step = 0.5 * (worst + margin)
+            offset["r"] = offset["r"] + u * step
+            offset["l"] = offset["l"] - u * step
+            for sd in ("r", "l"):
+                fq = self.sim.free_q[sd]
+                d.qpos[fq:fq + 3] += offset["r"] if sd == "r" else offset["l"]
+                mid = m.body_mocapid[self.sim.mocap_bid[sd]]
+                d.mocap_pos[mid] = d.qpos[fq:fq + 3]
+        mujoco.mj_forward(m, d)
+        return offset
+
+    def reset_at(self, k=0, separate=False):
         m, d = self.sim.model, self.sim.data
         mujoco.mj_resetData(m, d)
+        self.offset = {"r": np.zeros(3), "l": np.zeros(3)}
         for sd in ("r", "l"):
             self.place(sd, k)
         d.qpos[self.obj_q:self.obj_q + 3] = self.ref_pos[k]
         d.qpos[self.obj_q + 3:self.obj_q + 7] = self.ref_quat[k]
         mujoco.mj_forward(m, d)
+        if separate:
+            self.separate(self.offset)
         return d
 
     def obj_pose(self):
