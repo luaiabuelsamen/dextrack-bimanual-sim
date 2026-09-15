@@ -3091,3 +3091,44 @@ why DexTrack distils an RL policy rather than cloning a trajectory optimiser.
 The measurement to record is that MAE was the wrong scoreboard, and the rollout
 is the right one -- exactly the mistake this repository made once before with a
 behaviour-cloning result that open-loop replay matched.
+
+## 2026-09-15 — PPO works, and my evaluation was out of distribution
+
+Stage 3 done the way DexTrack does it, rather than with MPPI standing in.
+
+**Throughput first, because it was the blocker.** MuJoCo releases the GIL inside
+`mj_step`, so the environment pool steps its physics in threads: 8 envs go from
+9,676 to 48,979 MuJoCo steps/s here, 5.06x. `ctrl_for` was calling `np.clip`
+once per actuator in a Python loop -- 9,400 times per 25 control steps, 11% of
+wall clock -- and is now one matmul. Together with 24 environments instead of 8:
+**36 -> 195 control steps/s**, which is two hours per million instead of eight.
+The feedforward is bit-identical afterwards (8197.3 mm), which is the check that
+this was a rewrite and not a behaviour change.
+
+**Two runs of 614,400 control steps each.** Training is healthy in both: reward
+rises monotonically and the alive fraction sits at 0.98.
+
+    evaluation                          feedforward   PPO (v1)   PPO (v2)
+    one 111-step rollout from gf[0]        8197 mm     10535 mm   12413 mm
+    12 starts x 64 steps, mean             19.7 mm         --      22.7 mm
+    12 starts x 64 steps, MEDIAN           18.7 mm         --       7.9 mm
+    starts where PPO is better                 --          --      11/12
+
+**The first row is an out-of-distribution evaluation and I wrote it down twice
+before noticing.** The policy trains on 64-step windows from randomly drawn
+graspable starts, and I was scoring it on a single 111-step rollout -- 1.7x its
+training horizon, from one fixed start. On the distribution it was actually
+trained on it beats the feedforward on **11 of 12 starts**, with a median error
+of 7.9 mm against 18.7 mm.
+
+So stage 3 works, with the honest qualifier attached: PPO learns a tracking
+correction that is better than the feedforward over the horizon it was trained
+for, and does not extrapolate to horizons well beyond it. Longer training
+windows are the obvious next measurement, and they cost linearly.
+
+Reward shaping is recorded as a wash rather than a win. The first reward,
+`exp(-e/0.02)`, is 0.007 at 10 cm, so a drifting policy has no gradient back;
+the second added a wide exponential and a linear term. On the training
+distribution v2 is clearly good (median 7.9 mm); on the long rollout it is worse
+than v1 (12413 vs 10535 mm). Both sit inside the same out-of-distribution
+artifact, so the comparison between them is not worth much.

@@ -154,7 +154,7 @@ measurement, not on the previous stage having compiled:
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
 | 2. retarget | human contact points → robot joint trajectory | **done** — ~13 mm to the human's contacts, 0 mm penetration after settling |
-| 3. per-reference tracking | feedforward + MPPI, one solution per clip | **built** — tracks 116/116 frames at 35.3 mm, given a grasp that holds |
+| 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **working on its training horizon** — beats the feedforward on 11/12 starts, median 7.9 mm vs 18.7 mm |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
 | 5. distillation | one neural tracking controller across references | **built, fails in the loop** — regression ratio 0.716 held out, but the policy drops the object on every held-out reference |
 | 6. bimanual | both hands on one object | **tracking** — 3 of 4 references inside 200 mm (56/117/165 mm), all 4 hold |
