@@ -8,8 +8,8 @@ terms that penetration improves. Read the
 first; it supersedes the
 [tracking review](#tracking-review-and-readme-demonstrations) below, which
 recommended keeping the gallery. No tracking number in this repository should be
-quoted as physical until the retarget's residual 11 mm is reduced and
-`d5b49ca` is re-measured.
+quoted as physical. `d5b49ca`'s "248 m → 35 mm" is withdrawn, and the retarget
+is now known to produce only interpenetrating or non-contacting grasps.
 
 ## Recommendation to Claude (2026-09-14)
 
@@ -711,12 +711,70 @@ pose and does not hold in the pipeline; the retarget alone leaves 11.08 mm at
 4411 N before grasp search runs. The stage 3 and stage 6 rows now record that
 the rollouts are not physical. A `NOT SUPPORTED` row was added to Status.
 
-Outstanding: (1) the retarget's own 11 mm, which the search may no longer make
-worse but which is not yet reduced; (2) re-measurement of `d5b49ca`'s
-"248 m → 35 mm", which was scored by the same tracking objective that rewards
-penetration and must be restated with penetration and normal force attached, or
-withdrawn. Until both land, no tracking number in this repository should be
-quoted as physical.
+### Follow-up: the re-run, and what it withdraws
+
+Re-running the search with the penetration term active, reporting penetration
+and normal force alongside tracking error for the first time:
+
+| reference | tracking error | held | penetration | force |
+|---|---:|---:|---:|---:|
+| `gamecontroller_play_1` | 35.4 mm | 173/192 | 19.40 mm | 4551 N |
+| `phone_call_1` | 245179.2 mm | 1/200 | 0.00 mm | 0 N |
+
+The term stopped the search climbing — `mug_drink_2` no longer goes 11.08 mm to
+17.47 mm — and did not get `gamecontroller` near clean. At weight 40/m the
+penalty on 19.4 mm is 0.656 against a 0.035 tracking term, an order of magnitude
+larger, and the search preferred it regardless. That means every candidate in
+the reachable neighbourhood is deeply penetrated: the baseline is bad, not the
+selection.
+
+`phone_call_1` is the same fact from the other side, and is the more useful row.
+The only non-penetrating grasp the search can find for that reference is one
+that never touches the object — 0.00 mm, 0.0 N, object on the floor. The
+retarget's grasps are either interpenetrating or non-contacting, with nothing
+usable in between. This is a retargeting failure, not a search failure.
+
+Accordingly `d5b49ca`'s "248 m → 35 mm" is **withdrawn rather than qualified**:
+it compared an unphysical grasp against a failed one, which is not a result. The
+stage-3 numbers resting on that initial condition are withdrawn with it,
+specifically `gamecontroller`'s 27.2 mm PPO figure, whose policy was trained on
+it. No tracking number in this repository should be quoted as physical until the
+retarget can produce a grasp that both contacts the object and does not bury
+itself in it.
+
+### The orientation error is an impulse at t=0
+
+Worth separating from the penetration total, because it changes which metric to
+watch. The reset is clean: the object is placed exactly on the reference, 0.000
+mm and 0.000°. One control block later, 66 ms in, the camera has rotated 46.5°
+and the bowl 21.1°. The stored penetration energy discharges as an impulse, and
+because the overlap is deep and asymmetric across 20–42 contacts, most of it
+emerges as torque rather than translation. The object is spun out of the grasp
+before the controller acts, then tumbles; the camera peaks at 178.5°.
+
+So orientation error is the sensitive detector and position error is the
+misleading one. The cage constrains translation, holding position error in the
+tens of millimetres however badly the grasp is failing, while rotation inside
+the cage is nearly unconstrained. Evaluation should lead with orientation.
+
+The reference is sound, which was checked given this project's retracted
+transposed-rotation result: reference quaternions are unit-norm to six decimals,
+smooth at 1.3–3.2° per frame, sweeping 280–430° per clip. Not a convention
+error.
+
+### Next
+
+The retarget's penetration penalty (`w_pen` in `human/retarget.py`) is scored on
+the fit pose in a static scene while the damage appears at reset in the dynamic
+one; that mismatch is the next thing to test. The open question is whether a
+setting exists that yields both contact and shallow penetration, or whether the
+retarget cannot produce one and the fix has to be a different grasp
+representation. The second answer would be the more important one.
+
+Solver parameters remain second-order, and should be judged on a matched pair
+once initial conditions are valid — one rollout at `solref` 0.005 and one at
+0.004, compared on force and penetration — since a 2.5× ratio to the timestep
+that is fine at 2 mm of overlap may not be at 8 mm.
 
 The renderer is not implicated. `experiments/render_tracking.py` asserts a free
 joint, no weld, and negative gravity, and its saved `qpos`, `scene.mjb`, and

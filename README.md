@@ -59,6 +59,26 @@ Three consequences:
    161. Only the bowl is balanced (6.9 / 7.2) — and its fingers are visibly
    through the bowl wall.
 
+**The orientation error is a kick at t=0, not drift.** The reset is clean — the
+object is placed exactly on the reference, 0.000 mm and 0.000°. One control
+block later, 66 ms in, the camera has rotated **46.5°** and the bowl 21.1°. That
+is the stored penetration energy discharging, and because the overlap is deep
+and asymmetrically distributed across 20–42 contacts, most of the ejection
+impulse comes out as *torque* rather than translation. The object is spun out of
+the grasp before the controller has done anything, then tumbles inside the cage
+for the rest of the clip; the camera peaks at 178.5°, fully inverted.
+
+This also means **orientation error is the sensitive detector here and position
+error is the misleading one**. The cage constrains translation, so position error
+stays in the tens of millimetres no matter how badly the grasp is failing;
+rotation inside the cage is nearly unconstrained. The 138.4° on the camera was
+the honest signal all along.
+
+The reference itself is sound, which was worth checking given this project's
+[retracted transposed-rotation result](NOTES.md): the reference quaternions are
+unit-norm to six decimals and smooth at 1.3–3.2° per frame, sweeping 280–430°
+over a clip. This is not a convention error.
+
 **The cause is upstream of the simulator.** At the reset state, before a single
 `mj_step`, grasp synthesis already hands MuJoCo 13.2 / 14.3 / 16.2 / 20.8 mm of
 penetration across 20–42 contacts. The solver relaxes that to a steady 8–14 mm
@@ -83,11 +103,29 @@ at the fingertips and none elsewhere, weighted so that 10 mm of excess costs
 about what dropping the object costs. With it, `mug_drink_2` stays at the
 retarget's 11.08 mm instead of climbing to 17.47 mm.
 
-Two things are still outstanding: the retarget's own 11 mm, which the search is
-no longer allowed to make worse but which is not yet down; and the re-run of
-`d5b49ca`'s "248 m → 35 mm", which will be restated with penetration and normal
-force attached, or withdrawn. **Until both land, no number in the table above
-should be quoted as physical.** What this section does establish is that the
+**The retarget cannot produce a usable grasp at all.** Re-running the search
+with the penetration term active, and reporting penetration and normal force
+alongside tracking error for the first time:
+
+| reference | tracking error | held | penetration | force |
+|---|---:|---:|---:|---:|
+| `gamecontroller_play_1` | 35.4 mm | 173/192 | 19.40 mm | 4551 N |
+| `phone_call_1` | 245179.2 mm | 1/200 | 0.00 mm | 0 N |
+
+`phone_call_1` is the informative row. The only non-penetrating grasp the search
+can find for that reference is one that **never touches the object** — 0.00 mm,
+0.0 N, object on the floor. The retarget's grasps are either interpenetrating or
+non-contacting, with nothing usable in between, so the penetration term stops
+the search climbing but has nothing clean to climb toward. The baseline is bad,
+not the selection.
+
+`d5b49ca`'s **"248 m → 35 mm" is therefore withdrawn**, not qualified. It
+compared an unphysical grasp against a failed one, which is not a result. The
+stage-3 numbers resting on that initial condition go with it, `gamecontroller`'s
+27.2 mm PPO figure in particular, since the policy was trained on it. **No
+tracking number in this repository should be quoted as physical** until the
+retarget can produce a grasp that both contacts the object and does not bury
+itself in it. What this section does establish is that the
 renderer and its manifests work: `make render-tracking` reproduces the set, and
 [`experiments/render_tracking.py`](experiments/render_tracking.py) saves
 per-frame errors, contact counts, source/model hashes, and search settings
@@ -123,6 +161,8 @@ retargeting and grasp search. See [From human motion to a robot hand](#from-huma
 | ε predicts task success | **weakly** | AUC 0.684 (0.679 excluding non-reproducible grasps), below the pre-declared ρ = 0.3 |
 | Every metric inverts on capsules | **robust across three bug fixes and an audit** | see the figure below |
 | GRAB tracking rollouts are physically valid | **NOT SUPPORTED** | 8–14 mm penetration on 541/541 frames at 1530–7549 N mean on a 1.96 N object; grasp search was climbing toward it |
+| The retarget can produce a usable grasp | **NOT SUPPORTED** | its grasps are either interpenetrating or non-contacting; on `phone_call_1` the only 0 mm-penetration grasp found never touches the object |
+| Scoring the grasp search on tracking improved it (`d5b49ca`, 248 m → 35 mm) | **WITHDRAWN** | compared an unphysical grasp against a failed one; the 35 mm is achieved at 19.4 mm penetration and 4551 N |
 | Perturbed repeats agree | **high agreement, with replay failures** | G4: 0.928 unanimity, CI [0.897, 0.956]; five grasps did not re-form |
 | The peg task requires two hands | **supported** | 13.49 cm vs 5.32 cm, by force balance |
 | An opposition deficit exists among these hands | **RETRACTED** | all four oppose within 2.8 mm once measured correctly |
@@ -235,8 +275,8 @@ measurement, not on the previous stage having compiled:
 | stage | what it does | state |
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
-| 2. retarget | human contact points → robot joint trajectory | **partial** — ~13 mm to the human's contacts; 0 mm penetration was measured on an isolated settled pose and **does not hold in the pipeline** (11.08 mm, 4411 N on `mug_drink_2`) |
-| 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **not physical** — the checkpoint reproduces 29.35 mm, but on 13.8 mm of penetration at 1530 N; see [above](#physics-rollouts--four-failures) |
+| 2. retarget | human contact points → robot joint trajectory | **NOT WORKING** — grasps are either interpenetrating (11.08 mm, 4411 N on `mug_drink_2`) or non-contacting (`phone_call_1`), with nothing usable between; the "0 mm penetration" figure was an isolated settled pose |
+| 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **not physical** — 29.35 mm is achieved on 13.8 mm of penetration at 1530 N; `gamecontroller`'s 27.2 mm withdrawn; see [above](#physics-rollouts--four-failures) |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
 | 5. distillation | one neural tracking controller across references | **incomplete** — reported held-out position error is 158–456 mm; that error alone does not verify continued grasp retention |
 | 6. bimanual | joint retargeting + wrist-offset search | **fails under physics** — and 2 of 3 clips are effectively one-handed; see [above](#physics-rollouts--four-failures) |
@@ -326,7 +366,7 @@ dataset would have been physically impossible, and a correctly placed hand reads
 as 20–40 mm of penetration that is not there. Convex decomposition brings the
 mug to 0.92× (`src/oppdef/human/decompose.py`).
 
-### Stage 3: a reproduced per-reference PPO result
+### Stage 3: a per-reference PPO result, on an invalid initial condition
 
 | controller | mean | final | frames within 50 mm |
 |---|---|---|---|
@@ -337,8 +377,17 @@ mug to 0.92× (`src/oppdef/human/decompose.py`).
 844,800 control steps. Extending the training horizon was the useful change
 in this comparison: evaluation spans 111 steps. The reproduced checkpoint
 also depends on the hold-scored grasp setup used during training; its weights
-alone do not specify a reproducible episode. The displayed result measures
-position tracking. Its 44.8° mean orientation error remains a limitation.
+alone do not specify a reproducible episode.
+
+**This whole table is measured on a penetrated grasp** and none of it should be
+read as physical. The 29.4 mm is achieved at 13.8 mm of interpenetration under
+1530 N on a 1.96 N object, and the accompanying 44.8° orientation error is the
+object rotating inside a cage it was never held by — see
+[Physics rollouts](#physics-rollouts--four-failures). The comparison between
+rows may still be informative about horizon, since all three share the same
+initial condition, but the winning row is not a working controller. The
+`gamecontroller` 27.2 mm figure reported elsewhere from this stage is
+**withdrawn**: its policy was trained on the same invalid initial condition.
 
 
 
