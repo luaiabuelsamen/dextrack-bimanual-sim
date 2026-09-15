@@ -663,8 +663,24 @@ class ReferenceTracker:
             self.establish(grip)
         return d
 
+    def track_score(self, start=0, steps=None):
+        """Search objective for the one-handed grasp. **Unitless.**
+
+        Clipped mean tracking error plus a drop penalty, over the whole
+        reference by default. `grasp_frames` -- which counts frames that hold
+        under gravity -- is not this: `gamecontroller_play_1` has 15 graspable
+        frames and a feedforward that still ends 248 m away. Holding is
+        necessary and not sufficient, and a grasp search scored on holding
+        selects for the wrong thing.
+        """
+        n = (self.T - start) if steps is None else steps
+        self.reset_at(start)
+        r = self.rollout(start=start, steps=min(n, self.T - start))
+        return float(np.minimum(r.pos_err, 0.25).mean()
+                     + 0.5 * np.mean(r.pos_err > 0.10))
+
     def synthesize_grasp(self, k=None, samples=12, rounds=2, seconds=0.4,
-                         grip=8.0, seed=0):
+                         grip=8.0, seed=0, objective="track"):
         """Search near the retargeted wrist for a pose that actually holds, and
         apply that correction to the WHOLE trajectory.
 
@@ -692,6 +708,28 @@ class ReferenceTracker:
         # offset is optimised at one frame, and on `cup_pass_1` the frame's
         # optimum took the reference from 6 graspable frames to 1. Guarded, this
         # can only help.
+        if objective == "track":
+            # Search the wrist offset directly against tracking, the way the
+            # two-handed stage does. Scored on holding, the search cannot see
+            # that a grasp survives gravity and not the motion.
+            rng = np.random.default_rng(seed)
+            sig = np.array([0.012] * 3 + [0.08] * 3)
+            best = self.track_score()
+            base = np.zeros(6)
+            for _rnd in range(rounds):
+                for dlt in rng.normal(size=(samples, 6)) * sig:
+                    self.apply_wrist_offset(dlt)
+                    v = self.track_score()
+                    if v < best:
+                        best, base = v, base + dlt
+                    else:
+                        self.apply_wrist_offset(-dlt)
+            self.grasp_fit = None
+            self.grasp_score = best
+            self.grasp_frames_before = self.grasp_frames_after = len(
+                self.grasp_frames())
+            return base
+
         before = len(self.grasp_frames())
         fit = G.synthesize(self._hold_env, self.tr.q[k], samples=samples,
                            rounds=rounds, seconds=seconds, grip=grip, seed=seed)
