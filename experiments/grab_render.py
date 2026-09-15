@@ -26,6 +26,7 @@ from oppdef.human import grab
 CHAINS = [[0, 13, 14, 15, 16], [0, 1, 2, 3, 17], [0, 4, 5, 6, 18],
           [0, 10, 11, 12, 19], [0, 7, 8, 9, 20]]
 COLOR = {"rhand": "#d62728", "lhand": "#1f77b4"}
+HAND_FACES = None      # filled from the MANO model on first render
 
 
 def camera(elev_deg: float, azim_deg: float) -> np.ndarray:
@@ -43,7 +44,15 @@ def project(P: np.ndarray, M: np.ndarray, ctr: np.ndarray) -> np.ndarray:
     return (np.asarray(P) - ctr) @ M.T
 
 
-def render(seq, out: Path, face_stride: int = 6, fps: int = 10, spin: float = 0.4):
+def render(seq, out: Path, face_stride: int = 6, fps: int = 10, spin: float = 0.4,
+           mesh: bool = True):
+    """Draw the hands as their MANO SURFACE, not as a stick skeleton.
+
+    A skeleton cannot show whether a hand is curled: five polylines radiating
+    from a wrist look like a flat fan whether the fingers are wrapped round a
+    mug or splayed flat, and reading one as the other is exactly the mistake a
+    picture is supposed to prevent. The mesh shows the grasp.
+    """
     fig, ax = plt.subplots(figsize=(6, 6), dpi=95)
     ov, of = seq.obj_mesh
     of = of[::face_stride]
@@ -74,12 +83,26 @@ def render(seq, out: Path, face_stride: int = 6, fps: int = 10, spin: float = 0.
                 edgecolors="none", zorder=1))
 
             for side, h in seq.hands.items():
-                J = project(h.joints[k], M, ctr)
-                segs = [J[c[i:i + 2], :2] for c in CHAINS for i in range(4)]
-                ax.add_collection(LineCollection(
-                    segs, colors=COLOR[side], linewidths=2.0, zorder=3))
-                ax.scatter(J[:, 0], J[:, 1], s=11, c=COLOR[side], zorder=4,
-                           edgecolors="white", linewidths=0.4)
+                if mesh and h.verts is not None:
+                    hv = project(h.verts[k], M, ctr)
+                    hf = HAND_FACES
+                    ht = hv[hf]
+                    ho = np.argsort(ht[:, :, 2].mean(1))
+                    ht = ht[ho]
+                    hn = np.cross(ht[:, 1] - ht[:, 0], ht[:, 2] - ht[:, 0])
+                    hn /= np.linalg.norm(hn, axis=1, keepdims=True) + 1e-12
+                    sh = np.clip(0.35 + 0.65 * np.abs(hn[:, 2]), 0, 1)
+                    cmap = (plt.cm.Reds if side == "rhand" else plt.cm.Blues)
+                    ax.add_collection(PolyCollection(
+                        ht[:, :, :2], facecolors=cmap(0.35 + 0.45 * sh),
+                        edgecolors="none", zorder=5))
+                else:
+                    J = project(h.joints[k], M, ctr)
+                    segs = [J[c[i:i + 2], :2] for c in CHAINS for i in range(4)]
+                    ax.add_collection(LineCollection(
+                        segs, colors=COLOR[side], linewidths=2.0, zorder=3))
+                    ax.scatter(J[:, 0], J[:, 1], s=11, c=COLOR[side], zorder=4,
+                               edgecolors="white", linewidths=0.4)
 
             ax.set_xlim(-rad, rad); ax.set_ylim(-rad, rad)
             ax.set_aspect("equal"); ax.set_axis_off()
@@ -94,10 +117,12 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("seq", nargs="?", default="s1/mug_drink_1.npz")
     ap.add_argument("--stride", type=int, default=12)
-    ap.add_argument("--faces", type=int, default=2)
+    ap.add_argument("--faces", type=int, default=1)
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
-    s = grab.load(a.seq, stride=a.stride)
+    s = grab.load(a.seq, stride=a.stride, verts=True)
+    from oppdef.human import mano as _mano
+    globals()["HAND_FACES"] = _mano.load("right").faces
     out = Path(a.out or f"figures/grab_{s.name}.gif")
     out.parent.mkdir(parents=True, exist_ok=True)
     render(s, out, face_stride=a.faces)
