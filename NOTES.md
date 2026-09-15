@@ -2786,3 +2786,68 @@ starts. What remains true from the earlier entry is the fingertip-origin defect
 (4469 N → 64 N), the control-rate bug, and the `MocapHand.command` snapshot bug
 — those were real and are fixed. What was wrong was the conclusion drawn while
 every episode was being started before the grasp existed.
+
+---
+
+## 2026-09-14 — **RETRACTION: the object's rotation was transposed.** Everything downstream is void.
+
+Found because the GIF looked wrong to a reader and I was asked to look again.
+
+**The bug.** GRAB's own `tools/objectmodel.py` poses the object as
+
+    vertices = torch.matmul(v_template, rot_mats) + transl     # v @ R
+
+which is `R.T @ v` — the transpose of the usual convention. I wrote `v @ R.T + p`.
+Every object pose in this pipeline was therefore rotated the wrong way.
+
+**Why nothing caught it.** Every check was self-referential: reconstructed hand
+against reconstructed object. Both were wrong together, so they stayed in
+contact, and the headline validation — minimum hand-to-object distance falling
+to 0.1–0.6 mm — passed the whole time. A minimum over 778 vertices is satisfied
+by one grazing vertex; I later replaced it with contact AREA (100–145 vertices
+within 5 mm), and that passed too, because the hand was genuinely touching the
+mug — just in the wrong place, its body instead of its handle.
+
+**The external ground truth I had not used.** GRAB ships
+`contact['object']`: per frame, per object vertex, which body part touches it.
+Scored against it, on `mug_drink_1`:
+
+    object transform      recall   IoU     contacts on the handle
+    v @ R.T + p  (mine)    0.158   0.045            4.8%
+    v @ R   + p  (GRAB)    0.847   0.456           76.6%
+
+GRAB's labels put 41–100% of that clip's contacts on the handle, which is what
+"drinking from a mug" looks like and what the render did not show. Fixed at the
+boundary: `GrabSequence.obj_R` now stores the PROPER rotation matrix, converted
+once at load, and `to_object` / `object_world` are the only two places the
+convention appears. Across 8 sequences the fixed pipeline scores **recall 0.919,
+minimum 0.846**.
+
+`experiments/grab_validate.py` now scores the reconstruction against GRAB's
+labels, so this class of error cannot pass silently again.
+
+**What this retracts.** Everything computed through the object frame:
+
+* the **GRAB inventory** (`results/grab_inventory_TRANSPOSED.json`) — contact
+  masks, hold windows, and the 136/291 bimanual count;
+* **G5 in full** (`results/g5_hold_TRANSPOSED.json`) — the 0.255 hold rate, both
+  hypotheses, and the decision rule I drew from it. G5's *pre-registration*
+  stands; its result does not;
+* every **retargeting** number (13 mm contact error, 32–36 mm tip offsets are
+  fine — those are robot-side — but the targets they were fitted to were wrong);
+* every **tracking** number, including the 11.9 mm feedforward result and the
+  MPPI 53.0 mm rescue;
+* the claim that the mug is grasped by its **body**. It is grasped by the
+  handle. My "5.6% on the handle" measurement was computed under the transposed
+  transform.
+
+**What survives**, because it never touched the object frame: the MANO loader
+and its rest-pose check; the convex decomposition (hull ratios are properties of
+the meshes); the fingertip-origin fix (4469 N → 64 N is robot-side); the
+control-rate and `MocapHand.command` bugs; and the left-hand registration.
+
+**The lesson, and it is the second time in this project.** A measurement that
+compares a reconstruction against itself validates nothing. The opposition
+deficit died the same way — every hand measured at its own body origin — and
+`hands/tips.py` was written to stop it. Here the external check existed, shipped
+in the dataset, and I did not look for it until a picture forced me to.

@@ -153,6 +153,14 @@ class GrabSequence:
     obj_quat: np.ndarray      # (T, 4) wxyz
     hands: dict[str, HandTrack]
     obj_mesh: tuple[np.ndarray, np.ndarray]   # canonical verts, faces
+    #: (T,3,3) PROPER rotation matrices: world = R @ v_object + pos.
+    #: GRAB's own ObjectModel computes `matmul(v_template, rot_mats)`, i.e.
+    #: v @ M, which is M.T @ v -- the TRANSPOSE of the usual convention. Storing
+    #: the proper matrix here converts once, at the boundary, so nothing
+    #: downstream has to remember which way round GRAB's object frame goes.
+    #: Getting this wrong put the hand on the mug's body instead of through its
+    #: handle while still passing every distance check.
+    obj_R: np.ndarray = None
 
     @property
     def T(self) -> int:
@@ -167,8 +175,11 @@ class GrabSequence:
     def object_world(self, k: int) -> np.ndarray:
         """Object mesh vertices at frame k, in world coordinates."""
         v, _ = self.obj_mesh
-        R = _rodrigues(self.obj_quat_aa[k][None])[0]
-        return v @ R.T + self.obj_pos[k]
+        return v @ self.obj_R[k].T + self.obj_pos[k]
+
+    def to_object(self, pts: np.ndarray, k: int) -> np.ndarray:
+        """World points -> the object's own frame at frame k."""
+        return (np.asarray(pts, float) - self.obj_pos[k]) @ self.obj_R[k]
 
     def contact_distance(self, side: str = "rhand") -> np.ndarray:
         """(T,) min distance from any hand vertex to any object vertex.
@@ -183,8 +194,7 @@ class GrabSequence:
         v0, _ = self.obj_mesh
         out = np.empty(self.T)
         for k in range(self.T):
-            R = _rodrigues(self.obj_quat_aa[k][None])[0]
-            ov = v0 @ R.T + self.obj_pos[k]
+            ov = v0 @ self.obj_R[k].T + self.obj_pos[k]
             d = np.linalg.norm(hand.verts[k][:, None, :] - ov[None, :, :], axis=-1)
             out[k] = d.min()
         return out
@@ -213,7 +223,8 @@ def load(path: str | Path, verts: bool = False, stride: int = 1,
     op = d["object"].item()["params"]
     obj_aa = np.asarray(op["global_orient"], float)[sl]
     obj_pos = np.asarray(op["transl"], float)[sl]
-    obj_quat = _quat_from_R(_rodrigues(obj_aa))
+    obj_M = _rodrigues(obj_aa).transpose(0, 2, 1)     # see ObjectScene.obj_R
+    obj_quat = _quat_from_R(obj_M)
 
     gender = str(d["gender"])
     hands: dict[str, HandTrack] = {}
@@ -245,6 +256,7 @@ def load(path: str | Path, verts: bool = False, stride: int = 1,
         intent=str(d["motion_intent"]), gender=gender,
         dt=stride / float(d["framerate"]),
         obj_pos=obj_pos, obj_quat=obj_quat, hands=hands, obj_mesh=mesh,
+        obj_R=obj_M,
     )
-    seq.obj_quat_aa = obj_aa       # kept for exact mesh placement
+    seq.obj_quat_aa = obj_aa       # raw axis-angle, as recorded
     return seq

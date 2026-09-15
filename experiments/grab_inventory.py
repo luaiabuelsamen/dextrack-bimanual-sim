@@ -46,8 +46,7 @@ def contact_mask(seq, tree, side: str, thresh: float = CONTACT_M) -> np.ndarray:
         return np.zeros(seq.T, bool)
     out = np.zeros(seq.T, bool)
     for k in range(seq.T):
-        R = grab._rodrigues(seq.obj_quat_aa[k][None])[0]
-        local = (h.verts[k] - seq.obj_pos[k]) @ R      # world -> object frame
+        local = seq.to_object(h.verts[k], k)           # world -> object frame
         out[k] = tree.query(local, k=1)[0].min() < thresh
     return out
 

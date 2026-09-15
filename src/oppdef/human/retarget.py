@@ -267,7 +267,7 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
     q = np.clip(sc.q_closure.copy(), lo, hi)
     q_prev = None
     for t, k in enumerate(frames):
-        R = grab_mod._rodrigues(seq.obj_quat_aa[k][None])[0]
+        R = seq.obj_R[k]
         p = seq.obj_pos[k]
 
         # Everything is solved in the OBJECT frame, never in GRAB's world
