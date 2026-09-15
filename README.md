@@ -33,9 +33,10 @@ job?** That is G3, and the answer is *partly, and not the one you would expect*.
 | A wrench objective beats the shipped retargeting pipeline | **supported** | pre-registered, n=60, McNemar p = 0.0075 |
 | …by *selecting* better, not searching more | **supported** | finds fewer valid grasps, survives 2.3× as often |
 | Human demonstration data helps | **not supported, twice** | G1 initialisation p = 1.0000; G2 specification p = 0.180, worse on magnitude |
-| Contact **force** predicts task success | **supported** | ρ +0.325, AUC 0.800, clustered by grasp |
-| ε predicts task success | **weakly** | AUC 0.684, below the pre-declared ρ = 0.3 |
-| Every metric inverts on capsules | **robust across three bug fixes** | see the figure below |
+| Contact **force** predicts task success | **supported** | ρ +0.325, AUC 0.800, clustered by grasp; survives G4 |
+| ε predicts task success | **weakly** | AUC 0.684 (0.679 excluding non-reproducible grasps), below the pre-declared ρ = 0.3 |
+| Every metric inverts on capsules | **robust across three bug fixes and an audit** | see the figure below |
+| Task outcomes are reproducible under perturbation | **supported** | G4: 0.928 unanimity, CI [0.897, 0.956] |
 | The peg task requires two hands | **supported** | 13.49 cm vs 5.32 cm, by force balance |
 | An opposition deficit exists among these hands | **RETRACTED** | all four oppose within 2.8 mm once measured correctly |
 | A second hand repairs that deficit | **WITHDRAWN** | force-only data labelled as wrench; budget uncontrolled |
@@ -128,16 +129,19 @@ in advance, including the branch where the result kills the idea.
 | **G2** | does the demonstration specify the *task*? | **no** — and conditioning on it costs grasp strength |
 | **G3.1** | can all four hands even be placed? | **fixed** — Shadow went from 0/320 valid grasps to 16–38% |
 | **G3.2** | do grasp metrics predict task success? | contact force does (AUC 0.800); ε weakly (0.684) |
-| **G4** | *is the task outcome even reproducible?* | **running** — a go/no-go on all of the above |
+| **G4** | *is the task outcome even reproducible?* | **yes** — 0.928 unanimity, CI [0.897, 0.956]; the gate says **go** |
 
-**G4 is the gate.** If the same grasp gives different outcomes under ±1 mm and
-±2% perturbations, none of G3 means anything and the right move is a better
-contact model, not another sweep. Its threshold (80% unanimity) was fixed
-before the code was written.
+**G4 was the gate, and it passed.** Under ±1 mm and ±2% perturbations the same
+grasp gives the same outcome 92.8% of the time (clustered CI [0.897, 0.956]),
+and the majority outcome reproduces G3 at 99.6%. Its 80% threshold was fixed
+before the code was written. One caveat is recorded rather than buried: 5 of
+228 G3 grasps (2.2%) do not re-form standalone — they existed only given
+accumulated scene state — and excluding them moves ε from AUC 0.684 to 0.679
+and contact force from 0.800 to 0.795. Nothing changes.
 
-If G4 passes, the next question is the capsule inversion: it is the one
-observation that survived every bug fix, and it points at contact *geometry*
-rather than scalar wrench summaries.
+**Next: the capsule inversion.** It is the one observation that survived a
+gravity leak, a dead task axis, an unstable seed and a reproducibility audit,
+and it points at contact *geometry* rather than scalar wrench summaries.
 
 ## Layout
 

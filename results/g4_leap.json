@@ -1,0 +1,2303 @@
+{
+  "provenance": {
+    "commit": "b78653fbb7a6db966c47c299ddd9f5827aeb02d7",
+    "dirty": true,
+    "mujoco": "3.8.0",
+    "numpy": "2.2.6",
+    "python": "3.10.12",
+    "machine": "aarch64",
+    "when": "2026-09-14T17:25:07"
+  },
+  "args": {
+    "hands": [
+      "leap"
+    ],
+    "glob": "results/g3_leap.json",
+    "repeats": 5,
+    "seed": 0,
+    "out": "results/g4_leap.json"
+  },
+  "preregistration": "docs/G4_PREREGISTRATION.md",
+  "rows": [
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 0,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 0,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 1,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 1,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 2,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 2,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 3,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 3,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 4,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 4,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 5,
+      "task": "a",
+      "original": false,
+      "determinism_ok": false,
+      "det_success": null,
+      "repeats": [
+        false,
+        null,
+        false,
+        null,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 3,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 5,
+      "task": "b",
+      "original": true,
+      "determinism_ok": false,
+      "det_success": null,
+      "repeats": [
+        true,
+        null,
+        false,
+        null,
+        true
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 3,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 6,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 6,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 7,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 7,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 8,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 8,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 9,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        false,
+        true,
+        true,
+        true,
+        false
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 9,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        false,
+        true,
+        true
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 10,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 10,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 11,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 11,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 12,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 12,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 13,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 13,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 14,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "box",
+      "grasp": 14,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 15,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 15,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 16,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 16,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 17,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 17,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 18,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 18,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 19,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 19,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 20,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 20,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 21,
+      "task": "a",
+      "original": false,
+      "determinism_ok": false,
+      "det_success": null,
+      "repeats": [
+        false,
+        null,
+        false,
+        null,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 3,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 21,
+      "task": "b",
+      "original": false,
+      "determinism_ok": false,
+      "det_success": null,
+      "repeats": [
+        false,
+        null,
+        false,
+        null,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 3,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 22,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 22,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 23,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 23,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 24,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 24,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 25,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 25,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 26,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 26,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 27,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 27,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 28,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 28,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 29,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "cylinder",
+      "grasp": 29,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 30,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 30,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 31,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 31,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 32,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 32,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 33,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 33,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 34,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        false,
+        true,
+        false,
+        true,
+        true
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 34,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 35,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 35,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 36,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 36,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 37,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 37,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 38,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        true,
+        true,
+        false,
+        false,
+        false
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 38,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 39,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 39,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 40,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 40,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 41,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 41,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 42,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 42,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 43,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 43,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 44,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "sphere",
+      "grasp": 44,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 45,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 45,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 46,
+      "task": "a",
+      "original": false,
+      "determinism_ok": false,
+      "det_success": true,
+      "repeats": [
+        null,
+        true,
+        null,
+        true,
+        null
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 2,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 46,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        null,
+        false,
+        null,
+        false,
+        null
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 2,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 47,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 47,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 48,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 48,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 49,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 49,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 50,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 50,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 51,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 51,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 52,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 52,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 53,
+      "task": "a",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 53,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 54,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 54,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 55,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 55,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 56,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 56,
+      "task": "b",
+      "original": true,
+      "determinism_ok": true,
+      "det_success": true,
+      "repeats": [
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": true
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 57,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        true,
+        false,
+        false,
+        false,
+        true
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 57,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": false,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 58,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        null,
+        false,
+        null,
+        false,
+        null
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 2,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 58,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        null,
+        false,
+        null,
+        false,
+        null
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 2,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 59,
+      "task": "a",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    },
+    {
+      "hand": "leap",
+      "shape": "capsule",
+      "grasp": 59,
+      "task": "b",
+      "original": false,
+      "determinism_ok": true,
+      "det_success": false,
+      "repeats": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "unanimous": true,
+      "n_valid_repeats": 5,
+      "majority": false
+    }
+  ]
+}

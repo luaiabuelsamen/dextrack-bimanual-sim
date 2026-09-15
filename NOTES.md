@@ -2502,3 +2502,64 @@ quietly pooled away.
 This is one object size, one mass, four hands, two variants of a single carry
 family, in simulation. Whether the task outcome is even reproducible is exactly
 what G4 Part A is testing; until that returns, none of the above is safe.
+
+## 2026-09-14 — G4 Part A: the task outcome is reproducible (gate PASSES, with one caveat)
+
+Pre-registered in `docs/G4_PREREGISTRATION.md` (`61a06df`), Amendment 1 recorded
+after run 1 tripped its own determinism gate. 228 grasps x 2 tasks, 5 perturbed
+repeats each (±1 mm object offset, ±2% mass as an equivalent steady force,
+warm-start reset) plus an unperturbed determinism check.
+
+    PRIMARY   unanimity of the 5 repeats   423/456 = 0.928
+              Wilson 95%                   [0.900, 0.948]
+              grasp-clustered 95%          [0.897, 0.956]
+
+    SECONDARY majority vote vs G3's saved outcome   454/456 = 0.996
+
+**PASS.** The pre-declared gate was 80% with a lower bound above 0.75; the
+clustered lower bound is 0.897. The task outcome is a stable property of the
+grasp, so G3's correlations describe something real rather than noise.
+
+Unanimity is lowest where grasps are marginal: leap 0.842 and allegro 0.865
+against shadow 0.992 and f5d6 1.000 — and f5d6's perfect score is because it
+fails every task, which is consistency without information.
+
+### The determinism gate is NOT met, and the reason is worth recording
+
+    unperturbed repeat vs G3's saved outcome   444/456 = 0.974   (gate: 0.99)
+
+Of the 12 disagreements, 10 were grasps failing to re-form and 2 genuine flips.
+Run 1 blamed the mass perturbation, which was real: mutating `body_mass` needs
+`mj_setConst` and restoring the scalar did not restore everything. Amendment 1
+removed that. The residual has a different cause, and the check that found it
+is worth stating because it reversed my assumption:
+
+Re-running the failing pairs with a **fresh scene per repeat** made them fail
+**consistently** (no grasp at all), where a reused scene made them alternate.
+So those grasps do not re-form standalone; they formed in G3 only because that
+cell's scene carried accumulated state from earlier draws. **5 of 228 G3 grasps
+(2.2%) are not independently reproducible.**
+
+### Robustness: excluding them changes nothing
+
+    metric          rho all   rho kept   AUC all   AUC kept
+    f_total          +0.325     +0.320     0.800      0.795
+    margin           +0.274     +0.268     0.753      0.747
+    epsilon          +0.203     +0.198     0.684      0.679
+    hold_N           +0.297     +0.300     0.606      0.608
+
+Kept-only clustered CIs: f_total AUC [0.726, 0.854], epsilon AUC [0.568, 0.781].
+Every conclusion in G3 survives. The gate failure is real, bounded at 2.2%, and
+demonstrably immaterial to the result it was guarding.
+
+### Where that leaves the project
+
+G4 was set up as a go/no-go on the whole line of work, and it says **go**. The
+outcome being measured is stable, so the G3 finding stands: contact force is
+the best predictor of task success (AUC 0.800), epsilon is real but weaker
+(0.684), and every metric inverts on capsules.
+
+That capsule inversion is now the most robust unexplained observation in the
+repository — it survived a gravity leak, a dead task axis, an unstable seed, and
+a reproducibility audit. It is the obvious next question, and it points at
+contact geometry rather than scalar wrench summaries.
