@@ -1369,6 +1369,70 @@ class BimanualTracker:
                    if ({int(d.contact[i].geom1), int(d.contact[i].geom2)} & obj)
                    and ({int(d.contact[i].geom1), int(d.contact[i].geom2)} & hands))
 
+    def hold_test(self, k=0, seconds=0.8, settle=0.15):
+        """Do the two hands hold the object where the reference starts?
+
+        The bimanual analogue of the one-handed hold test, and the score a
+        two-handed grasp search needs. Without it, stage 6 could only be
+        evaluated by running a whole trajectory, which conflates the grasp with
+        the tracking.
+        """
+        m, d = self.sim.model, self.sim.data
+        self.reset_at(k)
+        for _ in range(int(settle / m.opt.timestep)):
+            mujoco.mj_step(m, d)
+        p0 = self.obj_pose()[0].copy()
+        for _ in range(int(seconds / m.opt.timestep)):
+            mujoco.mj_step(m, d)
+        return float(np.linalg.norm(self.obj_pose()[0] - p0))
+
+    def synthesize_grasp(self, k=0, samples=10, rounds=2, sigma_pos=0.012,
+                         sigma_rot=0.08, seed=0):
+        """Search both wrists for a two-handed pose that holds the object.
+
+        Alternating, one hand at a time, because a joint 12-dimensional search
+        needs far more samples for the same coverage and each sample costs a
+        physics rollout. Scored by `hold_test`, i.e. in physics -- the same
+        standard the one-handed synthesis uses, which took that stage from 4/24
+        to 19/24.
+
+        The offsets are constant in the OBJECT frame and applied to every frame,
+        so the trajectory's shape is untouched and only the grasp moves. Kept
+        only if the hold improves.
+        """
+        rng = np.random.default_rng(seed)
+        sig = np.array([sigma_pos] * 3 + [sigma_rot] * 3)
+        best = self.hold_test(k)
+        applied = {"r": np.zeros(6), "l": np.zeros(6)}
+        for _ in range(rounds):
+            for sd in ("r", "l"):
+                cand = rng.normal(size=(samples, 6)) * sig
+                for dlt in cand:
+                    self._shift(sd, dlt)
+                    score = self.hold_test(k)
+                    if score < best:
+                        best = score
+                        applied[sd] = applied[sd] + dlt
+                    else:
+                        self._shift(sd, -dlt)
+        self.grasp_drop = best
+        self.grasp_offsets = applied
+        return best, applied
+
+    def _shift(self, sd, delta):
+        """Shift one hand's wrist by `delta` across the whole trajectory."""
+        names = [mujoco.mj_id2name(self.fit[sd].model, mujoco.mjtObj.mjOBJ_JOINT, j)
+                 for j in self.fit[sd].jids]
+        pre = f"{sd}_"
+        for i, n in enumerate(names):
+            b = n[len(pre):] if n and n.startswith(pre) else n
+            if b in ("x", "y", "z"):
+                self.tr[sd].q[:, i] += delta[{"x": 0, "y": 1, "z": 2}[b]]
+            elif b in ("rx", "ry", "rz"):
+                self.tr[sd].q[:, i] += delta[3 + {"rx": 0, "ry": 1, "rz": 2}[b]]
+        self.P[sd], self.Q[sd], self.vals[sd] = feedforward_se3(
+            self.fit[sd], self.tr[sd].q, self.ref_pos, self.ref_quat)
+
     def rollout(self, start=0, steps=None):
         m, d = self.sim.model, self.sim.data
         steps = self.T - start if steps is None else steps

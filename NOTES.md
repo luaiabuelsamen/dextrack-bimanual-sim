@@ -2970,3 +2970,29 @@ and needed a hinge-base variant of the bimanual scene because a free joint gives
 the solver no wrist DoF to move. Tracking still fails on every sequence tried,
 for the one-handed grasp-quality reason. Grasp synthesis is what it needs next
 and has not been applied to it.
+
+## 2026-09-15 — stage 6: the two-handed grasp is fixed; tracking is partly
+
+Applying the same physics-scored wrist search to both hands, alternating one at
+a time (a joint 12-D search needs far more samples for the same coverage, and
+every sample costs a rollout). Scored by a two-handed `hold_test`:
+
+    sequence              object          hold drop        tracking error
+                                       before -> after    before -> after
+    gamecontroller_play_1 gamecontroller  981.6 -> 3.40 cm   97 m -> 151 m
+    camera_takepicture_2  camera            1.3 -> 0.13 cm  188 m -> 131 m
+    binoculars_see_1      binoculars      232.5 -> 0.05 cm   21.8 m -> 0.19 m
+    bowl_drink_1          bowl              7.3 -> 0.24 cm  160.9 m -> 0.12 m
+
+**All four now hold.** That was the blocking failure, and it is gone: every
+sequence tried went from losing the object outright to holding it within
+0.05–3.4 cm. Two of the four then track to 120–190 mm, against 21 and 161
+METRES before — three orders of magnitude. The other two hold and still lose the
+object during the motion, which is the one-handed pattern: a grasp that survives
+gravity need not survive inertia, and that is what the MPPI correction is for.
+It has not been applied to the two-handed case.
+
+The prerequisites were two structural fixes, both measured rather than assumed:
+fitting both hands in ONE scene so each sees the other (inter-hand contact 42 at
+11.7 mm -> 0.1 at 2.4 mm), which in turn needed a hinge-base variant of the
+bimanual scene, because a free joint leaves the solver no wrist DoF to move.
