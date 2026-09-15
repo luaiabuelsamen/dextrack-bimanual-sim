@@ -780,3 +780,50 @@ The renderer is not implicated. `experiments/render_tracking.py` asserts a free
 joint, no weld, and negative gravity, and its saved `qpos`, `scene.mjb`, and
 manifests are what made this audit possible at all. The instrumentation is
 sound; what it instrumented was not.
+
+### Standalone finding: every static grasp metric is corrupted by a manufactured contact set
+
+Worth stating separately from the tracking failure, because it generalises past
+this repository. Ferrari–Canny ε computed on the four reset contact sets:
+
+| clip | contacts | ε | F_total | resistible | δ | outcome |
+|---|---:|---:|---:|---:|---:|---|
+| mug | 21 | 0.204 | 2125 N | 434 N | 0.0045 | 44.8° |
+| bowl | 20 | 0.155 | 2947 N | 458 N | 0.0043 | 45.9° |
+| binoculars | 33 | 0.263 | 12042 N | 3162 N | 0.0006 | 20.0° |
+| camera | 42 | 0.344 | 12049 N | 4142 N | 0.0005 | 138.4° |
+
+All four are strongly force-closed on paper — δ of 0.0005–0.0045 means they
+resist 200–2000× the gravity wrench — and the ranking is backwards: the camera
+has the highest ε and the worst orientation error, the binoculars the
+second-highest and the best.
+
+ε takes the contact set as given, and the contact set is fictitious. Deep
+penetration manufactures 21–42 contacts with well-distributed normals and wide
+friction cones, which is an excellent grasp by every static wrench-space
+measure. So held-ness, contact count, normal force, ε and force closure are all
+corrupted by the same artifact and none can detect it — feeding a corrupted
+contact set to a grasp-quality metric returns a confident wrong answer. Adding ε
+to the search objective would have let it find high-ε penetrated configurations
+exactly as it previously found high-force ones.
+
+This is G3's AUC 0.684 arriving from a second direction, and it is the sharper
+statement of the two: the metric this repository was named after cannot diagnose
+the failure that invalidated the repository's numbers.
+
+Two practical notes. `grasp_metrics` takes a single `obj_geom_id` while the GRAB
+objects are convex-decomposed into 23–42 geoms, so a multi-geom variant is
+needed to run ε here at all — plausibly why `src/oppdef/human/` never imported
+it. And the metric that *does* discriminate is cheap: the net unbalanced wrench
+on the object at reset, gravity included, which should be ~1× object weight for
+a configuration that is genuinely a grasp at rest and measures 142–337× for
+these. One `mj_forward`, ungameable by manufacturing contacts, and it rejects
+the non-contacting failure as well as the buried one.
+
+Candidate sweep supporting the same conclusion: 40 sampled wrist offsets around
+the `bowl_drink_1` retarget, measured at reset. Penetration spans 0.00–21.35 mm
+and contacts 0–68, correlated at +0.597. Three candidates reach both a
+near-balanced wrench and under 2 mm penetration; all three have fewer than three
+contacts. Zero of 41 configurations both touch the object and stay out of it.
+Direct placement offers burial or thin air, which is why the fix is to close the
+hand under simulation rather than to reweight a penalty.

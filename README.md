@@ -1,16 +1,46 @@
-# opposition-deficit
+# dextrack-bimanual-sim
 
 [![simulation](https://img.shields.io/badge/simulation-MuJoCo-2a78d6)](src/oppdef/human/track.py)
 [![license](https://img.shields.io/badge/license-MIT-2a78d6)](LICENSE)
 
-A simulation workbench for **turning human hand-object motion into dexterous
-robot tracking**. Real GRAB references drive retargeting, grasp search,
-per-reference PPO, and experiments with two robot hands.
+A simulation workbench for **two-handed dexterous tracking from human motion**,
+and a public measurement log. Real [GRAB](https://grab.is.tue.mpg.de/) hand-object
+references drive retargeting, grasp synthesis, per-reference PPO and two-hand
+experiments, following [DexTrack](https://meowuu7.github.io/DexTrack/).
 
-> **The name is a historical artifact.** It refers to an "opposition deficit"
-> that does not exist — the measurement behind it was taken at the wrong point
-> on every hand. The original claim is retracted; the name remains for continuity.
-> See [Status](#status) and the full [measurement log](NOTES.md).
+The log is the point. Every claim this project has had to withdraw is recorded
+here with the measurement that killed it, including the one it used to be named
+after. **[NOTES.md](NOTES.md) is authoritative — read it before quoting any
+number.**
+
+> **Renamed from `opposition-deficit`** (2026-09-15). That name referred to a
+> deficit that does not exist: the measurement behind it was taken at the wrong
+> point on every hand, and the claim is retracted. The Python package is still
+> `oppdef`; renaming it is a mechanical change deliberately deferred so it does
+> not collide with active work.
+
+## Where this stands
+
+Honest summary, because the stage table below is mostly red and that needs
+context: **the pipeline runs end to end and its numbers were wrong.** On
+2026-09-15 the tracking stage was stepped as real physics for the first time
+rather than kinematic playback, and the instrumentation immediately showed that
+every rollout was a contact artifact — the hand placed *inside* the object,
+which manufactures contacts, which inflates grip, which flatters every metric
+downstream. Tracking numbers across stages 2, 3 and 6 are withdrawn.
+
+The cause is understood and the fix is identified, small, and in progress: the
+retargeted pose was being *placed* interpenetrated instead of closed onto the
+object under simulation. Closing under physics takes `gamecontroller_play_1`
+from 4411 N to **10.5 N** on a 0.2 kg object — 2250× object weight down to 5.4×,
+a plausible grip — and recovers the case where the alternative was a hand that
+never touched the object at all.
+
+So this is not a project that is stuck. It is a project whose measurement log
+caught a systematic error that had been inflating everything in it, which is
+what the log is for.
+
+---
 
 ---
 
@@ -103,7 +133,57 @@ at the fingertips and none elsewhere, weighted so that 10 mm of excess costs
 about what dropping the object costs. With it, `mug_drink_2` stays at the
 retarget's 11.08 mm instead of climbing to 17.47 mm.
 
-**The retarget cannot produce a usable grasp at all.** Re-running the search
+**Every static grasp metric is corrupted by this, including ε.** Ferrari–Canny
+on the four reset contact sets gives ε = 0.204 / 0.155 / 0.263 / 0.344 and
+δ = 0.0005–0.0045, i.e. all four are strongly force-closed on paper and could
+resist 200–2000× the gravity wrench. The ranking is *backwards*: the camera has
+the highest ε of the four and the worst orientation error, the binoculars the
+second-highest and the best. ε takes the contact set as given, and the contact
+set is fictitious — deep penetration manufactures 21–42 contacts with
+well-distributed normals and wide friction cones, which is an excellent grasp by
+any static wrench-space measure. Held-ness, contact count, normal force, ε and
+force closure are all corrupted by the same artifact, so none of them can be
+used to detect it. (This is [G3](#earlier-benchmark-which-metrics-predict-task-success)'s
+deflating ε result arriving from a second direction.)
+
+What does detect it is a single cheap scalar: the **net unbalanced wrench on the
+object at the reset configuration, with gravity included**. A configuration that
+is genuinely a grasp at rest nets to ~1× object weight. These measure 194× /
+237× / 142× / 337×. It cannot be gamed by manufacturing contacts, since more
+penetrating contacts worsen the imbalance, and it rejects the non-contacting
+failure too — no contacts means freefall, exactly as unbalanced as burial.
+
+**Why depth alone cannot be optimised away.** Sampling 40 wrist-offset
+candidates around the `bowl_drink_1` retarget and measuring each at its reset
+state (one `mj_forward`, ~0.07 s each): penetration ranges 0.00–21.35 mm and
+contacts 0–68, correlated at **+0.597** — contacts are manufactured by burial.
+Three candidates achieve both a near-balanced wrench and under 2 mm of
+penetration. **All three have fewer than three contacts.** Zero of 41
+configurations both touch the object and stay out of it; the best-scoring
+candidate has 0.00 mm penetration, a balanced wrench, and *no contacts at all*.
+Direct placement offers burial or thin air, and reweighting cannot find a middle
+that is not there.
+
+**The fix is not a new grasp representation.** It is to stop *placing* the hand
+and start *closing* it — backing the fingers off along the derived flexion
+direction, then closing under simulation to a force target:
+
+| reference | | penetration | force | torque | 66 ms kick |
+|---|---|---:|---:|---:|---:|
+| `gamecontroller_play_1` | direct | 0.00 mm | 0.0 N | 0.00 N·m | 44.1° / 16.8 mm |
+| `gamecontroller_play_1` | **close** | 5.53 mm | **10.5 N** | **0.33 N·m** | **12.1° / 10.1 mm** |
+| `mug_drink_2` | direct | 11.08 mm | 4410.8 N | 54.35 N·m | 23.1° / 24.3 mm |
+| `mug_drink_2` | close | 16.45 mm | 5049.0 N | 72.52 N·m | 21.3° / 9.8 mm |
+
+`gamecontroller` is the result: 2250× object weight down to **5.4×**, a
+plausible grip, on the same reference that direct placement leaves with zero
+contacts and a 44° kick. One change recovers both failure ends. `mug_drink_2`
+does not improve, instructively — its retarget starts buried and the pre-grasp
+opens the fingers by only 0.30 rad, not enough to clear an 11 mm overlap. The
+procedure works when the pre-grasp is outside the object and fails when it is
+not, which is a parameter, not a wall.
+
+**Direct placement cannot produce a usable grasp.** Re-running the search
 with the penetration term active, and reporting penetration and normal force
 alongside tracking error for the first time:
 
@@ -275,7 +355,7 @@ measurement, not on the previous stage having compiled:
 | stage | what it does | state |
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
-| 2. retarget | human contact points → robot joint trajectory | **NOT WORKING** — grasps are either interpenetrating (11.08 mm, 4411 N on `mug_drink_2`) or non-contacting (`phone_call_1`), with nothing usable between; the "0 mm penetration" figure was an isolated settled pose |
+| 2. retarget | human contact points → robot joint trajectory | **broken, fix in progress** — placing the pose interpenetrated gives either burial (11.08 mm, 4411 N) or no contact (`phone_call_1`); closing under physics instead gives 10.5 N on `gamecontroller_play_1` |
 | 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **not physical** — 29.35 mm is achieved on 13.8 mm of penetration at 1530 N; `gamecontroller`'s 27.2 mm withdrawn; see [above](#physics-rollouts--four-failures) |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
 | 5. distillation | one neural tracking controller across references | **incomplete** — reported held-out position error is 158–456 mm; that error alone does not verify continued grasp retention |
