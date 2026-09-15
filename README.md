@@ -154,10 +154,10 @@ measurement, not on the previous stage having compiled:
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
 | 2. retarget | human contact points → robot joint trajectory | **done** — ~13 mm to the human's contacts, 0 mm penetration after settling |
-| 3. per-reference tracking | feedforward + MPPI, one solution per clip | **built** — tracks 116/116 frames at 35.3 mm; 21/24 frames hold unaided |
+| 3. per-reference tracking | feedforward + MPPI, one solution per clip | **built** — tracks 116/116 frames at 35.3 mm, given a grasp that holds |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
-| 5. distillation | one neural tracking controller across references | **built** — 87-dim object-relative obs, held out by object |
-| 6. bimanual | both hands on one object | **built** — two hands in one physics scene; 136 of 291 sequences are bimanual |
+| 5. distillation | one neural tracking controller across references | **built, does not generalise** — held-out objects worse than predicting the mean (ratio 1.84) at 5 episodes |
+| 6. bimanual | both hands on one object | **built, does not track** — joint fitting removes the 11.7 mm interpenetration; grasps still fail |
 | 7. perception | depth → pose estimator → evaluate the *frozen* tracker | **built** — and it already says something (below) |
 
 Every number in this section is from the **corrected** pipeline. An earlier set

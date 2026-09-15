@@ -2919,3 +2919,54 @@ sampled over mesh FACES, since a convex part carries 64 vertices and ~12 mm
 spacing caps the achievable pose at ~28 mm; and MuJoCo puts the eye at
 `lookat - distance * forward`, so azimuth and elevation say where the camera
 LOOKS, not where it sits — asking for (0.3, −0.3, 0.3) gave (−0.28, 0.32, −0.30).
+
+## 2026-09-15 (later) — what the seven stages actually do
+
+**G5, re-run twice on the corrected pipeline.** Pre-registered threshold 0.50:
+
+    retarget objective          hold rate   clustered CI        verdict
+    fingertips only (W_JOINT=0)   0.318     [0.270, 0.367]       FAIL
+    + intermediate joints (0.45)  0.200     [0.161, 0.238]       FAIL
+
+H2 unsupported in both (+0.001 and +0.024, intervals spanning zero), so the
+"the window starts before the grasp is formed" explanation I drew from one
+sequence does not generalise.
+
+**Matching the human better makes the grasp worse.** This is the session's
+sharpest result and it arrived by accident, from fixing something a reader
+spotted in a render. Adding the intermediate finger joints as targets moves the
+retarget onto the mug's handle the way the human holds it -- handle contacts
+31.8% → 38.8%, distance to the human's own contact points 19.6 → 13.1 mm -- and
+costs 12 points of hold rate, with non-overlapping intervals. The gap survives
+grasp synthesis (0.500 → 0.750 from tips-only against 0.250 → 0.650 from the
+wrap-aware fit), so the repair stage does not absorb it. `W_JOINT` defaults to 0
+and the trade-off is recorded as the finding: it is this project's founding
+claim arriving from the other direction.
+
+**Grasp synthesis is what unblocks the pipeline**, exactly as G5's decision rule
+said it would. Searching a small neighbourhood of the retargeted wrist for a
+pose that holds -- scored in physics -- takes 4/24 to 19/24. Closing the fingers
+without repositioning does nothing (0.288 → 0.276): the failures make 0.1
+contacts and have nothing to close on. Applied as a constant wrist offset in the
+object frame and kept only when it improves the whole reference; unguarded it
+took one clip from 6 graspable frames to 1. Guarded: 16 → 38 graspable frames
+over six references, never worse.
+
+**Stage 5 runs end to end and does not generalise.** 16 references attempted, 5
+solved, 632 transitions over 5 objects, held out by object:
+
+    train              MAE 0.00297   ratio to predict-the-mean 0.122
+    held-out objects   MAE 0.04648   ratio to predict-the-mean 1.840
+
+A ratio above 1 means the policy is worse than a constant. With three training
+objects that is what should happen, and it is reported rather than buried: the
+statement is about data scale, not about the method. The collection also ran
+with W_JOINT = 0.45, which is now known to be the worse setting, so the 5-of-16
+solve rate is a floor.
+
+**Stage 6 still does not track.** Joint bimanual fitting works -- fitting both
+hands in one scene takes inter-hand contact from 42 at 11.7 mm to 0.1 at 2.4 mm,
+and needed a hinge-base variant of the bimanual scene because a free joint gives
+the solver no wrist DoF to move. Tracking still fails on every sequence tried,
+for the one-handed grasp-quality reason. Grasp synthesis is what it needs next
+and has not been applied to it.
