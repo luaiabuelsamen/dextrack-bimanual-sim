@@ -1515,8 +1515,14 @@ class BimanualTracker:
         return float(np.linalg.norm(self.obj_pose()[0] - p0))
 
     def track_score(self, steps=60, start=0):
-        """Mean tracking error over a short rollout -- the objective that
-        actually matters.
+        """Search objective. **Unitless, not millimetres.**
+
+        It is a clipped mean error plus a drop penalty, so it is not comparable
+        to a tracking error and must not be printed beside one. Doing exactly
+        that cost an hour chasing a reproducibility bug that did not exist: a
+        score of 0.0469 printed as "46.9 mm" next to a 92752 mm rollout looked
+        like the search and the evaluation disagreeing by 2000x, when the code
+        is deterministic and repeats to the digit.
 
         `hold_test` scores a grasp against gravity, and a grasp can pass it and
         still fail in motion: on `gamecontroller_play_1` two synthesis seeds

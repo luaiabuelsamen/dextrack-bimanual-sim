@@ -3261,3 +3261,27 @@ diagnosed rather than guessed:
 
 Which is the argument DexTrack's design makes, arrived at from the wrong end
 four times.
+
+## 2026-09-15 — the stage 6 "discrepancy" was my own unit label
+
+I recorded binoculars as showing a search score of 46.9 mm against a 92752 mm
+rollout and called the bimanual numbers untrustworthy. There is no such bug.
+`track_score` returns a **composite** -- a clipped mean error plus half the
+fraction of dropped frames -- which is unitless, and my test script printed it
+with a "mm" suffix beside a genuine millimetre error. A score of 0.0469 printed
+as "46.9 mm" looked like a 2000x disagreement.
+
+Checked directly, the code repeats to the digit:
+
+    before search   score 0.6642   rollout mean 96709 mm   dropped 0.877 of frames
+    repeat          score 0.6642   rollout mean 96709 mm   dropped 0.877
+    after search    score 0.6589   rollout mean 93575 mm   dropped 0.870
+    repeat          score 0.6589   rollout mean 93575 mm   dropped 0.870
+
+So stage 6's numbers stand as measured, and binoculars genuinely fails --
+87% of its frames have the object dropped. The two that work, work:
+**bowl 28.1 mm (103/131 frames in tolerance)** and **camera 44.1 mm (151/161)**.
+Two of four, honestly measured, with no outstanding reproducibility question.
+
+The lesson is narrow and worth the entry: never print an objective and a metric
+with the same unit suffix. I spent an hour on a phantom.

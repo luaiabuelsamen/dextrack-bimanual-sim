@@ -157,7 +157,7 @@ measurement, not on the previous stage having compiled:
 | 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **solved** — 29.4 mm mean, **111/111** frames within 50 mm, object never dropped |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
 | 5. distillation | one neural tracking controller across references | **keeps the object on held-out objects** (158–456 mm) once it distils PPO policies rather than a trajectory optimiser; still far from the 2.5–17.7 mm experts |
-| 6. bimanual | both hands on one object | **tracking** — 3 of 4 references inside 200 mm (56/117/165 mm), all 4 hold |
+| 6. bimanual | both hands on one object | **2 of 4 track well** — bowl 28.1 mm (103/131 frames), camera 44.1 mm (151/161); binoculars and gamecontroller fail |
 | 7. perception | depth → pose estimator → evaluate the *frozen* tracker | **built** — and it already says something (below) |
 
 Every number in this section is from the **corrected** pipeline. An earlier set
