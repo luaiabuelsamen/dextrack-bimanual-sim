@@ -200,7 +200,7 @@ def _in_palm_frame(scene, pfx):
 
 
 def run_task(scene, traj, slip_tol=0.015, drop=0.06, settle=200,
-             min_carry=0.05):
+             min_carry=0.05, extra_force=None):
     """Execute the trajectory on an already-formed grasp. Object-side success.
 
     Success is **slip in the palm frame**, not tracking error against the
@@ -231,13 +231,15 @@ def run_task(scene, traj, slip_tol=0.015, drop=0.06, settle=200,
     m.opt.gravity[:] = GRAVITY
     try:
         return _run_task_inner(scene, traj, m, d, pfx, base_q, base_a,
-                               slip_tol, drop, settle, min_carry)
+                               slip_tol, drop, settle, min_carry,
+                               extra_force)
     finally:
         m.opt.gravity[:] = _saved_gravity
 
 
 def _run_task_inner(scene, traj, m, d, pfx, base_q, base_a,
-                    slip_tol, drop, settle, min_carry):
+                    slip_tol, drop, settle, min_carry,
+                    extra_force=None):
 
     p0 = d.qpos[scene.obj_q:scene.obj_q + 3].copy()
     start = np.array([d.qpos[base_q[dof]] for dof in traj.dof])
@@ -256,6 +258,8 @@ def _run_task_inner(scene, traj, m, d, pfx, base_q, base_a,
         for i, dof in enumerate(traj.dof):
             if dof in base_a:
                 d.ctrl[base_a[dof]] = start[i] + cmd[k][i]
+        if extra_force is not None:
+            d.xfrc_applied[scene.obj_bid, :3] = extra_force
         mujoco.mj_step(m, d)
         slip = float(np.linalg.norm(_in_palm_frame(scene, pfx) - rest))
         worst = max(worst, slip)

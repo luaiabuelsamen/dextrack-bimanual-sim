@@ -37,16 +37,24 @@ def one_run(sc, row, traj, rng, perturb):
     if not at.valid or at.n_contacts < 2:
         return None
     if perturb:
-        # mass +/-2%: body_mass changes need the derived constants rebuilt
-        base = float(row["mass"])
-        sc.m.body_mass[sc.obj_bid] = base * (1.0 + rng.uniform(-0.02, 0.02))
-        mujoco.mj_setConst(sc.m, sc.d)
+        # Amendment 1: the +/-2% mass perturbation is applied as an equivalent
+        # STEADY FORCE on the object rather than by mutating body_mass.
+        # Mutating mass needs mj_setConst to rebuild derived inertia, and
+        # restoring the scalar afterwards did not restore everything: grasps
+        # then failed to re-form intermittently, in an alternating pattern, and
+        # 10 of 12 determinism-check failures were re-formation failures rather
+        # than physics differences. The model is now never mutated mid-run.
+        sc._mass_bias = np.array([0.0, 0.0,
+                                  -9.81 * float(row["mass"])
+                                  * rng.uniform(-0.02, 0.02)])
         # object start offset +/-1 mm, applied AFTER the grasp formed, so the
         # grasp itself is identical across repeats
         sc.d.qpos[sc.obj_q:sc.obj_q + 3] += rng.uniform(-0.001, 0.001, 3)
         sc.d.qacc_warmstart[:] = 0.0        # no repeat inherits another's path
         mujoco.mj_forward(sc.m, sc.d)
-    return run_task(sc, traj)
+    else:
+        sc._mass_bias = None
+    return run_task(sc, traj, extra_force=getattr(sc, "_mass_bias", None))
 
 
 def main():
@@ -83,16 +91,11 @@ def main():
             # scene a task has already run in
             sc = GraspScene(g["hand"], tuple(half), mass=g["mass"], n_hands=1,
                             kp_finger=g["kp_finger"], shape=g["shape"])
-            base_mass = float(sc.m.body_mass[sc.obj_bid])
             det = one_run(sc, g, traj, rng, perturb=False)
             reps = []
             for _ in range(a.repeats):
-                sc.m.body_mass[sc.obj_bid] = base_mass   # undo the last perturb
-                mujoco.mj_setConst(sc.m, sc.d)
                 r = one_run(sc, g, traj, rng, perturb=True)
                 reps.append(None if r is None else bool(r.success))
-            sc.m.body_mass[sc.obj_bid] = base_mass
-            mujoco.mj_setConst(sc.m, sc.d)
             good = [x for x in reps if x is not None]
             unan = bool(good) and all(x == good[0] for x in good)
             det_ok = (det is not None and bool(det.success) == bool(orig))

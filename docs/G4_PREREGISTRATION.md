@@ -69,4 +69,27 @@ the outcome is unstable to perturbations this small, that is the finding.
 
 ## Amendments
 
-*(none)*
+### Amendment 1 — 2026-09-14, after run 1 tripped its own determinism gate
+
+Run 1 gave unanimity 438/456 = 0.961, which passes the primary. It did **not**
+pass the determinism gate: the unperturbed repeat matched the saved G3 outcome
+in only 444/456 = 0.974, below the 0.99 this pre-registration requires. Per the
+rule, that is fixed before anything is interpreted.
+
+Diagnosis: **10 of the 12 disagreements were grasps failing to RE-FORM**, not
+physics differing, and they alternated within a cell. The cause is the mass
+perturbation. Changing `body_mass` requires `mj_setConst` to rebuild derived
+inertia, and restoring the scalar afterwards did not restore everything, so a
+scene reused across repeats drifted.
+
+**Change:** the ±2% mass perturbation is applied as the equivalent steady
+vertical force on the object during the carry, rather than by mutating the
+model. The model is never mutated mid-run. Everything else — ±1 mm offset,
+warm-start reset, R = 5, the 80% threshold, the decision rule — is unchanged.
+
+A second defect, in the analysis rather than the experiment: the saved
+`unanimous` field ignores repeats whose grasp failed to re-form, so it read
+456/456 where the honest count was 438/456. All reporting now uses one strict
+definition — every declared repeat must re-form **and** agree — and the
+grasp-clustered bootstrap uses the same one. Flagged by the codex review before
+it could reach a result.
