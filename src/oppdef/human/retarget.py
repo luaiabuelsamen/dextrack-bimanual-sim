@@ -28,6 +28,7 @@ import mujoco
 from scipy.spatial import cKDTree
 
 from oppdef.human import grab as grab_mod
+from oppdef.hands.tips import tip_offset
 from oppdef.retarget import correspond, retargeter_for
 
 #: MANO tips come out thumb-first; this repository orders tips fingers-then-
@@ -41,9 +42,12 @@ W_CONTACT = 1.0
 W_FREE = 0.25
 W_WRIST = 0.15
 W_SMOOTH = 0.05
-W_PEN = 2.0             # penetration outweighs tip error: a pose 14 mm inside
+W_PEN = 1.0             # with fingertips targeted at their DERIVED points and
+                        # allowed 2 mm, a light penalty is enough; heavier ones
+                        # fight the contact targets without reducing penetration
                         # the object is not a grasp, whatever its tips score
-PEN_MARGIN = 0.0        # only true penetration is penalised
+PEN_MARGIN = 0.0        # non-fingertip links: any penetration is penalised
+TIP_ALLOW = 0.002       # fingertips may sink 2 mm; beyond that it is not contact
 
 
 @dataclass
@@ -76,7 +80,7 @@ class _Solver:
     """
 
     def __init__(self, sc, tips, wrist_bid, lo, hi, w_smooth=W_SMOOTH,
-                 w_pen=W_PEN):
+                 w_pen=W_PEN, tip_offsets=None):
         self.sc = sc
         self.m, self.d = sc.model, sc.data
         self.tips = list(tips)
@@ -86,9 +90,22 @@ class _Solver:
         self.n = len(sc.jids)
         self.w_smooth, self.w_pen = w_smooth, w_pen
         self.obj = set(sc.obj_gids)
-        self.hand = set(sc.hand_gids) - set(sc.tip_gids)
+        self.hand = set(sc.hand_gids)
+        self.tips_g = set(sc.tip_gids)
         self._jp = np.zeros((3, sc.model.nv))
         self._jr = np.zeros((3, sc.model.nv))
+        # A fingertip is the far end of the distal link, not that link's body
+        # origin. Targeting the origin puts the CENTRE of the tip geom on the
+        # object surface, which buries the geom by its own radius: measured,
+        # 12 mm of tip penetration and 4469 N of contact force on a 0.2 kg mug.
+        # oppdef.hands.tips derives the real point from the collision geometry;
+        # this project has already been caught by exactly this once.
+        self.tip_off = (tip_offsets if tip_offsets is not None else
+                        [tip_offset(sc.model, b) for b in self.tips])
+
+    def _tip_world(self, i):
+        b = self.tips[i]
+        return self.d.xpos[b] + self.d.xmat[b].reshape(3, 3) @ self.tip_off[i]
 
     def _fk(self, q, collide=True):
         self.d.qpos[:] = 0.0
@@ -105,6 +122,9 @@ class _Solver:
         self._jp[:] = 0.0
         mujoco.mj_jacBody(self.m, self.d, self._jp, self._jr, bid)
         return self._jp[:, self.dofs].copy()
+
+    def _jac_tip(self, i):
+        return self._jac_point(self._tip_world(i), self.tips[i])
 
     def _jac_point(self, point, bid):
         self._jp[:] = 0.0
@@ -124,7 +144,13 @@ class _Solver:
                 hand_g, sign = g1, -1.0
             else:
                 continue
-            depth = PEN_MARGIN - float(c.dist)
+            # A fingertip ON the surface is the grasp, so tips get an
+            # allowance rather than exemption. Exempting them entirely let the
+            # fit bury them 12 mm in, and the constraint solver answered with
+            # 4469 N of contact force on a 0.2 kg object -- which makes every
+            # number downstream of it meaningless.
+            allow = TIP_ALLOW if hand_g in self.tips_g else PEN_MARGIN
+            depth = -float(c.dist) - allow
             if depth <= 0:
                 continue
             # contact frame row 0 is the normal, pointing geom1 -> geom2
@@ -146,8 +172,8 @@ class _Solver:
                 w = weights[i]
                 if w <= 0:
                     continue
-                rows.append(w * self._jac_body(bid))
-                res.append(w * (self.d.xpos[bid] - targets[i]))
+                rows.append(w * self._jac_tip(i))
+                res.append(w * (self._tip_world(i) - targets[i]))
             if wrist_target is not None:
                 rows.append(W_WRIST * self._jac_body(self.wrist))
                 res.append(W_WRIST * (self.d.xpos[self.wrist] - wrist_target))
@@ -176,7 +202,7 @@ class _Solver:
             if step < 1e-5:
                 break
         self._fk(q)
-        return q, self.d.xpos[np.array(self.tips)].copy()
+        return q, np.array([self._tip_world(i) for i in range(len(self.tips))])
 
 
 def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",

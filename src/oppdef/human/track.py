@@ -422,15 +422,18 @@ class MocapHand:
     def command(self, palm_p, palm_q):
         """Move the mocap target only; the weld drags the hand to it."""
         m, d = self.sc.model, self.sc.data
-        q = d.qpos[self.sc.qadr].copy()
+        # Snapshot BEFORE touching qpos. Taking it afterwards restored the
+        # hand's free joint to the origin on every control step, teleporting
+        # the hand off the object; the rollout reported 253 m of error.
+        saved = d.qpos.copy()
         d.qpos[self.free_q:self.free_q + 3] = 0.0
         d.qpos[self.free_q + 3:self.free_q + 7] = [1, 0, 0, 0]
-        saved = d.qpos.copy()
         mujoco.mj_kinematics(m, d)
         p0 = d.xpos[self.sc.wrist_bid].copy()
         q0 = np.zeros(4)
         mujoco.mju_mat2Quat(q0, d.xmat[self.sc.wrist_bid].copy())
         d.qpos[:] = saved
+        mujoco.mj_kinematics(m, d)
         pi, qi = _inv(p0, q0)
         bp, bq = _mul(np.asarray(palm_p, float), np.asarray(palm_q, float), pi, qi)
         d.mocap_pos[m.body_mocapid[self.sc.mocap_bid]] = bp
@@ -462,3 +465,414 @@ def feedforward_se3(sc_fit, q_obj, ref_pos, ref_quat):
         if Q[k] @ Q[k - 1] < 0:
             Q[k] = -Q[k]
     return P, Q, vals
+
+
+# --------------------------------------------------------------------------
+# per-reference tracking: feedforward + a correction searched by MPPI
+# --------------------------------------------------------------------------
+def act_map(sc):
+    """actuator -> indices into sc.jids that it drives.
+
+    Shadow couples each finger's distal two joints onto one actuator through a
+    tendon, so this is not one-to-one and an actuator-per-joint assignment
+    drives the wrong targets.
+    """
+    m = sc.model
+    pos = {j: i for i, j in enumerate(sc.jids)}
+    out = []
+    for a in range(m.nu):
+        tt = m.actuator_trntype[a]
+        if tt == mujoco.mjtTrn.mjTRN_JOINT:
+            j = int(m.actuator_trnid[a, 0])
+            out.append((a, [pos[j]] if j in pos else []))
+        elif tt == mujoco.mjtTrn.mjTRN_TENDON:
+            t = int(m.actuator_trnid[a, 0])
+            lo = int(m.tendon_adr[t])
+            idx = [int(m.wrap_objid[lo + w]) for w in range(int(m.tendon_num[t]))]
+            out.append((a, [pos[j] for j in idx if j in pos]))
+        else:
+            out.append((a, []))
+    return out
+
+
+def palm_pose_cached(rt, k):
+    """The palm's pose in the OBJECT frame at reference frame k."""
+    if getattr(rt, "_palm_obj", None) is None:
+        rt._palm_obj = [palm_pose(rt.fit, q) for q in rt.tr.q]
+    return rt._palm_obj[int(np.clip(k, 0, len(rt._palm_obj) - 1))]
+
+
+@dataclass
+class Rollout:
+    pos_err: np.ndarray       # (T,) object position error, metres
+    rot_err: np.ndarray       # (T,) object orientation error, radians
+    dropped: bool
+    steps: int
+
+    @property
+    def score(self) -> float:
+        """Mean position error, with a dropped object scored as a full miss."""
+        return float(np.mean(self.pos_err)) if not self.dropped else 1.0
+
+
+class ReferenceTracker:
+    """One GRAB reference, a hand that starts on it, and a controller.
+
+    The feedforward carries the retargeted grasp along the reference exactly
+    (0.000 mm, by construction). What it cannot do is react: the grasp slips,
+    the object rotates in the hand, and nothing corrects it. The correction is
+    what the tracking stage searches for -- here with MPPI, which needs no
+    gradients through contact and is the same sampling optimiser the synthetic
+    tracker used.
+    """
+
+    def __init__(self, seq, hand="shadow", side="rhand", window=None,
+                 obj_mass=0.2, ctrl_every=None, w_pen=None):
+        from oppdef.human.scene import build as build_scene
+        from oppdef.human.retarget import retarget_sequence
+
+        if window is None:
+            from experiments.grab_inventory import contact_mask, longest_run, _tree
+            mk = contact_mask(seq, _tree(seq, {}), side)
+            window = longest_run(mk)
+        self.seq, self.hand, self.side, self.window = seq, hand, side, window
+
+        self.fit = build_scene(hand, seq.obj, obj_static=True)
+        kw = {} if w_pen is None else {"w_pen": w_pen}
+        self.tr = retarget_sequence(seq, side, hand, window=window,
+                                    sc=self.fit, **kw)
+        pos, quat = reference_in_first_frame(seq, window[0])
+        self.ref_pos, self.ref_quat = pos[self.tr.frames], quat[self.tr.frames]
+        self.P, self.Q, self.vals = feedforward_se3(
+            self.fit, self.tr.q, self.ref_pos, self.ref_quat)
+
+        self.sim = build_scene(hand, seq.obj, base="mocap", obj_static=False)
+        self.mh = MocapHand(self.sim)
+        m = self.sim.model
+        self.obj_q = int(m.jnt_qposadr[
+            [j for j in range(m.njnt)
+             if m.jnt_type[j] == mujoco.mjtJoint.mjJNT_FREE
+             and int(m.jnt_bodyid[j]) == self.sim.obj_bid][0]])
+        bid = self.sim.obj_bid
+        if obj_mass:
+            k = obj_mass / max(float(m.body_mass[bid]), 1e-9)
+            m.body_mass[bid] *= k
+            m.body_inertia[bid] *= k
+        self.obj_v = int(self.sim.model.jnt_dofadr[
+            [j for j in range(self.sim.model.njnt)
+             if self.sim.model.jnt_type[j] == mujoco.mjtJoint.mjJNT_FREE
+             and int(self.sim.model.jnt_bodyid[j]) == self.sim.obj_bid][0]])
+        self._acts = act_map(self.sim)
+        self._grip_offset = np.zeros(self.sim.model.nu)
+        self._ctrl_closure = self._raw_ctrl(self.sim.q_closure)
+        # Which actuators drive FINGERS. A squeeze must not touch the wrist:
+        # Shadow's WRJ1 sits on the palm body itself, and driving it "toward
+        # closure" swings the whole hand off the object -- closing to 1.21 rad
+        # then produced 0.10 N because the fingers were being carried away
+        # faster than they were closing. Selected by body descent, not by name.
+        mm = self.sim.model
+        below = np.zeros(len(self.sim.jids), bool)
+        for i, j in enumerate(self.sim.jids):
+            b = int(mm.body_parentid[int(mm.jnt_bodyid[j])])
+            while b > 0:
+                if b == self.sim.wrist_bid:
+                    below[i] = True
+                    break
+                b = int(mm.body_parentid[b])
+        self._finger_act = np.array(
+            [bool(idx) and bool(np.all(below[idx])) for _a, idx in self._acts])
+        # One control frame must last one REFERENCE frame. Hardcoding it
+        # instead played a 15 Hz clip at 50 Hz -- the hand ran 3.3x ahead of
+        # the object and threw it 13 m.
+        self.ctrl_every = (int(round(seq.dt / m.opt.timestep))
+                           if ctrl_every is None else int(ctrl_every))
+        if self.ctrl_every < 1:
+            raise ValueError(f"reference dt {seq.dt} is below one timestep")
+        self.T = len(self.P)
+        #: 3 palm translation + 3 palm rotation (rotvec) + one per actuator
+        self.n_action = 6 + len(self._acts)
+
+    # -- state ------------------------------------------------------------
+    def _raw_ctrl(self, q) -> np.ndarray:
+        m = self.sim.model
+        c = np.zeros(m.nu)
+        for a, idx in self._acts:
+            if idx:
+                c[a] = np.clip(np.sum(np.asarray(q)[idx]), *m.actuator_ctrlrange[a])
+        return c
+
+    def ctrl_for(self, values: dict) -> np.ndarray:
+        m = self.sim.model
+        q = self.mh.config_from(values)
+        c = np.zeros(m.nu)
+        for a, idx in self._acts:
+            if idx:
+                c[a] = np.clip(np.sum(q[idx]), *m.actuator_ctrlrange[a])
+        return c
+
+    def reset(self, settle: float = 0.2, grip: float | None = None):
+        """Place the hand and object, then let the contact set resolve.
+
+        The retarget leaves the fingertips a centimetre inside the object -- it
+        is a kinematic fit and tips are deliberately exempt from its penetration
+        penalty, since a fingertip on the surface IS the grasp. Started from
+        there, the constraint solver resolves all of it at once and, because the
+        welded wrist cannot yield, the object absorbs the whole impulse: it left
+        at 13 m/s and the rollout reported 253 m of tracking error.
+
+        So the scene is settled first with gravity off and the reference held,
+        which lets the penetration relax without the object also falling. The
+        object's velocity is then zeroed and gravity restored.
+        """
+        m, d = self.sim.model, self.sim.data
+        mujoco.mj_resetData(m, d)
+        self._grip_offset = np.zeros(m.nu)
+        self.mh.place(self.P[0], self.Q[0], self.vals[0])
+        d.qpos[self.obj_q:self.obj_q + 3] = self.ref_pos[0]
+        d.qpos[self.obj_q + 3:self.obj_q + 7] = self.ref_quat[0]
+        d.ctrl[:] = self.ctrl_for(self.vals[0])
+        mujoco.mj_forward(m, d)
+
+        if settle > 0:
+            g = m.opt.gravity.copy()
+            m.opt.gravity[:] = 0.0
+            for _ in range(int(settle / m.opt.timestep)):
+                mujoco.mj_step(m, d)
+            m.opt.gravity[:] = g
+            d.qvel[:] = 0.0
+            mujoco.mj_forward(m, d)
+        if grip:
+            self.establish(grip)
+        return d
+
+    def establish(self, target_n: float = 8.0, open_by: float = 0.30,
+                  step: float = 0.015, settle_steps: int = 10,
+                  max_close: float = 1.2):
+        """Pre-grasp, then close onto the object until the grip carries it.
+
+        A kinematic retarget cannot BE a grasp, and both failure modes were
+        measured. Fingertips exactly on the surface give a position servo
+        nothing to push against, so it applies no force and the object
+        free-falls from the first frame. Fingertips buried to get force instead
+        put 4469 N on a 0.2 kg mug -- and merely letting that relax ejects the
+        object, which moved 28 mm and lost every contact during a 0.2 s settle.
+
+        So the grip is built the way grasp synthesis in this repository already
+        builds one: open to a pre-grasp, then close until the contact force
+        reaches a target. The closing DIRECTION is derived, never tabled -- it
+        is the sign of each actuator's own derived closure. Blending toward the
+        closure POSTURE instead moved the fingertips from 134 mm to 209 mm away
+        from the object, because a hand wrapped round a mug is already more
+        flexed than its generic closure.
+        """
+        m, d = self.sim.model, self.sim.data
+        g = m.opt.gravity.copy()
+        m.opt.gravity[:] = 0.0
+
+        direction = np.sign(self._ctrl_closure) * self._finger_act
+        base = d.ctrl.copy()
+
+        # pre-grasp: back the fingers off so nothing starts interpenetrating
+        d.ctrl[:] = np.clip(base - open_by * direction,
+                            m.actuator_ctrlrange[:, 0], m.actuator_ctrlrange[:, 1])
+        for _ in range(60):
+            mujoco.mj_step(m, d)
+        d.qpos[self.obj_q:self.obj_q + 3] = self.ref_pos[0]
+        d.qpos[self.obj_q + 3:self.obj_q + 7] = self.ref_quat[0]
+        d.qvel[:] = 0.0
+        mujoco.mj_forward(m, d)
+        pre = d.ctrl.copy()
+
+        a, reached = 0.0, 0.0
+        while a < max_close:
+            a += step
+            d.ctrl[:] = np.clip(pre + a * direction,
+                                m.actuator_ctrlrange[:, 0], m.actuator_ctrlrange[:, 1])
+            for _ in range(settle_steps):
+                mujoco.mj_step(m, d)
+                # Pin the object while the grip forms. Left free it is simply
+                # squeezed out of the hand -- closing to the limit then read
+                # 0 N because the object had already been extruded.
+                d.qpos[self.obj_q:self.obj_q + 3] = self.ref_pos[0]
+                d.qpos[self.obj_q + 3:self.obj_q + 7] = self.ref_quat[0]
+                d.qvel[self.obj_v:self.obj_v + 6] = 0.0
+                mujoco.mj_forward(m, d)
+            reached, _n = total_grip(self.sim)
+            if reached >= target_n:
+                break
+
+        m.opt.gravity[:] = g
+        d.qvel[:] = 0.0
+        mujoco.mj_forward(m, d)
+        # The offset the grip is MADE of. apply() rewrites d.ctrl from the
+        # feedforward every frame, which silently discarded the squeeze that
+        # had just been established and dropped the object on frame 0.
+        self._grip_offset = d.ctrl - self.ctrl_for(self.vals[0])
+        self.grip_close = a
+        self.grip_force = reached
+        return a, reached
+
+    def obj_pose(self):
+        d = self.sim.data
+        return (d.qpos[self.obj_q:self.obj_q + 3].copy(),
+                d.qpos[self.obj_q + 3:self.obj_q + 7].copy())
+
+    def error(self, k):
+        p, q = self.obj_pose()
+        k = int(np.clip(k, 0, self.T - 1))
+        dq = np.zeros(4)
+        c = self.ref_quat[k] * np.array([1.0, -1, -1, -1])
+        mujoco.mju_mulQuat(dq, q, c)
+        ang = 2.0 * np.arccos(np.clip(abs(dq[0]), -1.0, 1.0))
+        return float(np.linalg.norm(p - self.ref_pos[k])), float(ang)
+
+    # -- control ----------------------------------------------------------
+    def apply(self, k, action=None, squeeze=None, alpha=None):
+        """Command frame k's feedforward, optionally corrected by `action`.
+
+        `squeeze` drives the finger targets a fraction of the way from the
+        retargeted posture toward the hand's DERIVED closure. A position servo
+        commanded exactly to the surface applies no force -- it yields as soon
+        as the object pushes back -- so a kinematic fit has no grip at all.
+        This is the ingredient the retarget cannot supply.
+        """
+        m, d = self.sim.model, self.sim.data
+        k = int(np.clip(k, 0, self.T - 1))
+        if alpha is None or alpha >= 1.0:
+            p, q = self.P[k].copy(), self.Q[k].copy()
+        else:
+            # Place the grasp on the object where it ACTUALLY is, blended
+            # toward where the reference says it should be. alpha = 1 is the
+            # pure feedforward, which commands the hand to the reference and
+            # therefore walks away from an object that is lagging: measured,
+            # the palm-object gap grew 133 -> 167 mm while the object fell 79 mm
+            # behind, and contacts went 25 -> 0. alpha = 0 rides the object
+            # perfectly but never corrects it.
+            op, oq = self.obj_pose()
+            bp = (1.0 - alpha) * op + alpha * self.ref_pos[k]
+            bq = (1.0 - alpha) * oq + alpha * self.ref_quat[k] * np.sign(
+                oq @ self.ref_quat[k] or 1.0)
+            bq = bq / max(np.linalg.norm(bq), 1e-12)
+            p, q = _mul(bp, bq, *palm_pose_cached(self, k))
+        c = self.ctrl_for(self.vals[k]) + self._grip_offset
+        if squeeze:
+            c = (1.0 - squeeze) * c + squeeze * self._ctrl_closure
+        if action is not None:
+            a = np.asarray(action, float)
+            p = p + a[:3]
+            dq = np.zeros(4)
+            mujoco.mju_axisAngle2Quat(dq, a[3:6] / (np.linalg.norm(a[3:6]) + 1e-12),
+                                      float(np.linalg.norm(a[3:6])))
+            nq = np.zeros(4)
+            mujoco.mju_mulQuat(nq, dq, q)
+            q = nq
+            c = c + a[6:]
+        for i in range(m.nu):
+            c[i] = np.clip(c[i], *m.actuator_ctrlrange[i])
+        self.mh.command(p, q)
+        d.ctrl[:] = c
+
+    def rollout(self, actions=None, start=0, steps=None, squeeze=None,
+                alpha=None) -> Rollout:
+        """Run from frame `start` for `steps` control frames."""
+        m, d = self.sim.model, self.sim.data
+        steps = self.T - start if steps is None else steps
+        pe, re = np.empty(steps), np.empty(steps)
+        for i in range(steps):
+            k = start + i
+            self.apply(k, None if actions is None else actions[i],
+                       squeeze=squeeze, alpha=alpha)
+            for _ in range(self.ctrl_every):
+                mujoco.mj_step(m, d)
+            pe[i], re[i] = self.error(k)
+        dropped = bool(pe[-1] > 0.10)
+        return Rollout(pos_err=pe, rot_err=re, dropped=dropped, steps=steps)
+
+    def save(self):
+        d = self.sim.data
+        return (d.qpos.copy(), d.qvel.copy(), d.mocap_pos.copy(),
+                d.mocap_quat.copy(), d.ctrl.copy())
+
+    def restore(self, st):
+        d = self.sim.data
+        d.qpos[:], d.qvel[:], d.mocap_pos[:], d.mocap_quat[:], d.ctrl[:] = st
+        mujoco.mj_forward(self.sim.model, d)
+
+
+def mppi_track(rt, horizon=5, samples=48, sigma_pos=0.004, sigma_rot=0.03,
+               sigma_fin=0.05, rho=1.0, w_rot=0.10, w_drop=2.0,
+               seed=0, settle=0.2, progress=None):
+    """Search a correction to the feedforward, one control frame at a time.
+
+    The feedforward carries the retargeted grasp exactly in KINEMATICS and
+    never squeezes, so the first time the reference accelerates the object is
+    thrown: measured on `mug_drink_1`, contacts collapse from 8 to 0 at frame
+    27 and the clip ends 175 m away. MPPI searches the correction that the
+    kinematic fit cannot provide, without needing gradients through contact.
+
+    The temperature is adaptive (lambda = rho * std(cost)); a fixed one is
+    meaningless here because the cost scale changes by three orders of
+    magnitude between a held object and a dropped one.
+    """
+    rng = np.random.default_rng(seed)
+    n_fin = rt.n_action - 6
+    scale = np.concatenate([np.full(3, sigma_pos), np.full(3, sigma_rot),
+                            np.full(n_fin, sigma_fin)])
+
+    rt.reset(settle=settle)
+    plan = np.zeros((horizon, rt.n_action))
+    chosen = np.zeros((rt.T, rt.n_action))
+    pos_err = np.empty(rt.T)
+    rot_err = np.empty(rt.T)
+
+    for k in range(rt.T):
+        state = rt.save()
+        noise = rng.normal(size=(samples, horizon, rt.n_action)) * scale
+        cand = plan[None] + noise
+        cand[0] = plan                      # keep the incumbent
+        cand[1] = 0.0                       # and pure feedforward
+        cost = np.empty(samples)
+        for i in range(samples):
+            rt.restore(state)
+            c = 0.0
+            for h in range(horizon):
+                rt.apply(k + h, cand[i, h])
+                for _ in range(rt.ctrl_every):
+                    mujoco.mj_step(rt.sim.model, rt.sim.data)
+                pe, re = rt.error(k + h)
+                c += pe + w_rot * re + (w_drop if pe > 0.10 else 0.0)
+            cost[i] = c
+
+        lam = max(rho * float(np.std(cost)), 1e-6)
+        w = np.exp(-(cost - cost.min()) / lam)
+        w /= w.sum()
+        plan = np.einsum("i,iha->ha", w, cand)
+
+        rt.restore(state)
+        rt.apply(k, plan[0])
+        for _ in range(rt.ctrl_every):
+            mujoco.mj_step(rt.sim.model, rt.sim.data)
+        chosen[k] = plan[0]
+        pos_err[k], rot_err[k] = rt.error(k)
+        plan = np.vstack([plan[1:], np.zeros(rt.n_action)])
+        if progress and k % progress == 0:
+            print(f"    k={k:4d}/{rt.T}  pos {pos_err[k]*1000:7.1f} mm  "
+                  f"rot {np.degrees(rot_err[k]):6.1f} deg", flush=True)
+
+    return Rollout(pos_err=pos_err, rot_err=rot_err,
+                   dropped=bool(pos_err[-1] > 0.10), steps=rt.T), chosen
+
+
+def total_grip(sc) -> tuple[float, int]:
+    """(sum of hand-object normal force in N, number of such contacts)."""
+    m, d = sc.model, sc.data
+    obj, hand = set(sc.obj_gids), set(sc.hand_gids)
+    f = np.zeros(6)
+    tot, n = 0.0, 0
+    for i in range(d.ncon):
+        g1, g2 = int(d.contact[i].geom1), int(d.contact[i].geom2)
+        if ({g1, g2} & obj) and ({g1, g2} & hand):
+            mujoco.mj_contactForce(m, d, i, f)
+            tot += abs(float(f[0]))       # normal component, contact frame
+            n += 1
+    return tot, n

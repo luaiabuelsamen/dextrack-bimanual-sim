@@ -2673,3 +2673,73 @@ of freedom at gimbal lock, a tracking controller should be producing SE(3)
 rather than Euler angles, and the transfer between the two representations is
 exact: the mocap scene reproduces the hinge-base fit to **0.0000 mm** on both
 the palm and all five fingertips.
+
+## 2026-09-14 (later) — the retarget is not a grasp, and the measurement that shows it
+
+Building the tracking stage turned up a defect in the retargeting that
+invalidated every physical number taken from it, and then a finding that is not
+a defect at all.
+
+**The fingertip was the body origin again.** `oppdef.hands.tips` exists because
+all four hands in this project once tracked a distal body's ORIGIN as its
+fingertip; the new retargeter did the same thing. The derived tip lies **32–36 mm**
+beyond the origin on Shadow, so placing the origin on the object surface buries
+the tip geom by its own radius. Consequences, measured in the tracking scene:
+
+    tip targeting     initial penetration     total contact force (0.2 kg mug)
+    body origin              12.7 mm                     4469 N
+    derived tip               0.0 mm                     64–85 N
+
+4469 N is 450 kgf on a coffee mug. Every rollout taken before this fix was
+measuring the constraint solver relaxing that, not a grasp. Fingertips are also
+no longer *exempt* from the penetration penalty but given a 2 mm allowance: a
+fingertip on the surface is the grasp, a fingertip 12 mm inside is not.
+
+**A kinematic retarget cannot be a grasp, and both horns were measured.** With
+the tips correctly on the surface a position servo is already at its target and
+applies no force at all: the object free-falls from frame 0 (302 m over 7.9 s,
+which is exactly ½·9.81·7.9²). Burying them to get force instead gives the 4469 N
+above, and merely letting that relax ejects the object — it moved 28 mm and lost
+every contact during a 0.2 s settle with gravity off.
+
+So the grip has to be built, not fitted, which is what grasp synthesis in this
+repository already does (pre-grasp, close, squeeze). Three things that had to be
+right before closing did anything, each found by measurement:
+
+1. Closing toward the derived closure POSTURE moved the fingertips *away* from
+   the object, 134 mm → 209 mm. A hand wrapped round a mug is already more
+   flexed than its generic closure, so the blend opens it. The closing
+   *direction* — the sign of each actuator's own derived closure — is the right
+   quantity.
+2. That direction must exclude the wrist. Shadow's `WRJ1` sits on the palm body
+   itself, so driving it "toward closure" swings the whole hand off the object:
+   closing to 1.21 rad produced 0.10 N because the fingers were being carried
+   away faster than they closed. The finger set is selected by body descent.
+3. `apply()` rewrites `d.ctrl` from the feedforward every frame, which silently
+   discarded the squeeze that had just been established.
+
+With all three fixed, closing reaches **81.6 N across 14 contacts** — and the
+object is still lost on the first frame, because the contact set is one-sided:
+the squeeze that generates enough force to hold against Shadow's weak finger
+servos (gains 0.4–1.5 N·m/rad) also extrudes a rigid object. **This is the gap
+the tracking stage exists to close**, and it is not closable by a kinematic fit
+plus a heuristic squeeze. MPPI over feedforward corrections does not close it
+either: 24 samples at horizon 4 moved the hold from 22 to 25 frames of 119,
+with corrections of 9 mm and 0.16 rad — local search cannot recover an object
+that has already been released.
+
+**Open-loop feedforward, for the record.** Before the tip fix, the feedforward
+carried the mug for 27 of 119 frames: contacts fell 25 → 8 → 0 as the reference
+accelerated from 3.7 to 17 mm/frame, with the object rotating 45° in the hand
+first. The hand was also commanded to the REFERENCE while the object lagged
+behind it, so the palm–object gap grew 133 → 167 mm — a separate defect, fixed
+by blending toward the object's actual pose, which on its own did not save the
+grasp either.
+
+**Control rate.** One control frame must last one reference frame. Hardcoding
+`ctrl_every=10` against a 15 Hz clip ran the hand at 50 Hz — 3.3× ahead of the
+object — and threw it 13 m. Now derived from `seq.dt / timestep`.
+
+**`MocapHand.command` snapshotted `qpos` after zeroing the free joint**, so
+restoring it teleported the hand to the origin on every control step. 253 m of
+"tracking error" was the hand leaving, not the object.
