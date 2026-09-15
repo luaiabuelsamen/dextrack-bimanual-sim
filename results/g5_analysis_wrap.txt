@@ -1,0 +1,58 @@
+G5 -- retargeted grasps under gravity
+config: {'n_frames': 10, 'min_hold': 20, 'hold_s': 1.0, 'settle_s': 0.25, 'drop_m': 0.05, 'stride': 8, 'hands': ['shadow'], 'subjects': ['s1', 's2']}
+
+2790 observations over 279 sequence-clusters, 51 objects, 1 hand(s)
+
+H1  hold rate 557/2790 = 0.200
+    Wilson (ignores clustering) [0.185, 0.215]
+    clustered bootstrap         [0.161, 0.238]
+    threshold 0.50  ->  FAIL
+
+H2  early (<= 20% of window) 0.192  n=584
+    middle                        0.215  n=1648
+    middle - early = +0.024  [-0.013, +0.061]
+    -> not supported
+
+H3  (exploratory; no decision rule attached)
+    shadow     557/2790 = 0.200  [0.161, 0.238]
+
+    by intent:
+      browse          0/  20 = 0.000  (1 sequences)
+      call            4/  20 = 0.200  (1 sequences)
+      clean           6/  20 = 0.300  (1 sequences)
+      cook            0/  20 = 0.000  (2 sequences)
+      drink          78/ 130 = 0.600  (10 sequences)
+      eat            12/  30 = 0.400  (2 sequences)
+      fly             9/  20 = 0.450  (1 sequences)
+      inspect        40/ 330 = 0.121  (19 sequences)
+      lift           92/ 620 = 0.148  (46 sequences)
+      offhand        45/ 390 = 0.115  (39 sequences)
+      open            0/  10 = 0.000  (1 sequences)
+      pass          111/ 650 = 0.171  (48 sequences)
+      peel            0/  20 = 0.000  (1 sequences)
+      play            3/  50 = 0.060  (3 sequences)
+      pour           37/  50 = 0.740  (4 sequences)
+      see             0/  20 = 0.000  (2 sequences)
+      set             0/  20 = 0.000  (2 sequences)
+      squeeze         4/  20 = 0.200  (1 sequences)
+      stamp          16/  20 = 0.800  (1 sequences)
+      staple          0/  40 = 0.000  (2 sequences)
+      switchON        7/  40 = 0.175  (2 sequences)
+      takepicture     1/  40 = 0.025  (3 sequences)
+      toast          13/  30 = 0.433  (2 sequences)
+      use            76/ 170 = 0.447  (11 sequences)
+      wear            3/  10 = 0.300  (1 sequences)
+
+    worst objects (>= 3 sequences):
+      alarmclock     0.000  (40 obs, 4 seqs)
+      cubelarge      0.000  (70 obs, 4 seqs)
+      cubesmall      0.000  (70 obs, 4 seqs)
+      duck           0.000  (60 obs, 5 seqs)
+      fryingpan      0.000  (30 obs, 3 seqs)
+      spherelarge    0.000  (70 obs, 4 seqs)
+      spheremedium   0.000  (50 obs, 4 seqs)
+      spheresmall    0.000  (50 obs, 4 seqs)
+
+    contacts at reset: held 15.6  fell 0.1
+    contact err (mm):  held 1.9  fell 7.5
+    penetration (mm):  held 10.2  fell 6.6

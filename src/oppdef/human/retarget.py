@@ -44,14 +44,34 @@ REPO_TIP_NAMES = ("index", "middle", "ring", "pinky", "thumb")
 #: suggests.
 MANO_CHAINS = ((1, 2, 3), (4, 5, 6), (10, 11, 12), (7, 8, 9), (13, 14, 15))
 
-#: Weight on the intermediate (non-tip) joints. Lower than a contact, because
+#: Weight on the intermediate (non-tip) joints. **Default 0, and that is a
+#: result rather than a default.** Setting it to 0.45 makes the retarget match
+#: the human far better -- contacts on the mug's handle 31.8% -> 38.8%, median
+#: distance to the human's own contact points 19.6 -> 13.1 mm, and the render
+#: visibly changes from gripping the body to reaching through the handle. It
+#: also makes the grasp WORSE at its job:
+#:
+#:      W_JOINT   G5 hold rate (2790 obs, 279 clusters)
+#:        0.00      0.318   CI [0.270, 0.367]
+#:        0.45      0.200   CI [0.161, 0.238]
+#:
+#: Non-overlapping intervals. And the gap survives grasp synthesis, so it is not
+#: something the repair stage absorbs: on a 20-frame subsample, 0.500 -> 0.750
+#: from tips-only against 0.250 -> 0.650 from the wrap-aware fit.
+#:
+#: That is this project's founding claim, arriving from the other direction:
+#: reproducing the human's hand pose more faithfully is not the same as
+#: producing a grasp that works, and optimising for the first costs the second.
+#: Set W_JOINT > 0 when contact fidelity is what you want to study.
+#:
+#: Lower than a contact, because
 #: these are shape targets rather than contact targets, but not zero: a handle
 #: grasp touches the object with the MIDDLE phalanges while the fingertip sits
 #: in free space inside the hole. Measured on `mug_drink_1`, the human's
 #: fingertips are 5-19 mm off the surface through the grasp and only the thumb
 #: tip touches (1.3-2.4 mm), so a fingertip-only objective has no way to
 #: reproduce the wrap and the retarget slid off the handle onto the body.
-W_JOINT = 0.45
+W_JOINT = 0.0
 
 CONTACT_TOL = 0.015     # a human tip within 15 mm of the surface was reaching for it
 W_CONTACT = 1.0
