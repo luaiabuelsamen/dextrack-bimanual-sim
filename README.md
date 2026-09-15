@@ -64,17 +64,17 @@ The object is not grasped in any of these. It is trapped inside overlapping
 finger geometry and dragged along by the externally driven wrists, while the
 contact solver applies kilonewtons trying to push it back out:
 
-| Clip | Mean position error | Mean orientation error | Max penetration | Mean contact force | Peak |
-|---|---:|---:|---:|---:|---:|
-| [Mug](figures/physics_mug.json) | 29.4 mm | 44.8° | 13.8 mm | 1530 N | 2240 N |
-| [Bowl](figures/physics_bowl.json) | 18.0 mm | 45.9° | 9.8 mm | 2256 N | 3557 N |
-| [Binoculars](figures/physics_binoculars.json) | 32.6 mm | 20.0° | 10.9 mm | 7549 N | 11874 N |
-| [Camera](figures/physics_camera.json) | 34.4 mm | 138.4° | 11.4 mm | 5307 N | 13160 N |
+| Clip | Mean position error | Mean orientation error | Max penetration | Mean grip force | Peak | vs object weight |
+|---|---:|---:|---:|---:|---:|---:|
+| [Mug](figures/physics_mug.json) | 29.4 mm | 44.8° | 13.8 mm | 1563 N | 2323 N | 796× |
+| [Bowl](figures/physics_bowl.json) | 18.0 mm | 45.9° | 9.8 mm | 2325 N | 3708 N | 1185× |
+| [Binoculars](figures/physics_binoculars.json) | 32.6 mm | 20.0° | 10.9 mm | 7554 N | 12109 N | 3850× |
+| [Camera](figures/physics_camera.json) | 34.4 mm | 138.4° | 11.4 mm | 5353 N | 13205 N | 2729× |
 
-**The object weighs 1.96 N.** These rollouts apply 780×–3848× its weight to it,
-on every frame, with 8–14 mm of interpenetration that is present in **541 of 541
-frames** and never settles. Recomputed from each run's saved `qpos` and
-`scene.mjb` via `mj_forward`; reproduce with the manifests linked above.
+**The object weighs 1.96 N.** These rollouts apply 796×–3850× its weight to it,
+on every frame, with 8–14 mm of interpenetration present in **541 of 541 frames**
+that never settles. Every figure here is drawn on the GIFs themselves and saved
+per-frame in the linked manifests; `make render-tracking` reproduces them.
 
 Three consequences:
 

@@ -264,6 +264,8 @@ def render(name, cache, out):
         cam.distance = 0.44
     width, height = 640, 480
     frames = []
+    diag = {"penetration_mm": [], "contact_force_N": [],
+            "object_contacts": [], "equilibrium_residual_x_weight": []}
     pos, ref = z["object_pos"], z["ref_pos"]
     mode_label = "PER-CLIP PPO" if meta["mode"] == "ppo" else "BIMANUAL / GRASP SEARCH"
     title_font, body_font, small_font = font(20, True), font(14), font(12)
@@ -288,6 +290,10 @@ def render(name, cache, out):
             draw.text((20, 40), mode_label + "   |   MUJOCO PHYSICS", font=small_font, fill="#98adbf")
             draw.rectangle((0, height - 97, width, height), fill="#101722")
             pen, force, ncon, residual = contact_diagnostics(m, d, obj_gids, obj_bid)
+            diag["penetration_mm"].append(pen)
+            diag["contact_force_N"].append(force)
+            diag["object_contacts"].append(ncon)
+            diag["equilibrium_residual_x_weight"].append(residual)
             e = meta["position_error_mm"][k]
             draw.text((20, height - 86), f"Position error  {e:5.1f} mm", font=body_font, fill="#f2f4f8")
             draw.text((247, height - 86), f"Angle error {meta['orientation_error_deg'][k]:.1f}°",
@@ -300,7 +306,7 @@ def render(name, cache, out):
             bad = pen > 2.0 or force > 40 * weight
             draw.text((20, height - 62), f"Penetration {pen:5.2f} mm", font=body_font,
                       fill="#ff6b6b" if pen > 2.0 else "#7ddc8a")
-            draw.text((180, height - 62), f"Grip {force:7.1f} N ({force / weight:4.0f}x weight)",
+            draw.text((205, height - 62), f"Grip {force:7.1f} N ({force / weight:4.0f}x weight)",
                       font=body_font, fill="#ff6b6b" if force > 40 * weight else "#7ddc8a")
             draw.text((width - 152, height - 62), f"{ncon:3d} contacts", font=body_font,
                       fill="#ff6b6b" if bad else "#98adbf")
@@ -333,6 +339,13 @@ def render(name, cache, out):
     for i, k in enumerate(picks):
         sheet.paste(frames[k], ((i % 2) * width, (i // 2) * height))
     sheet.save(cache / "preview.jpg", quality=90)
+    meta.update({k: v for k, v in diag.items()},
+                max_penetration_mm=float(max(diag["penetration_mm"])),
+                mean_penetration_mm=float(np.mean(diag["penetration_mm"])),
+                mean_contact_force_N=float(np.mean(diag["contact_force_N"])),
+                max_contact_force_N=float(max(diag["contact_force_N"])),
+                mean_equilibrium_residual_x_weight=float(
+                    np.mean(diag["equilibrium_residual_x_weight"])))
     meta.update(gif=str(out), gif_sha256=digest(out), gif_frames=len(frames),
                 gif_duration_ms=sum(durations), renderer_sha256=digest(__file__),
                 camera="Follows the reference object position",
