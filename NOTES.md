@@ -2631,3 +2631,19 @@ frame per clip.
 real: sequences whose intent is `offhand` (hand-to-hand transfer) have both hands
 in contact simultaneously, and the full inventory is in
 `results/grab_inventory.json`.
+
+**Feedforward is exact; the base's parameterisation is not.** Composing the
+retargeted object-frame grasp with the reference trajectory and solving the six
+base DoF by IK reproduces the fingertip targets to **0.000 mm** — so the base
+chain is a genuine SE(3) parameterisation and the composition is right. But the
+three base hinges are Euler angles, and `mug_drink_1` passes near their gimbal:
+the hinge commands jump **0.70 rad** between consecutive frames while the object
+turns by at most 0.231. Constraining the solve to stay near the previous frame
+trades the error straight back (max_step 0.35 → 171 mm max residual; 0.20 → 293
+mm), so there is no nearby parameterisation of the same pose and the jump is
+forced by the chart, not chosen by the solver. **The floating base must be
+re-parameterised — a free joint, or commanding SE(3) and converting — before
+the tracking stage drives it.** A position servo pushed through that jump
+applies an impulse unrelated to the task. Recorded rather than smoothed away:
+`max_step` defaults to off so the feedforward stays exact and the problem stays
+visible.

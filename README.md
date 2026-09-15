@@ -179,6 +179,13 @@ transform all have to be right simultaneously for that to happen.
 *The same grasp retargeted onto a Shadow hand, rendered in MuJoCo against the
 real GRAB mesh. The handle is a genuine hole, not a filled-in hull.*
 
+![GRAB bimanual handover](figures/grab_bimanual_waterbottle.gif)
+
+*GRAB `s1/waterbottle_offhand_1`: the left hand (blue) holds the bottle, both
+hands share it through the transfer, then the right hand (red) carries it away.
+The `offhand` intent is a genuine hand-to-hand handover, which is what makes the
+bimanual stage a data problem already solved rather than one to be invented.*
+
 Two things had to be fixed before this picture was honest:
 
 **MuJoCo collides a mesh as its convex hull.** For GRAB that is not a small
