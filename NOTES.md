@@ -2632,18 +2632,44 @@ real: sequences whose intent is `offhand` (hand-to-hand transfer) have both hand
 in contact simultaneously, and the full inventory is in
 `results/grab_inventory.json`.
 
-**Feedforward is exact; the base's parameterisation is not.** Composing the
-retargeted object-frame grasp with the reference trajectory and solving the six
-base DoF by IK reproduces the fingertip targets to **0.000 mm** — so the base
-chain is a genuine SE(3) parameterisation and the composition is right. But the
-three base hinges are Euler angles, and `mug_drink_1` passes near their gimbal:
-the hinge commands jump **0.70 rad** between consecutive frames while the object
-turns by at most 0.231. Constraining the solve to stay near the previous frame
-trades the error straight back (max_step 0.35 → 171 mm max residual; 0.20 → 293
-mm), so there is no nearby parameterisation of the same pose and the jump is
-forced by the chart, not chosen by the solver. **The floating base must be
-re-parameterised — a free joint, or commanding SE(3) and converting — before
-the tracking stage drives it.** A position servo pushed through that jump
-applies an impulse unrelated to the task. Recorded rather than smoothed away:
-`max_step` defaults to off so the feedforward stays exact and the problem stays
-visible.
+**Feedforward is exact.** Composing the retargeted object-frame grasp with the
+reference trajectory and solving the six base DoF by IK reproduces the fingertip
+targets to **0.000 mm**, with the fingers frozen at their retargeted values so
+the grasp shape cannot drift.
+
+**CORRECTION — the jumpy commands were my solver, not the base's Euler chart.**
+An earlier version of this entry attributed a 0.70 rad frame-to-frame jump in
+the base command to gimbal in the three base hinges, on the evidence that
+constraining the solve to stay near the previous frame traded the error straight
+back (max_step 0.35 → 171 mm residual). That inference was wrong. The jump is
+present in the **retargeted palm pose itself**, before any base
+parameterisation: measured in the object frame, the fitted palm moved 157 mm and
+0.715 rad between frames while the human's own wrist moved at most 52.3 mm, and
+an SE(3) feedforward with no IK at all reproduced it (0.825 rad).
+
+The actual cause is **non-convergence in the retargeting solve**. Five fingertip
+targets are fifteen constraints on twenty-nine DoF, so there is a
+fourteen-dimensional null space; stopped at twelve iterations each frame halts
+wherever its trust-region path reached, and consecutive frames land in different
+parts of it. Raising `iters` to 80:
+
+    iters   contact err   palm turn max   palm step max
+       12       16.6 mm       0.715 rad        157.3 mm
+       80       16.7 mm       0.275 rad         52.6 mm
+
+— a strict improvement, at no accuracy cost, and the palm now moves like the
+human wrist it was fitted to (52.6 mm against 52.3 mm). With the converged fit
+the *hinge* base has **zero** steps above 0.3 rad, which is the check that
+settles it. Intermediate iteration counts are not monotone (60 was worse than
+either), because with a trust region the path matters and not only the optimum.
+
+The nearest-surface-point targets were checked and exonerated: they jump no more
+than the human's own fingertips (28.8 mm against 30.4 mm).
+
+**The SE(3) wrist was kept anyway**, on its own merits rather than as this fix.
+`scene.build(base="mocap")` puts the hand on a free joint driven by a welded
+mocap body, commanded as a pose. Three serial hinges genuinely do lose a degree
+of freedom at gimbal lock, a tracking controller should be producing SE(3)
+rather than Euler angles, and the transfer between the two representations is
+exact: the mocap scene reproduces the hinge-base fit to **0.0000 mm** on both
+the palm and all five fingertips.

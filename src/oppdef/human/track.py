@@ -324,3 +324,141 @@ def feedforward(sc, q_obj: np.ndarray, ref_pos: np.ndarray, ref_quat: np.ndarray
         Q[k] = q
         err[k] = float(np.linalg.norm(d.xpos[tips] - target, axis=1).mean())
     return Q, err
+
+
+# --------------------------------------------------------------------------
+# SE(3) wrist: converting a hinge-base fit into a mocap-driven state
+# --------------------------------------------------------------------------
+def joint_values(sc, q) -> dict:
+    """Configuration as {joint name without the scene's prefix: value}."""
+    m = sc.model
+    out = {}
+    for i, j in enumerate(sc.jids):
+        n = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j) or ""
+        if n in BASE_DOF:
+            continue
+        out[n[5:] if n.startswith("hand_") else n] = float(q[i])
+    return out
+
+
+def palm_pose(sc, q) -> tuple[np.ndarray, np.ndarray]:
+    """Palm position and orientation (wxyz) at configuration `q`."""
+    m, d = sc.model, sc.data
+    d.qpos[:] = 0.0
+    d.qpos[sc.qadr] = q
+    mujoco.mj_kinematics(m, d)
+    quat = np.zeros(4)
+    mujoco.mju_mat2Quat(quat, d.xmat[sc.wrist_bid].copy())
+    return d.xpos[sc.wrist_bid].copy(), quat
+
+
+def _mul(pa, qa, pb, qb):
+    """Compose two poses: (pa,qa) applied to (pb,qb)."""
+    q = np.zeros(4)
+    mujoco.mju_mulQuat(q, qa, qb)
+    r = np.zeros(3)
+    mujoco.mju_rotVecQuat(r, pb, qa)
+    return pa + r, q
+
+
+def _inv(p, q):
+    qi = np.array([q[0], -q[1], -q[2], -q[3]])
+    r = np.zeros(3)
+    mujoco.mju_rotVecQuat(r, -p, qi)
+    return r, qi
+
+
+class MocapHand:
+    """Place and drive a free-jointed hand by its palm pose.
+
+    The free joint sits on `hand_base`, not on the palm -- MuJoCo allows six
+    DoF per body and every one of these hands already spends some of the palm's
+    on a wrist. So the base pose that puts the palm where it is wanted depends
+    on the finger configuration, and is measured here rather than assumed.
+    """
+
+    def __init__(self, sc):
+        if sc.base_kind != "mocap":
+            raise ValueError("MocapHand needs a scene built with base='mocap'")
+        self.sc = sc
+        m = sc.model
+        self.free_q = int(m.jnt_qposadr[
+            [j for j in range(m.njnt)
+             if m.jnt_type[j] == mujoco.mjtJoint.mjJNT_FREE
+             and int(m.jnt_bodyid[j]) == sc.base_bid][0]])
+        self.name_to_i = {}
+        for i, j in enumerate(sc.jids):
+            n = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j) or ""
+            self.name_to_i[n[5:] if n.startswith("hand_") else n] = i
+
+    def config_from(self, values: dict) -> np.ndarray:
+        q = np.zeros(len(self.sc.jids))
+        for n, v in values.items():
+            if n in self.name_to_i:
+                q[self.name_to_i[n]] = v
+        return q
+
+    def place(self, palm_p, palm_q, values: dict):
+        """Set the hand so its palm is at (palm_p, palm_q) with these joints."""
+        m, d = self.sc.model, self.sc.data
+        q = self.config_from(values)
+        d.qpos[self.sc.qadr] = q
+        d.qpos[self.free_q:self.free_q + 3] = 0.0
+        d.qpos[self.free_q + 3:self.free_q + 7] = [1, 0, 0, 0]
+        mujoco.mj_kinematics(m, d)
+        p0 = d.xpos[self.sc.wrist_bid].copy()
+        q0 = np.zeros(4)
+        mujoco.mju_mat2Quat(q0, d.xmat[self.sc.wrist_bid].copy())
+        # base = palm_target * (palm_when_base_identity)^-1
+        pi, qi = _inv(p0, q0)
+        bp, bq = _mul(np.asarray(palm_p, float), np.asarray(palm_q, float), pi, qi)
+        d.qpos[self.free_q:self.free_q + 3] = bp
+        d.qpos[self.free_q + 3:self.free_q + 7] = bq
+        d.mocap_pos[m.body_mocapid[self.sc.mocap_bid]] = bp
+        d.mocap_quat[m.body_mocapid[self.sc.mocap_bid]] = bq
+        mujoco.mj_forward(m, d)
+        return bp, bq
+
+    def command(self, palm_p, palm_q):
+        """Move the mocap target only; the weld drags the hand to it."""
+        m, d = self.sc.model, self.sc.data
+        q = d.qpos[self.sc.qadr].copy()
+        d.qpos[self.free_q:self.free_q + 3] = 0.0
+        d.qpos[self.free_q + 3:self.free_q + 7] = [1, 0, 0, 0]
+        saved = d.qpos.copy()
+        mujoco.mj_kinematics(m, d)
+        p0 = d.xpos[self.sc.wrist_bid].copy()
+        q0 = np.zeros(4)
+        mujoco.mju_mat2Quat(q0, d.xmat[self.sc.wrist_bid].copy())
+        d.qpos[:] = saved
+        pi, qi = _inv(p0, q0)
+        bp, bq = _mul(np.asarray(palm_p, float), np.asarray(palm_q, float), pi, qi)
+        d.mocap_pos[m.body_mocapid[self.sc.mocap_bid]] = bp
+        d.mocap_quat[m.body_mocapid[self.sc.mocap_bid]] = bq
+        return bp, bq
+
+
+def feedforward_se3(sc_fit, q_obj, ref_pos, ref_quat):
+    """Palm poses that carry a retargeted grasp along the reference.
+
+    The object-frame grasp is composed with the reference pose directly:
+    `T_palm_world[k] = T_obj[k] . T_palm_obj[k]`. No inverse kinematics, and
+    therefore no chart to get stuck in -- the discontinuity the hinge base
+    suffers (0.70 rad between frames while the object turns 0.231) cannot arise
+    here, because nothing is being solved for.
+    """
+    P = np.empty((len(q_obj), 3))
+    Q = np.empty((len(q_obj), 4))
+    vals = []
+    for k in range(len(q_obj)):
+        pp, pq = palm_pose(sc_fit, q_obj[k])
+        wp, wq = _mul(np.asarray(ref_pos[k], float),
+                      np.asarray(ref_quat[k], float), pp, pq)
+        P[k], Q[k] = wp, wq / np.linalg.norm(wq)
+        vals.append(joint_values(sc_fit, q_obj[k]))
+    # keep the quaternion on one branch so a controller differencing it sees
+    # rotation, not a sign flip
+    for k in range(1, len(Q)):
+        if Q[k] @ Q[k - 1] < 0:
+            Q[k] = -Q[k]
+    return P, Q, vals

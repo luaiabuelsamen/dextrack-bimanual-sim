@@ -41,6 +41,10 @@ class ObjectScene:
     tip_gids: list[int]
     qadr: np.ndarray
     jids: list[int]
+    base_kind: str = "hinges"
+    mocap_bid: int = -1
+    base_bid: int = -1
+    obj_bid: int = -1
 
     def set_q(self, q):
         self.data.qpos[:] = 0.0
@@ -77,14 +81,70 @@ def _decimate(v: np.ndarray, f: np.ndarray, n: int = MAX_HULL_VERTS):
         return v[::step], None
 
 
+def _mocap_parent(hand: str):
+    """A hand on a FREE joint, driven by a welded mocap body.
+
+    The default floating base is three slides and three hinges in series. Three
+    serial hinges do not merely parameterise SO(3) awkwardly -- they lose a
+    degree of freedom at gimbal lock, where two axes align, and that is a
+    property of the mechanism rather than of the maths. Measured on
+    `mug_drink_1`, the base command jumped 0.70 rad between frames while the
+    object turned 0.231, and constraining the solve to stay nearby cost up to
+    293 mm of placement, because no nearby solution exists.
+
+    A free joint has no such configuration. The hand is then driven by welding
+    it to a mocap body whose pose is commanded directly as SE(3), which is also
+    the representation a tracking controller should be producing.
+    """
+    from oppdef.embodiment import HANDS, hand_spec
+
+    h = HANDS[hand]
+    parent = mujoco.MjSpec()
+    parent.worldbody.add_light(
+        pos=[0.2, -0.2, 1.2], dir=[-0.2, 0.2, -1.0],
+        type=int(mujoco.mjtLightType.mjLIGHT_DIRECTIONAL),
+        diffuse=[0.8, 0.8, 0.8], ambient=[0.45, 0.45, 0.45])
+
+    base = parent.worldbody.add_body(name="hand_base")
+    base.add_freejoint()
+    # a massless-ish stub so the free joint is well conditioned on its own
+    base.add_geom(type=mujoco.mjtGeom.mjGEOM_SPHERE, size=[0.005, 0, 0],
+                  rgba=[0, 0, 0, 0], contype=0, conaffinity=0, mass=0.01)
+    parent.attach(hand_spec(h), prefix="hand_", frame=base.add_frame())
+
+    mocap = parent.worldbody.add_body(name="hand_mocap", mocap=True)
+    mocap.add_geom(type=mujoco.mjtGeom.mjGEOM_BOX, size=[0.01, 0.01, 0.01],
+                   rgba=[0.9, 0.2, 0.2, 0.0], contype=0, conaffinity=0)
+    eq = parent.add_equality()
+    eq.type = mujoco.mjtEq.mjEQ_WELD
+    eq.objtype = mujoco.mjtObj.mjOBJ_BODY
+    eq.name1, eq.name2 = "hand_mocap", "hand_base"
+    eq.data[:7] = [0, 0, 0, 1, 0, 0, 0]
+    # finite stiffness: an infinitely rigid wrist can push the object with
+    # unbounded force, which is not a wrist
+    eq.solref[:2] = [0.01, 1.0]
+    return parent, "hand_"
+
+
 def build(hand: str = "shadow", obj: str = "mug", free_base: bool = True,
-          obj_static: bool = True, convex_parts: bool = True) -> ObjectScene:
-    """Hand + GRAB object, in the object frame."""
+          obj_static: bool = True, convex_parts: bool = True,
+          base: str = "hinges") -> ObjectScene:
+    """Hand + GRAB object, in the object frame.
+
+    `base` is "hinges" (three slides and three hinges, position-actuated) or
+    "mocap" (a free joint welded to a mocap body, commanded as SE(3)). Use
+    hinges for static fitting and mocap for anything that follows a trajectory.
+    """
     from oppdef.embodiment import make
 
-    emb = make(hand=hand, free_base=free_base)
-    spec = emb.spec
-    pfx = list(emb.palm_bid)[0]
+    if base == "mocap":
+        spec, pfx_m = _mocap_parent(hand)
+        emb = None
+    else:
+        emb = make(hand=hand, free_base=free_base)
+        spec = emb.spec
+        pfx_m = list(emb.palm_bid)[0]
+    pfx = pfx_m
     # the default offscreen buffer is 640x480; renders here are square
     spec.visual.global_.offwidth = max(spec.visual.global_.offwidth, 1024)
     spec.visual.global_.offheight = max(spec.visual.global_.offheight, 1024)
@@ -120,15 +180,17 @@ def build(hand: str = "shadow", obj: str = "mug", free_base: bool = True,
     model = spec.compile()
     data = mujoco.MjData(model)
 
-    palm = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY,
-                             emb.spec.bodies[0].name) if False else None
-
     obj_bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, f"obj_{obj}")
     obj_gids = [i for i in range(model.ngeom) if model.geom_bodyid[i] == obj_bid]
 
     # the hand's geoms, by body descent from the palm -- f5d6's file is a whole
     # robot, so anything name-based picks up the torso and the other arm
-    palm_bid = emb.palm_bid[pfx]
+    from oppdef.embodiment import HANDS
+    h = HANDS[hand]
+    palm_bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY,
+                                 f"{pfx}{h.palm}")
+    mocap_bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "hand_mocap")
+    base_bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "hand_base")
 
     def descends(b):
         while b > 0:
@@ -140,22 +202,18 @@ def build(hand: str = "shadow", obj: str = "mug", free_base: bool = True,
     hand_gids = [i for i in range(model.ngeom)
                  if descends(int(model.geom_bodyid[i]))]
 
-    base = {f"{pfx}{d}" for d in ("x", "y", "z", "rx", "ry", "rz")}
+    base_names = {f"{pfx}{d}" for d in ("x", "y", "z", "rx", "ry", "rz")}
     jids = [j for j in range(model.njnt)
             if model.jnt_type[j] not in (mujoco.mjtJoint.mjJNT_FREE,
                                          mujoco.mjtJoint.mjJNT_BALL)
             and (descends(int(model.jnt_bodyid[j]))
                  or (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, j) or "")
-                 in base)]
+                 in base_names)]
     qadr = np.array([model.jnt_qposadr[j] for j in jids])
 
-    def rename(b):
-        return mujoco.mj_name2id(
-            model, mujoco.mjtObj.mjOBJ_BODY,
-            mujoco.mj_id2name(emb.model, mujoco.mjtObj.mjOBJ_BODY, b))
-
-    tip_bids = [rename(b) for b in emb.tip_bid[pfx]]
-    wrist_bid = rename(palm_bid)
+    tip_bids = [mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, f"{pfx}{t}")
+                for t in h.tip_names]
+    wrist_bid = palm_bid
 
     # The closing posture is DERIVED (specs.derive_flex solves it over all
     # joints at once); here it is only re-indexed into this model's order so it
@@ -187,4 +245,6 @@ def build(hand: str = "shadow", obj: str = "mug", free_base: bool = True,
     return ObjectScene(model=model, data=data, spec=spec, tip_bids=tip_bids,
                        wrist_bid=wrist_bid, q_closure=q_closure,
                        obj_gids=obj_gids, hand_gids=hand_gids,
-                       tip_gids=tip_gids, qadr=qadr, jids=jids)
+                       tip_gids=tip_gids, qadr=qadr, jids=jids,
+                       base_kind=base, mocap_bid=mocap_bid, base_bid=base_bid,
+                       obj_bid=obj_bid)

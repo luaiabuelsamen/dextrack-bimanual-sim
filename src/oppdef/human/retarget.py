@@ -182,8 +182,9 @@ class _Solver:
 def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
                       window: tuple[int, int] | None = None,
                       contact_tol: float = CONTACT_TOL,
-                      sc=None, tree=None, iters: int = 12,
-                      w_pen: float = W_PEN) -> RobotTrack:
+                      sc=None, tree=None, iters: int = 80,
+                      w_pen: float = W_PEN,
+                      w_smooth: float = W_SMOOTH) -> RobotTrack:
     """Fit `hand` to the human hand `side` over a GRAB sequence.
 
     `window` is (start, length) in sequence frames -- normally the hold window
@@ -194,6 +195,17 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
     `sc` is a built `human.scene.ObjectScene`; pass one in to reuse it across
     the sequences that share an object, since compiling the model and loading
     the convex decomposition dominate the cost of a short clip.
+
+    `iters` is 80 rather than a dozen because the hand is redundant: five
+    fingertip targets are fifteen constraints on twenty-nine degrees of
+    freedom, leaving a fourteen-dimensional null space. Stopped early, each
+    frame halts wherever its trust-region path happened to reach, and
+    consecutive frames land in different parts of that null space -- the fitted
+    palm then jumped 157 mm and 0.715 rad between frames while the human's own
+    wrist moved at most 52.3 mm. Converged, the same fit moves the palm 52.6 mm,
+    which is the human's motion, at no cost in accuracy (16.7 mm vs 16.6 mm).
+    Intermediate values are NOT monotone -- iters=60 was worse than either --
+    because the trust region makes the path, not just the optimum, matter.
     """
     from oppdef.human.scene import build as build_scene
 
@@ -218,7 +230,8 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
             lo[i], hi[i] = -np.pi, np.pi   # a retarget must be able to turn over
 
     ri, hidx = correspond(5, len(sc.tip_bids))
-    solver = _Solver(sc, sc.tip_bids, sc.wrist_bid, lo, hi, w_pen=w_pen)
+    solver = _Solver(sc, sc.tip_bids, sc.wrist_bid, lo, hi,
+                     w_smooth=w_smooth, w_pen=w_pen)
 
     Q = np.zeros((len(frames), len(sc.jids)))
     tip_err = np.zeros(len(frames))
@@ -265,5 +278,5 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
         tip_err=tip_err, contact_err=con_err, n_contact=n_con, frames=frames,
         meta={"object": seq.obj, "intent": seq.intent, "subject": seq.subject,
               "dt": seq.dt, "contact_tol": contact_tol,
-              "w_pen": w_pen},
+              "w_pen": w_pen, "w_smooth": w_smooth},
     )
