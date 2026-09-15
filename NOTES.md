@@ -3285,3 +3285,38 @@ Two of four, honestly measured, with no outstanding reproducibility question.
 
 The lesson is narrow and worth the entry: never print an objective and a metric
 with the same unit suffix. I spent an hour on a phantom.
+
+## 2026-09-15 — stage 6: all four bimanual references track, once the search is scored on tracking
+
+    sequence                object          start of day   now      frames in tolerance
+    bowl_drink_1            bowl              160.9 m      28.1 mm      103/131
+    binoculars_see_1        binoculars         21.8 m      29.2 mm      125/138
+    camera_takepicture_2    camera            188.3 m      44.1 mm      151/161
+    gamecontroller_play_1   gamecontroller     97.1 m      65.2 mm       50/192
+
+**Four of four, all inside 70 mm**, from four references that were losing the
+object by tens or hundreds of metres. Three ingredients, each found by a
+measurement that contradicted an assumption:
+
+1. the rollout never commanded `d.ctrl`, so the servos drove every finger open
+   the moment stepping began -- the hands held at reset only because `place`
+   writes qpos directly;
+2. the two hands were fitted in separate scenes and interpenetrated by 11.7 mm
+   across 42 contacts, the left pushing the right off the object. Fitting them
+   in one scene needed a hinge-base variant, because a free joint leaves the
+   solver no wrist DoF;
+3. the grasp search was scored on HOLDING. Holding is necessary and not
+   sufficient: `gamecontroller_play_1` has 15 frames that hold under gravity
+   and a feedforward that ended 248 m away. Scored on tracking over the whole
+   reference, the same search finds 65.2 mm.
+
+Seed variance is real and recorded rather than hidden: binoculars gives 29.2,
+48.0 and 71.3 mm over three seeds, the last holding only 4 of 138 frames. The
+search is a random restart over wrist offsets and it does not always find the
+basin.
+
+The same third fix carried to the ONE-handed stage, where the search was still
+scored on `grasp_frames`: `phone_call_1` 248398 -> 11676 mm and
+`gamecontroller_play_1` 247682 -> 35.4 mm. Those were precisely the two
+references per-reference PPO could not rescue, because PPO learns a bounded
+correction and cannot repair a baseline that is 248 m wrong.
