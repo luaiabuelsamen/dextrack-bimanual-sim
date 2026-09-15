@@ -14,45 +14,84 @@ per-reference PPO, and experiments with two robot hands.
 
 ---
 
-## Physics rollouts
+## Physics rollouts — four failures
 
-These recordings step a free object under gravity in MuJoCo. The camera follows
-the reference path (cyan); the measured object path is amber. Each frame
-shows position and orientation error. Right hands are silver; left hands
-are teal. Forearms are hidden for visibility.
+These four recordings are the first time this pipeline was stepped as **real
+physics** — free-jointed object, gravity on, no weld — rather than the kinematic
+playback shown [further down](#from-human-motion-to-a-robot-hand). All four
+fail. They are kept because the failure is measured, and because the position
+error alone hides it completely.
 
 | Mug — per-clip PPO | Bowl — bimanual grasp search |
 |---|---|
-| ![PPO-controlled Shadow hand tracking a GRAB mug reference](figures/physics_mug.gif) | ![Two Shadow hands tracking a bowl reference in physics](figures/physics_bowl.gif) |
+| ![Shadow hand dragging a GRAB mug through penetrating contact](figures/physics_mug.gif) | ![Two Shadow hands with fingers through a bowl](figures/physics_bowl.gif) |
 
 | Binoculars — bimanual grasp search | Camera — bimanual grasp search |
 |---|---|
-| ![Two Shadow hands tracking binoculars in physics](figures/physics_binoculars.gif) | ![Two Shadow hands tracking a camera in physics](figures/physics_camera.gif) |
+| ![Two Shadow hands, only the left in contact with binoculars](figures/physics_binoculars.gif) | ![A camera inverted between two Shadow hands](figures/physics_camera.gif) |
 
-Measured from the exact rollouts shown above:
+The object is not grasped in any of these. It is trapped inside overlapping
+finger geometry and dragged along by the externally driven wrists, while the
+contact solver applies kilonewtons trying to push it back out:
 
-| Clip / saved measurements | Mean position error | Frames under 50 mm | Mean orientation error |
-|---|---:|---:|---:|
-| [Mug](figures/physics_mug.json) | 29.4 mm | 111/111 | 44.8° |
-| [Bowl](figures/physics_bowl.json) | 18.0 mm | 131/131 | 45.9° |
-| [Binoculars](figures/physics_binoculars.json) | 32.6 mm | 138/138 | 20.0° |
-| [Camera](figures/physics_camera.json) | 34.4 mm | 154/161 | 138.4° |
+| Clip | Mean position error | Mean orientation error | Max penetration | Mean contact force | Peak |
+|---|---:|---:|---:|---:|---:|
+| [Mug](figures/physics_mug.json) | 29.4 mm | 44.8° | 13.8 mm | 1530 N | 2240 N |
+| [Bowl](figures/physics_bowl.json) | 18.0 mm | 45.9° | 9.8 mm | 2256 N | 3557 N |
+| [Binoculars](figures/physics_binoculars.json) | 32.6 mm | 20.0° | 10.9 mm | 7549 N | 11874 N |
+| [Camera](figures/physics_camera.json) | 34.4 mm | 138.4° | 11.4 mm | 5307 N | 13160 N |
 
-**Scope:** selected, already-grasped reference windows with 0.20 kg objects
-and floating, externally driven wrists. The mug uses a PPO policy trained
-for that clip. The two-hand examples use jointly fitted grasps and wrist
-offsets searched on the displayed trajectory, followed by feedforward
-control. They do not demonstrate a learned bimanual policy or held-out
-generalization.
+**The object weighs 1.96 N.** These rollouts apply 780×–3848× its weight to it,
+on every frame, with 8–14 mm of interpenetration that is present in **541 of 541
+frames** and never settles. Recomputed from each run's saved `qpos` and
+`scene.mjb` via `mj_forward`; reproduce with the manifests linked above.
 
-Position tracking is promising; **orientation tracking remains incomplete**.
-The camera clip is a clear failure of orientation tracking despite its small
-position error; its GRAB intent label does not mean the robot completed that task.
-The angular errors compare the full reference orientation without an
-object-symmetry adjustment. Each capture matches the existing evaluator
-exactly after reset. Reproduce with `make render-tracking`; the
-[renderer](experiments/render_tracking.py) saves per-frame errors, contact
-counts, source/model hashes, and search settings beside every GIF.
+Three consequences:
+
+1. **The position error is measuring squeeze-out, not tracking.** 18–34 mm is
+   the scale at which the object is being extruded from a cage of overlapping
+   geometry. It is not evidence of a working controller.
+2. **The object spins freely inside that cage**, which is the 45°/138°
+   orientation error. The camera clip ends inverted.
+3. **Two of the three "bimanual" clips are one-handed.** Per-hand contacts are
+   17.4 left / 1.4 right on binoculars, where the right hand has *zero* contacts
+   in 35 of 138 frames; and 21.0 right / 2.2 left on camera, left absent in 49 of
+   161. Only the bowl is balanced (6.9 / 7.2) — and its fingers are visibly
+   through the bowl wall.
+
+**The cause is upstream of the simulator.** At the reset state, before a single
+`mj_step`, grasp synthesis already hands MuJoCo 13.2 / 14.3 / 16.2 / 20.8 mm of
+penetration across 20–42 contacts. The solver relaxes that to a steady 8–14 mm
+and it stays there. No contact solver is obligated to resolve an overlap that
+deep: settling with gravity off moves 12.7 mm to 11.8 mm while ejecting the
+object 28 mm and losing every contact, so the only alternatives are to leave the
+overlap or convert it into ejection.
+
+**And the search climbs toward it.** `synthesize_grasp` scores candidates on
+whether the object stays held and, since `d5b49ca`, on tracking error — neither
+term can see penetration, and both are improved by it, because depth buys
+contacts, contacts buy normal force, and force buys grip. Measured on
+`mug_drink_2`: retarget alone gives 11.08 mm over 15 contacts at 4411 N; after
+grasp synthesis, 17.47 mm over 32 contacts at 8815 N.
+
+The optimizer is using a contact artifact as a grasp strategy, and the
+generalisable lesson is that **a rejection filter would not have fixed it** —
+the objective climbs toward penetration, so it would simply have walked up to
+whatever threshold the filter set. The term has to be in the objective. It now
+is: a penetration residual taken from MuJoCo's own narrowphase, 3 mm allowance
+at the fingertips and none elsewhere, weighted so that 10 mm of excess costs
+about what dropping the object costs. With it, `mug_drink_2` stays at the
+retarget's 11.08 mm instead of climbing to 17.47 mm.
+
+Two things are still outstanding: the retarget's own 11 mm, which the search is
+no longer allowed to make worse but which is not yet down; and the re-run of
+`d5b49ca`'s "248 m → 35 mm", which will be restated with penetration and normal
+force attached, or withdrawn. **Until both land, no number in the table above
+should be quoted as physical.** What this section does establish is that the
+renderer and its manifests work: `make render-tracking` reproduces the set, and
+[`experiments/render_tracking.py`](experiments/render_tracking.py) saves
+per-frame errors, contact counts, source/model hashes, and search settings
+beside every GIF. That instrumentation is what made the failure visible.
 
 ## The question, and where it has moved
 
@@ -83,6 +122,7 @@ retargeting and grasp search. See [From human motion to a robot hand](#from-huma
 | Contact **force** predicts task success | **supported** | ρ +0.325, AUC 0.800, clustered by grasp; survives G4 |
 | ε predicts task success | **weakly** | AUC 0.684 (0.679 excluding non-reproducible grasps), below the pre-declared ρ = 0.3 |
 | Every metric inverts on capsules | **robust across three bug fixes and an audit** | see the figure below |
+| GRAB tracking rollouts are physically valid | **NOT SUPPORTED** | 8–14 mm penetration on 541/541 frames at 1530–7549 N mean on a 1.96 N object; grasp search was climbing toward it |
 | Perturbed repeats agree | **high agreement, with replay failures** | G4: 0.928 unanimity, CI [0.897, 0.956]; five grasps did not re-form |
 | The peg task requires two hands | **supported** | 13.49 cm vs 5.32 cm, by force balance |
 | An opposition deficit exists among these hands | **RETRACTED** | all four oppose within 2.8 mm once measured correctly |
@@ -195,11 +235,11 @@ measurement, not on the previous stage having compiled:
 | stage | what it does | state |
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
-| 2. retarget | human contact points → robot joint trajectory | **done** — ~13 mm to the human's contacts, 0 mm penetration after settling |
-| 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **mug checkpoint reproduced** — 29.35 mm mean position error, 111/111 frames under 50 mm; other clips still fail |
+| 2. retarget | human contact points → robot joint trajectory | **partial** — ~13 mm to the human's contacts; 0 mm penetration was measured on an isolated settled pose and **does not hold in the pipeline** (11.08 mm, 4411 N on `mug_drink_2`) |
+| 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **not physical** — the checkpoint reproduces 29.35 mm, but on 13.8 mm of penetration at 1530 N; see [above](#physics-rollouts--four-failures) |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
 | 5. distillation | one neural tracking controller across references | **incomplete** — reported held-out position error is 158–456 mm; that error alone does not verify continued grasp retention |
-| 6. bimanual | joint retargeting + wrist-offset search | **selected physical rollouts demonstrated** — see measured GIFs above; no learned bimanual controller yet |
+| 6. bimanual | joint retargeting + wrist-offset search | **fails under physics** — and 2 of 3 clips are effectively one-handed; see [above](#physics-rollouts--four-failures) |
 | 7. perception | depth → pose estimator → evaluate the *frozen* tracker | **built** — and it already says something (below) |
 
 Every number in this section is from the **corrected** pipeline. An earlier set
@@ -323,6 +363,13 @@ number: the retargeter targeted fingertip **body origins**, and Shadow's real
 tip is 32–36 mm beyond one, so the tip geom was buried by its own radius —
 **4469 N** of contact force on a 0.2 kg mug. Targeting the derived tip gives
 64 N and zero penetration.
+
+That fix is real, but the number it earned was measured on a retargeted pose in
+isolation, under settling, and **it does not survive the rest of the pipeline**.
+On `mug_drink_2` the retarget alone still leaves 11.08 mm and 4411 N before
+grasp search runs at all. Settling cannot recover it either: with gravity off
+for 0.5 s, 12.7 mm becomes 11.8 mm while the object is ejected 28 mm and every
+contact is lost. A penetrated pose is not a grasp the simulator can repair.
 
 ### Establishing a grasp before tracking
 

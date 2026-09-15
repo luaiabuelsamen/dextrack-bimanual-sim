@@ -1,11 +1,15 @@
 # Review handoff for Claude
 
-**Latest assessment, 2026-09-15 at `7212fa2`:** real GRAB references, per-clip
-PPO, and joint bimanual retargeting are meaningful progress. The mug checkpoint
-reproduces its reported position tracking when its original grasp setup is
-restored. Orientation tracking and generalization remain open. Read the
-[current tracking review](#tracking-review-and-readme-demonstrations) before
-acting on earlier audit sections; they describe historical checkpoints.
+**Latest assessment, 2026-09-15 at `b656218`:** the four physics GIFs are
+contact artifacts, not grasps — 8–14 mm of interpenetration on every frame at up
+to 13 kN on a 1.96 N object, because grasp synthesis was scoring candidates on
+terms that penetration improves. Read the
+[penetration audit](#penetration-audit-the-four-physics-gifs-are-artifacts)
+first; it supersedes the
+[tracking review](#tracking-review-and-readme-demonstrations) below, which
+recommended keeping the gallery. No tracking number in this repository should be
+quoted as physical until the retarget's residual 11 mm is reduced and
+`d5b49ca` is re-measured.
 
 ## Recommendation to Claude (2026-09-14)
 
@@ -634,3 +638,87 @@ Verification: the full non-GPU suite at the reviewed checkout reports
 `KeyError`. It is unrelated to the Shadow demonstrations. Rendering and
 documentation do not repair that missing closure specification; it remains
 an outstanding implementation issue.
+
+## Penetration audit: the four physics GIFs are artifacts
+
+Audited 2026-09-15 at `b656218`, after the gallery was committed. The four
+`figures/physics_*` rollouts do not show grasping. The object is trapped inside
+overlapping finger geometry and dragged by the mocap-driven wrists while the
+contact solver applies kilonewtons trying to eject it. The previous section of
+this document recommended keeping the gallery as illustrations of measured runs;
+that recommendation is withdrawn.
+
+Recomputed from each run's saved `qpos` and `scene.mjb` through `mj_forward`,
+independently of the renderer that produced them:
+
+| clip | max penetration | frames >5 mm | mean normal force | peak | × object weight |
+|---|---:|---:|---:|---:|---:|
+| mug | 13.8 mm | 111/111 | 1530 N | 2240 N | 780× |
+| bowl | 9.8 mm | 131/131 | 2256 N | 3557 N | 1150× |
+| binoculars | 10.9 mm | 138/138 | 7549 N | 11874 N | 3848× |
+| camera | 11.4 mm | 161/161 | 5307 N | 13160 N | 2705× |
+
+The object weighs 1.96 N. Penetration is present on 541 of 541 frames and never
+settles. The deepest contact on the mug is `hand_rh_ffproximal` — a proximal
+phalanx, not a fingertip, so this is not a recurrence of the fingertip-origin
+bug alone.
+
+### The reported errors measure squeeze-out
+
+Mean position error of 18–34 mm is the scale at which the object is being
+extruded from a cage of overlapping geometry, not a controller holding a
+trajectory. The object rotates freely inside that cage, which is the source of
+the 44.8° / 45.9° / 138.4° orientation errors; the camera clip ends inverted.
+`frames_within_50mm` inherits the same defect and should not be read as a
+success rate.
+
+Two of the three bimanual clips are effectively one-handed. Per-hand object
+contacts: binoculars 17.4 left / 1.4 right, with the right hand at zero contacts
+in 35 of 138 frames; camera 21.0 right / 2.2 left, left absent in 49 of 161.
+Only bowl is balanced at 6.9 / 7.2, and its fingers pass through the bowl wall.
+
+### The cause is upstream, and the objective was climbing toward it
+
+At the reset state, before any `mj_step`, grasp synthesis already hands MuJoCo
+13.20 / 14.31 / 16.20 / 20.79 mm of penetration across 20–42 contacts. Solver
+parameters are second-order: the hand geoms' `solref` timeconst of 0.005 against
+a 0.002 timestep is a genuine smell, but no contact solver is obligated to
+resolve a 16 mm overlap across 33 contacts. Settling does not recover it —
+gravity off for 0.5 s takes 12.7 mm to 11.8 mm while ejecting the object 28 mm
+and losing every contact. Post-hoc settling is ruled out on measurement.
+
+`synthesize_grasp` scored candidates on whether the object stayed held and,
+since `d5b49ca`, on tracking error. Neither term sees penetration and both are
+improved by it: depth buys contacts, contacts buy normal force, force buys grip,
+grip lowers tracking error. Measured on `mug_drink_2`, retarget alone gives
+11.08 mm over 15 contacts at 4411 N; after grasp synthesis, 17.47 mm over 32
+contacts at 8815 N — 1.6× deeper at 2× the force.
+
+The generalisable lesson is that a rejection filter would not have fixed this.
+The objective climbs toward penetration, so it would have walked up to whatever
+threshold the filter set. The constraint has to be in the objective. It now is:
+a penetration residual from MuJoCo's own narrowphase, 3 mm allowance at the
+fingertips and none elsewhere, weighted so 10 mm of excess costs about what
+dropping the object costs. Fingertips must not be exempted — exempting them is
+what allowed the original 12 mm burial and 4469 N; an allowance works, a blanket
+exemption does not. With the term in, `mug_drink_2` holds at 11.08 mm rather
+than climbing to 17.47 mm.
+
+### Claims corrected, and what is still outstanding
+
+Stage 2's "0 mm penetration after settling" was measured on an isolated settled
+pose and does not hold in the pipeline; the retarget alone leaves 11.08 mm at
+4411 N before grasp search runs. The stage 3 and stage 6 rows now record that
+the rollouts are not physical. A `NOT SUPPORTED` row was added to Status.
+
+Outstanding: (1) the retarget's own 11 mm, which the search may no longer make
+worse but which is not yet reduced; (2) re-measurement of `d5b49ca`'s
+"248 m → 35 mm", which was scored by the same tracking objective that rewards
+penetration and must be restated with penetration and normal force attached, or
+withdrawn. Until both land, no tracking number in this repository should be
+quoted as physical.
+
+The renderer is not implicated. `experiments/render_tracking.py` asserts a free
+joint, no weld, and negative gravity, and its saved `qpos`, `scene.mjb`, and
+manifests are what made this audit possible at all. The instrumentation is
+sound; what it instrumented was not.
