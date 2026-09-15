@@ -164,19 +164,28 @@ measurement, not on the previous stage having compiled:
 
 ![GRAB mug_drink_1](figures/grab_mug_drink_1.gif)
 
-*GRAB `s1/mug_drink_1`: the human right hand (red) reaching, wrapping the mug's
-**body** (only 5.6% of its contacts fall on the handle — measured, after an
-earlier caption here claimed the handle from a thumbnail), drinking, and setting
-it down. The left hand stays 53 cm away, which is what "drink" should look like.
-Drawn as the MANO surface: a stick skeleton cannot show whether a hand is
-curled — five polylines from a wrist look like a flat fan either way.*
+*GRAB `s1/mug_drink_1`: the human right hand (red) reaching, taking the mug **by
+its handle**, drinking, and setting it down. The left hand stays 53 cm away,
+which is what "drink" should look like. Drawn as the MANO surface — a stick
+skeleton cannot show whether a hand is curled.*
 
-The reference is validated on contact AREA, not on a minimum. Minimum distance
-falls from **1.28 m** to **0.1–0.6 mm** and stays there through the grasp — but
-a minimum over 778 vertices passes if a single vertex grazes the object, so on
-its own it is nearly worthless. The measurement that means something is that
-**100–145 of the 778 hand vertices sit within 5 mm** of the mug's surface, and
-300+ within 15 mm, throughout the hold: a wrapped grasp, not a touch.
+> Two earlier versions of this caption were wrong, and the second one was wrong
+> because the pipeline was. It first claimed the handle from a thumbnail, then
+> claimed the **body** on the strength of a measurement taken while the object's
+> rotation was **transposed** (GRAB poses objects as `v @ R`, not `v @ R.T`).
+> GRAB's own per-vertex contact labels put 41–100% of this clip's contacts on
+> the handle. See [the retraction](NOTES.md).
+
+The reference is validated against **GRAB's own per-vertex contact labels**, not
+against itself. Every earlier check here compared the reconstructed hand to the
+reconstructed object and asked whether they were close; they always were, and
+for a while they were close in the wrong place — the object's rotation was
+transposed and a 0.1 mm minimum-distance check passed the whole time.
+
+`experiments/grab_validate.py` scores the reconstruction against the labels the
+dataset ships: **recall 0.919, minimum 0.846** over the sequences checked, where
+recall is the fraction of GRAB's own contacted vertices the reconstruction also
+marks as touched. Under the transposed transform that number was 0.158.
 
 ![Shadow hand carrying the mug](figures/track_shadow_mug_drink_1.gif)
 
