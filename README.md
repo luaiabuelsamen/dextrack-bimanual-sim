@@ -270,6 +270,31 @@ tip is 32–36 mm beyond one, so the tip geom was buried by its own radius —
 **4469 N** of contact force on a 0.2 kg mug. Targeting the derived tip gives
 64 N and zero penetration.
 
+### The retarget is a prior, not a starting state
+
+G5 asked whether a retargeted pose holds the object under gravity. Pre-registered
+threshold 0.50; measured **0.318**, clustered CI [0.270, 0.367] over 279
+sequence-clusters. **FAIL.** Its failures make **0.1 contacts at reset** against
+17.4 for its successes — they are not slipping grasps, they are poses that never
+touch. The retargeting solves fingertip positions against a static object;
+nothing in it asks the result to close on anything.
+
+G5's decision rule, fixed before the experiment ran, says to initialise tracking
+from a grasp **synthesised near the human's contact set**. It is right:
+
+| initialisation | holds the object |
+|---|---|
+| retargeted pose, as fitted | 4/24 = **0.167** |
+| closing the fingers on it | 0.276 (from 0.288 — no effect) |
+| **searching near it for a pose that holds** | 19/24 = **0.792** |
+
+Closing alone cannot work, because the failures are not touching anything to
+close on. The hand has to be repositioned. The correction is a constant wrist
+offset in the object frame — the trajectory's shape is untouched, only the grasp
+moves — and it is kept only when it improves the whole reference (unguarded, it
+took one clip from 6 graspable frames to 1). Guarded: **16 → 38** graspable
+frames over six references, never worse.
+
 ### Stage 7: the estimator's error is structured, and that is the finding
 
 The controller is frozen and only the object pose it reads is swapped. Scored on
