@@ -174,6 +174,15 @@ to **0.1–0.6 mm**, stays there for the whole grasp, then recedes. The MANO
 skinning, the pose convention, the subject-specific template and the object
 transform all have to be right simultaneously for that to happen.
 
+![Shadow hand carrying the mug](figures/track_shadow_mug_drink_1.gif)
+
+*The end of the pipeline so far: the retargeted Shadow hand carrying the real
+GRAB mug along the human's own trajectory, including the tilt of the "drink"
+intent. **Kinematic playback** — the object is placed at the reference pose and
+the hand at the pose the SE(3) feedforward produces. Whether the grasp survives
+physics is exactly what G5 and the tracking stage measure, and is not claimed
+here.*
+
 ![retargeted Shadow hand](figures/retarget_shadow_mug_drink_1.png)
 
 *The same grasp retargeted onto a Shadow hand, rendered in MuJoCo against the
