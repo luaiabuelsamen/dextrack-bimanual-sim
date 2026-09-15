@@ -156,7 +156,7 @@ measurement, not on the previous stage having compiled:
 | 2. retarget | human contact points → robot joint trajectory | **done** — ~13 mm to the human's contacts, 0 mm penetration after settling |
 | 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **solved** — 29.4 mm mean, **111/111** frames within 50 mm, object never dropped |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
-| 5. distillation | one neural tracking controller across references | **built, fails in the loop** — regression ratio 0.716 held out, but the policy drops the object on every held-out reference |
+| 5. distillation | one neural tracking controller across references | **keeps the object on held-out objects** (158–456 mm) once it distils PPO policies rather than a trajectory optimiser; still far from the 2.5–17.7 mm experts |
 | 6. bimanual | both hands on one object | **tracking** — 3 of 4 references inside 200 mm (56/117/165 mm), all 4 hold |
 | 7. perception | depth → pose estimator → evaluate the *frozen* tracker | **built** — and it already says something (below) |
 

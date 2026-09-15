@@ -3225,3 +3225,39 @@ artifact.
 This also makes stage 5 worth another attempt for the first time. Every previous
 distillation cloned a trajectory optimiser or an open-loop feedforward, and the
 failures traced to exactly that. There are now policies worth distilling.
+
+## 2026-09-15 — stage 5: distilling PPO policies finally generalises without dropping
+
+Six references, PPO trained per reference with a horizon covering the clip, the
+policies' own on-policy states and commands distilled into one network, held out
+by object:
+
+    per-reference PPO       hammer 2.5   camera 17.7   mouse 62.3   binoculars 60.7 mm
+                            phone 216250   gamecontroller 211786 mm   (2 of 6 fail)
+
+    held-out object    feedforward    its own PPO    DISTILLED
+    gamecontroller      247682 mm      211786 mm       456.5 mm
+    hammer                  18.2 mm         2.5 mm     158.6 mm
+
+Against every earlier distillation attempt, which dropped the object on every
+held-out reference (3180-23549 mm, i.e. free fall), **the distilled policy now
+keeps it**: 158-456 mm is drift, not a drop. On gamecontroller it is 540x better
+than the expert it was distilled from, because that expert fails and the network
+has learned from the four references that do not.
+
+It is still far short of the per-reference policies (2.5-17.7 mm), and with four
+training references that is a data-scale statement rather than a verdict.
+
+The sequence of failures that led here is worth keeping, because each one was
+diagnosed rather than guessed:
+
+    cloning MPPI's correction        ratio 2.235, worse than a constant -- the
+                                     label had R^2 0.075 on the observation
+    cloning the absolute command     ratio 0.716 and dropped the object in the
+                                     loop -- a regression metric is not a rollout
+    DAgger, four variants            round 0 best every time -- an open-loop
+                                     expert cannot say how to recover
+    distilling PPO policies          keeps the object on held-out objects
+
+Which is the argument DexTrack's design makes, arrived at from the wrong end
+four times.

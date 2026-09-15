@@ -1514,8 +1514,30 @@ class BimanualTracker:
             mujoco.mj_step(m, d)
         return float(np.linalg.norm(self.obj_pose()[0] - p0))
 
+    def track_score(self, steps=60, start=0):
+        """Mean tracking error over a short rollout -- the objective that
+        actually matters.
+
+        `hold_test` scores a grasp against gravity, and a grasp can pass it and
+        still fail in motion: on `gamecontroller_play_1` two synthesis seeds
+        both reached an excellent static hold (0.65 cm and 0.14 cm) and then
+        tracked at 100.9 mm and 248 m. Holding is necessary and not sufficient,
+        which is the two-handed restatement of what the one-handed stage found.
+        """
+        self.reset_at(start)
+        r = self.rollout(start=start, steps=min(steps, self.T - start))
+        # Clipping alone hides the only failure that matters. At a 1 m clip, a
+        # rollout with 130 good frames and 8 catastrophic ones scored 46.9 mm
+        # while its true mean was 92752 mm, and the search happily selected it.
+        # The clip keeps the objective from being dominated by how FAR a
+        # dropped object flew; the drop fraction puts the drop itself back in.
+        e = np.minimum(r.pos_err, 0.25)
+        dropped = float(np.mean(r.pos_err > 0.10))
+        return float(e.mean() + 0.5 * dropped)
+
     def synthesize_grasp(self, k=0, samples=10, rounds=2, sigma_pos=0.012,
-                         sigma_rot=0.08, seed=0):
+                         sigma_rot=0.08, seed=0, objective="track",
+                         track_steps=60):
         """Search both wrists for a two-handed pose that holds the object.
 
         Alternating, one hand at a time, because a joint 12-dimensional search
@@ -1530,16 +1552,23 @@ class BimanualTracker:
         """
         rng = np.random.default_rng(seed)
         sig = np.array([sigma_pos] * 3 + [sigma_rot] * 3)
-        best = self.hold_test(k)
+        # Score over the WHOLE reference by default. A 70-step window gave a
+        # grasp scoring 93.7 mm on that window and 491 m over the full 192
+        # frames -- the same horizon lesson PPO taught, now for the grasp
+        # search: optimise what you will be judged on.
+        nsteps = (self.T - k) if track_steps is None else track_steps
+        score = ((lambda: self.track_score(nsteps, k))
+                 if objective == "track" else (lambda: self.hold_test(k)))
+        best = score()
         applied = {"r": np.zeros(6), "l": np.zeros(6)}
         for _ in range(rounds):
             for sd in ("r", "l"):
                 cand = rng.normal(size=(samples, 6)) * sig
                 for dlt in cand:
                     self._shift(sd, dlt)
-                    score = self.hold_test(k)
-                    if score < best:
-                        best = score
+                    v = score()
+                    if v < best:
+                        best = v
                         applied[sd] = applied[sd] + dlt
                     else:
                         self._shift(sd, -dlt)
