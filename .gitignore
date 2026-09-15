@@ -12,3 +12,10 @@ vendor/mujoco_menagerie/
 .venv/
 .venv-mjx/
 .xla_cache/
+
+# GRAB / MANO are licensed datasets, downloaded per-user, not redistributed
+data/grab/
+data/grab_unzipped/
+data/mano/
+data/grab_convex/
+logs/

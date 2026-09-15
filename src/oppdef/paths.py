@@ -39,6 +39,13 @@ def require(path: Path, what: str, env: str) -> Path:
 RESULTS = REPO / "results"
 FIGURES = REPO / "figures"
 
+#: Large third-party datasets and models (GRAB, MANO). Not redistributed; each
+#: carries its own licence and must be downloaded from its own site.
+DATA = Path(os.environ.get("OPPDEF_DATA", REPO / "data"))
+
+#: GRAB, after running vendor/GRAB/grab/unzip_grab.py.
+GRAB = DATA / "grab_unzipped"
+
 
 _URDF_LOCK = None
 
