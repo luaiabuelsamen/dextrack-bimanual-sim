@@ -22,6 +22,16 @@ import mujoco
 from oppdef.human import grab as grab_mod
 
 GRAVITY = np.array([0.0, 0.0, -9.81])
+
+#: Penetration allowance and weight in the grasp-search objective. A fingertip
+#: resting a couple of millimetres into a soft contact is the grasp; a hand
+#: 17 mm inside a mug is 8815 N on a 1.96 N object, and a rollout started there
+#: is measuring the contact solver, not a grasp. The weight is large on purpose:
+#: at 40 per metre, 10 mm of excess penetration costs 0.40, which is the same
+#: order as dropping the object outright. Flagged by a peer session measuring
+#: 1.5-13 kN across four clips and 13-21 mm at reset.
+PEN_ALLOW = 0.003
+W_PEN_SCORE = 40.0
 BASE_DOF = ("x", "y", "z", "rx", "ry", "rz")
 
 
@@ -675,9 +685,18 @@ class ReferenceTracker:
         """
         n = (self.T - start) if steps is None else steps
         self.reset_at(start)
+        # Penetration at the reset state, BEFORE stepping. Without this term
+        # the search does not merely ignore penetration, it is rewarded by it:
+        # deeper overlap means more contacts and more normal force, which means
+        # a better grip and a lower tracking error. Measured on mug_drink_2,
+        # the search took the retarget from 11.08 mm / 4411 N to 17.47 mm /
+        # 8815 N on a 1.96 N object -- it had learned to exploit the contact
+        # model as a grasp strategy.
+        pen0 = self.sim.penetration()[0]
         r = self.rollout(start=start, steps=min(n, self.T - start))
         return float(np.minimum(r.pos_err, 0.25).mean()
-                     + 0.5 * np.mean(r.pos_err > 0.10))
+                     + 0.5 * np.mean(r.pos_err > 0.10)
+                     + W_PEN_SCORE * max(0.0, pen0 - PEN_ALLOW))
 
     def synthesize_grasp(self, k=None, samples=12, rounds=2, seconds=0.4,
                          grip=8.0, seed=0, objective="track", restarts=1):
@@ -1595,6 +1614,14 @@ class BimanualTracker:
         which is the two-handed restatement of what the one-handed stage found.
         """
         self.reset_at(start)
+        pen0 = 0.0
+        d = self.sim.data
+        obj = set(self.sim.obj_gids)
+        hands = set(self.sim.hand_gids["r"]) | set(self.sim.hand_gids["l"])
+        for i in range(d.ncon):
+            g = {int(d.contact[i].geom1), int(d.contact[i].geom2)}
+            if g & obj and g & hands:
+                pen0 = max(pen0, -float(d.contact[i].dist))
         r = self.rollout(start=start, steps=min(steps, self.T - start))
         # Clipping alone hides the only failure that matters. At a 1 m clip, a
         # rollout with 130 good frames and 8 catastrophic ones scored 46.9 mm
@@ -1603,7 +1630,8 @@ class BimanualTracker:
         # dropped object flew; the drop fraction puts the drop itself back in.
         e = np.minimum(r.pos_err, 0.25)
         dropped = float(np.mean(r.pos_err > 0.10))
-        return float(e.mean() + 0.5 * dropped)
+        return float(e.mean() + 0.5 * dropped
+                     + W_PEN_SCORE * max(0.0, pen0 - PEN_ALLOW))
 
     def synthesize_grasp(self, k=0, samples=10, rounds=2, sigma_pos=0.012,
                          sigma_rot=0.08, seed=0, objective="track",
