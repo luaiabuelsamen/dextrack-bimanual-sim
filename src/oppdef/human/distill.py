@@ -204,3 +204,46 @@ def train(npz_path, holdout_frac=0.3, seed=0, epochs=300, hidden=512):
                      hidden=hidden)
     model["test_objs"] = test_objs
     return model, (O, A, is_test)
+
+
+def policy_rollout(rt, model, start=None):
+    """Run the distilled policy in the simulator and score it on the truth.
+
+    MAE against the recorded command is a proxy: a policy can score well on it
+    and still lose the object, because the errors that matter are the ones that
+    break contact. This closes the loop -- the network's output IS the command,
+    and the object's tracking error is the number.
+
+    The policy emits the palm pose in the OBJECT frame plus the finger targets,
+    so the world command is recovered by composing with the object's current
+    pose. That composition is what makes the policy object-relative rather than
+    tied to where GRAB's subject stood.
+    """
+    import mujoco
+    from oppdef.learning.bc import policy_fn
+    from oppdef.human import track as T
+
+    act = policy_fn(model)
+    if start is None:
+        gf = rt.grasp_frames()
+        start = int(gf[0]) if len(gf) else 0
+    rt.reset_at(start)
+    m, d = rt.sim.model, rt.sim.data
+    errs = []
+    for k in range(start, rt.T):
+        y = act(rt.observe(k).astype(np.float32))
+        op, oq = rt.true_obj_pose()
+        R = np.zeros(9)
+        mujoco.mju_quat2Mat(R, oq)
+        R = R.reshape(3, 3)
+        palm_p = R @ y[:3] + op
+        q = y[3:7] / max(np.linalg.norm(y[3:7]), 1e-9)
+        palm_q = np.zeros(4)
+        mujoco.mju_mulQuat(palm_q, oq, q)
+        rt.mh.command(palm_p, palm_q)
+        c = np.asarray(y[7:], float)
+        d.ctrl[:] = np.clip(c, m.actuator_ctrlrange[:, 0], m.actuator_ctrlrange[:, 1])
+        for _ in range(rt.ctrl_every):
+            mujoco.mj_step(m, d)
+        errs.append(rt.error(k)[0])
+    return np.array(errs)

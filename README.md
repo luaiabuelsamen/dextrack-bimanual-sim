@@ -156,8 +156,8 @@ measurement, not on the previous stage having compiled:
 | 2. retarget | human contact points → robot joint trajectory | **done** — ~13 mm to the human's contacts, 0 mm penetration after settling |
 | 3. per-reference tracking | feedforward + MPPI, one solution per clip | **built** — tracks 116/116 frames at 35.3 mm, given a grasp that holds |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
-| 5. distillation | one neural tracking controller across references | **built, does not generalise** — held-out objects worse than predicting the mean (ratio 1.84) at 5 episodes |
-| 6. bimanual | both hands on one object | **built, does not track** — joint fitting removes the 11.7 mm interpenetration; grasps still fail |
+| 5. distillation | one neural tracking controller across references | **built, fails in the loop** — regression ratio 0.716 held out, but the policy drops the object on every held-out reference |
+| 6. bimanual | both hands on one object | **tracking** — 3 of 4 references inside 200 mm (56/117/165 mm), all 4 hold |
 | 7. perception | depth → pose estimator → evaluate the *frozen* tracker | **built** — and it already says something (below) |
 
 Every number in this section is from the **corrected** pipeline. An earlier set

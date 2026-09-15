@@ -3062,3 +3062,32 @@ Recorded with both numbers rather than tuned to the average.
 One merge bug worth keeping: combining the two sides' servo targets by taking
 whichever was non-zero silently drops a target of exactly zero, which is a
 legitimate target. Assigned by actuator ownership instead.
+
+## 2026-09-15 — stage 5: the regression metric improved and the policy still fails
+
+Rolling the distilled policy out in the simulator, on objects it never saw:
+
+    held-out object   feedforward   distilled policy   frames in tolerance
+    camera              31.1 mm        23549 mm             0/146
+    hammer              18.2 mm         3180 mm             0/14
+    hand                23.6 mm        14620 mm             0/99
+
+**It drops the object every time.** The held-out MAE ratio is 0.716 -- better
+than predicting a constant, robust across five object splits -- and that is not
+sufficient. A command error that would be unremarkable in a regression metric
+breaks contact, and once contact is broken nothing the policy does afterwards
+matters. The feedforward it is cloning tracks these same references to 18-31 mm.
+
+So the earlier entry overstated it. Changing the label from MPPI's correction to
+the absolute command fixed the *learnability* problem, which was real and
+measurable (R^2 0.075 -> a target that is a function of the state, ratio 2.235
+-> 0.716). It did not make the stage work. Behaviour cloning of a contact-rich
+tracking controller does not survive its own errors: the training distribution
+contains only states the demonstrator visited, and the first command error takes
+the policy somewhere it has never seen.
+
+That is the standard argument for DAgger and for training IN the loop, and it is
+why DexTrack distils an RL policy rather than cloning a trajectory optimiser.
+The measurement to record is that MAE was the wrong scoreboard, and the rollout
+is the right one -- exactly the mistake this repository made once before with a
+behaviour-cloning result that open-loop replay matched.
