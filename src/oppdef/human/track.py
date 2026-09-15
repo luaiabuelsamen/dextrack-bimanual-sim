@@ -680,7 +680,7 @@ class ReferenceTracker:
                      + 0.5 * np.mean(r.pos_err > 0.10))
 
     def synthesize_grasp(self, k=None, samples=12, rounds=2, seconds=0.4,
-                         grip=8.0, seed=0, objective="track"):
+                         grip=8.0, seed=0, objective="track", restarts=1):
         """Search near the retargeted wrist for a pose that actually holds, and
         apply that correction to the WHOLE trajectory.
 
@@ -708,6 +708,32 @@ class ReferenceTracker:
         # offset is optimised at one frame, and on `cup_pass_1` the frame's
         # optimum took the reference from 6 graspable frames to 1. Guarded, this
         # can only help.
+        if objective == "track" and restarts > 1:
+            # Off by default, because it is not a reliable win. The search
+            # genuinely varies with seed -- binoculars gives 29.2, 48.0 and
+            # 71.3 mm over three -- but selecting among restarts by the search
+            # SCORE does not reliably pick the best ROLLOUT: measured,
+            # phone_call_1 improved (250753 -> 99785 mm) and
+            # gamecontroller_play_1 got worse (15.3 -> 35.7 mm). The composite
+            # score and the final mean error do not rank identically, and until
+            # they do this is a coin flip with extra steps.
+            best_v, best_off = np.inf, np.zeros(6)
+            for rs in range(restarts):
+                off = self.synthesize_grasp(k=k, samples=samples, rounds=rounds,
+                                            seconds=seconds, grip=grip,
+                                            seed=seed + 1000 * rs,
+                                            objective="track", restarts=1)
+                v = self.grasp_score
+                if v < best_v:
+                    best_v, best_off = v, np.asarray(off) + best_off * 0
+                    keep = np.asarray(off)
+                self.apply_wrist_offset(-np.asarray(off))
+            self.apply_wrist_offset(keep)
+            self.grasp_score = best_v
+            self.grasp_frames_before = self.grasp_frames_after = len(
+                self.grasp_frames())
+            return keep
+
         if objective == "track":
             # Search the wrist offset directly against tracking, the way the
             # two-handed stage does. Scored on holding, the search cannot see
