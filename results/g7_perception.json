@@ -1,0 +1,31 @@
+[
+ {
+  "truth": {
+   "mean_mm": 101.48170214896061,
+   "final_mm": 152.59822614240198,
+   "held_frac": 0.22413793103448276,
+   "dropped": true,
+   "pose_err_mm": 0.0,
+   "steps": 116
+  },
+  "depth": {
+   "mean_mm": 637.2738537733877,
+   "final_mm": 8927.731007353219,
+   "held_frac": 0.017241379310344827,
+   "dropped": true,
+   "pose_err_mm": 38.36090877568972,
+   "steps": 116
+  },
+  "noise": {
+   "mean_mm": 102.47239002926845,
+   "final_mm": 128.04026842649114,
+   "held_frac": 0.10344827586206896,
+   "dropped": true,
+   "pose_err_mm": 61.81321382328014,
+   "steps": 116
+  },
+  "seq": "mug_drink_1",
+  "object": "mug",
+  "start": 0
+ }
+]

@@ -769,10 +769,21 @@ class ReferenceTracker:
         self.grip_force = reached
         return a, reached
 
-    def obj_pose(self):
+    #: Set to a callable returning (pos, quat) to feed the controller an
+    #: ESTIMATE of the object's pose instead of the simulator's ground truth.
+    #: The controller is otherwise untouched, so any change in the result is
+    #: attributable to perception rather than to a different controller.
+    pose_source = None
+
+    def true_obj_pose(self):
         d = self.sim.data
         return (d.qpos[self.obj_q:self.obj_q + 3].copy(),
                 d.qpos[self.obj_q + 3:self.obj_q + 7].copy())
+
+    def obj_pose(self):
+        if self.pose_source is not None:
+            return self.pose_source()
+        return self.true_obj_pose()
 
     def observe(self, k) -> np.ndarray:
         """What a distilled tracking policy sees at reference frame k.
@@ -820,7 +831,9 @@ class ReferenceTracker:
         return len(self.sim.jids) * 2 + 3 + 4 + 3 + 4 + 6 + 3 * 7
 
     def error(self, k):
-        p, q = self.obj_pose()
+        # scored on the TRUTH even when the controller is fed an estimate:
+        # a tracker that believes a wrong pose must not also be graded by it
+        p, q = self.true_obj_pose()
         k = int(np.clip(k, 0, self.T - 1))
         dq = np.zeros(4)
         c = self.ref_quat[k] * np.array([1.0, -1, -1, -1])

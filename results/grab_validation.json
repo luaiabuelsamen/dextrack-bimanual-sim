@@ -1,0 +1,2916 @@
+{
+ "near_m": 0.005,
+ "stride": 8,
+ "rows": [
+  {
+   "seq": "airplane_fly_1",
+   "subject": "s1",
+   "object": "airplane",
+   "intent": "fly",
+   "frames": 10,
+   "recall": 0.9367943495231206,
+   "iou": 0.4414883096351332,
+   "recall_all_parts": 0.9367943495231206
+  },
+  {
+   "seq": "airplane_lift",
+   "subject": "s1",
+   "object": "airplane",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.9590163631872238,
+   "iou": 0.4137040380095461,
+   "recall_all_parts": 0.9590163631872238
+  },
+  {
+   "seq": "airplane_offhand_1",
+   "subject": "s1",
+   "object": "airplane",
+   "intent": "offhand",
+   "frames": 7,
+   "recall": 0.8656692510801456,
+   "iou": 0.4222489144509256,
+   "recall_all_parts": 0.8656692510801456
+  },
+  {
+   "seq": "airplane_pass_1",
+   "subject": "s1",
+   "object": "airplane",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.9814329332466847,
+   "iou": 0.42900826024855854,
+   "recall_all_parts": 0.9814329332466847
+  },
+  {
+   "seq": "alarmclock_lift",
+   "subject": "s1",
+   "object": "alarmclock",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.8461065185720612,
+   "iou": 0.5121822714212101,
+   "recall_all_parts": 0.8461065185720612
+  },
+  {
+   "seq": "alarmclock_offhand_1",
+   "subject": "s1",
+   "object": "alarmclock",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.9354637657034393,
+   "iou": 0.5769281851581808,
+   "recall_all_parts": 0.9354637657034393
+  },
+  {
+   "seq": "alarmclock_pass_1",
+   "subject": "s1",
+   "object": "alarmclock",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.854992112956278,
+   "iou": 0.47407723341427876,
+   "recall_all_parts": 0.854992112956278
+  },
+  {
+   "seq": "alarmclock_see_1",
+   "subject": "s1",
+   "object": "alarmclock",
+   "intent": "see",
+   "frames": 7,
+   "recall": 0.9733034007718765,
+   "iou": 0.5668625721775372,
+   "recall_all_parts": 0.9733034007718765
+  },
+  {
+   "seq": "apple_eat_1",
+   "subject": "s1",
+   "object": "apple",
+   "intent": "eat",
+   "frames": 9,
+   "recall": 0.9047464101239105,
+   "iou": 0.5000893052961973,
+   "recall_all_parts": 0.8745026675267366
+  },
+  {
+   "seq": "apple_lift",
+   "subject": "s1",
+   "object": "apple",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.8972682915417908,
+   "iou": 0.5071970544538419,
+   "recall_all_parts": 0.8972682915417908
+  },
+  {
+   "seq": "apple_offhand_1",
+   "subject": "s1",
+   "object": "apple",
+   "intent": "offhand",
+   "frames": 10,
+   "recall": 0.8323345808383187,
+   "iou": 0.46828095378567164,
+   "recall_all_parts": 0.81145848318469
+  },
+  {
+   "seq": "apple_pass_1",
+   "subject": "s1",
+   "object": "apple",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9632084235431335,
+   "iou": 0.4608676561315483,
+   "recall_all_parts": 0.9632084235431335
+  },
+  {
+   "seq": "banana_eat_1",
+   "subject": "s1",
+   "object": "banana",
+   "intent": "eat",
+   "frames": 10,
+   "recall": 0.7990358625092345,
+   "iou": 0.41642521267553073,
+   "recall_all_parts": 0.7859153912492283
+  },
+  {
+   "seq": "banana_lift",
+   "subject": "s1",
+   "object": "banana",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.9549688626926922,
+   "iou": 0.4866962677621544,
+   "recall_all_parts": 0.9549688626926922
+  },
+  {
+   "seq": "banana_offhand_1",
+   "subject": "s1",
+   "object": "banana",
+   "intent": "offhand",
+   "frames": 11,
+   "recall": 0.8964780139397247,
+   "iou": 0.48593027598706434,
+   "recall_all_parts": 0.8671969195608158
+  },
+  {
+   "seq": "banana_pass_1",
+   "subject": "s1",
+   "object": "banana",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.872636792303145,
+   "iou": 0.4439774889054848,
+   "recall_all_parts": 0.872636792303145
+  },
+  {
+   "seq": "banana_peel_1",
+   "subject": "s1",
+   "object": "banana",
+   "intent": "peel",
+   "frames": 11,
+   "recall": 0.6304678699294283,
+   "iou": 0.3526738930842388,
+   "recall_all_parts": 0.6304678699294283
+  },
+  {
+   "seq": "banana_peel_2",
+   "subject": "s1",
+   "object": "banana",
+   "intent": "peel",
+   "frames": 9,
+   "recall": 0.6710155567163383,
+   "iou": 0.3534906898556794,
+   "recall_all_parts": 0.6710155567163383
+  },
+  {
+   "seq": "binoculars_lift",
+   "subject": "s1",
+   "object": "binoculars",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.6736506679765142,
+   "iou": 0.4125462043698194,
+   "recall_all_parts": 0.6736506679765142
+  },
+  {
+   "seq": "binoculars_offhand_1",
+   "subject": "s1",
+   "object": "binoculars",
+   "intent": "offhand",
+   "frames": 10,
+   "recall": 0.5399116355572953,
+   "iou": 0.3589065651249266,
+   "recall_all_parts": 0.5399116355572953
+  },
+  {
+   "seq": "binoculars_pass_1",
+   "subject": "s1",
+   "object": "binoculars",
+   "intent": "pass",
+   "frames": 9,
+   "recall": 0.8754487794441733,
+   "iou": 0.4951044999458235,
+   "recall_all_parts": 0.8754487794441733
+  },
+  {
+   "seq": "binoculars_see_1",
+   "subject": "s1",
+   "object": "binoculars",
+   "intent": "see",
+   "frames": 10,
+   "recall": 0.5370774513927046,
+   "iou": 0.3561784501523919,
+   "recall_all_parts": 0.5058641002531202
+  },
+  {
+   "seq": "bowl_drink_1",
+   "subject": "s1",
+   "object": "bowl",
+   "intent": "drink",
+   "frames": 8,
+   "recall": 0.47136746107203487,
+   "iou": 0.3498128739421057,
+   "recall_all_parts": 0.4549168270321612
+  },
+  {
+   "seq": "bowl_drink_2",
+   "subject": "s1",
+   "object": "bowl",
+   "intent": "drink",
+   "frames": 7,
+   "recall": 0.9602662696962921,
+   "iou": 0.597618354576165,
+   "recall_all_parts": 0.8776155844530876
+  },
+  {
+   "seq": "bowl_lift",
+   "subject": "s1",
+   "object": "bowl",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.5666097855792052,
+   "iou": 0.3583564680437511,
+   "recall_all_parts": 0.5650474232545405
+  },
+  {
+   "seq": "bowl_pass_1",
+   "subject": "s1",
+   "object": "bowl",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9531592894136475,
+   "iou": 0.5192238660146024,
+   "recall_all_parts": 0.9531592894136475
+  },
+  {
+   "seq": "camera_browse_1",
+   "subject": "s1",
+   "object": "camera",
+   "intent": "browse",
+   "frames": 8,
+   "recall": 0.47602628423461246,
+   "iou": 0.27779193175596417,
+   "recall_all_parts": 0.47602628423461246
+  },
+  {
+   "seq": "camera_lift",
+   "subject": "s1",
+   "object": "camera",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.9056321411008174,
+   "iou": 0.5529736210707393,
+   "recall_all_parts": 0.9056321411008174
+  },
+  {
+   "seq": "camera_offhand_1",
+   "subject": "s1",
+   "object": "camera",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.6279899722551674,
+   "iou": 0.3957194366315629,
+   "recall_all_parts": 0.6279899722551674
+  },
+  {
+   "seq": "camera_pass_1",
+   "subject": "s1",
+   "object": "camera",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9608498802392083,
+   "iou": 0.483741373794512,
+   "recall_all_parts": 0.9608498802392083
+  },
+  {
+   "seq": "camera_takepicture_1",
+   "subject": "s1",
+   "object": "camera",
+   "intent": "takepicture",
+   "frames": 11,
+   "recall": 0.4735027984566966,
+   "iou": 0.3527374929524737,
+   "recall_all_parts": 0.4735027984566966
+  },
+  {
+   "seq": "camera_takepicture_2",
+   "subject": "s1",
+   "object": "camera",
+   "intent": "takepicture",
+   "frames": 10,
+   "recall": 0.4620472163813879,
+   "iou": 0.3277618415050364,
+   "recall_all_parts": 0.4620472163813879
+  },
+  {
+   "seq": "camera_takepicture_3_Retake",
+   "subject": "s1",
+   "object": "camera",
+   "intent": "takepicture",
+   "frames": 10,
+   "recall": 0.5607495430602422,
+   "iou": 0.3813043546998443,
+   "recall_all_parts": 0.560723099688254
+  },
+  {
+   "seq": "cubelarge_inspect_1",
+   "subject": "s1",
+   "object": "cubelarge",
+   "intent": "inspect",
+   "frames": 9,
+   "recall": 0.7480360683032539,
+   "iou": 0.509250636898859,
+   "recall_all_parts": 0.7480360683032539
+  },
+  {
+   "seq": "cubelarge_lift",
+   "subject": "s1",
+   "object": "cubelarge",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.8701622175620918,
+   "iou": 0.5930898722908629,
+   "recall_all_parts": 0.8701622175620918
+  },
+  {
+   "seq": "cubelarge_offhand_1",
+   "subject": "s1",
+   "object": "cubelarge",
+   "intent": "offhand",
+   "frames": 10,
+   "recall": 0.7151904063043761,
+   "iou": 0.468694474386508,
+   "recall_all_parts": 0.7151904063043761
+  },
+  {
+   "seq": "cubelarge_pass_1",
+   "subject": "s1",
+   "object": "cubelarge",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.8201959709558874,
+   "iou": 0.5646151590198887,
+   "recall_all_parts": 0.8201959709558874
+  },
+  {
+   "seq": "cubemedium_inspect_1",
+   "subject": "s1",
+   "object": "cubemedium",
+   "intent": "inspect",
+   "frames": 9,
+   "recall": 0.9254299746125212,
+   "iou": 0.48372230589856663,
+   "recall_all_parts": 0.9254299746125212
+  },
+  {
+   "seq": "cubemedium_lift",
+   "subject": "s1",
+   "object": "cubemedium",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.7796611926375504,
+   "iou": 0.3962389738669167,
+   "recall_all_parts": 0.7796611926375504
+  },
+  {
+   "seq": "cubemedium_offhand_1",
+   "subject": "s1",
+   "object": "cubemedium",
+   "intent": "offhand",
+   "frames": 7,
+   "recall": 0.8027654378984499,
+   "iou": 0.4014612559372511,
+   "recall_all_parts": 0.8027654378984499
+  },
+  {
+   "seq": "cubemedium_pass_1",
+   "subject": "s1",
+   "object": "cubemedium",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.7884964421386997,
+   "iou": 0.45430493174488357,
+   "recall_all_parts": 0.7884964421386997
+  },
+  {
+   "seq": "cubesmall_inspect_1",
+   "subject": "s1",
+   "object": "cubesmall",
+   "intent": "inspect",
+   "frames": 10,
+   "recall": 0.8692441641346366,
+   "iou": 0.3409624576665731,
+   "recall_all_parts": 0.8692441641346366
+  },
+  {
+   "seq": "cubesmall_lift",
+   "subject": "s1",
+   "object": "cubesmall",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.7935333821019525,
+   "iou": 0.3451542622657596,
+   "recall_all_parts": 0.7935333821019525
+  },
+  {
+   "seq": "cubesmall_offhand_1",
+   "subject": "s1",
+   "object": "cubesmall",
+   "intent": "offhand",
+   "frames": 9,
+   "recall": 0.7905358648735984,
+   "iou": 0.329040502338521,
+   "recall_all_parts": 0.7905358648735984
+  },
+  {
+   "seq": "cubesmall_pass_1",
+   "subject": "s1",
+   "object": "cubesmall",
+   "intent": "pass",
+   "frames": 5,
+   "recall": 0.958200943547942,
+   "iou": 0.4973177490635548,
+   "recall_all_parts": 0.958200943547942
+  },
+  {
+   "seq": "cup_drink_1",
+   "subject": "s1",
+   "object": "cup",
+   "intent": "drink",
+   "frames": 9,
+   "recall": 0.9327050771533933,
+   "iou": 0.4516974326182173,
+   "recall_all_parts": 0.8465124960236421
+  },
+  {
+   "seq": "cup_drink_2",
+   "subject": "s1",
+   "object": "cup",
+   "intent": "drink",
+   "frames": 9,
+   "recall": 0.9209560286464978,
+   "iou": 0.4506003123982676,
+   "recall_all_parts": 0.8434119915267119
+  },
+  {
+   "seq": "cup_lift",
+   "subject": "s1",
+   "object": "cup",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.7487334632130767,
+   "iou": 0.4618454250927373,
+   "recall_all_parts": 0.7493805170117405
+  },
+  {
+   "seq": "cup_pass_1",
+   "subject": "s1",
+   "object": "cup",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9049423766537775,
+   "iou": 0.48427694932617266,
+   "recall_all_parts": 0.9056408063145901
+  },
+  {
+   "seq": "cup_pour_1",
+   "subject": "s1",
+   "object": "cup",
+   "intent": "pour",
+   "frames": 8,
+   "recall": 0.8800347529791063,
+   "iou": 0.44342647283135417,
+   "recall_all_parts": 0.8802881442229986
+  },
+  {
+   "seq": "cylinderlarge_inspect_1",
+   "subject": "s1",
+   "object": "cylinderlarge",
+   "intent": "inspect",
+   "frames": 10,
+   "recall": 0.7773861968159335,
+   "iou": 0.5046055398918632,
+   "recall_all_parts": 0.7773861968159335
+  },
+  {
+   "seq": "cylinderlarge_lift",
+   "subject": "s1",
+   "object": "cylinderlarge",
+   "intent": "lift",
+   "frames": 12,
+   "recall": 0.7552836596181294,
+   "iou": 0.4931082276310514,
+   "recall_all_parts": 0.7559072683017938
+  },
+  {
+   "seq": "cylinderlarge_offhand_1",
+   "subject": "s1",
+   "object": "cylinderlarge",
+   "intent": "offhand",
+   "frames": 9,
+   "recall": 0.8908723007217342,
+   "iou": 0.5444949393156577,
+   "recall_all_parts": 0.8902398745098599
+  },
+  {
+   "seq": "cylinderlarge_pass_1",
+   "subject": "s1",
+   "object": "cylinderlarge",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.7745667223861026,
+   "iou": 0.483092628694352,
+   "recall_all_parts": 0.7745667223861026
+  },
+  {
+   "seq": "cylindermedium_inspect_1",
+   "subject": "s1",
+   "object": "cylindermedium",
+   "intent": "inspect",
+   "frames": 9,
+   "recall": 0.7011881865572476,
+   "iou": 0.4331236615216483,
+   "recall_all_parts": 0.7011881865572476
+  },
+  {
+   "seq": "cylindermedium_lift",
+   "subject": "s1",
+   "object": "cylindermedium",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.9389508598248184,
+   "iou": 0.5278959671758694,
+   "recall_all_parts": 0.9389508598248184
+  },
+  {
+   "seq": "cylindermedium_offhand_1",
+   "subject": "s1",
+   "object": "cylindermedium",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.7950985269858628,
+   "iou": 0.4447430216768649,
+   "recall_all_parts": 0.7950985269858628
+  },
+  {
+   "seq": "cylindermedium_pass_1",
+   "subject": "s1",
+   "object": "cylindermedium",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.8399192512885628,
+   "iou": 0.467396952063486,
+   "recall_all_parts": 0.8399192512885628
+  },
+  {
+   "seq": "cylindersmall_inspect_1",
+   "subject": "s1",
+   "object": "cylindersmall",
+   "intent": "inspect",
+   "frames": 8,
+   "recall": 0.8710343840534357,
+   "iou": 0.44365680048285383,
+   "recall_all_parts": 0.8710343840534357
+  },
+  {
+   "seq": "cylindersmall_lift",
+   "subject": "s1",
+   "object": "cylindersmall",
+   "intent": "lift",
+   "frames": 11,
+   "recall": 0.9351031185986529,
+   "iou": 0.4772526480714268,
+   "recall_all_parts": 0.9351031185986529
+  },
+  {
+   "seq": "cylindersmall_offhand_1",
+   "subject": "s1",
+   "object": "cylindersmall",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.9682913572053823,
+   "iou": 0.482923289417743,
+   "recall_all_parts": 0.9682913572053823
+  },
+  {
+   "seq": "cylindersmall_pass_1",
+   "subject": "s1",
+   "object": "cylindersmall",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.8769513264483042,
+   "iou": 0.4503391951581815,
+   "recall_all_parts": 0.8769513264483042
+  },
+  {
+   "seq": "doorknob_use_1",
+   "subject": "s1",
+   "object": "doorknob",
+   "intent": "use",
+   "frames": 6,
+   "recall": 0.7571883866714307,
+   "iou": 0.4461699636968626,
+   "recall_all_parts": 0.7603218909904869
+  },
+  {
+   "seq": "doorknob_use_2",
+   "subject": "s1",
+   "object": "doorknob",
+   "intent": "use",
+   "frames": 7,
+   "recall": 0.9172963726986854,
+   "iou": 0.48855082210691486,
+   "recall_all_parts": 0.9157684227310581
+  },
+  {
+   "seq": "doorknob_use_fun_1",
+   "subject": "s1",
+   "object": "doorknob",
+   "intent": "use",
+   "frames": 7,
+   "recall": 0.5187628406069852,
+   "iou": 0.344335247393078,
+   "recall_all_parts": 0.5188533534020405
+  },
+  {
+   "seq": "duck_inspect_1",
+   "subject": "s1",
+   "object": "duck",
+   "intent": "inspect",
+   "frames": 8,
+   "recall": 0.9116478077363108,
+   "iou": 0.5303416387602418,
+   "recall_all_parts": 0.9116478077363108
+  },
+  {
+   "seq": "duck_lift",
+   "subject": "s1",
+   "object": "duck",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.9354338015912843,
+   "iou": 0.46674681827503506,
+   "recall_all_parts": 0.935482612596254
+  },
+  {
+   "seq": "duck_offhand_1",
+   "subject": "s1",
+   "object": "duck",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.8407570263849303,
+   "iou": 0.4291278564890059,
+   "recall_all_parts": 0.8407570263849303
+  },
+  {
+   "seq": "duck_offhand_2",
+   "subject": "s1",
+   "object": "duck",
+   "intent": "offhand",
+   "frames": 9,
+   "recall": 0.8417308757966341,
+   "iou": 0.4398043442746422,
+   "recall_all_parts": 0.8417308757966341
+  },
+  {
+   "seq": "duck_pass_1",
+   "subject": "s1",
+   "object": "duck",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.9188414862962666,
+   "iou": 0.405100493463034,
+   "recall_all_parts": 0.9188414862962666
+  },
+  {
+   "seq": "elephant_inspect_1",
+   "subject": "s1",
+   "object": "elephant",
+   "intent": "inspect",
+   "frames": 8,
+   "recall": 0.8390443177311732,
+   "iou": 0.4579289820808338,
+   "recall_all_parts": 0.8390443177311732
+  },
+  {
+   "seq": "elephant_lift",
+   "subject": "s1",
+   "object": "elephant",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.8926122864765926,
+   "iou": 0.49587644581540014,
+   "recall_all_parts": 0.8926122864765926
+  },
+  {
+   "seq": "elephant_offhand_1",
+   "subject": "s1",
+   "object": "elephant",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.9676921670497529,
+   "iou": 0.516130392471234,
+   "recall_all_parts": 0.9676921670497529
+  },
+  {
+   "seq": "elephant_pass_1",
+   "subject": "s1",
+   "object": "elephant",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9679652225482039,
+   "iou": 0.5203018425252417,
+   "recall_all_parts": 0.9679652225482039
+  },
+  {
+   "seq": "eyeglasses_clean_1",
+   "subject": "s1",
+   "object": "eyeglasses",
+   "intent": "clean",
+   "frames": 10,
+   "recall": 0.6447487711818237,
+   "iou": 0.4895815175137853,
+   "recall_all_parts": 0.6447487711818237
+  },
+  {
+   "seq": "eyeglasses_lift",
+   "subject": "s1",
+   "object": "eyeglasses",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.8397752999590202,
+   "iou": 0.5203462899413422,
+   "recall_all_parts": 0.8397752999590202
+  },
+  {
+   "seq": "eyeglasses_offhand_1",
+   "subject": "s1",
+   "object": "eyeglasses",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.5664786504584022,
+   "iou": 0.438343984591744,
+   "recall_all_parts": 0.4548542527771368
+  },
+  {
+   "seq": "eyeglasses_pass_1",
+   "subject": "s1",
+   "object": "eyeglasses",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9945633676006734,
+   "iou": 0.8232721951237486,
+   "recall_all_parts": 0.9945633676006734
+  },
+  {
+   "seq": "eyeglasses_wear_1",
+   "subject": "s1",
+   "object": "eyeglasses",
+   "intent": "wear",
+   "frames": 7,
+   "recall": 0.6328981779569012,
+   "iou": 0.43234913749109316,
+   "recall_all_parts": 0.44119781444335954
+  },
+  {
+   "seq": "flashlight_lift",
+   "subject": "s1",
+   "object": "flashlight",
+   "intent": "lift",
+   "frames": 7,
+   "recall": 0.9659218137739646,
+   "iou": 0.5620250728322128,
+   "recall_all_parts": 0.9659218137739646
+  },
+  {
+   "seq": "flashlight_offhand_1",
+   "subject": "s1",
+   "object": "flashlight",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.9469151059915681,
+   "iou": 0.5054358559325222,
+   "recall_all_parts": 0.9469151059915681
+  },
+  {
+   "seq": "flashlight_on_1",
+   "subject": "s1",
+   "object": "flashlight",
+   "intent": "switchON",
+   "frames": 8,
+   "recall": 0.7724870649164332,
+   "iou": 0.4587643323608611,
+   "recall_all_parts": 0.7731654717697598
+  },
+  {
+   "seq": "flashlight_on_2",
+   "subject": "s1",
+   "object": "flashlight",
+   "intent": "switchON",
+   "frames": 10,
+   "recall": 0.9406445048886137,
+   "iou": 0.4481125857735807,
+   "recall_all_parts": 0.9287118310646809
+  },
+  {
+   "seq": "flashlight_pass_1",
+   "subject": "s1",
+   "object": "flashlight",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9907154176582981,
+   "iou": 0.4955115621984974,
+   "recall_all_parts": 0.9907154176582981
+  },
+  {
+   "seq": "flute_lift",
+   "subject": "s1",
+   "object": "flute",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.9565084555493073,
+   "iou": 0.4203864363443102,
+   "recall_all_parts": 0.9565084555493073
+  },
+  {
+   "seq": "flute_offhand_1",
+   "subject": "s1",
+   "object": "flute",
+   "intent": "offhand",
+   "frames": 9,
+   "recall": 0.7160815648995555,
+   "iou": 0.3436819447080987,
+   "recall_all_parts": 0.6957018341694732
+  },
+  {
+   "seq": "flute_pass_1",
+   "subject": "s1",
+   "object": "flute",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9957589594575895,
+   "iou": 0.42181135514726403,
+   "recall_all_parts": 0.9957589594575895
+  },
+  {
+   "seq": "flute_play_1",
+   "subject": "s1",
+   "object": "flute",
+   "intent": "play",
+   "frames": 10,
+   "recall": 0.59932793617702,
+   "iou": 0.2757376379670987,
+   "recall_all_parts": 0.5535310345023452
+  },
+  {
+   "seq": "fryingpan_cook_1",
+   "subject": "s1",
+   "object": "fryingpan",
+   "intent": "cook",
+   "frames": 8,
+   "recall": 0.8407901629418345,
+   "iou": 0.5109567071428028,
+   "recall_all_parts": 0.8407901629418345
+  },
+  {
+   "seq": "fryingpan_cook_2",
+   "subject": "s1",
+   "object": "fryingpan",
+   "intent": "cook",
+   "frames": 9,
+   "recall": 0.9001759664712237,
+   "iou": 0.6072542522928168,
+   "recall_all_parts": 0.9001759664712237
+  },
+  {
+   "seq": "gamecontroller_lift",
+   "subject": "s1",
+   "object": "gamecontroller",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.7421375786755999,
+   "iou": 0.46466226077138584,
+   "recall_all_parts": 0.7421375786755999
+  },
+  {
+   "seq": "gamecontroller_offhand_1",
+   "subject": "s1",
+   "object": "gamecontroller",
+   "intent": "offhand",
+   "frames": 9,
+   "recall": 0.5342675407270709,
+   "iou": 0.3505894027735824,
+   "recall_all_parts": 0.5356625307813471
+  },
+  {
+   "seq": "gamecontroller_play_1",
+   "subject": "s1",
+   "object": "gamecontroller",
+   "intent": "play",
+   "frames": 10,
+   "recall": 0.46994681348349987,
+   "iou": 0.2951245366340915,
+   "recall_all_parts": 0.4685052957358737
+  },
+  {
+   "seq": "hammer_pass_1",
+   "subject": "s1",
+   "object": "hammer",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9722087376367953,
+   "iou": 0.4878694690182783,
+   "recall_all_parts": 0.9722087376367953
+  },
+  {
+   "seq": "hammer_use_1",
+   "subject": "s1",
+   "object": "hammer",
+   "intent": "use",
+   "frames": 8,
+   "recall": 0.8634709755684117,
+   "iou": 0.4552386148136158,
+   "recall_all_parts": 0.8519510218798519
+  },
+  {
+   "seq": "hammer_use_2",
+   "subject": "s1",
+   "object": "hammer",
+   "intent": "use",
+   "frames": 10,
+   "recall": 0.9577242628413922,
+   "iou": 0.4045252912584563,
+   "recall_all_parts": 0.9326163794926966
+  },
+  {
+   "seq": "hammer_use_3",
+   "subject": "s1",
+   "object": "hammer",
+   "intent": "use",
+   "frames": 10,
+   "recall": 0.7432599852862354,
+   "iou": 0.38150419945931907,
+   "recall_all_parts": 0.7353021793908912
+  },
+  {
+   "seq": "hand_inspect_1",
+   "subject": "s1",
+   "object": "hand",
+   "intent": "inspect",
+   "frames": 9,
+   "recall": 0.9570677758631619,
+   "iou": 0.4689204645479433,
+   "recall_all_parts": 0.9570677758631619
+  },
+  {
+   "seq": "hand_offhand_1",
+   "subject": "s1",
+   "object": "hand",
+   "intent": "offhand",
+   "frames": 7,
+   "recall": 0.9328223289084633,
+   "iou": 0.4905387905354582,
+   "recall_all_parts": 0.9328223289084633
+  },
+  {
+   "seq": "hand_pass_1",
+   "subject": "s1",
+   "object": "hand",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.90651808858035,
+   "iou": 0.5045431583888712,
+   "recall_all_parts": 0.90651808858035
+  },
+  {
+   "seq": "headphones_offhand_1",
+   "subject": "s1",
+   "object": "headphones",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.5922266612079076,
+   "iou": 0.38747486059371394,
+   "recall_all_parts": 0.5922266612079076
+  },
+  {
+   "seq": "headphones_pass_1",
+   "subject": "s1",
+   "object": "headphones",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9844306377887593,
+   "iou": 0.4594559492884371,
+   "recall_all_parts": 0.9844306377887593
+  },
+  {
+   "seq": "headphones_use_1",
+   "subject": "s1",
+   "object": "headphones",
+   "intent": "use",
+   "frames": 7,
+   "recall": 0.4871170077399711,
+   "iou": 0.29857006636262107,
+   "recall_all_parts": 0.4871170077399711
+  },
+  {
+   "seq": "knife_lift",
+   "subject": "s1",
+   "object": "knife",
+   "intent": "lift",
+   "frames": 12,
+   "recall": 0.9444850029688158,
+   "iou": 0.4084731689055841,
+   "recall_all_parts": 0.9444850029688158
+  },
+  {
+   "seq": "lightbulb_pass_1",
+   "subject": "s1",
+   "object": "lightbulb",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9623120104271204,
+   "iou": 0.47521950931643175,
+   "recall_all_parts": 0.9623120104271204
+  },
+  {
+   "seq": "mouse_lift",
+   "subject": "s1",
+   "object": "mouse",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.9082284558290495,
+   "iou": 0.47500529147719345,
+   "recall_all_parts": 0.9082284558290495
+  },
+  {
+   "seq": "mouse_offhand_1",
+   "subject": "s1",
+   "object": "mouse",
+   "intent": "offhand",
+   "frames": 7,
+   "recall": 0.8313360088499373,
+   "iou": 0.4228486779935648,
+   "recall_all_parts": 0.8313360088499373
+  },
+  {
+   "seq": "mouse_pass_1",
+   "subject": "s1",
+   "object": "mouse",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.866256437171338,
+   "iou": 0.4886931712067987,
+   "recall_all_parts": 0.866256437171338
+  },
+  {
+   "seq": "mouse_use_1",
+   "subject": "s1",
+   "object": "mouse",
+   "intent": "use",
+   "frames": 10,
+   "recall": 0.9177216657587103,
+   "iou": 0.34814731208010097,
+   "recall_all_parts": 0.7588808671314535
+  },
+  {
+   "seq": "mug_drink_1",
+   "subject": "s1",
+   "object": "mug",
+   "intent": "drink",
+   "frames": 9,
+   "recall": 0.9850488942086955,
+   "iou": 0.5265264547259348,
+   "recall_all_parts": 0.8247612494949519
+  },
+  {
+   "seq": "mug_drink_2",
+   "subject": "s1",
+   "object": "mug",
+   "intent": "drink",
+   "frames": 9,
+   "recall": 0.5132844447106167,
+   "iou": 0.31124139090658287,
+   "recall_all_parts": 0.46641536251792737
+  },
+  {
+   "seq": "mug_drink_3",
+   "subject": "s1",
+   "object": "mug",
+   "intent": "drink",
+   "frames": 9,
+   "recall": 0.92908856036461,
+   "iou": 0.48917554634044413,
+   "recall_all_parts": 0.7707986677221458
+  },
+  {
+   "seq": "mug_drink_4",
+   "subject": "s1",
+   "object": "mug",
+   "intent": "drink",
+   "frames": 9,
+   "recall": 0.9537597868963087,
+   "iou": 0.38054370414858657,
+   "recall_all_parts": 0.8604954402669092
+  },
+  {
+   "seq": "mug_lift",
+   "subject": "s1",
+   "object": "mug",
+   "intent": "lift",
+   "frames": 12,
+   "recall": 0.9399330741806396,
+   "iou": 0.472269132302018,
+   "recall_all_parts": 0.9399330741806396
+  },
+  {
+   "seq": "mug_offhand_1",
+   "subject": "s1",
+   "object": "mug",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.7704075641629111,
+   "iou": 0.379506846314215,
+   "recall_all_parts": 0.7704075641629111
+  },
+  {
+   "seq": "mug_pass_1",
+   "subject": "s1",
+   "object": "mug",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.8890143300512927,
+   "iou": 0.45309799812323154,
+   "recall_all_parts": 0.8890143300512927
+  },
+  {
+   "seq": "mug_toast_1",
+   "subject": "s1",
+   "object": "mug",
+   "intent": "toast",
+   "frames": 9,
+   "recall": 0.9715386805892003,
+   "iou": 0.45143708276399974,
+   "recall_all_parts": 0.8798875775636225
+  },
+  {
+   "seq": "phone_call_1",
+   "subject": "s1",
+   "object": "phone",
+   "intent": "call",
+   "frames": 10,
+   "recall": 0.9251158684717332,
+   "iou": 0.4852787027087716,
+   "recall_all_parts": 0.8368187534085786
+  },
+  {
+   "seq": "phone_lift",
+   "subject": "s1",
+   "object": "phone",
+   "intent": "lift",
+   "frames": 7,
+   "recall": 0.9696780955689455,
+   "iou": 0.547207572996874,
+   "recall_all_parts": 0.9696780955689455
+  },
+  {
+   "seq": "phone_offhand_1",
+   "subject": "s1",
+   "object": "phone",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.9454471432386313,
+   "iou": 0.4770378247414673,
+   "recall_all_parts": 0.8407224953221468
+  },
+  {
+   "seq": "phone_pass_1",
+   "subject": "s1",
+   "object": "phone",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.9946933693377711,
+   "iou": 0.4541303366807764,
+   "recall_all_parts": 0.9946933693377711
+  },
+  {
+   "seq": "piggybank_lift",
+   "subject": "s1",
+   "object": "piggybank",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.8366862543253423,
+   "iou": 0.5007689335045169,
+   "recall_all_parts": 0.838105995618261
+  },
+  {
+   "seq": "piggybank_offhand_1",
+   "subject": "s1",
+   "object": "piggybank",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.7922616510512717,
+   "iou": 0.44819014946512375,
+   "recall_all_parts": 0.7830753098030914
+  },
+  {
+   "seq": "piggybank_pass_1",
+   "subject": "s1",
+   "object": "piggybank",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.751579470416926,
+   "iou": 0.4408487753740051,
+   "recall_all_parts": 0.7518265717889103
+  },
+  {
+   "seq": "piggybank_use_1",
+   "subject": "s1",
+   "object": "piggybank",
+   "intent": "use",
+   "frames": 9,
+   "recall": 0.7927815930893687,
+   "iou": 0.46080447750019243,
+   "recall_all_parts": 0.7905101126367444
+  },
+  {
+   "seq": "pyramidlarge_inspect_1",
+   "subject": "s1",
+   "object": "pyramidlarge",
+   "intent": "inspect",
+   "frames": 10,
+   "recall": 0.7279084393271907,
+   "iou": 0.4486092289747979,
+   "recall_all_parts": 0.7279084393271907
+  },
+  {
+   "seq": "pyramidlarge_lift",
+   "subject": "s1",
+   "object": "pyramidlarge",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.7904847414030373,
+   "iou": 0.47335221208057016,
+   "recall_all_parts": 0.7904847414030373
+  },
+  {
+   "seq": "pyramidlarge_offhand_1",
+   "subject": "s1",
+   "object": "pyramidlarge",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.8201775771750718,
+   "iou": 0.44310116696409485,
+   "recall_all_parts": 0.8201775771750718
+  },
+  {
+   "seq": "pyramidlarge_pass_1",
+   "subject": "s1",
+   "object": "pyramidlarge",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9615061334197348,
+   "iou": 0.5037072916729431,
+   "recall_all_parts": 0.9615061334197348
+  },
+  {
+   "seq": "pyramidmedium_inspect_1",
+   "subject": "s1",
+   "object": "pyramidmedium",
+   "intent": "inspect",
+   "frames": 9,
+   "recall": 0.9428068564970338,
+   "iou": 0.46861536733362974,
+   "recall_all_parts": 0.9428068564970338
+  },
+  {
+   "seq": "pyramidmedium_lift",
+   "subject": "s1",
+   "object": "pyramidmedium",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.9450228620546781,
+   "iou": 0.45041318690427506,
+   "recall_all_parts": 0.9450228620546781
+  },
+  {
+   "seq": "pyramidmedium_offhand_1",
+   "subject": "s1",
+   "object": "pyramidmedium",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.7475407479708128,
+   "iou": 0.3549369792342563,
+   "recall_all_parts": 0.7475407479708128
+  },
+  {
+   "seq": "pyramidmedium_pass_1",
+   "subject": "s1",
+   "object": "pyramidmedium",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.94861766640243,
+   "iou": 0.5179519280852231,
+   "recall_all_parts": 0.94861766640243
+  },
+  {
+   "seq": "pyramidsmall_inspect_1",
+   "subject": "s1",
+   "object": "pyramidsmall",
+   "intent": "inspect",
+   "frames": 7,
+   "recall": 0.9514518475141834,
+   "iou": 0.3681641042576737,
+   "recall_all_parts": 0.9514518475141834
+  },
+  {
+   "seq": "pyramidsmall_pass_1",
+   "subject": "s1",
+   "object": "pyramidsmall",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.7371598570157817,
+   "iou": 0.3430357070288502,
+   "recall_all_parts": 0.7371598570157817
+  },
+  {
+   "seq": "scissors_offhand_1",
+   "subject": "s1",
+   "object": "scissors",
+   "intent": "offhand",
+   "frames": 6,
+   "recall": 0.8233365623862,
+   "iou": 0.42320694825038885,
+   "recall_all_parts": 0.8233365623862
+  },
+  {
+   "seq": "scissors_pass_1",
+   "subject": "s1",
+   "object": "scissors",
+   "intent": "pass",
+   "frames": 9,
+   "recall": 0.7883796142400741,
+   "iou": 0.5066601473506609,
+   "recall_all_parts": 0.7883796142400741
+  },
+  {
+   "seq": "scissors_use_2",
+   "subject": "s1",
+   "object": "scissors",
+   "intent": "use",
+   "frames": 9,
+   "recall": 0.9181451196127366,
+   "iou": 0.4588806300481938,
+   "recall_all_parts": 0.9181451196127366
+  },
+  {
+   "seq": "spherelarge_inspect_1",
+   "subject": "s1",
+   "object": "spherelarge",
+   "intent": "inspect",
+   "frames": 9,
+   "recall": 0.7603190796134285,
+   "iou": 0.44940484148590976,
+   "recall_all_parts": 0.761811832337434
+  },
+  {
+   "seq": "spherelarge_lift",
+   "subject": "s1",
+   "object": "spherelarge",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.6929155034591248,
+   "iou": 0.44559926045005843,
+   "recall_all_parts": 0.6929155034591248
+  },
+  {
+   "seq": "spherelarge_offhand_1",
+   "subject": "s1",
+   "object": "spherelarge",
+   "intent": "offhand",
+   "frames": 9,
+   "recall": 0.764701751385881,
+   "iou": 0.4070161450303628,
+   "recall_all_parts": 0.7647116066478324
+  },
+  {
+   "seq": "spherelarge_pass_1",
+   "subject": "s1",
+   "object": "spherelarge",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.9083659192813671,
+   "iou": 0.5060359433460562,
+   "recall_all_parts": 0.91012813732648
+  },
+  {
+   "seq": "spheremedium_inspect_1",
+   "subject": "s1",
+   "object": "spheremedium",
+   "intent": "inspect",
+   "frames": 7,
+   "recall": 0.8766659029578666,
+   "iou": 0.45299075758825424,
+   "recall_all_parts": 0.8766659029578666
+  },
+  {
+   "seq": "spheremedium_lift",
+   "subject": "s1",
+   "object": "spheremedium",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.9327049498763031,
+   "iou": 0.4632104351647713,
+   "recall_all_parts": 0.9327049498763031
+  },
+  {
+   "seq": "spheremedium_offhand_1",
+   "subject": "s1",
+   "object": "spheremedium",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.8988660955824914,
+   "iou": 0.4498459325675134,
+   "recall_all_parts": 0.8988660955824914
+  },
+  {
+   "seq": "spheremedium_pass_1",
+   "subject": "s1",
+   "object": "spheremedium",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.781496904011423,
+   "iou": 0.395388719737664,
+   "recall_all_parts": 0.781496904011423
+  },
+  {
+   "seq": "spheresmall_inspect_1",
+   "subject": "s1",
+   "object": "spheresmall",
+   "intent": "inspect",
+   "frames": 7,
+   "recall": 0.9693431696535129,
+   "iou": 0.4521677171748641,
+   "recall_all_parts": 0.9693431696535129
+  },
+  {
+   "seq": "spheresmall_lift",
+   "subject": "s1",
+   "object": "spheresmall",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.9198101066123177,
+   "iou": 0.4750904388574359,
+   "recall_all_parts": 0.9198101066123177
+  },
+  {
+   "seq": "spheresmall_offhand_1",
+   "subject": "s1",
+   "object": "spheresmall",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.9956215052017456,
+   "iou": 0.3837504115015005,
+   "recall_all_parts": 0.9956215052017456
+  },
+  {
+   "seq": "spheresmall_pass_1",
+   "subject": "s1",
+   "object": "spheresmall",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9495373783241888,
+   "iou": 0.5097647976548586,
+   "recall_all_parts": 0.9495373783241888
+  },
+  {
+   "seq": "stamp_lift",
+   "subject": "s1",
+   "object": "stamp",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.9046408713541475,
+   "iou": 0.44328120291514855,
+   "recall_all_parts": 0.9046408713541475
+  },
+  {
+   "seq": "stamp_offhand_1",
+   "subject": "s1",
+   "object": "stamp",
+   "intent": "offhand",
+   "frames": 9,
+   "recall": 0.9453429293970407,
+   "iou": 0.4239333682010929,
+   "recall_all_parts": 0.9453429293970407
+  },
+  {
+   "seq": "stamp_pass_1",
+   "subject": "s1",
+   "object": "stamp",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.7566635045148095,
+   "iou": 0.3641057566016635,
+   "recall_all_parts": 0.7566635045148095
+  },
+  {
+   "seq": "stamp_stamp_1",
+   "subject": "s1",
+   "object": "stamp",
+   "intent": "stamp",
+   "frames": 8,
+   "recall": 0.9268633928154606,
+   "iou": 0.48480777909589307,
+   "recall_all_parts": 0.9287428339519531
+  },
+  {
+   "seq": "stanfordbunny_inspect_1",
+   "subject": "s1",
+   "object": "stanfordbunny",
+   "intent": "inspect",
+   "frames": 10,
+   "recall": 0.7839639076189033,
+   "iou": 0.44654635566734857,
+   "recall_all_parts": 0.7839639076189033
+  },
+  {
+   "seq": "stanfordbunny_lift",
+   "subject": "s1",
+   "object": "stanfordbunny",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.9186620039889555,
+   "iou": 0.498997059511773,
+   "recall_all_parts": 0.9186620039889555
+  },
+  {
+   "seq": "stanfordbunny_offhand_1",
+   "subject": "s1",
+   "object": "stanfordbunny",
+   "intent": "offhand",
+   "frames": 7,
+   "recall": 0.8429429576210672,
+   "iou": 0.45937071701492116,
+   "recall_all_parts": 0.8429429576210672
+  },
+  {
+   "seq": "stanfordbunny_pass_1",
+   "subject": "s1",
+   "object": "stanfordbunny",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.946233002853572,
+   "iou": 0.48772126794663284,
+   "recall_all_parts": 0.946233002853572
+  },
+  {
+   "seq": "stapler_lift",
+   "subject": "s1",
+   "object": "stapler",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.9409655808212758,
+   "iou": 0.4170979812739767,
+   "recall_all_parts": 0.9409655808212758
+  },
+  {
+   "seq": "stapler_offhand_1",
+   "subject": "s1",
+   "object": "stapler",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.8314577442333126,
+   "iou": 0.3992035618822526,
+   "recall_all_parts": 0.8321521624675697
+  },
+  {
+   "seq": "stapler_pass_1",
+   "subject": "s1",
+   "object": "stapler",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.7323082769736436,
+   "iou": 0.3279118465612225,
+   "recall_all_parts": 0.7323082769736436
+  },
+  {
+   "seq": "stapler_staple_1",
+   "subject": "s1",
+   "object": "stapler",
+   "intent": "staple",
+   "frames": 7,
+   "recall": 0.9083211813477552,
+   "iou": 0.4506613294787104,
+   "recall_all_parts": 0.9107511127707982
+  },
+  {
+   "seq": "stapler_staple_2",
+   "subject": "s1",
+   "object": "stapler",
+   "intent": "staple",
+   "frames": 3,
+   "recall": 0.9312958449713715,
+   "iou": 0.44909013540727094,
+   "recall_all_parts": 0.9334733943429595
+  },
+  {
+   "seq": "teapot_pass_1",
+   "subject": "s1",
+   "object": "teapot",
+   "intent": "pass",
+   "frames": 5,
+   "recall": 0.4830099238093829,
+   "iou": 0.29206525057465815,
+   "recall_all_parts": 0.4830099238093829
+  },
+  {
+   "seq": "teapot_pour_1",
+   "subject": "s1",
+   "object": "teapot",
+   "intent": "pour",
+   "frames": 8,
+   "recall": 0.8399758596929824,
+   "iou": 0.5513621267582797,
+   "recall_all_parts": 0.8399758596929824
+  },
+  {
+   "seq": "toothbrush_lift",
+   "subject": "s1",
+   "object": "toothbrush",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.9691318118630372,
+   "iou": 0.42217202802025144,
+   "recall_all_parts": 0.9691318118630372
+  },
+  {
+   "seq": "toothpaste_lift",
+   "subject": "s1",
+   "object": "toothpaste",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.9554734075749108,
+   "iou": 0.5803999864974806,
+   "recall_all_parts": 0.9554734075749108
+  },
+  {
+   "seq": "toothpaste_pass_1",
+   "subject": "s1",
+   "object": "toothpaste",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.7689735164069915,
+   "iou": 0.4268504675955017,
+   "recall_all_parts": 0.7689735164069915
+  },
+  {
+   "seq": "toothpaste_squeeze_1",
+   "subject": "s1",
+   "object": "toothpaste",
+   "intent": "squeeze",
+   "frames": 9,
+   "recall": 0.7062146539753832,
+   "iou": 0.4505080313268861,
+   "recall_all_parts": 0.7062146539753832
+  },
+  {
+   "seq": "toruslarge_inspect_1",
+   "subject": "s1",
+   "object": "toruslarge",
+   "intent": "inspect",
+   "frames": 9,
+   "recall": 0.9248154005174948,
+   "iou": 0.4594396715235074,
+   "recall_all_parts": 0.9248154005174948
+  },
+  {
+   "seq": "toruslarge_lift",
+   "subject": "s1",
+   "object": "toruslarge",
+   "intent": "lift",
+   "frames": 6,
+   "recall": 0.9523726296891427,
+   "iou": 0.5183339719266988,
+   "recall_all_parts": 0.9523726296891427
+  },
+  {
+   "seq": "toruslarge_pass_1",
+   "subject": "s1",
+   "object": "toruslarge",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.861916637182607,
+   "iou": 0.45594337946758806,
+   "recall_all_parts": 0.861916637182607
+  },
+  {
+   "seq": "torusmedium_inspect_1",
+   "subject": "s1",
+   "object": "torusmedium",
+   "intent": "inspect",
+   "frames": 8,
+   "recall": 0.8902135160619421,
+   "iou": 0.4014713061297787,
+   "recall_all_parts": 0.8902135160619421
+  },
+  {
+   "seq": "torusmedium_lift",
+   "subject": "s1",
+   "object": "torusmedium",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.9846439089430736,
+   "iou": 0.4204839531379057,
+   "recall_all_parts": 0.9846439089430736
+  },
+  {
+   "seq": "torusmedium_offhand_1",
+   "subject": "s1",
+   "object": "torusmedium",
+   "intent": "offhand",
+   "frames": 8,
+   "recall": 0.7519895686332541,
+   "iou": 0.326149479459427,
+   "recall_all_parts": 0.7519895686332541
+  },
+  {
+   "seq": "torusmedium_pass_1",
+   "subject": "s1",
+   "object": "torusmedium",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.934632050683809,
+   "iou": 0.49041238330516373,
+   "recall_all_parts": 0.934632050683809
+  },
+  {
+   "seq": "torussmall_inspect_1",
+   "subject": "s1",
+   "object": "torussmall",
+   "intent": "inspect",
+   "frames": 7,
+   "recall": 0.9806482433218439,
+   "iou": 0.5393611584051151,
+   "recall_all_parts": 0.9806482433218439
+  },
+  {
+   "seq": "torussmall_lift",
+   "subject": "s1",
+   "object": "torussmall",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.9673451261451701,
+   "iou": 0.3957693926987499,
+   "recall_all_parts": 0.9673451261451701
+  },
+  {
+   "seq": "torussmall_offhand_1",
+   "subject": "s1",
+   "object": "torussmall",
+   "intent": "offhand",
+   "frames": 4,
+   "recall": 0.9765289545678758,
+   "iou": 0.32955549458523586,
+   "recall_all_parts": 0.9765289545678758
+  },
+  {
+   "seq": "torussmall_pass_1",
+   "subject": "s1",
+   "object": "torussmall",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9394507518933725,
+   "iou": 0.48789267809485465,
+   "recall_all_parts": 0.9394507518933725
+  },
+  {
+   "seq": "train_offhand_1",
+   "subject": "s1",
+   "object": "train",
+   "intent": "offhand",
+   "frames": 9,
+   "recall": 0.7703072122443602,
+   "iou": 0.46192504505906856,
+   "recall_all_parts": 0.7703072122443602
+  },
+  {
+   "seq": "train_play_1",
+   "subject": "s1",
+   "object": "train",
+   "intent": "play",
+   "frames": 8,
+   "recall": 0.8224055132318479,
+   "iou": 0.4816924524845214,
+   "recall_all_parts": 0.8224055132318479
+  },
+  {
+   "seq": "watch_lift",
+   "subject": "s1",
+   "object": "watch",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.9415294887025016,
+   "iou": 0.48537723724890264,
+   "recall_all_parts": 0.9415294887025016
+  },
+  {
+   "seq": "watch_offhand_1",
+   "subject": "s1",
+   "object": "watch",
+   "intent": "offhand",
+   "frames": 7,
+   "recall": 0.7404626863679167,
+   "iou": 0.41408773047249303,
+   "recall_all_parts": 0.7404626863679167
+  },
+  {
+   "seq": "watch_pass_1",
+   "subject": "s1",
+   "object": "watch",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.9753257163757203,
+   "iou": 0.49086294848606604,
+   "recall_all_parts": 0.9753257163757203
+  },
+  {
+   "seq": "watch_set_1",
+   "subject": "s1",
+   "object": "watch",
+   "intent": "set",
+   "frames": 8,
+   "recall": 0.8572045196947269,
+   "iou": 0.4721617775213633,
+   "recall_all_parts": 0.8572045196947269
+  },
+  {
+   "seq": "watch_set_2",
+   "subject": "s1",
+   "object": "watch",
+   "intent": "set",
+   "frames": 10,
+   "recall": 0.5529586153844448,
+   "iou": 0.286417689733874,
+   "recall_all_parts": 0.5529586153844448
+  },
+  {
+   "seq": "waterbottle_drink_1",
+   "subject": "s1",
+   "object": "waterbottle",
+   "intent": "drink",
+   "frames": 10,
+   "recall": 0.8002317031746035,
+   "iou": 0.39440072355898526,
+   "recall_all_parts": 0.7805390764637757
+  },
+  {
+   "seq": "waterbottle_lift",
+   "subject": "s1",
+   "object": "waterbottle",
+   "intent": "lift",
+   "frames": 11,
+   "recall": 0.9328747484502071,
+   "iou": 0.541681083232948,
+   "recall_all_parts": 0.9328747484502071
+  },
+  {
+   "seq": "waterbottle_offhand_1",
+   "subject": "s1",
+   "object": "waterbottle",
+   "intent": "offhand",
+   "frames": 9,
+   "recall": 0.8514711985528169,
+   "iou": 0.4235764006398387,
+   "recall_all_parts": 0.8240486841279848
+  },
+  {
+   "seq": "waterbottle_open_1",
+   "subject": "s1",
+   "object": "waterbottle",
+   "intent": "open",
+   "frames": 9,
+   "recall": 0.6442877637127684,
+   "iou": 0.3173595383134037,
+   "recall_all_parts": 0.6442877637127684
+  },
+  {
+   "seq": "waterbottle_pass_1",
+   "subject": "s1",
+   "object": "waterbottle",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9514389328035577,
+   "iou": 0.5159968059274956,
+   "recall_all_parts": 0.9514389328035577
+  },
+  {
+   "seq": "waterbottle_pour_1",
+   "subject": "s1",
+   "object": "waterbottle",
+   "intent": "pour",
+   "frames": 10,
+   "recall": 0.7162764361987833,
+   "iou": 0.38518251525031055,
+   "recall_all_parts": 0.7162764361987833
+  },
+  {
+   "seq": "wineglass_drink_2",
+   "subject": "s1",
+   "object": "wineglass",
+   "intent": "drink",
+   "frames": 10,
+   "recall": 0.9293725119518023,
+   "iou": 0.5745649982320178,
+   "recall_all_parts": 0.9098694160614504
+  },
+  {
+   "seq": "wineglass_lift",
+   "subject": "s1",
+   "object": "wineglass",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.9093947057639021,
+   "iou": 0.44946840548025985,
+   "recall_all_parts": 0.9073634460576095
+  },
+  {
+   "seq": "wineglass_offhand_1",
+   "subject": "s1",
+   "object": "wineglass",
+   "intent": "offhand",
+   "frames": 10,
+   "recall": 0.8821519176147459,
+   "iou": 0.47409781181746896,
+   "recall_all_parts": 0.8527704016807939
+  },
+  {
+   "seq": "wineglass_pass_1",
+   "subject": "s1",
+   "object": "wineglass",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9501232765658563,
+   "iou": 0.4630254616213861,
+   "recall_all_parts": 0.9501232765658563
+  },
+  {
+   "seq": "wineglass_toast_1",
+   "subject": "s1",
+   "object": "wineglass",
+   "intent": "toast",
+   "frames": 10,
+   "recall": 0.9701002872437561,
+   "iou": 0.5171942033448242,
+   "recall_all_parts": 0.9599739169312006
+  },
+  {
+   "seq": "airplane_fly_1",
+   "subject": "s2",
+   "object": "airplane",
+   "intent": "fly",
+   "frames": 6,
+   "recall": 0.989972532075551,
+   "iou": 0.4701247560672009,
+   "recall_all_parts": 0.989972532075551
+  },
+  {
+   "seq": "apple_eat_1",
+   "subject": "s2",
+   "object": "apple",
+   "intent": "eat",
+   "frames": 8,
+   "recall": 0.9191896669749198,
+   "iou": 0.558202920922411,
+   "recall_all_parts": 0.8915751306971884
+  },
+  {
+   "seq": "apple_lift",
+   "subject": "s2",
+   "object": "apple",
+   "intent": "lift",
+   "frames": 7,
+   "recall": 0.6855212257018098,
+   "iou": 0.3667276523266419,
+   "recall_all_parts": 0.6855212257018098
+  },
+  {
+   "seq": "apple_pass_1",
+   "subject": "s2",
+   "object": "apple",
+   "intent": "pass",
+   "frames": 5,
+   "recall": 0.9364769658655201,
+   "iou": 0.5034958661779406,
+   "recall_all_parts": 0.9366742918964478
+  },
+  {
+   "seq": "banana_eat_1",
+   "subject": "s2",
+   "object": "banana",
+   "intent": "eat",
+   "frames": 9,
+   "recall": 0.9921282742262094,
+   "iou": 0.45030572334188673,
+   "recall_all_parts": 0.9921282742262094
+  },
+  {
+   "seq": "banana_pass_1",
+   "subject": "s2",
+   "object": "banana",
+   "intent": "pass",
+   "frames": 5,
+   "recall": 0.964701822334564,
+   "iou": 0.5266606009521272,
+   "recall_all_parts": 0.964701822334564
+  },
+  {
+   "seq": "banana_peel_1",
+   "subject": "s2",
+   "object": "banana",
+   "intent": "peel",
+   "frames": 8,
+   "recall": 0.7778054896778757,
+   "iou": 0.520910786279614,
+   "recall_all_parts": 0.7778054896778757
+  },
+  {
+   "seq": "camera_browse_1",
+   "subject": "s2",
+   "object": "camera",
+   "intent": "browse",
+   "frames": 8,
+   "recall": 0.5224597553556661,
+   "iou": 0.33651445841332756,
+   "recall_all_parts": 0.5224597553556661
+  },
+  {
+   "seq": "camera_lift",
+   "subject": "s2",
+   "object": "camera",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.6857553236093726,
+   "iou": 0.43389617436230615,
+   "recall_all_parts": 0.6857553236093726
+  },
+  {
+   "seq": "camera_pass_1",
+   "subject": "s2",
+   "object": "camera",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9983733261715942,
+   "iou": 0.4877175550175054,
+   "recall_all_parts": 0.9983733261715942
+  },
+  {
+   "seq": "camera_takepicture_2",
+   "subject": "s2",
+   "object": "camera",
+   "intent": "takepicture",
+   "frames": 8,
+   "recall": 0.4934624357648256,
+   "iou": 0.3273050531022327,
+   "recall_all_parts": 0.4934624357648256
+  },
+  {
+   "seq": "cubelarge_inspect_1",
+   "subject": "s2",
+   "object": "cubelarge",
+   "intent": "inspect",
+   "frames": 10,
+   "recall": 0.5508890622552185,
+   "iou": 0.37683786277071624,
+   "recall_all_parts": 0.5508890622552185
+  },
+  {
+   "seq": "cubelarge_lift",
+   "subject": "s2",
+   "object": "cubelarge",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.5989863365979329,
+   "iou": 0.43780524606197213,
+   "recall_all_parts": 0.5989863365979329
+  },
+  {
+   "seq": "cubelarge_pass_1",
+   "subject": "s2",
+   "object": "cubelarge",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.9092713152304122,
+   "iou": 0.6283162745984499,
+   "recall_all_parts": 0.9092713152304122
+  },
+  {
+   "seq": "cubemedium_inspect_1",
+   "subject": "s2",
+   "object": "cubemedium",
+   "intent": "inspect",
+   "frames": 7,
+   "recall": 0.9035552636222901,
+   "iou": 0.504273789912362,
+   "recall_all_parts": 0.9035552636222901
+  },
+  {
+   "seq": "cubemedium_lift",
+   "subject": "s2",
+   "object": "cubemedium",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.7046264062691739,
+   "iou": 0.4278643621487131,
+   "recall_all_parts": 0.7046264062691739
+  },
+  {
+   "seq": "cubesmall_inspect_1",
+   "subject": "s2",
+   "object": "cubesmall",
+   "intent": "inspect",
+   "frames": 6,
+   "recall": 0.8880131815366304,
+   "iou": 0.5466987803741247,
+   "recall_all_parts": 0.8880131815366304
+  },
+  {
+   "seq": "cubesmall_lift",
+   "subject": "s2",
+   "object": "cubesmall",
+   "intent": "lift",
+   "frames": 5,
+   "recall": 0.6952647726945907,
+   "iou": 0.3789871197703007,
+   "recall_all_parts": 0.6952647726945907
+  },
+  {
+   "seq": "cubesmall_pass_1",
+   "subject": "s2",
+   "object": "cubesmall",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9178418323096732,
+   "iou": 0.4720637940512962,
+   "recall_all_parts": 0.9178418323096732
+  },
+  {
+   "seq": "cup_drink_1",
+   "subject": "s2",
+   "object": "cup",
+   "intent": "drink",
+   "frames": 6,
+   "recall": 0.884944721791311,
+   "iou": 0.41637498540393114,
+   "recall_all_parts": 0.7890402744870014
+  },
+  {
+   "seq": "cup_pass_1",
+   "subject": "s2",
+   "object": "cup",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9251245443464834,
+   "iou": 0.47873034037551054,
+   "recall_all_parts": 0.9251245443464834
+  },
+  {
+   "seq": "cylinderlarge_inspect_1",
+   "subject": "s2",
+   "object": "cylinderlarge",
+   "intent": "inspect",
+   "frames": 6,
+   "recall": 0.8962065788432061,
+   "iou": 0.5340437041445538,
+   "recall_all_parts": 0.8962065788432061
+  },
+  {
+   "seq": "cylinderlarge_lift",
+   "subject": "s2",
+   "object": "cylinderlarge",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.7523063926366198,
+   "iou": 0.4740490215509327,
+   "recall_all_parts": 0.7525653662493508
+  },
+  {
+   "seq": "cylinderlarge_pass_1",
+   "subject": "s2",
+   "object": "cylinderlarge",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.8590768114237272,
+   "iou": 0.5445753822810542,
+   "recall_all_parts": 0.8590768114237272
+  },
+  {
+   "seq": "cylindermedium_inspect_1",
+   "subject": "s2",
+   "object": "cylindermedium",
+   "intent": "inspect",
+   "frames": 5,
+   "recall": 0.9054163709164399,
+   "iou": 0.5844670121082058,
+   "recall_all_parts": 0.9054553452754142
+  },
+  {
+   "seq": "cylindermedium_lift",
+   "subject": "s2",
+   "object": "cylindermedium",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.8512433887963149,
+   "iou": 0.4933843489740173,
+   "recall_all_parts": 0.8516046435491967
+  },
+  {
+   "seq": "cylindermedium_pass_1",
+   "subject": "s2",
+   "object": "cylindermedium",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9438040484211908,
+   "iou": 0.5293112028289834,
+   "recall_all_parts": 0.9438040484211908
+  },
+  {
+   "seq": "cylindersmall_pass_1",
+   "subject": "s2",
+   "object": "cylindersmall",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.7271895648247626,
+   "iou": 0.32746688207185054,
+   "recall_all_parts": 0.7271895648247626
+  },
+  {
+   "seq": "doorknob_use_2",
+   "subject": "s2",
+   "object": "doorknob",
+   "intent": "use",
+   "frames": 5,
+   "recall": 0.9147566403576436,
+   "iou": 0.4402506135202368,
+   "recall_all_parts": 0.9105726298590527
+  },
+  {
+   "seq": "duck_inspect_1",
+   "subject": "s2",
+   "object": "duck",
+   "intent": "inspect",
+   "frames": 5,
+   "recall": 0.8622075751590235,
+   "iou": 0.4666404796383065,
+   "recall_all_parts": 0.8622075751590235
+  },
+  {
+   "seq": "elephant_inspect_1",
+   "subject": "s2",
+   "object": "elephant",
+   "intent": "inspect",
+   "frames": 6,
+   "recall": 0.9318233425679128,
+   "iou": 0.49817403818264955,
+   "recall_all_parts": 0.9318233425679128
+  },
+  {
+   "seq": "elephant_pass_1",
+   "subject": "s2",
+   "object": "elephant",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9633542522412263,
+   "iou": 0.520343494178875,
+   "recall_all_parts": 0.9633542522412263
+  },
+  {
+   "seq": "eyeglasses_clean_1",
+   "subject": "s2",
+   "object": "eyeglasses",
+   "intent": "clean",
+   "frames": 6,
+   "recall": 0.6537488709369,
+   "iou": 0.40729876603195614,
+   "recall_all_parts": 0.6537488709369
+  },
+  {
+   "seq": "eyeglasses_pass_1",
+   "subject": "s2",
+   "object": "eyeglasses",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9947470020071068,
+   "iou": 0.7216489072697536,
+   "recall_all_parts": 0.9947470020071068
+  },
+  {
+   "seq": "flashlight_on_1",
+   "subject": "s2",
+   "object": "flashlight",
+   "intent": "switchON",
+   "frames": 8,
+   "recall": 0.951131634115322,
+   "iou": 0.5688161515686279,
+   "recall_all_parts": 0.9503293718374826
+  },
+  {
+   "seq": "flashlight_on_2",
+   "subject": "s2",
+   "object": "flashlight",
+   "intent": "switchON",
+   "frames": 8,
+   "recall": 0.8108159940894499,
+   "iou": 0.4631414964229237,
+   "recall_all_parts": 0.7839100914122199
+  },
+  {
+   "seq": "flute_pass_1",
+   "subject": "s2",
+   "object": "flute",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9869732001642767,
+   "iou": 0.5170517894249657,
+   "recall_all_parts": 0.9869732001642767
+  },
+  {
+   "seq": "fryingpan_pass_1",
+   "subject": "s2",
+   "object": "fryingpan",
+   "intent": "pass",
+   "frames": 9,
+   "recall": 0.9454535848642157,
+   "iou": 0.49480459229306184,
+   "recall_all_parts": 0.9494547520663572
+  },
+  {
+   "seq": "gamecontroller_pass_1",
+   "subject": "s2",
+   "object": "gamecontroller",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.7306929007145099,
+   "iou": 0.3828783630152964,
+   "recall_all_parts": 0.7306929007145099
+  },
+  {
+   "seq": "gamecontroller_play_1",
+   "subject": "s2",
+   "object": "gamecontroller",
+   "intent": "play",
+   "frames": 6,
+   "recall": 0.4722054821360429,
+   "iou": 0.33176723131498426,
+   "recall_all_parts": 0.4739092259596738
+  },
+  {
+   "seq": "hammer_lift",
+   "subject": "s2",
+   "object": "hammer",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.8427784974466356,
+   "iou": 0.4412546519180244,
+   "recall_all_parts": 0.8396180616674032
+  },
+  {
+   "seq": "hammer_use_1",
+   "subject": "s2",
+   "object": "hammer",
+   "intent": "use",
+   "frames": 6,
+   "recall": 0.8900205324417917,
+   "iou": 0.41790484065033295,
+   "recall_all_parts": 0.8139587118548043
+  },
+  {
+   "seq": "hammer_use_2",
+   "subject": "s2",
+   "object": "hammer",
+   "intent": "use",
+   "frames": 7,
+   "recall": 0.8253888152401715,
+   "iou": 0.4338863285870945,
+   "recall_all_parts": 0.7680572799835925
+  },
+  {
+   "seq": "hand_inspect_1",
+   "subject": "s2",
+   "object": "hand",
+   "intent": "inspect",
+   "frames": 5,
+   "recall": 0.9032882453359058,
+   "iou": 0.48764971212982344,
+   "recall_all_parts": 0.8993218008777644
+  },
+  {
+   "seq": "hand_lift",
+   "subject": "s2",
+   "object": "hand",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.6765323163665313,
+   "iou": 0.44010881641959243,
+   "recall_all_parts": 0.669860325814827
+  },
+  {
+   "seq": "headphones_lift",
+   "subject": "s2",
+   "object": "headphones",
+   "intent": "lift",
+   "frames": 7,
+   "recall": 0.6815861209881231,
+   "iou": 0.37269798364238,
+   "recall_all_parts": 0.6815861209881231
+  },
+  {
+   "seq": "headphones_pass_1",
+   "subject": "s2",
+   "object": "headphones",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.5739060855298076,
+   "iou": 0.39520005825572785,
+   "recall_all_parts": 0.5739060855298076
+  },
+  {
+   "seq": "headphones_use_1",
+   "subject": "s2",
+   "object": "headphones",
+   "intent": "use",
+   "frames": 7,
+   "recall": 0.5244675646254863,
+   "iou": 0.35781196018220657,
+   "recall_all_parts": 0.5244675646254863
+  },
+  {
+   "seq": "knife_pass_1",
+   "subject": "s2",
+   "object": "knife",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.8064812914426627,
+   "iou": 0.4831612248665305,
+   "recall_all_parts": 0.8064812914426627
+  },
+  {
+   "seq": "mouse_pass_1",
+   "subject": "s2",
+   "object": "mouse",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.969327323255715,
+   "iou": 0.46735997029722026,
+   "recall_all_parts": 0.969327323255715
+  },
+  {
+   "seq": "mouse_use_1",
+   "subject": "s2",
+   "object": "mouse",
+   "intent": "use",
+   "frames": 7,
+   "recall": 0.919602677219884,
+   "iou": 0.39529200348936744,
+   "recall_all_parts": 0.9198146795444272
+  },
+  {
+   "seq": "mug_drink_1",
+   "subject": "s2",
+   "object": "mug",
+   "intent": "drink",
+   "frames": 6,
+   "recall": 0.9708214876612266,
+   "iou": 0.47242874356177955,
+   "recall_all_parts": 0.8970594033919825
+  },
+  {
+   "seq": "mug_drink_2",
+   "subject": "s2",
+   "object": "mug",
+   "intent": "drink",
+   "frames": 7,
+   "recall": 0.8483515354347516,
+   "iou": 0.5593168677378524,
+   "recall_all_parts": 0.7959013579845742
+  },
+  {
+   "seq": "mug_lift",
+   "subject": "s2",
+   "object": "mug",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.7149065637386066,
+   "iou": 0.39676679853374147,
+   "recall_all_parts": 0.7143834060138156
+  },
+  {
+   "seq": "mug_pass_1",
+   "subject": "s2",
+   "object": "mug",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.7242756167979718,
+   "iou": 0.37072510047185725,
+   "recall_all_parts": 0.6908658637382733
+  },
+  {
+   "seq": "mug_toast_1",
+   "subject": "s2",
+   "object": "mug",
+   "intent": "toast",
+   "frames": 6,
+   "recall": 0.9662130627772352,
+   "iou": 0.46412499262952345,
+   "recall_all_parts": 0.9372045668733145
+  },
+  {
+   "seq": "phone_call_1",
+   "subject": "s2",
+   "object": "phone",
+   "intent": "call",
+   "frames": 8,
+   "recall": 0.9539537661734114,
+   "iou": 0.5189737788586537,
+   "recall_all_parts": 0.9509530411072488
+  },
+  {
+   "seq": "phone_pass_1",
+   "subject": "s2",
+   "object": "phone",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9653429303179867,
+   "iou": 0.49809715532091275,
+   "recall_all_parts": 0.9641005273048898
+  },
+  {
+   "seq": "piggybank_lift",
+   "subject": "s2",
+   "object": "piggybank",
+   "intent": "lift",
+   "frames": 10,
+   "recall": 0.7005417897754991,
+   "iou": 0.4148739512632229,
+   "recall_all_parts": 0.6819090651221162
+  },
+  {
+   "seq": "piggybank_pass_1_Retake",
+   "subject": "s2",
+   "object": "piggybank",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.6288879602105815,
+   "iou": 0.32322570586889376,
+   "recall_all_parts": 0.6258791495915901
+  },
+  {
+   "seq": "piggybank_use_1",
+   "subject": "s2",
+   "object": "piggybank",
+   "intent": "use",
+   "frames": 8,
+   "recall": 0.704920145253514,
+   "iou": 0.4429834667340899,
+   "recall_all_parts": 0.7037488757533144
+  },
+  {
+   "seq": "pyramidlarge_inspect_1",
+   "subject": "s2",
+   "object": "pyramidlarge",
+   "intent": "inspect",
+   "frames": 6,
+   "recall": 0.9671910395074409,
+   "iou": 0.506888138727498,
+   "recall_all_parts": 0.9671910395074409
+  },
+  {
+   "seq": "pyramidlarge_lift",
+   "subject": "s2",
+   "object": "pyramidlarge",
+   "intent": "lift",
+   "frames": 6,
+   "recall": 0.6322627960422018,
+   "iou": 0.36763663093408017,
+   "recall_all_parts": 0.6322627960422018
+  },
+  {
+   "seq": "pyramidlarge_pass_1_Retake",
+   "subject": "s2",
+   "object": "pyramidlarge",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.908918180953506,
+   "iou": 0.4852241556549288,
+   "recall_all_parts": 0.908918180953506
+  },
+  {
+   "seq": "pyramidmedium_inspect_1",
+   "subject": "s2",
+   "object": "pyramidmedium",
+   "intent": "inspect",
+   "frames": 6,
+   "recall": 0.9818172476764117,
+   "iou": 0.5737358075064184,
+   "recall_all_parts": 0.9818172476764117
+  },
+  {
+   "seq": "pyramidmedium_pass_1",
+   "subject": "s2",
+   "object": "pyramidmedium",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.7211558395882244,
+   "iou": 0.43903562112464556,
+   "recall_all_parts": 0.7211558395882244
+  },
+  {
+   "seq": "scissors_use_1",
+   "subject": "s2",
+   "object": "scissors",
+   "intent": "use",
+   "frames": 6,
+   "recall": 0.9557455715769528,
+   "iou": 0.5327652349419649,
+   "recall_all_parts": 0.9557455715769528
+  },
+  {
+   "seq": "spherelarge_inspect_1",
+   "subject": "s2",
+   "object": "spherelarge",
+   "intent": "inspect",
+   "frames": 6,
+   "recall": 0.9462230607199359,
+   "iou": 0.547147679847333,
+   "recall_all_parts": 0.9493229588870288
+  },
+  {
+   "seq": "spherelarge_lift",
+   "subject": "s2",
+   "object": "spherelarge",
+   "intent": "lift",
+   "frames": 7,
+   "recall": 0.7090202802768771,
+   "iou": 0.4019077807155778,
+   "recall_all_parts": 0.6880820046632304
+  },
+  {
+   "seq": "spherelarge_pass_1",
+   "subject": "s2",
+   "object": "spherelarge",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.8621912830669162,
+   "iou": 0.4283242237864458,
+   "recall_all_parts": 0.8254782572571454
+  },
+  {
+   "seq": "spheremedium_pass_1",
+   "subject": "s2",
+   "object": "spheremedium",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9420285985040838,
+   "iou": 0.4890350263418064,
+   "recall_all_parts": 0.9420285985040838
+  },
+  {
+   "seq": "spheresmall_inspect_1",
+   "subject": "s2",
+   "object": "spheresmall",
+   "intent": "inspect",
+   "frames": 5,
+   "recall": 0.98466573670705,
+   "iou": 0.43022722203772973,
+   "recall_all_parts": 0.98466573670705
+  },
+  {
+   "seq": "stamp_stamp_1",
+   "subject": "s2",
+   "object": "stamp",
+   "intent": "stamp",
+   "frames": 6,
+   "recall": 0.9566865131514347,
+   "iou": 0.42428689267699865,
+   "recall_all_parts": 0.9611978743476679
+  },
+  {
+   "seq": "stanfordbunny_inspect_1",
+   "subject": "s2",
+   "object": "stanfordbunny",
+   "intent": "inspect",
+   "frames": 7,
+   "recall": 0.9109099537193301,
+   "iou": 0.4788976188532951,
+   "recall_all_parts": 0.9157578503138672
+  },
+  {
+   "seq": "stanfordbunny_lift",
+   "subject": "s2",
+   "object": "stanfordbunny",
+   "intent": "lift",
+   "frames": 11,
+   "recall": 0.8125418165955536,
+   "iou": 0.43733966293360715,
+   "recall_all_parts": 0.8090824414212452
+  },
+  {
+   "seq": "stanfordbunny_pass_1",
+   "subject": "s2",
+   "object": "stanfordbunny",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.8235805620036747,
+   "iou": 0.40973470876451734,
+   "recall_all_parts": 0.8205202235243808
+  },
+  {
+   "seq": "stapler_pass_1",
+   "subject": "s2",
+   "object": "stapler",
+   "intent": "pass",
+   "frames": 6,
+   "recall": 0.9831099517079899,
+   "iou": 0.4208991205866215,
+   "recall_all_parts": 0.9831099517079899
+  },
+  {
+   "seq": "stapler_staple_1",
+   "subject": "s2",
+   "object": "stapler",
+   "intent": "staple",
+   "frames": 5,
+   "recall": 0.9665158054361435,
+   "iou": 0.45868006567401237,
+   "recall_all_parts": 0.9665158054361435
+  },
+  {
+   "seq": "stapler_staple_2",
+   "subject": "s2",
+   "object": "stapler",
+   "intent": "staple",
+   "frames": 7,
+   "recall": 0.9274647101663246,
+   "iou": 0.36327943959662534,
+   "recall_all_parts": 0.9100360169663025
+  },
+  {
+   "seq": "teapot_lift",
+   "subject": "s2",
+   "object": "teapot",
+   "intent": "lift",
+   "frames": 8,
+   "recall": 0.5819466140418623,
+   "iou": 0.343713313703164,
+   "recall_all_parts": 0.5695939664806174
+  },
+  {
+   "seq": "teapot_pass_1",
+   "subject": "s2",
+   "object": "teapot",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.6735726661950646,
+   "iou": 0.38449052227853686,
+   "recall_all_parts": 0.6735726661950646
+  },
+  {
+   "seq": "teapot_pour_1",
+   "subject": "s2",
+   "object": "teapot",
+   "intent": "pour",
+   "frames": 6,
+   "recall": 0.8938555720355533,
+   "iou": 0.536577683578762,
+   "recall_all_parts": 0.8938555720355533
+  },
+  {
+   "seq": "teapot_pour_2",
+   "subject": "s2",
+   "object": "teapot",
+   "intent": "pour",
+   "frames": 5,
+   "recall": 0.9249878993512525,
+   "iou": 0.34334080577003345,
+   "recall_all_parts": 0.6898977162309429
+  },
+  {
+   "seq": "toothbrush_lift",
+   "subject": "s2",
+   "object": "toothbrush",
+   "intent": "lift",
+   "frames": 6,
+   "recall": 0.9396947721203559,
+   "iou": 0.3945959046109741,
+   "recall_all_parts": 0.9366826730600536
+  },
+  {
+   "seq": "toothpaste_lift",
+   "subject": "s2",
+   "object": "toothpaste",
+   "intent": "lift",
+   "frames": 6,
+   "recall": 0.9790572067469588,
+   "iou": 0.4244713245039513,
+   "recall_all_parts": 0.9688860335575806
+  },
+  {
+   "seq": "toothpaste_squeeze_1",
+   "subject": "s2",
+   "object": "toothpaste",
+   "intent": "squeeze",
+   "frames": 6,
+   "recall": 0.960772073367874,
+   "iou": 0.40551459274658,
+   "recall_all_parts": 0.7978562557446076
+  },
+  {
+   "seq": "toruslarge_inspect_1",
+   "subject": "s2",
+   "object": "toruslarge",
+   "intent": "inspect",
+   "frames": 6,
+   "recall": 0.9530832862352888,
+   "iou": 0.4884354576638125,
+   "recall_all_parts": 0.9530832862352888
+  },
+  {
+   "seq": "toruslarge_lift",
+   "subject": "s2",
+   "object": "toruslarge",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.7774345564170017,
+   "iou": 0.3942974775820497,
+   "recall_all_parts": 0.7774345564170017
+  },
+  {
+   "seq": "toruslarge_pass_1",
+   "subject": "s2",
+   "object": "toruslarge",
+   "intent": "pass",
+   "frames": 8,
+   "recall": 0.8604849845291039,
+   "iou": 0.41585750487761663,
+   "recall_all_parts": 0.8604849845291039
+  },
+  {
+   "seq": "torussmall_lift",
+   "subject": "s2",
+   "object": "torussmall",
+   "intent": "lift",
+   "frames": 5,
+   "recall": 0.9639096097257284,
+   "iou": 0.42869313191459424,
+   "recall_all_parts": 0.9639096097257284
+  },
+  {
+   "seq": "train_lift",
+   "subject": "s2",
+   "object": "train",
+   "intent": "lift",
+   "frames": 9,
+   "recall": 0.7696618465561437,
+   "iou": 0.46424447300747074,
+   "recall_all_parts": 0.7696618465561437
+  },
+  {
+   "seq": "train_pass_1",
+   "subject": "s2",
+   "object": "train",
+   "intent": "pass",
+   "frames": 7,
+   "recall": 0.9393404906288169,
+   "iou": 0.5949476662522447,
+   "recall_all_parts": 0.9393404906288169
+  },
+  {
+   "seq": "train_play_1",
+   "subject": "s2",
+   "object": "train",
+   "intent": "play",
+   "frames": 6,
+   "recall": 0.9937597362519489,
+   "iou": 0.5774560945629487,
+   "recall_all_parts": 0.9937597362519489
+  }
+ ]
+}

@@ -35,6 +35,15 @@ from oppdef.human import grab
 
 NEAR_M = 0.005          # a hand vertex this close counts as touching
 
+#: GRAB labels each contacted object vertex with the body part touching it, and
+#: not all of them are hands -- `eyeglasses_wear` touches the face, and
+#: `camera_takepicture` the brow. Measured, the labels separate cleanly: 16 and
+#: 23 sit 42-50 mm from either hand, while 27 and above sit 2-4 mm. Scoring a
+#: HAND reconstruction against face contacts penalises it for something it does
+#: not model, so only hand labels count. The unrestricted figure is reported
+#: alongside, so the restriction is visible rather than silent.
+HAND_LABEL_MIN = 25
+
 
 def score(seq_path, stride=8, near=NEAR_M, limit_frames=14):
     raw = np.load(paths.GRAB / "grab" / seq_path, allow_pickle=True)
@@ -42,13 +51,15 @@ def score(seq_path, stride=8, near=NEAR_M, limit_frames=14):
     s = grab.load(seq_path, verts=True, stride=stride)
     v, _f = s.obj_mesh
 
-    ious, recs, ns = [], [], 0
+    ious, recs, alls, ns = [], [], [], 0
     ks = np.linspace(0, s.T - 1, limit_frames).astype(int)
     for t in ks:
         k = int(t) * stride
         if k >= len(co):
             continue
-        gt = co[k] > 0
+        lab = co[k]
+        gt = lab >= HAND_LABEL_MIN
+        gt_any = lab > 0
         if gt.sum() == 0:
             continue
         for side in ("rhand", "lhand"):
@@ -62,12 +73,14 @@ def score(seq_path, stride=8, near=NEAR_M, limit_frames=14):
             inter = int((gt & mine).sum())
             ious.append(inter / max(int((gt | mine).sum()), 1))
             recs.append(inter / max(int(gt.sum()), 1))
+            alls.append(int((gt_any & mine).sum()) / max(int(gt_any.sum()), 1))
         ns += 1
     if not recs:
         return None
     return {"seq": s.name, "subject": s.subject, "object": s.obj,
             "intent": s.intent, "frames": ns,
-            "recall": float(np.mean(recs)), "iou": float(np.mean(ious))}
+            "recall": float(np.mean(recs)), "iou": float(np.mean(ious)),
+            "recall_all_parts": float(np.mean(alls))}
 
 
 def main(subjects, limit, stride, out):
@@ -91,6 +104,9 @@ def main(subjects, limit, stride, out):
         print(f"  recall  mean {rec.mean():.3f}  median {np.median(rec):.3f}  "
               f"min {rec.min():.3f}   >=0.5: {(rec >= 0.5).sum()}/{len(rec)}")
         print(f"  IoU     mean {iou.mean():.3f}  median {np.median(iou):.3f}")
+        ap_ = np.array([r["recall_all_parts"] for r in rows])
+        print(f"  (recall against ALL body parts, incl. face/torso contacts "
+              f"a hand model cannot cover: {ap_.mean():.3f})")
         Path(out).parent.mkdir(parents=True, exist_ok=True)
         Path(out).write_text(json.dumps(
             {"near_m": NEAR_M, "stride": stride, "rows": rows}, indent=1))
