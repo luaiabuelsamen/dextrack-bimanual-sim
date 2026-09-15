@@ -2563,3 +2563,71 @@ That capsule inversion is now the most robust unexplained observation in the
 repository — it survived a gravity leak, a dead task axis, an unstable seed, and
 a reproducibility audit. It is the obvious next question, and it points at
 contact geometry rather than scalar wrench summaries.
+
+---
+
+## 2026-09-14 — real human data: GRAB + MANO, read, retargeted, and put in physics
+
+The human-data gate is closed. Everything below was measured on this machine.
+
+**MANO without chumpy.** The official `mano_v1_2` pickles are Python-2 chumpy
+objects and chumpy does not install against modern numpy. They are unpickled
+with stub classes that keep the payload and discard the wrapper, then cached as
+npz (`src/oppdef/human/mano.py`). LBS and the pose correctives are implemented
+directly. Checks: the rest pose reproduces the template to **0.0000 mm**, the
+skinning weights partition unity to 1.0000, and the kinematic tree comes out as
+five chains of three off the wrist.
+
+**The reference is correct, and this is not assumable.** On `s1/mug_drink_1`
+the minimum distance from any right-hand vertex to any mug vertex falls
+1281 → 53 → **0.5 mm**, stays in **0.1–0.6 mm for 48 frames**, then recedes to
+1265 mm. The left hand never comes closer than 534 mm, which is what the
+"drink" intent should look like. Sub-millimetre contact for the whole grasp
+requires the MANO fit, the subject template, `flat_hand_mean`, the pose
+convention and the object transform to be simultaneously right.
+
+**MuJoCo collides meshes as convex hulls, and for GRAB that is fatal.**
+Measured hull-to-mesh volume ratios: mug **3.52×**, airplane **3.51×**, body
+6.56×, banana 2.00×, binoculars 1.60×, apple 1.05×. The mug's hull fills the cup
+*and* the handle's hole — every handle grasp GRAB records would be impossible
+against it. CoACD brings the mug to 0.92× and the airplane to 0.82×; cached on
+the mesh hash so a changed threshold cannot silently reuse a stale
+decomposition. Without this, a correctly placed hand read as 22.6 mm mean
+penetration; with it, 14.3 mm, of which the rest was real.
+
+**Three bugs, each of which returned a plausible wrong answer rather than an
+error.** Recorded because each was found by a measurement, not by reading code:
+
+1. `mj_jacBody` reads `d.cdof`, which `mj_kinematics` does **not** fill. The
+   Jacobian was identically zero, every Gauss-Newton step was zero, and the fit
+   returned its seed pose while reporting 1324 mm of error as though it had
+   converged. `mj_comPos` fixes it.
+2. Retargeting in GRAB's world frame is impossible: the object sits 0.8–1.7 m up
+   and the floating base has 0.6 m of travel. The fit pinned itself against its
+   limits at **486 mm**. Re-expressed in the object frame — which is the frame
+   the result is consumed in — the same solver reaches **6.7 mm**.
+3. Penalising *fingertip* contact as penetration fights the contact targets
+   directly: it bought 4 mm of penetration for 27 mm of contact accuracy
+   (6.7 → 33.6 mm). The penalty now excludes fingertip geoms; at w_pen = 2.0 the
+   trade is 12.9 mm contact error for 3.9 mm penetration. w_pen = 15 is worse on
+   **both** — the steps destabilise the Gauss-Newton solve.
+
+**Retargeting, validated per finger** (Shadow, `mug_drink_1`, hold window):
+index 12.5 mm, middle 10.4 mm, ring 14.2 mm, thumb 14.5 mm, pinky 22.3 mm.
+The pinky is the worst and is in contact in only 13.8% of frames, so it is
+mostly unconstrained — the ordering is the one the grasp implies, not a defect.
+Correspondence confirmed thumb→`rh_thdistal`, index→`rh_ffdistal`.
+
+**First look at holding.** A three-frame sample suggested the grasps were
+failing — two of three showed ~14 m of displacement. That is not a drop, it is
+**free fall** (½·9.81·1.75² = 15 m) with zero contacts. Across the full 119-frame
+window the retargeted poses make contact in **117/119** frames (mean 25.7
+contacts) and **16 of 20** sampled frames hold the object for 1 s. The failures
+are concentrated in the frames where the human hand is still closing. This is
+why G5 samples across the window and clusters by sequence rather than taking one
+frame per clip.
+
+**Dataset.** 198 `s1` + 93 `s2` sequences, 51 objects. The bimanual subset is
+real: sequences whose intent is `offhand` (hand-to-hand transfer) have both hands
+in contact simultaneously, and the full inventory is in
+`results/grab_inventory.json`.

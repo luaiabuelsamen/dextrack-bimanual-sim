@@ -26,6 +26,12 @@ nothing to it — once as an initialisation (G1), once as a task specification
 **Do the metrics this field optimises actually predict whether a grasp does the
 job?** That is G3, and the answer is *partly, and not the one you would expect*.
 
+Since G4 the project has moved to the thing those experiments were always
+circling: **tracking control for dexterous manipulation, learned from real
+human hand-object motion** — the DexTrack pipeline, rebuilt here in simulation
+and validated locally, then extended to two hands. The first two stages are
+built and measured; see [From human motion to a robot hand](#from-human-motion-to-a-robot-hand).
+
 ## Status
 
 | claim | status | evidence |
@@ -139,9 +145,54 @@ before the code was written. One caveat is recorded rather than buried: 5 of
 accumulated scene state — and excluding them moves ε from AUC 0.684 to 0.679
 and contact force from 0.800 to 0.795. Nothing changes.
 
-**Next: the capsule inversion.** It is the one observation that survived a
-gravity leak, a dead task axis, an unstable seed and a reproducibility audit,
-and it points at contact *geometry* rather than scalar wrench summaries.
+| **G5** | does a retargeted human grasp hold the real object? | pre-registered; running |
+
+**The pipeline being built**, stage by stage. Each stage is gated on a
+measurement, not on the previous stage having compiled:
+
+| stage | what it does | state |
+|---|---|---|
+| 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
+| 2. retarget | human contact points → robot joint trajectory | **done** — ~13 mm to the human's contacts, ~4 mm penetration |
+| 3. per-reference tracking | RL + trajectory optimisation, one controller per clip | gated on **G5** |
+| 4. homotopy curriculum | solve an easier reference, deform it into the hard one | not started |
+| 5. distillation | one neural tracking controller across references | not started |
+| 6. bimanual | both hands on one object | **75+ GRAB sequences** have both hands in contact |
+| 7. perception | depth → pose estimator → evaluate the *frozen* tracker | not started |
+
+## From human motion to a robot hand
+
+![GRAB mug_drink_1](figures/grab_mug_drink_1.gif)
+
+*GRAB `s1/mug_drink_1`: the human right hand (red) reaching, grasping the mug by
+its handle, drinking, and setting it down. The left hand stays 53 cm away, which
+is what "drink" should look like.*
+
+The reference is validated by a measurement that cannot succeed by accident: the
+minimum distance from any hand vertex to any object vertex falls from **1.28 m**
+to **0.1–0.6 mm**, stays there for the whole grasp, then recedes. The MANO
+skinning, the pose convention, the subject-specific template and the object
+transform all have to be right simultaneously for that to happen.
+
+![retargeted Shadow hand](figures/retarget_shadow_mug_drink_1.png)
+
+*The same grasp retargeted onto a Shadow hand, rendered in MuJoCo against the
+real GRAB mesh. The handle is a genuine hole, not a filled-in hull.*
+
+Two things had to be fixed before this picture was honest:
+
+**MuJoCo collides a mesh as its convex hull.** For GRAB that is not a small
+approximation — the mug's hull is **3.52×** the mug's own volume, because it
+fills both the cup's cavity and the handle's hole. Every handle grasp in the
+dataset would have been physically impossible, and a correctly placed hand reads
+as 20–40 mm of penetration that is not there. Convex decomposition brings the
+mug to 0.92× (`src/oppdef/human/decompose.py`).
+
+**Retargeting cannot be done in the dataset's world frame.** GRAB puts the
+object 0.8–1.7 m above the origin while the floating hand base has 0.6 m of
+travel; the fit pins itself against its limits and reports 486 mm of error.
+Solved in the *object* frame — which is the frame the result is used in — the
+same fit reaches 6.7 mm.
 
 ## Layout
 
@@ -155,6 +206,9 @@ src/oppdef/
   hold.py     the 6-D wrench probe
   bench.py    the shared benchmark cell
   metrics/    Ferrari-Canny epsilon from real MuJoCo contacts
+  human/      mano.py (MANO without chumpy) · grab.py (GRAB references)
+              decompose.py (convex parts) · retarget.py (human -> robot)
+              scene.py (hand + real object) · track.py (tracking env)
   vec.py      batched stepping (CPU / MJX / Warp) with measured parity
 experiments/  live experiments; retracted/ holds the withdrawn ones
 docs/         task definitions, pre-registrations, external reviews
