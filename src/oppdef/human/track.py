@@ -573,6 +573,8 @@ class ReferenceTracker:
              if self.sim.model.jnt_type[j] == mujoco.mjtJoint.mjJNT_FREE
              and int(self.sim.model.jnt_bodyid[j]) == self.sim.obj_bid][0]])
         self._acts = act_map(self.sim)
+        self._hold_env = None
+        self.grasp_fit = None
         self._grip_offset = np.zeros(self.sim.model.nu)
         self._ctrl_closure = self._raw_ctrl(self.sim.q_closure)
         # Which actuators drive FINGERS. A squeeze must not touch the wrist:
@@ -650,6 +652,60 @@ class ReferenceTracker:
         if grip:
             self.establish(grip)
         return d
+
+    def synthesize_grasp(self, k=None, samples=12, rounds=2, seconds=0.4,
+                         grip=8.0, seed=0):
+        """Search near the retargeted wrist for a pose that actually holds, and
+        apply that correction to the WHOLE trajectory.
+
+        G5 measured the raw retarget holding the object in 0.318 of frames, and
+        its failures making 0.1 contacts at reset against 17.4 for successes --
+        they are non-grasps. Its pre-registered decision rule says to initialise
+        from a synthesised grasp near the human's contact set rather than from
+        the retarget. Measured on a 24-frame subsample, that takes the hold rate
+        from **0.167 to 0.792**.
+
+        The correction is a constant wrist offset in the OBJECT frame, so the
+        trajectory's shape is untouched and only the grasp moves. Applying it
+        per-frame instead would be a different trajectory, not a repaired one.
+        """
+        from oppdef.human import grasp as G
+        from oppdef.human.scene import build as build_scene
+
+        if self._hold_env is None:
+            self._hold_env = GrabTrackEnv(
+                self.seq, self.hand,
+                sc=build_scene(self.hand, self.seq.obj, obj_static=False))
+        if k is None:
+            k = int(np.argmax(self.tr.n_contact))
+        # Keep the correction only if it improves the WHOLE trajectory. The
+        # offset is optimised at one frame, and on `cup_pass_1` the frame's
+        # optimum took the reference from 6 graspable frames to 1. Guarded, this
+        # can only help.
+        before = len(self.grasp_frames())
+        fit = G.synthesize(self._hold_env, self.tr.q[k], samples=samples,
+                           rounds=rounds, seconds=seconds, grip=grip, seed=seed)
+        self.apply_wrist_offset(fit.offset)
+        after = len(self.grasp_frames())
+        if after < before:
+            self.apply_wrist_offset(-np.asarray(fit.offset))
+            fit.held = False
+        self.grasp_fit = fit
+        self.grasp_frames_before, self.grasp_frames_after = before, max(after, before)
+        return fit
+
+    def apply_wrist_offset(self, delta):
+        """Shift every frame's wrist by `delta` (3 translation + 3 rotation)."""
+        names = [mujoco.mj_id2name(self.fit.model, mujoco.mjtObj.mjOBJ_JOINT, j)
+                 for j in self.fit.jids]
+        for i, n in enumerate(names):
+            if n in ("x", "y", "z"):
+                self.tr.q[:, i] += delta[{"x": 0, "y": 1, "z": 2}[n]]
+            elif n in ("rx", "ry", "rz"):
+                self.tr.q[:, i] += delta[3 + {"rx": 0, "ry": 1, "rz": 2}[n]]
+        self._palm_obj = None
+        self.P, self.Q, self.vals = feedforward_se3(
+            self.fit, self.tr.q, self.ref_pos, self.ref_quat)
 
     def grasp_frames(self, seconds: float = 0.4, stride: int = 5) -> np.ndarray:
         """Which reference frames hold the object on their own.
@@ -1104,9 +1160,9 @@ class BimanualTracker:
     """
 
     def __init__(self, seq, hand_r="shadow", hand_l="shadow_left",
-                 window=None, obj_mass=0.2):
+                 window=None, obj_mass=0.2, joint_fit=True, rounds=2):
         from oppdef.human.scene import build as build_scene, build_bimanual
-        from oppdef.human.retarget import retarget_sequence
+        from oppdef.human.retarget import retarget_sequence, retarget_bimanual
 
         self.seq = seq
         if window is None:
@@ -1118,11 +1174,20 @@ class BimanualTracker:
         if window[1] < 2:
             raise ValueError(f"{seq.name}: no two-handed window")
 
+        # Fit both hands in ONE scene by default, so each sees the other.
+        # Fitted separately they interpenetrate by 11.7 mm and the left hand
+        # pushes the right off the object; see retarget_bimanual.
+        self.joint_fit = joint_fit
         self.fit, self.tr = {}, {}
-        for sd, side, hk in (("r", "rhand", hand_r), ("l", "lhand", hand_l)):
-            self.fit[sd] = build_scene(hk, seq.obj, obj_static=True)
-            self.tr[sd] = retarget_sequence(seq, side, hk, window=window,
-                                            sc=self.fit[sd])
+        if joint_fit:
+            self.tr, self.fit_scene, views = retarget_bimanual(
+                seq, window, hand_r, hand_l, rounds=rounds)
+            self.fit = views
+        else:
+            for sd, side, hk in (("r", "rhand", hand_r), ("l", "lhand", hand_l)):
+                self.fit[sd] = build_scene(hk, seq.obj, obj_static=True)
+                self.tr[sd] = retarget_sequence(seq, side, hk, window=window,
+                                                sc=self.fit[sd])
 
         pos, quat = reference_in_first_frame(seq, window[0])
         fr = self.tr["r"].frames
@@ -1162,8 +1227,14 @@ class BimanualTracker:
                   for j in self.sim.jids[sd]]
             idx = {n: i for i, n in enumerate(nf)}
             pre = f"{sd}_"
-            self.jmap[sd] = [idx.get(n[len(pre):] if n.startswith(pre) else n, -1)
-                             for n in ns]
+            if joint_fit:
+                # both scenes carry the same per-side prefix; only the fitting
+                # scene additionally has the six base DoF, which the mocap
+                # scene expresses as a free joint instead
+                self.jmap[sd] = [idx.get(n, -1) for n in ns]
+            else:
+                self.jmap[sd] = [idx.get(n[len(pre):] if n.startswith(pre) else n, -1)
+                                 for n in ns]
             if any(i < 0 for i in self.jmap[sd]):
                 raise ValueError(f"side {sd}: unmapped joints {ns[:3]} vs {nf[:3]}")
         self.ctrl_every = int(round(seq.dt / m.opt.timestep))

@@ -96,7 +96,7 @@ class _Solver:
     """
 
     def __init__(self, sc, tips, wrist_bid, lo, hi, w_smooth=W_SMOOTH,
-                 w_pen=W_PEN, tip_offsets=None):
+                 w_pen=W_PEN, tip_offsets=None, base_qpos=None):
         self.sc = sc
         self.m, self.d = sc.model, sc.data
         self.tips = list(tips)
@@ -105,6 +105,10 @@ class _Solver:
         self.dofs = np.array([sc.model.jnt_dofadr[j] for j in sc.jids], dtype=int)
         self.n = len(sc.jids)
         self.w_smooth, self.w_pen = w_smooth, w_pen
+        #: When two hands share a scene, zeroing all of qpos to pose one of
+        #: them also teleports the other to its zero configuration -- so the
+        #: obstacle the solver is meant to avoid is not where it will be.
+        self.base_qpos = None if base_qpos is None else np.asarray(base_qpos).copy()
         self.obj = set(sc.obj_gids)
         self.hand = set(sc.hand_gids)
         self.tips_g = set(sc.tip_gids)
@@ -132,7 +136,7 @@ class _Solver:
         return self.d.xpos[b] + self.d.xmat[b].reshape(3, 3) @ self.tip_off[i]
 
     def _fk(self, q, collide=True):
-        self.d.qpos[:] = 0.0
+        self.d.qpos[:] = 0.0 if self.base_qpos is None else self.base_qpos
         self.d.qpos[self.sc.qadr] = q
         mujoco.mj_kinematics(self.m, self.d)
         # mj_jacBody reads d.cdof, which mj_kinematics does NOT fill. Without
@@ -248,7 +252,8 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
                       contact_tol: float = CONTACT_TOL,
                       sc=None, tree=None, iters: int = 80,
                       w_pen: float = W_PEN,
-                      w_smooth: float = W_SMOOTH) -> RobotTrack:
+                      w_smooth: float = W_SMOOTH,
+                      base_qpos=None, q_init=None) -> RobotTrack:
     """Fit `hand` to the human hand `side` over a GRAB sequence.
 
     `window` is (start, length) in sequence frames -- normally the hold window
@@ -295,14 +300,15 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
 
     ri, hidx = correspond(5, len(sc.tip_bids))
     solver = _Solver(sc, sc.tip_bids, sc.wrist_bid, lo, hi,
-                     w_smooth=w_smooth, w_pen=w_pen)
+                     w_smooth=w_smooth, w_pen=w_pen, base_qpos=base_qpos)
 
     Q = np.zeros((len(frames), len(sc.jids)))
     tip_err = np.zeros(len(frames))
     con_err = np.zeros(len(frames))
     n_con = np.zeros(len(frames), int)
 
-    q = np.clip(sc.q_closure.copy(), lo, hi)
+    q = np.clip((sc.q_closure if q_init is None else np.asarray(q_init)[0]).copy(),
+                lo, hi)
     q_prev = None
     for t, k in enumerate(frames):
         R = seq.obj_R[k]
@@ -356,3 +362,48 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
               "dt": seq.dt, "contact_tol": contact_tol,
               "w_pen": w_pen, "w_smooth": w_smooth},
     )
+
+
+def retarget_bimanual(seq, window, hand_r="shadow", hand_l="shadow_left",
+                      rounds: int = 2, sc=None, **kw):
+    """Fit BOTH hands, each seeing the other.
+
+    Fitted independently in separate single-hand scenes, neither solver knows
+    the other hand exists: measured on `gamecontroller_play_1`, the two poses
+    interpenetrated by 11.7 mm across 42 contacts and the left hand pushed the
+    right off the object entirely. Separating them afterwards with a rigid shift
+    removes the overlap and makes tracking worse (105 mm -> 255 m), because
+    clearing the other hand also breaks the grasp -- the poses are mutually
+    inconsistent, not merely overlapping.
+
+    So they are fitted in one shared scene, alternately: each pass re-solves one
+    hand with the other posed at its current solution and folded into the
+    obstacle set, for `rounds` sweeps. The scene must use the HINGE base -- a
+    free joint gives the solver no wrist DoF to move, which is why this could
+    not be done before.
+    """
+    from oppdef.human.scene import build_bimanual
+
+    sc = sc or build_bimanual(hand_r, hand_l, seq.obj, obj_static=True,
+                              base="hinges")
+    if sc.base_kind != "hinges":
+        raise ValueError("bimanual fitting needs base='hinges'")
+
+    sides = {"r": ("rhand", hand_r), "l": ("lhand", hand_l)}
+    views = {sd: sc.side_view(sd, hand=hk) for sd, (_s, hk) in sides.items()}
+    tracks, poses = {}, {}
+
+    for rnd in range(rounds):
+        for sd, (side, _hk) in sides.items():
+            other = "l" if sd == "r" else "r"
+            base = np.zeros(sc.model.nq)
+            if other in poses:
+                # hold the other hand at its own first-frame solution, so the
+                # obstacle is where it will actually be
+                base[sc.qadr[other]] = poses[other]
+            tracks[sd] = retarget_sequence(
+                seq, side, _hk, window=window, sc=views[sd],
+                base_qpos=base,
+                q_init=None if sd not in tracks else tracks[sd].q, **kw)
+            poses[sd] = tracks[sd].q[0]
+    return tracks, sc, views

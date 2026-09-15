@@ -274,11 +274,27 @@ class BimanualScene:
     qadr: dict
     free_q: dict
     mocap_bid: dict
+    base_kind: str = "mocap"
 
     def set_side(self, side: str, q):
         self.data.qpos[self.qadr[side]] = q
 
-    def side_view(self, sd: str, q_closure=None) -> "ObjectScene":
+    def _closure(self, sd, hand):
+        """The side's derived closing posture, re-indexed into this model."""
+        q = np.zeros(len(self.jids[sd]))
+        if hand is None:
+            return q
+        from oppdef.hands.specs import derive_flex
+        _m, _c, flex, _t, _g = derive_flex(hand)
+        pre = f"{sd}_"
+        for i, j in enumerate(self.jids[sd]):
+            n = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, j) or ""
+            key = n[len(pre):] if n.startswith(pre) else n
+            if key in flex:
+                q[i] = flex[key]
+        return q
+
+    def side_view(self, sd: str, hand: str | None = None) -> "ObjectScene":
         """One side, presented as an ObjectScene over the SHARED model.
 
         This is what lets the two hands be retargeted against each other rather
@@ -294,17 +310,17 @@ class BimanualScene:
         return ObjectScene(
             model=self.model, data=self.data, spec=self.spec,
             tip_bids=self.tip_bids[sd], wrist_bid=self.palm_bid[sd],
-            q_closure=(np.zeros(len(self.jids[sd])) if q_closure is None
-                       else q_closure),
+            q_closure=self._closure(sd, hand),
             obj_gids=list(self.obj_gids) + list(self.hand_gids[other]),
             hand_gids=self.hand_gids[sd], tip_gids=self.tip_gids[sd],
-            qadr=self.qadr[sd], jids=self.jids[sd], base_kind="mocap",
+            qadr=self.qadr[sd], jids=self.jids[sd], base_kind=self.base_kind,
             obj_bid=self.obj_bid)
 
 
 def build_bimanual(hand_r: str = "shadow", hand_l: str = "shadow_left",
                    obj: str = "mug", obj_static: bool = True,
-                   convex_parts: bool = True) -> BimanualScene:
+                   convex_parts: bool = True,
+                   base: str = "mocap") -> BimanualScene:
     """Two free-jointed hands, each welded to its own mocap body.
 
     Registered left models are used rather than a mirrored right one: negating
@@ -314,7 +330,15 @@ def build_bimanual(hand_r: str = "shadow", hand_l: str = "shadow_left",
     136 of GRAB's 291 sequences have both hands on the object at once, and 63
     hold that for 15 consecutive frames or more, so this is what the bimanual
     stage is built against.
+
+    `base` mirrors the one-handed design. "mocap" gives each hand a free joint
+    welded to a mocap body, for SIMULATING a trajectory. "hinges" gives it the
+    six position DoF the retargeting solver can actually drive, for FITTING --
+    without which the two hands can never be fitted against each other, because
+    the solver cannot move a wrist it has no joints for. That is why the
+    independently fitted poses interpenetrated by 11.7 mm.
     """
+    from oppdef.envs.bimanual import _add_base_dof, BASE_DOF
     from oppdef.embodiment import HANDS, hand_spec
 
     spec = mujoco.MjSpec()
@@ -328,11 +352,15 @@ def build_bimanual(hand_r: str = "shadow", hand_l: str = "shadow_left",
     sides = {"r": hand_r, "l": hand_l}
     for sd, key in sides.items():
         h = HANDS[key]
-        base = spec.worldbody.add_body(name=f"{sd}_base")
-        base.add_freejoint()
-        base.add_geom(type=mujoco.mjtGeom.mjGEOM_SPHERE, size=[0.005, 0, 0],
-                      rgba=[0, 0, 0, 0], contype=0, conaffinity=0, mass=0.01)
-        spec.attach(hand_spec(h), prefix=f"{sd}_", frame=base.add_frame())
+        bb = spec.worldbody.add_body(name=f"{sd}_base")
+        if base == "mocap":
+            bb.add_freejoint()
+        bb.add_geom(type=mujoco.mjtGeom.mjGEOM_SPHERE, size=[0.005, 0, 0],
+                    rgba=[0, 0, 0, 0], contype=0, conaffinity=0, mass=0.01)
+        spec.attach(hand_spec(h), prefix=f"{sd}_", frame=bb.add_frame())
+        if base == "hinges":
+            _add_base_dof(spec, f"{sd}_base", f"{sd}_", None)
+            continue
         mc = spec.worldbody.add_body(name=f"{sd}_mocap", mocap=True)
         mc.add_geom(type=mujoco.mjtGeom.mjGEOM_BOX, size=[0.01, 0.01, 0.01],
                     rgba=[0.9, 0.2, 0.2, 0.0], contype=0, conaffinity=0)
@@ -377,15 +405,18 @@ def build_bimanual(hand_r: str = "shadow", hand_l: str = "shadow_left",
                     return True
                 b = int(model.body_parentid[b])
             return False
+        bnames = {f"{sd}_{d}" for d in ("x", "y", "z", "rx", "ry", "rz")}
         jids[sd] = [j for j in range(model.njnt)
                     if model.jnt_type[j] not in (mujoco.mjtJoint.mjJNT_FREE,
                                                  mujoco.mjtJoint.mjJNT_BALL)
-                    and under(int(model.jnt_bodyid[j]))]
+                    and (under(int(model.jnt_bodyid[j]))
+                         or (mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT,
+                                               j) or "") in bnames)]
         qadr[sd] = np.array([model.jnt_qposadr[j] for j in jids[sd]])
-        free_q[sd] = int(model.jnt_qposadr[
-            [j for j in range(model.njnt)
-             if model.jnt_type[j] == mujoco.mjtJoint.mjJNT_FREE
-             and int(model.jnt_bodyid[j]) == base_bid][0]])
+        fj = [j for j in range(model.njnt)
+              if model.jnt_type[j] == mujoco.mjtJoint.mjJNT_FREE
+              and int(model.jnt_bodyid[j]) == base_bid]
+        free_q[sd] = int(model.jnt_qposadr[fj[0]]) if fj else -1
         mocap[sd] = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY,
                                       f"{sd}_mocap")
 
@@ -397,7 +428,8 @@ def build_bimanual(hand_r: str = "shadow", hand_l: str = "shadow_left",
     return BimanualScene(model=model, data=data, spec=spec, obj_gids=obj_gids,
                          obj_bid=obj_bid, palm_bid=palm_bid, tip_bids=tip_bids,
                          hand_gids=hand_gids, tip_gids=tip_gids, jids=jids,
-                         qadr=qadr, free_q=free_q, mocap_bid=mocap)
+                         qadr=qadr, free_q=free_q, mocap_bid=mocap,
+                         base_kind=base)
 
 
 def _under_tip(model, b, tips):

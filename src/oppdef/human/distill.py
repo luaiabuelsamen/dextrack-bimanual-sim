@@ -63,7 +63,8 @@ def record(rt, actions, start, steps=None) -> Episode:
 
 
 def solve_reference(seq, hand="shadow", side="rhand", levels=(0.5, 1.0),
-                    horizon=4, samples=20, grip=8.0, seed=0, verbose=False):
+                    horizon=4, samples=20, grip=8.0, seed=0, verbose=False,
+                    synth=True):
     """Solve one reference with grip establishment + homotopy, and record it.
 
     Grip establishment is not optional: G5 measured a 0.255 hold rate for the
@@ -72,6 +73,12 @@ def solve_reference(seq, hand="shadow", side="rhand", levels=(0.5, 1.0),
     stage.
     """
     rt = track.ReferenceTracker(seq, hand=hand, side=side)
+    if synth:
+        # Without this, 12 of 14 references returned "no graspable frame": the
+        # raw retarget holds the object in only ~0.32 of frames (G5), and a
+        # reference with no holding frame has nothing to start a tracking
+        # episode from. Guarded, so it can only add graspable frames.
+        rt.synthesize_grasp()
     gf = rt.grasp_frames()
     if len(gf) == 0:
         return None, rt
@@ -82,6 +89,12 @@ def solve_reference(seq, hand="shadow", side="rhand", levels=(0.5, 1.0),
     if res.actions is None:
         return None, rt
     ep = record(rt, res.actions, start)
+    # A dropped episode is not a demonstration. Recorded without this check,
+    # one of two collected episodes had 30957 mm of tracking error -- the
+    # object in free fall -- and would have been distilled as if it were a
+    # solution.
+    if ep.pos_err[-1] > 0.10 or ep.pos_err.mean() > 0.15:
+        return None, rt
     ep.solved_lambda = res.solved_lambda
     ep.meta = {"levels": list(levels), "grasp_frames": int(len(gf)),
                "reached_full": bool(res.reached_full)}
@@ -150,7 +163,9 @@ def train(npz_path, holdout_frac=0.3, seed=0, epochs=300, hidden=512):
     from oppdef.learning.bc import train as bc_train
 
     z = np.load(npz_path, allow_pickle=True)
-    O, A = z["obs"], z["act"]
+    # float32: the observations are built in float64 and torch's Linear is
+    # float32, which fails at the first matmul rather than at load
+    O, A = z["obs"].astype(np.float32), z["act"].astype(np.float32)
     meta = json.loads(str(z["meta"]))
     _tr, _te, test_objs = split_by_object(meta, holdout_frac, seed)
     is_test = np.array([o in test_objs for o in z["obj"]])
