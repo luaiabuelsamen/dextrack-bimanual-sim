@@ -3320,3 +3320,24 @@ scored on `grasp_frames`: `phone_call_1` 248398 -> 11676 mm and
 `gamecontroller_play_1` 247682 -> 35.4 mm. Those were precisely the two
 references per-reference PPO could not rescue, because PPO learns a bounded
 correction and cannot repair a baseline that is 248 m wrong.
+
+## 2026-09-15 — stage 3 coverage, after the grasp search was scored on tracking
+
+Per-reference PPO, same budget, before and after the search objective changed
+from holding to tracking:
+
+    reference                hold-scored search   track-scored search
+    mouse_use_1                    62.3 mm              29.8 mm
+    gamecontroller_play_1      211786 mm                27.2 mm
+    phone_call_1               216250 mm              5069 mm
+    camera_takepicture_2           17.7 mm              57.7 mm
+
+The two catastrophic failures are gone. `gamecontroller_play_1` improves by a
+factor of 7800, and the reason is not that PPO got better -- it is that PPO
+learns a BOUNDED correction (6 mm of palm translation per control step) and
+cannot repair a baseline that is 248 m wrong. Give it a feedforward that is
+merely imperfect and it works; give it one that has thrown the object across the
+room and no amount of training helps.
+
+`camera` gets worse (17.7 -> 57.7 mm), so this is not free. `phone_call_1` is
+still poor at 5069 mm and is the remaining single-hand failure.
