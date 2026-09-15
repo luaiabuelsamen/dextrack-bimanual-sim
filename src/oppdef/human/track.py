@@ -610,6 +610,53 @@ class ReferenceTracker:
                 c[a] = np.clip(np.sum(q[idx]), *m.actuator_ctrlrange[a])
         return c
 
+    def reset_at(self, k: int, settle: float = 0.0, grip: float | None = None):
+        """Start from reference frame `k` rather than the window's first frame.
+
+        The window begins where the human's hand FIRST comes within 5 mm of the
+        object, which is the moment contact starts, not the moment the grasp is
+        formed. Started there the hand is still closing and drops the object
+        within a frame, and that reads as "tracking failed" when nothing has
+        been tracked yet: on `mug_drink_1`, window frames 10 and 30 drop while
+        50, 70 and 90 hold, in BOTH the hinge and the mocap scenes.
+        """
+        m, d = self.sim.model, self.sim.data
+        mujoco.mj_resetData(m, d)
+        self._grip_offset = np.zeros(m.nu)
+        k = int(np.clip(k, 0, self.T - 1))
+        self.mh.place(self.P[k], self.Q[k], self.vals[k])
+        d.qpos[self.obj_q:self.obj_q + 3] = self.ref_pos[k]
+        d.qpos[self.obj_q + 3:self.obj_q + 7] = self.ref_quat[k]
+        d.ctrl[:] = self.ctrl_for(self.vals[k])
+        mujoco.mj_forward(m, d)
+        if settle > 0:
+            g = m.opt.gravity.copy()
+            m.opt.gravity[:] = 0.0
+            for _ in range(int(settle / m.opt.timestep)):
+                mujoco.mj_step(m, d)
+            m.opt.gravity[:] = g
+            d.qvel[:] = 0.0
+            mujoco.mj_forward(m, d)
+        if grip:
+            self.establish(grip)
+        return d
+
+    def grasp_frames(self, seconds: float = 0.4, stride: int = 5) -> np.ndarray:
+        """Which reference frames hold the object on their own.
+
+        Used to choose where a tracking episode may start, and as the honest
+        denominator for what fraction of a reference is even graspable.
+        """
+        ok = []
+        for k in range(0, self.T, stride):
+            self.reset_at(k)
+            p0 = self.obj_pose()[0].copy()
+            for _ in range(int(seconds / self.sim.model.opt.timestep)):
+                mujoco.mj_step(self.sim.model, self.sim.data)
+            if np.linalg.norm(self.obj_pose()[0] - p0) < 0.03:
+                ok.append(k)
+        return np.array(ok)
+
     def reset(self, settle: float = 0.2, grip: float | None = None):
         """Place the hand and object, then let the contact set resolve.
 
@@ -801,7 +848,7 @@ class ReferenceTracker:
 
 def mppi_track(rt, horizon=5, samples=48, sigma_pos=0.004, sigma_rot=0.03,
                sigma_fin=0.05, rho=1.0, w_rot=0.10, w_drop=2.0,
-               seed=0, settle=0.2, progress=None):
+               seed=0, settle=0.0, start=None, progress=None):
     """Search a correction to the feedforward, one control frame at a time.
 
     The feedforward carries the retargeted grasp exactly in KINEMATICS and
@@ -819,13 +866,17 @@ def mppi_track(rt, horizon=5, samples=48, sigma_pos=0.004, sigma_rot=0.03,
     scale = np.concatenate([np.full(3, sigma_pos), np.full(3, sigma_rot),
                             np.full(n_fin, sigma_fin)])
 
-    rt.reset(settle=settle)
+    if start is None:
+        rt.reset(settle=settle)
+        start = 0
+    else:
+        rt.reset_at(start, settle=settle)
     plan = np.zeros((horizon, rt.n_action))
     chosen = np.zeros((rt.T, rt.n_action))
-    pos_err = np.empty(rt.T)
-    rot_err = np.empty(rt.T)
+    pos_err = np.full(rt.T, np.nan)
+    rot_err = np.full(rt.T, np.nan)
 
-    for k in range(rt.T):
+    for k in range(start, rt.T):
         state = rt.save()
         noise = rng.normal(size=(samples, horizon, rt.n_action)) * scale
         cand = plan[None] + noise
@@ -859,8 +910,10 @@ def mppi_track(rt, horizon=5, samples=48, sigma_pos=0.004, sigma_rot=0.03,
             print(f"    k={k:4d}/{rt.T}  pos {pos_err[k]*1000:7.1f} mm  "
                   f"rot {np.degrees(rot_err[k]):6.1f} deg", flush=True)
 
-    return Rollout(pos_err=pos_err, rot_err=rot_err,
-                   dropped=bool(pos_err[-1] > 0.10), steps=rt.T), chosen
+    sel = ~np.isnan(pos_err)
+    return Rollout(pos_err=pos_err[sel], rot_err=rot_err[sel],
+                   dropped=bool(pos_err[rt.T - 1] > 0.10),
+                   steps=int(sel.sum())), chosen
 
 
 def total_grip(sc) -> tuple[float, int]:

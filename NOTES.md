@@ -2743,3 +2743,46 @@ object — and threw it 13 m. Now derived from `seq.dt / timestep`.
 **`MocapHand.command` snapshotted `qpos` after zeroing the free joint**, so
 restoring it teleported the hand to the origin on every control step. 253 m of
 "tracking error" was the hand leaving, not the object.
+
+## 2026-09-14 (later still) — CORRECTION: tracking works; I was starting it in the wrong place
+
+The entry above concludes that "a kinematic retarget cannot be a grasp" and that
+the tracking gap "is not closable by a kinematic fit plus a heuristic". **The
+first claim is wrong and the second is too strong.** Both came from starting
+every tracking episode at window frame 0.
+
+The hold window begins where the human's hand first comes within 5 mm of the
+object — the moment contact *starts*, not the moment the grasp is *formed*.
+Started there, the hand is still closing, so it drops the object within a frame,
+and that reads as "tracking failed" when nothing has been tracked yet.
+
+Measured on `mug_drink_1` (Shadow), holding each frame's retargeted pose for 1 s:
+
+    window frame   10    30    50    70    90
+    hinge base    drop  drop  HELD  HELD  HELD
+    mocap base    drop  drop  HELD  HELD  HELD
+
+Identical in both scenes, so the mocap/weld env was never the problem either —
+another thing the earlier entry suspected. **17 of 24 sampled frames hold the
+object on their own.**
+
+Starting from a frame that holds, the open-loop feedforward tracks the rest of
+the reference:
+
+    start frame   frames kept        mean position error
+        35          24 of 84            (drops)
+        60          59 of 59              11.9 mm
+        75          44 of 44              14.4 mm
+
+And MPPI closes the marginal case rather than failing to:
+
+    start 35   feedforward  18608 mm mean, drops at frame 59
+               MPPI            53.0 mm mean, tracks to the end
+    start 20   both fail — correctly; at frame 20 the hand has not closed yet
+
+So the honest picture is: a retargeted pose IS a grasp over most of the hold
+window, open-loop feedforward tracks from one, and MPPI rescues the marginal
+starts. What remains true from the earlier entry is the fingertip-origin defect
+(4469 N → 64 N), the control-rate bug, and the `MocapHand.command` snapshot bug
+— those were real and are fixed. What was wrong was the conclusion drawn while
+every episode was being started before the grasp existed.
