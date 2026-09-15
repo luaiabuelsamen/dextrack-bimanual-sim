@@ -3198,3 +3198,30 @@ rather than a trajectory optimiser -- which is what DexTrack actually does, and
 which now has a working stage 3 to draw from. That costs one PPO run per
 reference (~50 min here) and is the honest next step rather than another
 relabelling scheme.
+
+## 2026-09-15 — **stage 3 solved.** PPO tracks the whole reference when its horizon covers it.
+
+    controller                          mean      final    frames within 50 mm
+    open-loop feedforward             8197.3 mm  52878 mm       53 / 111
+    PPO, training horizon  64        10535.3 mm  62601 mm       57 / 111
+    PPO, training horizon 160           29.4 mm     31.9 mm    111 / 111
+
+844,800 control steps, 6237 s. **Every frame inside 50 mm and the object never
+leaves the hand**, against a feedforward that loses it halfway. 279x better than
+the baseline it corrects.
+
+The whole story is the horizon. PPO learns a correction over the window it is
+trained on and does not extrapolate past it; the evaluation is a 111-step
+rollout, so a 64-step policy is being asked for something it never saw and a
+160-step policy is not. I reported "PPO loses" twice before working that out,
+and the fix was not a better reward or more steps -- the reshaped reward was a
+wash and 614k steps at horizon 64 did not help. It was matching the horizon to
+the task.
+
+Reward shaping is still recorded as a wash: v1 and v2 differ by less than the
+horizon does, and both were measured inside the same out-of-distribution
+artifact.
+
+This also makes stage 5 worth another attempt for the first time. Every previous
+distillation cloned a trajectory optimiser or an open-loop feedforward, and the
+failures traced to exactly that. There are now policies worth distilling.

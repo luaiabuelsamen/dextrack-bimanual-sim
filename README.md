@@ -154,7 +154,7 @@ measurement, not on the previous stage having compiled:
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
 | 2. retarget | human contact points → robot joint trajectory | **done** — ~13 mm to the human's contacts, 0 mm penetration after settling |
-| 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **working on its training horizon** — beats the feedforward on 11/12 starts, median 7.9 mm vs 18.7 mm |
+| 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **solved** — 29.4 mm mean, **111/111** frames within 50 mm, object never dropped |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
 | 5. distillation | one neural tracking controller across references | **built, fails in the loop** — regression ratio 0.716 held out, but the policy drops the object on every held-out reference |
 | 6. bimanual | both hands on one object | **tracking** — 3 of 4 references inside 200 mm (56/117/165 mm), all 4 hold |
@@ -246,7 +246,20 @@ dataset would have been physically impossible, and a correctly placed hand reads
 as 20–40 mm of penetration that is not there. Convex decomposition brings the
 mug to 0.92× (`src/oppdef/human/decompose.py`).
 
-### Stage 3: per-reference tracking
+### Stage 3: per-reference tracking — solved by PPO
+
+| controller | mean | final | frames within 50 mm |
+|---|---|---|---|
+| open-loop feedforward | 8197.3 mm | 52878 mm | 53/111 |
+| PPO, training horizon 64 | 10535.3 mm | 62601 mm | 57/111 |
+| **PPO, training horizon 160** | **29.4 mm** | **31.9 mm** | **111/111** |
+
+844,800 control steps. The whole story is the horizon: PPO learns a correction
+over the window it trains on and does not extrapolate past it, and the
+evaluation is a 111-step rollout. A reshaped reward was a wash and 614k steps at
+horizon 64 did not help — matching the horizon to the task did.
+
+
 
 A tracking episode has to START from a formed grasp. The hold window begins
 where the human's hand first comes within 5 mm of the object — contact
