@@ -37,13 +37,19 @@ def per_reference(row, hand="shadow", steps=200_000, seed=0, verbose=False):
     gf = rt.grasp_frames()
     if len(gf) == 0:
         return None, None, None
-    cfg = rl.RLConfig(n_envs=24, horizon=64, seed=seed)
-    cfg.iters = max(20, steps // (cfg.n_envs * cfg.horizon))
+    # The training horizon must COVER the reference. PPO learns a correction
+    # over the window it trains on and does not extrapolate past it: on
+    # mug_drink_1 a 64-step policy scored 10535 mm on a 111-step rollout and a
+    # 160-step policy scored 29.4 mm, tracking every frame. Matching the horizon
+    # to the task was worth more than a reshaped reward or ten times the steps.
+    span = int(rt.T - gf[0])
+    cfg = rl.RLConfig(n_envs=16, horizon=min(224, max(64, span + 8)), seed=seed)
+    cfg.iters = max(24, steps // (cfg.n_envs * cfg.horizon))
     net, _log = rl.train(rt, cfg, starts=gf, verbose=verbose)
     return rt, net, gf
 
 
-def harvest(rt, net, gf, per_start=48, max_starts=8):
+def harvest(rt, net, gf, per_start=200, max_starts=6):
     """On-policy states and the policy's own commands, as distillation data."""
     cfg = rl.RLConfig()
     scale = np.concatenate([np.full(3, cfg.a_pos), np.full(3, cfg.a_rot),
