@@ -8,7 +8,7 @@ export PYTHONPATH := $(CURDIR)
 GPU ?= ./mjx_env.sh python
 
 .PHONY: help install test test-fast axis inventory expert matched matched-fig \
-        g1 g1-analysis render-tasks vec parity parity-mjx clean vendor
+        g1 g1-analysis render-tasks render-tracking vec parity parity-mjx clean vendor
 
 help:
 	@grep -E '^[a-z0-9-]+:.*?##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/' | column -t -s "$$(printf '\t')"
@@ -47,6 +47,9 @@ expert:           ## T2: the bimanual peg task and its one-handed control
 
 render-tasks:     ## re-render every task GIF by replaying saved grasps
 	MUJOCO_GL=egl $(PY) experiments/render_tasks.py
+
+render-tracking:  ## capture and render the README's measured GRAB tracking demos
+	OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl PYTHONPATH=src:. $(PY) -m experiments.render_tracking mug bowl binoculars camera
 
 # -- infrastructure --------------------------------------------------------
 vec:              ## batched-stepping throughput and agreement, CPU backend

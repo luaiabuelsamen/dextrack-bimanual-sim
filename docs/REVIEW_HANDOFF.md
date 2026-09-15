@@ -1,12 +1,13 @@
 # Review handoff for Claude
 
-**Latest assessment, 2026-09-14 at `07c0f52`:** the earlier G3 numbers below
-are historical and have been withdrawn after a gravity-state leak was found.
-Read [the current recommendation](#recommendation-after-gravity-fix) before
-acting on earlier audit sections. Continue with a bounded task-validation
-milestone; neither the original thesis nor the G3 metric critique is established.
+**Latest assessment, 2026-09-15 at `7212fa2`:** real GRAB references, per-clip
+PPO, and joint bimanual retargeting are meaningful progress. The mug checkpoint
+reproduces its reported position tracking when its original grasp setup is
+restored. Orientation tracking and generalization remain open. Read the
+[current tracking review](#tracking-review-and-readme-demonstrations) before
+acting on earlier audit sections; they describe historical checkpoints.
 
-## Recommendation to Claude
+## Recommendation to Claude (2026-09-14)
 
 Claude: continue the project with one concrete next question: **can selecting
 contacts for a particular task improve successful execution over a practical
@@ -555,3 +556,81 @@ pass (**2 passed in 48.97 s**). The direct task-helper diagnostic produced the
 rotation and torque values above, and `git diff --check` passed. This follow-up
 did not repeat the full suite or run the G3/G4 experiments. It updates the review
 document; source and actively written result files were not changed.
+
+## Tracking review and README demonstrations
+
+Reviewed 2026-09-15 at `7212fa2`. I support the current direction as a
+demonstration-driven simulation workbench. It now has actual human-motion
+input, a measurable manipulation trajectory, and a saved neural controller
+that can be independently replayed. Those address major gaps in the earlier
+synthetic-grasp project. This is useful engineering progress; evidence for a
+new generalizable method still needs a separate comparison.
+
+The user requested new GIFs and a README update if the work supported them.
+`experiments/render_tracking.py` captures actual MuJoCo dynamics, then renders
+the captured states in a separate `MjData`. The object has a free joint, gravity
+is active, and it is not welded to a hand. Floating wrists are driven through
+mocap constraints and fingers through actuators. These are assisted-start,
+per-reference simulation examples. The new GIFs and adjacent JSON files in
+`figures/physics_*` contain measured position and orientation errors, contact
+counts, source/model hashes, and exact search/checkpoint settings. Display
+changes do not alter the captured physics.
+
+### What the replay establishes
+
+The saved `ppo_mug_drink_1_h160.pt` checkpoint reproduces **29.3509 mm** mean
+position error and **111/111** frames below 50 mm. Its original hold-scored
+grasp synthesis, seed 0, and start frame 5 are necessary parts of the protocol.
+Loading the weights on the unrefined retarget instead gave 1620.7 mm. Restoring
+the original setup also reproduced the feedforward baseline's 8197.3 mm error.
+The renderer's recorded errors match `rl.evaluate` exactly from the same reset.
+
+The new bowl example uses joint fitting and wrist search scored over all 131
+frames, seed 0, 10 samples and two rounds. It measures **18.0 mm** mean position
+error, with **131/131** frames below 50 mm. Its independently reset rollout
+matches the capture exactly. This is a fresh result under the saved settings,
+not a reproduction of the older 28.1 mm headline. The bimanual controller is
+searched feedforward, not a learned two-hand policy. Each remaining GIF carries
+its own complete measured values in the adjacent manifest.
+
+### What remains open
+
+1. **Position tracking is not full pose tracking.** The mug and bowl rollouts
+   average **44.8°** and **45.9°** of orientation error respectively, despite
+   their small position errors. The camera is more severe: **34.4 mm** mean
+   position error alongside **138.4°** mean orientation error. The binoculars
+   example measures **32.6 mm** and **20.0°**. `BimanualTracker.rollout` returns a
+   zero-filled `rot_err`; the renderer computes the actual quaternion error
+   independently. Include true orientation error in the evaluation API and
+   define task-appropriate angular tolerances, including object symmetries.
+   For a handled mug, orientation changes are functionally meaningful.
+2. **Per-reference fitting is not a held-out task result.** These grasp offsets
+   are optimized on the reference being shown. PPO is trained for its own
+   reference and reads simulator state and future reference poses. Keep that
+   scope explicit; demonstrate recovery from perturbations and compare with
+   action replay before attributing robustness to feedback. A matched one-hand
+   baseline is still needed to establish the benefit or necessity of two hands.
+3. **Distillation remains incomplete.** Position errors of 158–456 mm alone do
+   not establish that the object stayed held. Record contact histories, relative
+   motion, orientation, and task completion on held-out objects. The larger G9
+   run was still active during this review; its partial output is not a final
+   evaluation and was not used to label these GIFs.
+4. **Persist the full trained system.** The mug weights were saved without the
+   grasp/configuration needed to use them. `g9_ppo_distill.py` prints results but
+   does not persist each policy and its fitted environment. Save checkpoints,
+   grasp offsets, initialization, horizon, splits, seeds, model hashes, and
+   evaluation traces together before scaling the experiment further.
+
+My next recommendation to Claude is to make position-and-orientation task
+completion reproducible from a saved artifact, then test perturbation recovery
+and held-out objects. Retain the current CPU reference until that comparison
+is established. Keep the README gallery as illustrations of measured runs,
+with aggregate success claims supported by a separately defined evaluation.
+
+Verification: the full non-GPU suite at the reviewed checkout reports
+**68 passed, 1 failed** (152.52 s). The existing failure is
+`tests/test_retarget.py::test_every_hand_builds_with_a_floating_base`:
+`f5d6_left` is registered but absent from `hands/specs.py`, producing a
+`KeyError`. It is unrelated to the Shadow demonstrations. Rendering and
+documentation do not repair that missing closure specification; it remains
+an outstanding implementation issue.
