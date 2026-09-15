@@ -153,8 +153,8 @@ measurement, not on the previous stage having compiled:
 | stage | what it does | state |
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
-| 2. retarget | human contact points → robot joint trajectory | **done** — ~13 mm to the human's contacts, ~4 mm penetration |
-| 3. per-reference tracking | RL + trajectory optimisation, one controller per clip | gated on **G5** |
+| 2. retarget | human contact points → robot joint trajectory | **done** — ~13 mm to the human's contacts, 0 mm penetration after settling |
+| 3. per-reference tracking | RL + trajectory optimisation, one controller per clip | **not working** — env, feedforward and MPPI built; see below |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | not started |
 | 5. distillation | one neural tracking controller across references | not started |
 | 6. bimanual | both hands on one object | reference + retarget **done** for both hands; 136 of 291 sequences are bimanual |
@@ -227,6 +227,30 @@ fills both the cup's cavity and the handle's hole. Every handle grasp in the
 dataset would have been physically impossible, and a correctly placed hand reads
 as 20–40 mm of penetration that is not there. Convex decomposition brings the
 mug to 0.92× (`src/oppdef/human/decompose.py`).
+
+### Stage 3 does not work yet, and the reason is measured
+
+A retargeted pose is **not a grasp**, and both ways of trying to make it one
+fail for opposite reasons:
+
+| | contact force on a 0.2 kg mug | what happens |
+|---|---|---|
+| fingertips **on** the surface | ~0 N | a position servo is already at its target, applies no force, and the object free-falls from frame 0 |
+| fingertips **buried** 12.7 mm | **4469 N** | the constraint solver relaxes it and ejects the object — 28 mm and every contact lost in a 0.2 s settle |
+
+Building the grip by closing instead — pre-grasp, close, squeeze, the structure
+grasp synthesis in this repository already uses — reaches **81.6 N across 14
+contacts** and *still* loses the object: a squeeze strong enough to matter
+against Shadow's 0.4–1.5 N·m/rad finger servos extrudes a rigid object from a
+one-sided contact set. MPPI over feedforward corrections does not close the gap
+either (22 → 25 held frames of 119); local search cannot recover an object that
+has already been released.
+
+**This is the gap the learned tracking stage exists to fill**, and it is not
+fillable by a kinematic fit plus a heuristic. What is built and working is the
+scaffolding around it: the tracking environment, the exact SE(3) feedforward,
+the grip-establishment routine, and MPPI. What is missing is the optimiser that
+DexTrack actually runs.
 
 **Retargeting cannot be done in the dataset's world frame.** GRAB puts the
 object 0.8–1.7 m above the origin while the floating hand base has 0.6 m of
