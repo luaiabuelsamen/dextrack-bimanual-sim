@@ -2996,3 +2996,38 @@ The prerequisites were two structural fixes, both measured rather than assumed:
 fitting both hands in ONE scene so each sees the other (inter-hand contact 42 at
 11.7 mm -> 0.1 at 2.4 mm), which in turn needed a hinge-base variant of the
 bimanual scene, because a free joint leaves the solver no wrist DoF to move.
+
+## 2026-09-15 — stage 5 fixed by changing the LABEL, and PPO implemented
+
+**Distillation works once the target is a function of the state.** Distilling
+MPPI's per-step correction cannot work and the reason is measurable: regressing
+it on the observation gives a linear R^2 of **0.075 in sample**. A sampling
+optimiser's correction is dominated by its own noise draw. Labelling the
+ABSOLUTE command instead -- palm pose in the object frame plus finger targets --
+gives a target that is a function of the state by construction:
+
+    label                      train ratio   HELD-OUT OBJECT ratio
+    MPPI correction               0.265             2.235
+    absolute command              0.044             0.734
+
+Ratios are against predict-the-mean, so below 1 is better than a constant.
+13 episodes, 1525 transitions, 11 objects, held out by object. The correction
+label was worse than a constant on unseen objects; the absolute label
+generalises. Same data, same network, same split -- only the target changed.
+
+This is also the clearest statement of why DexTrack distils an RL policy rather
+than a trajectory optimiser's output, and it was worth getting wrong to find.
+
+**PPO is implemented** (`human/rl.py`): pooled environments over one shared
+model, Gaussian policy initialised near zero so it starts as the feedforward
+and only has to learn the correction, GAE, clipped objective, dense bounded
+reward with an alive bonus so that dropping the object is not the cheapest way
+to end an episode.
+
+**It does not yet beat the feedforward, and the reason is budget.** 40
+iterations x 40 steps x 10 envs is 16,000 control steps in 445 s -- about 36
+control steps a second, each of which is 33 MuJoCo steps. The policy came out at
+10412 mm against the feedforward's 8197 mm. DexTrack trains on millions of
+steps; 16k is not a fair test of PPO, it is a test of 16k steps. A longer run is
+the next measurement, and the honest cost on this machine is roughly 8 hours per
+million control steps.

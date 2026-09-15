@@ -41,8 +41,21 @@ class Episode:
     meta: dict = field(default_factory=dict)
 
 
-def record(rt, actions, start, steps=None) -> Episode:
-    """Replay a solved action sequence and log what a policy would have seen."""
+def record(rt, actions, start, steps=None, absolute=True) -> Episode:
+    """Replay a solved action sequence and log what a policy would have seen.
+
+    The label is the ABSOLUTE command, not MPPI's correction. Distilling the
+    correction does not work and the reason is measurable: regressing it on the
+    observation gives a linear R^2 of **0.075 in sample**, because a sampling
+    optimiser's per-step correction is dominated by its own noise draw rather
+    than by the state. A policy trained on it learns the training clips and
+    scores worse than a constant on held-out objects (ratio 2.235).
+
+    The absolute command -- palm pose in the object frame, plus finger targets --
+    is a function of the state by construction, which is what makes it a
+    regression target at all. DexTrack distils an RL policy for the same reason:
+    a policy is state-conditioned, a trajectory optimiser's output is not.
+    """
     import mujoco
 
     steps = rt.T - start if steps is None else steps
@@ -52,7 +65,23 @@ def record(rt, actions, start, steps=None) -> Episode:
         k = start + i
         O.append(rt.observe(k))
         a = actions[k] if actions is not None else np.zeros(rt.n_action)
-        A.append(a)
+        if absolute:
+            # what the hand is actually commanded to: the palm pose expressed in
+            # the OBJECT frame (so it does not encode where GRAB's subject
+            # stood) and the finger servo targets
+            op, oq = rt.true_obj_pose()
+            R = np.zeros(9)
+            mujoco.mju_quat2Mat(R, oq)
+            R = R.reshape(3, 3)
+            kk = int(np.clip(k, 0, rt.T - 1))
+            pp = R.T @ (rt.P[kk] + a[:3] - op)
+            rel = np.zeros(4)
+            mujoco.mju_mulQuat(rel, np.array([oq[0], -oq[1], -oq[2], -oq[3]]),
+                               rt.Q[kk])
+            fing = rt.ctrl_for(rt.vals[kk]) + rt._grip_offset + a[6:]
+            A.append(np.concatenate([pp, rel, fing]))
+        else:
+            A.append(a)
         rt.apply(k, a)
         for _ in range(rt.ctrl_every):
             mujoco.mj_step(rt.sim.model, rt.sim.data)

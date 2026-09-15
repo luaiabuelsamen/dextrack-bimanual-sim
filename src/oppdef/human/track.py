@@ -1260,7 +1260,7 @@ class BimanualTracker:
         d.mocap_pos[m.body_mocapid[self.sim.mocap_bid[sd]]] = bp
         d.mocap_quat[m.body_mocapid[self.sim.mocap_bid[sd]]] = bq
 
-    def command(self, sd, k):
+    def command(self, sd, k, delta=None):
         """Move side `sd`'s mocap target only; the weld drags the hand to it.
 
         Distinct from `place`, which writes qpos directly. Writing qpos every
@@ -1446,3 +1446,75 @@ class BimanualTracker:
             pe[i] = float(np.linalg.norm(self.obj_pose()[0] - self.ref_pos[k]))
         return Rollout(pos_err=pe, rot_err=np.zeros(steps),
                        dropped=bool(pe[-1] > 0.10), steps=steps)
+
+
+def mppi_bimanual(bt, horizon=4, samples=24, sigma_pos=0.004, sigma_rot=0.03,
+                  sigma_fin=0.05, rho=1.0, w_rot=0.10, w_drop=2.0, seed=0,
+                  start=0, progress=None):
+    """MPPI over BOTH wrists at once.
+
+    Two-handed grasp synthesis fixed the holding problem -- every sequence tried
+    now holds the object within 0.05-3.4 cm, where before they dropped it
+    outright -- and two of four then tracked. The other two hold and still lose
+    the object once it accelerates, which is exactly the one-handed pattern: a
+    grasp that survives gravity need not survive inertia, and a correction
+    searched in physics is what covers the difference.
+
+    The action is 12-dimensional (a translation and a rotation per wrist). The
+    fingers are deliberately NOT searched: they are already at a configuration
+    that holds, the search cost grows with the dimension, and letting a sampler
+    perturb 40 finger targets is a good way to lose a grasp that works.
+    """
+    rng = np.random.default_rng(seed)
+    scale = np.concatenate([np.full(3, sigma_pos), np.full(3, sigma_rot)] * 2)
+    n_a = 12
+
+    bt.reset_at(start)
+    plan = np.zeros((horizon, n_a))
+    pe = np.full(bt.T, np.nan)
+
+    def apply(k, a):
+        for i, sd in enumerate(("r", "l")):
+            bt.command(sd, k, delta=a[6 * i:6 * i + 6] if a is not None else None)
+
+    for k in range(start, bt.T):
+        st = (bt.sim.data.qpos.copy(), bt.sim.data.qvel.copy(),
+              bt.sim.data.mocap_pos.copy(), bt.sim.data.mocap_quat.copy())
+        noise = rng.normal(size=(samples, horizon, n_a)) * scale
+        cand = plan[None] + noise
+        cand[0] = plan
+        cand[1] = 0.0
+        cost = np.empty(samples)
+        for i in range(samples):
+            (bt.sim.data.qpos[:], bt.sim.data.qvel[:],
+             bt.sim.data.mocap_pos[:], bt.sim.data.mocap_quat[:]) = st
+            mujoco.mj_forward(bt.sim.model, bt.sim.data)
+            c = 0.0
+            for h in range(horizon):
+                apply(min(k + h, bt.T - 1), cand[i, h])
+                for _ in range(bt.ctrl_every):
+                    mujoco.mj_step(bt.sim.model, bt.sim.data)
+                kk = int(np.clip(k + h, 0, bt.T - 1))
+                e = float(np.linalg.norm(bt.obj_pose()[0] - bt.ref_pos[kk]))
+                c += e + (w_drop if e > 0.10 else 0.0)
+            cost[i] = c
+
+        lam = max(rho * float(np.std(cost)), 1e-6)
+        w = np.exp(-(cost - cost.min()) / lam)
+        w /= w.sum()
+        plan = np.einsum("i,iha->ha", w, cand)
+
+        (bt.sim.data.qpos[:], bt.sim.data.qvel[:],
+         bt.sim.data.mocap_pos[:], bt.sim.data.mocap_quat[:]) = st
+        mujoco.mj_forward(bt.sim.model, bt.sim.data)
+        apply(k, plan[0])
+        for _ in range(bt.ctrl_every):
+            mujoco.mj_step(bt.sim.model, bt.sim.data)
+        pe[k] = float(np.linalg.norm(bt.obj_pose()[0] - bt.ref_pos[k]))
+        plan = np.vstack([plan[1:], np.zeros(n_a)])
+        if progress and k % progress == 0:
+            print(f"    k={k}/{bt.T} {pe[k]*1000:.1f} mm", flush=True)
+
+    sel = ~np.isnan(pe)
+    return Rollout(pos_err=pe[sel], rot_err=np.zeros(int(sel.sum())),
+                   dropped=bool(pe[bt.T - 1] > 0.10), steps=int(sel.sum()))
