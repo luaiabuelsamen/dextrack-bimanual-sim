@@ -1239,6 +1239,59 @@ class BimanualTracker:
                 raise ValueError(f"side {sd}: unmapped joints {ns[:3]} vs {nf[:3]}")
         self.ctrl_every = int(round(seq.dt / m.opt.timestep))
 
+        # Actuator maps per side. Without these d.ctrl stays at zero and the
+        # position servos drive every finger to its OPEN configuration the
+        # instant stepping starts -- the hands held the object at reset only
+        # because `place` writes qpos directly, and then let go. Nothing in the
+        # rollout was commanding the fingers at all.
+        self._acts = {}
+        for sd in ("r", "l"):
+            pos = {j: i for i, j in enumerate(self.sim.jids[sd])}
+            am = []
+            for a in range(m.nu):
+                tgt = int(m.actuator_trnid[a, 0])
+                tt = m.actuator_trntype[a]
+                if tt == mujoco.mjtTrn.mjTRN_JOINT:
+                    am.append((a, [pos[tgt]] if tgt in pos else []))
+                elif tt == mujoco.mjtTrn.mjTRN_TENDON:
+                    lo = int(m.tendon_adr[tgt])
+                    idx = [int(m.wrap_objid[lo + w])
+                           for w in range(int(m.tendon_num[tgt]))]
+                    am.append((a, [pos[j] for j in idx if j in pos]))
+                else:
+                    am.append((a, []))
+            self._acts[sd] = am
+        self._dirs = None
+        self._grip_offset = np.zeros(m.nu)
+
+    def ctrl_for(self, sd, k):
+        """Servo targets that hold side `sd`'s retargeted configuration at k."""
+        m = self.sim.model
+        q = self._q_for(sd, k)
+        c = np.zeros(m.nu)
+        for a, idx in self._acts[sd]:
+            if idx:
+                c[a] = np.clip(np.sum(q[idx]), *m.actuator_ctrlrange[a])
+        return c
+
+    def set_ctrl(self, k):
+        """Command both hands' fingers for reference frame k.
+
+        Assigned by actuator OWNERSHIP, not by picking whichever side produced
+        a non-zero number: a servo target of exactly zero is a legitimate
+        target, and merging the two sides with a non-zero test silently drops
+        it.
+        """
+        m, d = self.sim.model, self.sim.data
+        c = np.zeros(m.nu)
+        for sd in ("r", "l"):
+            q = self._q_for(sd, k)
+            for a, idx in self._acts[sd]:
+                if idx:
+                    c[a] = np.clip(np.sum(q[idx]), *m.actuator_ctrlrange[a])
+        d.ctrl[:] = c + self._grip_offset
+        return c
+
     def _q_for(self, sd, k):
         qf = self.tr[sd].q[int(np.clip(k, 0, self.T - 1))]
         return np.array([qf[i] for i in self.jmap[sd]])
@@ -1350,6 +1403,7 @@ class BimanualTracker:
             self.place(sd, k)
         d.qpos[self.obj_q:self.obj_q + 3] = self.ref_pos[k]
         d.qpos[self.obj_q + 3:self.obj_q + 7] = self.ref_quat[k]
+        self.set_ctrl(k)
         mujoco.mj_forward(m, d)
         if separate:
             self.separate(self.offset)
@@ -1369,7 +1423,69 @@ class BimanualTracker:
                    if ({int(d.contact[i].geom1), int(d.contact[i].geom2)} & obj)
                    and ({int(d.contact[i].geom1), int(d.contact[i].geom2)} & hands))
 
-    def hold_test(self, k=0, seconds=0.8, settle=0.15):
+    def establish(self, k=0, target_n=8.0, open_by=0.25, step=0.02,
+                  settle_steps=8, max_close=1.0):
+        """Close both hands onto the object until the grip carries it.
+
+        The one-handed path has had this since G5's decision rule made it
+        mandatory; the two-handed path did not, which left it commanding the
+        retargeted finger ANGLES and hoping they happened to press. They need
+        not: a servo already at its target applies no force. Directions are
+        derived per side from that hand's own closure and exclude the wrist.
+
+        The object is pinned while the grip forms -- left free it is squeezed
+        out from between two hands even more readily than from one.
+        """
+        m, d = self.sim.model, self.sim.data
+        if self._dirs is None:
+            self._dirs = {sd: closing_direction(self.sim.side_view(sd), self._acts[sd])
+                          for sd in ("r", "l")}
+        direction = self._dirs["r"] + self._dirs["l"]
+        g = m.opt.gravity.copy()
+        m.opt.gravity[:] = 0.0
+        lo, hi = m.actuator_ctrlrange[:, 0], m.actuator_ctrlrange[:, 1]
+        base = self.set_ctrl(k)
+
+        d.ctrl[:] = np.clip(base - open_by * direction, lo, hi)
+        for _ in range(50):
+            mujoco.mj_step(m, d)
+        d.qpos[self.obj_q:self.obj_q + 3] = self.ref_pos[k]
+        d.qpos[self.obj_q + 3:self.obj_q + 7] = self.ref_quat[k]
+        d.qvel[:] = 0.0
+        mujoco.mj_forward(m, d)
+        pre = d.ctrl.copy()
+
+        a, reached = 0.0, 0.0
+        while a < max_close:
+            a += step
+            d.ctrl[:] = np.clip(pre + a * direction, lo, hi)
+            for _ in range(settle_steps):
+                mujoco.mj_step(m, d)
+                d.qpos[self.obj_q:self.obj_q + 3] = self.ref_pos[k]
+                d.qpos[self.obj_q + 3:self.obj_q + 7] = self.ref_quat[k]
+                d.qvel[self.obj_v:self.obj_v + 6] = 0.0
+                mujoco.mj_forward(m, d)
+            reached = sum(1 for i in range(d.ncon)
+                          if {int(d.contact[i].geom1), int(d.contact[i].geom2)}
+                          & set(self.sim.obj_gids))
+            tot = 0.0
+            f = np.zeros(6)
+            for i in range(d.ncon):
+                gg = {int(d.contact[i].geom1), int(d.contact[i].geom2)}
+                if gg & set(self.sim.obj_gids) and (
+                        gg & (set(self.sim.hand_gids["r"]) | set(self.sim.hand_gids["l"]))):
+                    mujoco.mj_contactForce(m, d, i, f)
+                    tot += abs(float(f[0]))
+            if tot >= target_n:
+                break
+        m.opt.gravity[:] = g
+        d.qvel[:] = 0.0
+        mujoco.mj_forward(m, d)
+        self._grip_offset = d.ctrl - self.set_ctrl(k)
+        d.ctrl[:] = self.set_ctrl(k) + self._grip_offset
+        return a, tot
+
+    def hold_test(self, k=0, seconds=0.8, settle=0.15, grip=None):
         """Do the two hands hold the object where the reference starts?
 
         The bimanual analogue of the one-handed hold test, and the score a
@@ -1379,6 +1495,8 @@ class BimanualTracker:
         """
         m, d = self.sim.model, self.sim.data
         self.reset_at(k)
+        if grip:
+            self.establish(k, target_n=grip)
         for _ in range(int(settle / m.opt.timestep)):
             mujoco.mj_step(m, d)
         p0 = self.obj_pose()[0].copy()
@@ -1441,6 +1559,7 @@ class BimanualTracker:
             k = start + i
             for sd in ("r", "l"):
                 self.command(sd, k)        # mocap targets only; the weld pulls
+            self.set_ctrl(k)
             for _ in range(self.ctrl_every):
                 mujoco.mj_step(m, d)
             pe[i] = float(np.linalg.norm(self.obj_pose()[0] - self.ref_pos[k]))
@@ -1476,6 +1595,7 @@ def mppi_bimanual(bt, horizon=4, samples=24, sigma_pos=0.004, sigma_rot=0.03,
     def apply(k, a):
         for i, sd in enumerate(("r", "l")):
             bt.command(sd, k, delta=a[6 * i:6 * i + 6] if a is not None else None)
+        bt.set_ctrl(k)
 
     for k in range(start, bt.T):
         st = (bt.sim.data.qpos.copy(), bt.sim.data.qvel.copy(),

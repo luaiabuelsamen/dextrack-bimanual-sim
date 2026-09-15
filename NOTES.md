@@ -3031,3 +3031,34 @@ control steps a second, each of which is 33 MuJoCo steps. The policy came out at
 steps; 16k is not a fair test of PPO, it is a test of 16k steps. A longer run is
 the next measurement, and the honest cost on this machine is roughly 8 hours per
 million control steps.
+
+## 2026-09-15 — stage 6 now tracks: the rollout was never commanding the fingers
+
+`BimanualTracker.rollout` set mocap targets and never touched `d.ctrl`. All 40
+actuators sat at zero, so the position servos drove every finger to its OPEN
+configuration the instant stepping began. The hands held the object at reset
+only because `place` writes qpos directly, and then let go. Nothing in the
+two-handed rollout was commanding the fingers at all.
+
+With that fixed, plus joint bimanual fitting and two-handed grasp synthesis, the
+four longest bimanual references go from losing the object outright to tracking
+it:
+
+    sequence                object          tracking error
+                                          start of day -> now
+    bowl_drink_1            bowl            160.9 m  ->   56 mm
+    camera_takepicture_2    camera          188.3 m  ->  117 mm
+    binoculars_see_1        binoculars       21.8 m  ->  165 mm
+    gamecontroller_play_1   gamecontroller   97.1 m  -> 1615 mm
+
+Three of four inside 200 mm, none in free fall. The grasp itself holds in all
+four (0.11-1.47 cm of drift over a 0.8 s hold test, against 1.3-998 cm before).
+
+Two-handed grip establishment is implemented and left OFF by default: it is not
+a uniform win. It raises camera's in-tolerance frames from 22/161 to 55/161 and
+costs gamecontroller (1615 mm -> 91903 mm) and binoculars (165 mm -> 21373 mm).
+Recorded with both numbers rather than tuned to the average.
+
+One merge bug worth keeping: combining the two sides' servo targets by taking
+whichever was non-zero silently drops a target of exactly zero, which is a
+legitimate target. Assigned by actuator ownership instead.
