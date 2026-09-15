@@ -39,11 +39,20 @@ class RLConfig:
     a_pos: float = 0.006
     a_rot: float = 0.04
     a_fin: float = 0.06
-    #: reward shaping
-    s_pos: float = 0.02          # metres, position tolerance
+    #: Reward shaping. The first version used a single exp(-e/0.02), which is
+    #: numerically flat past 5 cm: at 10 cm it is 0.007, so a policy that has
+    #: let the object drift gets no gradient telling it which way back. It
+    #: learned to stay ALIVE (0.98 of steps) without learning to track, and
+    #: came out at 10535 mm against the feedforward's 8197 mm over 614k steps.
+    #: Two scales now, one tight and one wide, so there is signal at both ends,
+    #: plus a small linear term that never saturates at all.
+    s_pos: float = 0.02          # metres, the precision term
+    s_wide: float = 0.10         # metres, the recovery term
+    w_wide: float = 0.6
+    w_lin: float = 2.0           # per metre, never saturates
     s_rot: float = 0.35          # radians
     w_rot: float = 0.35
-    alive: float = 0.20
+    alive: float = 0.10
     drop_m: float = 0.15
     seed: int = 0
 
@@ -134,6 +143,8 @@ class Pool:
             # available action "end the episode", which a drop conveniently
             # provides; the alive bonus is what removes that incentive.
             r = (np.exp(-pe / cfg.s_pos)
+                 + cfg.w_wide * np.exp(-pe / cfg.s_wide)
+                 - cfg.w_lin * pe
                  + cfg.w_rot * np.exp(-re / cfg.s_rot)
                  + cfg.alive)
             self.k[i] = k + 1
