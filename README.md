@@ -54,7 +54,7 @@ extend to two hands, then test under depth perception.
 | GRAB reconstruction | recall **0.919** against the dataset's own contact labels (0.158 under a transposed-rotation bug, since fixed) |
 | Convex decomposition | a mug handle is a genuine hole, not a filled hull — 0.92× volume |
 | Instrumentation | every rollout GIF carries penetration, grip force and contact count on its face, with a per-frame JSON manifest and a replay check |
-| Stages 1, 4, 7 | human reference, homotopy curriculum, depth→pose evaluation of a frozen tracker |
+| Stages 1, 4 | human reference, homotopy curriculum. *Stage 7 (depth → pose) is not on this list: its stored result was one clip from the approach frame, dropped in all three conditions — see [PIPELINE.md](docs/PIPELINE.md)* |
 
 **Stage 2 — the retarget — now has a number, and it is honest about what the
 number hides.** Hold rate **0.275 → 0.850** across 40 objects after a wrist

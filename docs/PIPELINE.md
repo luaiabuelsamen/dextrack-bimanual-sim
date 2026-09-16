@@ -205,7 +205,23 @@ moves — and it is kept only when it improves the whole reference (unguarded, i
 took one clip from 6 graspable frames to 1). Guarded: **16 → 38** graspable
 frames over six references, never worse.
 
-### Stage 7: the estimator's error is structured, and that is the finding
+### Stage 7: withdrawn — all three conditions dropped the object
+
+**Withdrawn 2026-09-15 (`1d138b7`).** The stored stage-7 result was a single
+reference, `mug_drink_1`, started from frame 0 — the approach, not the grasp —
+and the object was dropped in *all three* conditions: truth 101.5 mm (held
+0.22), depth 637.3 mm (held 0.02), noise 102.5 mm (held 0.10). Depth being 6×
+worse than noise of the same magnitude would have been a real finding — a
+structured estimator error, so the fix is perception rather than control — but
+the truth condition drops the object too, so all three measure the same
+failure. The second reference in the stage's default list had no graspable
+frame, so a stage built to compare three pose sources ran on one clip that
+failed in all of them. It is now seeded from stage 2's wrist offset like stage
+3, and records the seed's contact count and grip force, so a perception number
+cannot be read as a perception result when it is a burial being tracked. The
+section below is kept as the record of what was claimed.
+
+### Stage 7 as previously written
 
 The controller is frozen and only the object pose it reads is swapped. Scored on
 the truth in every condition, on `mug_drink_1`:
