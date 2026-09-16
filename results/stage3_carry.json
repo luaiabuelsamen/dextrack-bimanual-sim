@@ -1,0 +1,274 @@
+{
+ "seeds": "results/stage2_carry_robust_seeds.json",
+ "steps": 160000,
+ "envs": 12,
+ "jitter": 2,
+ "seed": 0,
+ "rows": [
+  {
+   "seq": "camera_browse_1",
+   "subject": "s1",
+   "object": "camera",
+   "start": 32,
+   "span": 32,
+   "starts": [
+    30,
+    31,
+    32,
+    33,
+    34
+   ],
+   "steps": 159744,
+   "horizon": 64,
+   "train_s": 684.1125056743622,
+   "feedforward": {
+    "mean_mm": 9.724638710414977,
+    "end_mm": 8.301942022617617,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 1.4111469679246262,
+    "end_contacts": 11,
+    "end_bodies": 5,
+    "end_sided": 0.39447576888519154,
+    "end_grip_n": 168.11896633346993,
+    "end_clean": true
+   },
+   "feedforward_after": {
+    "mean_mm": 9.724638710414977,
+    "end_mm": 8.301942022617617,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 1.4111469679246262,
+    "end_contacts": 11,
+    "end_bodies": 5,
+    "end_sided": 0.39447576888519154,
+    "end_grip_n": 168.11896633346993,
+    "end_clean": true
+   },
+   "policy": {
+    "mean_mm": 5.236967591658592,
+    "end_mm": 2.038718849991891,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 1.5360832059300618,
+    "end_contacts": 9,
+    "end_bodies": 5,
+    "end_sided": 0.13231266479666942,
+    "end_grip_n": 183.61574355106862,
+    "end_clean": true
+   }
+  },
+  {
+   "seq": "cubemedium_inspect_1",
+   "subject": "s1",
+   "object": "cubemedium",
+   "start": 42,
+   "span": 42,
+   "starts": [
+    40,
+    41,
+    42,
+    43,
+    44
+   ],
+   "steps": 159744,
+   "horizon": 64,
+   "train_s": 550.0517861843109,
+   "feedforward": {
+    "mean_mm": 7.103658447538445,
+    "end_mm": 6.380984378050113,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.4359766458843114,
+    "end_contacts": 7,
+    "end_bodies": 4,
+    "end_sided": 0.5112786791124995,
+    "end_grip_n": 13.181761840425281,
+    "end_clean": true
+   },
+   "feedforward_after": {
+    "mean_mm": 7.103658447538445,
+    "end_mm": 6.380984378050113,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.4359766458843114,
+    "end_contacts": 7,
+    "end_bodies": 4,
+    "end_sided": 0.5112786791124995,
+    "end_grip_n": 13.181761840425281,
+    "end_clean": true
+   },
+   "policy": {
+    "mean_mm": 3.4826735632679164,
+    "end_mm": 5.218590742064876,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.4534440124745795,
+    "end_contacts": 6,
+    "end_bodies": 4,
+    "end_sided": 0.6429910629956658,
+    "end_grip_n": 13.145655101479758,
+    "end_clean": true
+   }
+  },
+  {
+   "seq": "doorknob_use_1",
+   "subject": "s1",
+   "object": "doorknob",
+   "start": 32,
+   "span": 33,
+   "starts": [
+    30,
+    31,
+    32,
+    33,
+    34
+   ],
+   "steps": 159744,
+   "horizon": 64,
+   "train_s": 835.7068660259247,
+   "feedforward": {
+    "mean_mm": 51.33963530557025,
+    "end_mm": 84.4254021978352,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.7259606366516406,
+    "end_contacts": 12,
+    "end_bodies": 9,
+    "end_sided": 0.1769978901139805,
+    "end_grip_n": 49.851671891430286,
+    "end_clean": true
+   },
+   "feedforward_after": {
+    "mean_mm": 51.33963530557025,
+    "end_mm": 84.4254021978352,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.7259606366516406,
+    "end_contacts": 12,
+    "end_bodies": 9,
+    "end_sided": 0.1769978901139805,
+    "end_grip_n": 49.851671891430286,
+    "end_clean": true
+   },
+   "policy": {
+    "mean_mm": 37.39043676939411,
+    "end_mm": 69.76889829229826,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.735193737473331,
+    "end_contacts": 12,
+    "end_bodies": 9,
+    "end_sided": 0.17463110834864495,
+    "end_grip_n": 49.896773396482104,
+    "end_clean": true
+   }
+  },
+  {
+   "seq": "flashlight_lift",
+   "subject": "s1",
+   "object": "flashlight",
+   "start": 14,
+   "span": 15,
+   "starts": [
+    12,
+    13,
+    14,
+    15,
+    16
+   ],
+   "steps": 159744,
+   "horizon": 64,
+   "train_s": 561.200451374054,
+   "feedforward": {
+    "mean_mm": 18.091552682302858,
+    "end_mm": 16.647141484785173,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.5505049444910243,
+    "end_contacts": 3,
+    "end_bodies": 3,
+    "end_sided": 0.30146404810096855,
+    "end_grip_n": 12.898430283781721,
+    "end_clean": true
+   },
+   "feedforward_after": {
+    "mean_mm": 18.091552682302858,
+    "end_mm": 16.647141484785173,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.5505049444910243,
+    "end_contacts": 3,
+    "end_bodies": 3,
+    "end_sided": 0.30146404810096855,
+    "end_grip_n": 12.898430283781721,
+    "end_clean": true
+   },
+   "policy": {
+    "mean_mm": 5.613244900619376,
+    "end_mm": 4.020344056539743,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.5521484938650946,
+    "end_contacts": 3,
+    "end_bodies": 3,
+    "end_sided": 0.2987307162194482,
+    "end_grip_n": 12.345241158494677,
+    "end_clean": true
+   }
+  },
+  {
+   "seq": "pyramidlarge_inspect_1",
+   "subject": "s1",
+   "object": "pyramidlarge",
+   "start": 30,
+   "span": 30,
+   "starts": [
+    28,
+    29,
+    30,
+    31,
+    32
+   ],
+   "steps": 159744,
+   "horizon": 64,
+   "train_s": 556.2651462554932,
+   "feedforward": {
+    "mean_mm": 34.75108031568555,
+    "end_mm": 39.61637551363321,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.35448578792772567,
+    "end_contacts": 6,
+    "end_bodies": 4,
+    "end_sided": 0.32114804285568593,
+    "end_grip_n": 5.765554321515628,
+    "end_clean": true
+   },
+   "feedforward_after": {
+    "mean_mm": 34.75108031568555,
+    "end_mm": 39.61637551363321,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.35448578792772567,
+    "end_contacts": 6,
+    "end_bodies": 4,
+    "end_sided": 0.32114804285568593,
+    "end_grip_n": 5.765554321515628,
+    "end_clean": true
+   },
+   "policy": {
+    "mean_mm": 16.6753245015114,
+    "end_mm": 22.1355045995965,
+    "carried_frac": 1.0,
+    "end_held": true,
+    "end_pen_mm": 0.3522129852266546,
+    "end_contacts": 7,
+    "end_bodies": 4,
+    "end_sided": 0.2716421716231751,
+    "end_grip_n": 6.351462650478787,
+    "end_clean": true
+   }
+  }
+ ]
+}

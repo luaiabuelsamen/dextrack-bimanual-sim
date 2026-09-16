@@ -5313,3 +5313,22 @@ Open: the poses' quality beyond this gate (end-of-carry error 7-85 mm, mostly
 rotation slip); the count under more seeds; what keeps alarmclock, apple, bowl
 and bunny buried under every accepted offset when twenty others relax.
 
+### Stage 3 on the five robust carry seeds: PPO improves all five and keeps the grasp
+
+`stage3_carry.py`, 160k steps x 12 envs, horizon 64, from the carry start
+(+/-2 frames), evaluated deterministically from that start against the
+feedforward on the same state; feedforward re-rolled after training as a
+drift control (identical to the decimal on all five):
+
+    reference                  FF mean   PPO mean   FF end   PPO end   end state (both)
+    camera_browse_1             9.7        5.2       8.3       2.0     1.4-1.5 mm, 5 links, held
+    cubemedium_inspect_1        7.1        3.5       6.4       5.2     0.4 mm, 4 links, held
+    doorknob_use_1             51.3       37.4      84.4      69.8     0.7 mm, 9 links, held
+    flashlight_lift            18.1        5.6      16.6       4.0     0.6 mm, 3 links, held
+    pyramidlarge_inspect_1     34.8       16.7      39.6      22.1     0.4 mm, 4 links, held
+
+Five of five lower, 1.4-3.2x, ending exactly where the feedforward ends and
+out of the object. The first stage-3 rows here that track a grasp rather than
+a burial. Caveats as stated in STAGE2.md: scored at the training start, not
+held-out starts; handed a grasp, not asked to make one; n = 5.
+

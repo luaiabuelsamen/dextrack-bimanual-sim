@@ -99,14 +99,31 @@ above is not the hold rate the README headline was measured on: that was a
 static hold at one frame, this is a carry over the reference, and the two
 agree on nothing but the reference names.
 
-**Stage 3 on these seeds** is running as this is written
-(`experiments/tracking/stage3_carry.py`: PPO from the carry start frame,
-never from `grasp_frames()`, 160k steps in 12 environments, policy against
-feedforward on the identical start with the live end state). The 3000-step
-smoke test on the hammer matched its feedforward — 34 mm against 37 mm,
-both ending 0.5 mm out on 5–7 links — which is the first stage-3 row in
-this repository whose feedforward *and* policy end held and un-buried. The
-result on the five robust seeds is recorded in NOTES.md when it lands.
+**Stage 3 on these seeds — the first policies that improve a grasp.**
+`experiments/tracking/stage3_carry.py`: PPO from the carry start frame
+(±2 frames, never from `grasp_frames()`), 160k steps in 12 environments,
+horizon 64, deterministic evaluation from the carry start against the
+feedforward on the identical state, live end state on both
+(`results/stage3_carry.json`, policies in `results/ppo_carry/`):
+
+| reference | feedforward mean | PPO mean | feedforward end | PPO end | end state (both) |
+|---|---:|---:|---:|---:|---|
+| `camera_browse_1` | 9.7 mm | **5.2 mm** | 8.3 mm | 2.0 mm | 1.4–1.5 mm, 5 links, held |
+| `cubemedium_inspect_1` | 7.1 mm | **3.5 mm** | 6.4 mm | 5.2 mm | 0.4 mm, 4 links, held |
+| `doorknob_use_1` | 51.3 mm | **37.4 mm** | 84.4 mm | 69.8 mm | 0.7 mm, 9 links, held |
+| `flashlight_lift` | 18.1 mm | **5.6 mm** | 16.6 mm | 4.0 mm | 0.6 mm, 3 links, held |
+| `pyramidlarge_inspect_1` | 34.8 mm | **16.7 mm** | 39.6 mm | 22.1 mm | 0.4 mm, 4 links, held |
+
+Five of five: the policy lowers the tracking error, by 1.4× to 3.2×, and
+ends where the feedforward ends — same penetration to the hundredth of a
+millimetre, same links, held. Every stage-3 row before this either tracked a
+burial or dropped a grasp; these track a grasp and keep it. The feedforward
+was rolled again after training and matched itself to the decimal, so the
+gap is the policy's. What this is *not*: an evaluation from held-out start
+frames (the policy is scored at the start it trained around), a comparison
+against the earlier runs' budgets (same 160k steps, different horizon), or
+evidence that a policy can *make* a grasp — it was handed one. 9–14 minutes
+per reference on the Jetson.
 
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
