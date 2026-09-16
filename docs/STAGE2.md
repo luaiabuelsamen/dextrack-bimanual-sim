@@ -771,11 +771,11 @@ harmful. This run trained on the retarget with **no** wrist offset — the
 configuration stage 3 was wrongly starting from. On the mug, that offset *is*
 the burial. Remove it and nothing holds; keep it and you are tracking a burial.
 **That is a property of this clip's seed, not of the mug** (`f12889c`):
-`mug_drink_2`'s stage-2 seed is grasp-class — 9 contacts, 11.5 mm drop,
-equilibrium 0.05 — while `mug_drink_1`'s is the 20.6 mm / 13.6 kN burial. Same
-object, different sequence, opposite class. Which makes `mug_drink_2` the
-nearest thing to a controlled comparison in the set: the same object the
-buried policy tracked at 22.2 mm, seeded from a clean grasp.
+`mug_drink_2`'s stage-2 seed is 9 contacts, 11.5 mm drop, equilibrium 0.05 —
+and, corrected in `c3271e3`, **528 N of grip, 264× the object's weight**: a
+near-burial by force that contact count alone had filed as a grasp. Same
+object, different sequence, and *not* the clean control an earlier revision of
+this paragraph claimed. That comparison is withdrawn.
 
 **Two corrections to this section's own earlier entries.** *"Alive 0.839"* is
 `1 − mean(done)` over control steps, where `done` fires when position error
@@ -798,10 +798,17 @@ tracking **split by seed class**, with burial-seeded rows labelled *read these
 as tracking the contact solver*, and each row's end-of-rollout penetration,
 contacts and grip — naming only rows that both track under 50 mm *and* end
 un-buried, and printing *no row here is a tracking result* when there are none.
-The run is ordered by seed class then fewest contacts (`f12889c`), so the
-cleanest seeds train first: `flashlight_on_2` (3 contacts), `hammer_use_2` (4),
-`knife_lift` (4), `phone_call_1` (6, and only 2.8 N — thin on two axes),
-`mug_drink_2` (9); then `mouse_use_1` (mixed, 19); then the burials
+The run is ordered by seed class then fewest contacts (`f12889c`). **The
+classifier was corrected mid-run** (`c3271e3`): contact count alone had hidden
+both extremes inside "grasp" — `flashlight_on_2` at 3 contacts grips at
+**0.6 N, less than the object weighs**, and `mug_drink_2` at 9 contacts grips at
+528 N. Now: *burial* above 30 contacts or 200× weight, *thin* below one object
+weight, *grasp* at or under 12 contacts and 50× weight, *mixed* otherwise. Under
+those labels the first five are `flashlight_on_2` (**thin**, 0.6 N),
+`hammer_use_2` (**grasp**, 20.7 N, equilibrium 0.04 — the one reference that
+is a grasp by force as well as geometry), `knife_lift` (2.1 N) and
+`phone_call_1` (2.8 N, both at the thin end of grasp), `mug_drink_2`
+(near-burial by force); then `mouse_use_1` (mixed, 19); then the burials
 `camera_takepicture_2` (32), `gamecontroller_play_1` (57), `bowl_drink_1`
 (94); `binoculars_see_1` failed stage 2 outright at 1117 mm and trains
 unseeded, last — read nothing from that row. Two tail rows from the seed
