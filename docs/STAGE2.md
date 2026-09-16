@@ -35,6 +35,37 @@ rollout.
 
 ---
 
+## The reference is clean — a sub-millimetre wrap exists
+
+Worth establishing before anything else, because it bounds what stage 2 has to
+achieve. Minimum distance from any MANO hand vertex to any object vertex, in the
+GRAB reference itself:
+
+| reference | min gap | median during hold | frames < 1 mm |
+|---|---:|---:|---:|
+| `cup_lift` | **0.19 mm** | 0.99 mm | 194/467 |
+| `mug_drink_1` | **0.47 mm** | 1.51 mm | 18/167 |
+| `binoculars_see_1` | **0.14 mm** | 0.91 mm | 113/236 |
+| `flashlight_on_2` | **0.11 mm** | 0.81 mm | 112/194 |
+
+The human hand closes to a fraction of a millimetre and stops there, for
+hundreds of frames. Two consequences:
+
+1. **The 8–17 mm of robot penetration is the retarget's doing**, not a flaw
+   inherited from the data. The reference is not asking the robot to intersect
+   anything.
+2. **A sub-millimetre wrap of these exact objects exists**, because a human
+   performs one on every frame. So the earlier result — 3019 sampled wrist poses
+   under a 2 mm gate, none making contact — is a statement about the Shadow hand
+   and the space being searched, not about the objects being ungraspable.
+
+**Caveat, and it matters.** This is an unsigned point-cloud distance, the same
+quantity as `GrabSequence.contact_distance`. It cannot report a negative value,
+so it shows the human achieving sub-millimetre contact but does **not by itself
+prove non-penetration** — a hand a few millimetres inside would still report a
+small positive nearest-vertex distance. Establishing that properly needs a
+signed test against the convex decomposition, which has not been run.
+
 ## The defect
 
 The retarget matched the human's fingertip **positions** with no non-penetration
