@@ -4322,3 +4322,47 @@ released object would fall hundreds of metres. Either it was held until near the
 end, or it is resting on something, or the reference barely moves so the error
 against it stays small after release. Not measured; the row should carry no
 weight either way.
+
+## Both scenes pin the hand, and burial is self-cancelling
+
+A peer session proposed that the mocap weld is the structural difference from
+DexTrack: with the hand's base effectively rigid, an object can never push the
+hand out, so penetration costs nothing and only moves the object. That would
+explain "penetration is the grip", the closing failure against the weld, and the
+burial-tracks result in one stroke. Measured, the picture is broader and the
+predicted fix is weaker than it looks.
+
+**Both scenes pin the hand.** The fitting/hold scene is not a free base:
+
+    x_act / y_act / z_act     kp = 4000 N/m,  kv = -200,  force UNLIMITED
+    rx_act / ry_act / rz_act  kp =  200,      kv =  -20,  force UNLIMITED
+    mocap weld                solref [0.01, 1.0]
+                              solimp [0.9, 0.95, 0.001, 0.5, 2.0]
+
+(I first checked for actuators named `x`, `y`, `z` -- those are the JOINT names
+-- found none, and nearly recorded "the hinge base is a damped free body". The
+actuators are `x_act` and friends. Fifth wrong reading of the night caught by
+looking twice.)
+
+So stage 2's grasp search runs against a stiff servo-held base and stage 3
+against a stiff weld. The mechanism applies to the SEARCH as much as to
+tracking, and would explain stage 2's 35 kN bowl as well as stage 3's burial
+tracking.
+
+**But burial does not push.** `total_grip` sums the MAGNITUDES of the normal
+forces; it is not a net push. A buried hand has dozens of contacts pointing in
+opposing directions and their vector sum is near zero -- which is precisely what
+the equilibrium residual found when a settled 94-contact, 35.5 kN bowl read 0.00
+net force against a 1.90 placement reading. At kp = 4000 N/m a genuine 35 kN net
+push would displace the base by metres; the object moves 1.6 mm.
+
+So the forces are already cancelling and a softer base gives them less to push
+against, not more. Prediction, recorded before the experiment: softening the
+weld changes the burial numbers modestly and does not stop burial from tracking.
+
+Worth running anyway -- it is cheap, it is the clearest structural difference
+from DexTrack anyone has named, and my predictions have been wrong four times
+tonight on the stage 2/3 gap alone. What would make it decisive is logging the
+NET force on the hand rather than the summed magnitude: the same vector sum the
+equilibrium residual takes over the object, taken over the hand. Nothing in the
+pipeline measures that today, and it is the quantity base compliance acts on.
