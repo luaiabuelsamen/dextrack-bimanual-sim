@@ -576,15 +576,72 @@ to hook. A sphere needs opposed normals, which is exactly what a position
 objective cannot ask for. The failure class and the missing term are the same
 finding from two directions.
 
-Two further items from that session, landed in `2e4c951`: frame 0 is the
-approach on the **bimanual** path too — a reported 312 *km* tracking error on
-`gamecontroller_play_1` was an integrator artifact from a diverged sim, fixed
-by `BimanualTracker.grasp_frames` (start from the first self-holding frame) and
-truncating the rollout once the object is lost (6.6 mm drop, held; a failure
-now reports "131 mm over 8% of the clip" instead of a distance to the moon) —
-and the first controlled two-hand comparison, left hand *parked* rather than
-deleted so the model is identical: **131.0 mm over 8% two-handed against
-647.7 mm over 1% solo.**
+**And the score degrades its best input.** The drop-scored search made
+`apple_eat_1` — the one genuine equilibrium it was handed (0.034×, 9 contacts)
+— *worse*: raw drop 0.23 mm → 5.17 mm. Small, and it is the whole defect in one
+row. In the words of the session that recorded it (`e9a77d5`): *the score
+cannot tell a grasp from a burial, so it also cannot tell it already had a
+grasp — both are "held" and nothing prefers the first. A search that can
+degrade its best input is wandering inside a level set, and the burials are
+where the wandering ends up when the level set is wide.* Since the first
+candidate tried is always the unperturbed retarget, the search can only improve
+its own score; it got worse on the quantity that matters while improving the
+one it optimises.
+
+Two further items from that session, landed in `2e4c951` and `d517a85`. Frame
+0 is the approach on the **bimanual** path too — a reported 312 *km* tracking
+error on `gamecontroller_play_1` was an integrator artifact from a diverged
+sim, fixed by `BimanualTracker.grasp_frames` and truncating the rollout once
+the object is lost. And **stage 6 has a number that discriminates.** Eight
+bimanual references, four with a frame that holds on its own, all four hold
+after the two-handed search; each rerun with the left hand *parked* rather than
+deleted, so the model is identical:
+
+| reference | two-handed | left hand parked |
+|---|---:|---:|
+| `gamecontroller_play_1` | 97.4 mm / 14% | 2496.7 mm / 1% |
+| `binoculars_see_1` | 112.0 mm / 10% | **138.9 mm / 9%** |
+| `bowl_drink_1` | 64.5 mm / 54% | 2392.9 mm / 1% |
+| `teapot_pass_1` | 115.4 mm / 17% | 2498.5 mm / 2% |
+
+The row to lead with is binoculars showing **no two-handed advantage** — which
+is correct, since binoculars are held one-handed and the second hand steadies
+rather than carries — because a measure that said two hands always win would be
+measuring the harness. The percentages are low and honest: feedforward only,
+truncated at the frame the object is lost, stage 6 evaluated at stage 2's level
+of machinery. The gap is the result, not the absolute.
+
+**Three refuted hypotheses on the stage 2 → 3 gap** (`d517a85`). Stage 2 holds
+34/40, yet the distillation run discarded 4 of 6 references as having no
+graspable frame. Chased, and each candidate cause failed:
+
+1. *Stage 3 never closes the grip* — `reset_at` places the retargeted angles,
+   an open hand. True as description, irrelevant as cause: carrying stage 2's
+   achieved angles across (`adopt_grip`) changes the graspable-frame count by
+   **nothing** (0→0, 0→0, 23→23, 27→27, 6→3). It ships with its own refutation
+   in the docstring.
+2. *The grip needs establishing in the tracking scene* — **worse than
+   nothing.** `reset_at(k, grip=8.0)` takes `gamecontroller_play_1` from 30
+   graspable frames to **1**. The mocap body is welded to the hand, and closing
+   against that weld is a different problem from closing on a hinge base. **Do
+   not add grip establishment to the tracking reset without measuring first** —
+   it was the obvious next step after the raw-fit PPO run, and it is measured.
+3. *The scenes disagree about the grasp* — mostly not. `apple_eat_1` transfers
+   at 30.9 mm / 7 contacts / 10.1 N against 875 N in the scene that produced it.
+   Only `phone_call_1` fails outright, at 0 contacts.
+
+So the grip transfers, closing it again hurts, carrying it across buys nothing,
+and the gap is real and unexplained. That is the well-posed item between a
+stage 2 that works and a stage 3 that runs on more than two clips.
+
+**On measurement, from that investigation and this one.** Three probes there
+were wrong before any finding was true — a joint-name map returning 0/29
+because the mocap scene prefixes every joint with `hand_`, and a transfer of
+the seed `q` instead of the achieved state, which sent an open hand and read 0
+contacts — each producing a dramatic number ("3486 mm, the scenes disagree
+completely") that was entirely the probe's own error. Same family as the
+103 s/iteration above. **In this pipeline a large effect is a bug in the
+measurement until it survives being measured a second way.**
 
 **On the middle-phalanx term, one more correction.** The retraction above stands
 on its data: a joint-centre measurement cannot refute a per-finger surface
