@@ -1,0 +1,18 @@
+{
+ "hand": "shadow",
+ "steps": 160000,
+ "seed": 0,
+ "per_reference": [
+  {
+   "obj": "flashlight",
+   "seq": "flashlight_on_2",
+   "ppo_mm": 112.93284881858284,
+   "end_pen_mm": 4.857020184603934,
+   "end_grip_n": 207.21804155396296,
+   "end_contacts": 3,
+   "grasp_frames": 2,
+   "transitions": 148
+  }
+ ],
+ "held_out": []
+}

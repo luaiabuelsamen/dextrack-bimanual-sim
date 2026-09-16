@@ -25,6 +25,12 @@ def main():
     a = ap.parse_args()
     d = json.loads(Path(a.path).read_text())
     per = d.get("per_reference", [])
+    # The incremental writer emits the store dict verbatim, which names the
+    # object `obj`; the final writer renames it. Accept either rather than
+    # crash on a partial file -- reading partial results as they land is the
+    # whole point of writing them incrementally.
+    for x in per:
+        x.setdefault("object", x.get("obj", "?"))
     held = d.get("held_out", [])
 
     print(f"hand {d.get('hand','shadow')}, {d.get('steps'):,} steps/reference, "
@@ -43,12 +49,28 @@ def main():
             for r in json.loads(q.read_text())["rows"]:
                 seeds.setdefault(r["seq"], r)
 
+    # Classify on contact count AND grip force. Contact count alone calls
+    # mug_drink_2 a grasp on 9 contacts while it grips at 528 N -- 264x the
+    # object's own weight -- and calls flashlight_on_2 a grasp on 3 contacts at
+    # 0.6 N, which is LESS than the object weighs and is barely touching it.
+    # Both extremes matter: a policy handed the first is tracking a near-burial,
+    # and one handed the second has almost nothing to hold.
+    W = 0.2 * 9.81          # the object mass this pipeline standardises on
+
     def kind(n):
         r = seeds.get(n)
         if r is None or not r.get("held"):
             return "?", float("nan"), float("nan")
         nc, gn = r["n_contact"], r["grip_n"]
-        return ("BURIAL" if nc > 30 else "grasp" if nc <= 12 else "mixed"), nc, gn
+        if nc > 30 or gn > 200 * W:
+            k = "BURIAL"
+        elif gn < W:
+            k = "thin"
+        elif nc <= 12 and gn <= 50 * W:
+            k = "grasp"
+        else:
+            k = "mixed"
+        return k, nc, gn
 
     print(f"STAGE 3 -- per-reference PPO, {len(per)} references trained")
     if per:
@@ -64,6 +86,11 @@ def main():
                   f"{x.get('end_grip_n', float('nan')):9.0f}")
         print(f"  median {np.median(mm):.1f} mm   under 50 mm: "
               f"{int((mm < 50).sum())}/{len(mm)}")
+        for lab in ("thin",):
+            sel = [x for x in per if kind(x["seq"])[0] == lab]
+            if sel:
+                print(f"  from a THIN seed   ({len(sel)}): gripping less than the "
+                      f"object weighs -- little for a policy to hold")
         gr = np.array([x["ppo_mm"] for x in per if kind(x["seq"])[0] == "grasp"])
         bu = np.array([x["ppo_mm"] for x in per if kind(x["seq"])[0] == "BURIAL"])
         if len(gr):
