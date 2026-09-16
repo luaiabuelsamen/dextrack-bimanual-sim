@@ -1035,6 +1035,39 @@ question at any stage. The remaining differences from DexTrack are the
 retarget (which produces the buried pose) and the reward (which never asks
 for a grasp), and the sample scale.
 
+### The reward terms that would price a grasp — drafted, benchmarked, not landed
+
+Nothing in the PPO reward asks for a grasp: it prices position and rotation
+error and a drop, and a policy seeded with a light contact set re-buried to
+207 N to hold on while policies seeded with grasps let go. Branch
+`rl-penetration-cost` (`b14c384`) adds, all default 0: a hinge cost past
+3 mm of penetration or 10× object weight of force, capped at one drop
+penalty so it cannot make letting go optimal; a hold bonus that pays for a
+persisting contact set on ≥2 distinct hand bodies at ≥1 object weight of
+normal force, capped so it cannot pay for burial and documented as a proxy
+(44.8 N has been measured on a free-falling object); per-iteration logging
+of penetration, held fraction, grip, position error and both terms beside
+`alive`; an `EndState` from `evaluate`; and a test that loads `rl.py` from
+the previous commit and asserts bit-for-bit identical rewards at defaults.
+
+It does not land yet, because of what it costs. Benchmarked on a quiet
+machine (`experiments/infra/bench_rl_step.py`, alternating reps, medians),
+against 3216767 on the two many-contact seeds:
+
+| seed (s2, worst case) | 3216767 | branch, force read gated | branch, always-on |
+|---|---:|---:|---:|
+| gamecontroller, 45 contacts / 12 bodies, 15.4 kN | 6.743 s/iter | 7.098 (**×1.053**) | 7.148 (×1.060) |
+| bowl, 40 contacts / 6 bodies, 11.9 kN | 13.914 s/iter | 15.013 (**×1.079**) | 15.107 (×1.086) |
+
+Gating `mj_contactForce` buys under 1 %; the other 5–8 % is the per-contact
+Python loop reading depth, geom and body for every env on every step — the
+same shape as the per-actuator loop that once cost 11 % of wall clock. The
+reward is provably unchanged at defaults and training would be 5–8 % slower,
+which is exactly the regression nobody would look for. Being fixed on the
+branch by vectorising the summary over the contact arrays and computing it
+only when a term is on or the iteration is logged; re-benchmarked on the
+same seeds at the next quiet window before anything lands.
+
 ## Look at the pose before trusting the number
 
 `experiments/tracking/inspect_pose.py` renders a configuration from two angles
