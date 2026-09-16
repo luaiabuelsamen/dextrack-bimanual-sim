@@ -4795,3 +4795,26 @@ So the asymmetry is now stated precisely: a policy given more data and a valid
 grasp still drops the object, while a policy given burial sometimes tracks and
 sometimes does not. Sample size does not rescue the grasp arm. It may well be
 what separates the two burial arms, which is a smaller and different question.
+
+### knife reproduces bit-for-bit, which retroactively supports the 0.850 diagnosis
+
+`knife_lift` is subject-matched in both runs, so v2 trains it from the identical
+seed the first run used. It returns 87.65951234648011 mm, 1 start frame, 25
+transitions, ending 0.00/0/0 -- the old row to every digit.
+
+It carries nothing about the seed-class question. What it does give is a free
+determinism check on the whole stage-3 path -- retarget, wrist offset,
+grasp_frames, PPO with its threaded pool, harvest, evaluate -- across a seed-file
+rewrite and a run boundary.
+
+That matters for an earlier entry. The stage-2 sweeps disagreed on three of five
+shared references, and I attributed it to code having changed between them rather
+than to nondeterminism, on the strength of an in-process repeat check. This is
+the same conclusion from the other side and across processes: when the code does
+not change, this pipeline reproduces exactly. So the 0.850's irreproducibility
+was a version difference, as diagnosed, and the clean sweep at frozen HEAD is the
+right remedy rather than a hope that the number settles down.
+
+It also means every difference between the old run and v2 is attributable to the
+seed change, since nothing else moved. That is what makes the camera and mouse
+within-clip pairs interpretable at all.
