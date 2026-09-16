@@ -4728,3 +4728,38 @@ landing was the right one: at defaults the reward would have been provably
 unchanged while training ran 5-8% slower, which is the regression nobody looks
 for. The fix is to vectorise the summary over the contact arrays with numpy and
 gate the whole thing, not just the force call.
+
+## The contamination produced a controlled experiment we could not have designed
+
+`camera_takepicture_2` has now been trained twice on the SAME s1 clip with two
+different wrist offsets, and nothing else differing:
+
+    wrist offset              starts   tracking    end state
+    s2, burial (32 con, 5800 N)   28    34.6 mm    9.32 mm inside, 8 con, 509 N
+    s1, grasp  ( 2 con,  6.0 N)   33  2587.0 mm    0.00 mm, 0 contacts, 0 N
+
+Same reference, same recording, same horizon, same seed, same everything except
+the initial hand pose -- and the grasp arm has MORE training data, 33 start
+frames against 28. The burial tracks at 34.6 mm and ends inside the object. The
+grasp drops it.
+
+This is the within-reference control that every version of the seed-class
+question has lacked, and it exists only because the seq-name collision
+accidentally trained the same clip from another recording's grasp. The bug cost
+a night of mislabelled results and produced the one comparison that settles the
+confound.
+
+**Sample size is not the explanation.** The grasp-seeded arm has more data and
+fails. The 33 start frames also exceed every row in the old run except none --
+it is the largest start set in either run, on the lightest seed (2 contacts,
+6.0 N, equilibrium 0.01), on the one reference where the FEEDFORWARD already
+tracked at 36.0 mm.
+
+That last detail is worth stating on its own: on this clip the feedforward
+carries the object to 36 mm and a policy trained from a physically valid grasp
+carries it to 2587 mm. The policy is worse than no policy. Whatever PPO learns
+from a light contact set here, it is not how to keep hold of the object.
+
+Five more grasp-seeded rows follow. If they agree, the statement is that in this
+pipeline a policy can track only what it is handed buried, and that a valid
+grasp is not something it can learn to keep.

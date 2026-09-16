@@ -1,0 +1,19 @@
+{
+ "hand": "shadow",
+ "steps": 160000,
+ "seed": 0,
+ "per_reference": [
+  {
+   "obj": "camera",
+   "seq": "camera_takepicture_2",
+   "subject": "s1",
+   "ppo_mm": 2587.1408155807076,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 33,
+   "transitions": 891
+  }
+ ],
+ "held_out": []
+}
