@@ -3635,3 +3635,46 @@ made to produce OPPOSING contacts, and the natural next measurement is epsilon
 on the valid contact sets rather than the penetrated ones. This project is
 called opposition-deficit; it turns out the DexTrack pipeline built inside it
 never checked for opposition.
+
+## 2026-09-15 — epsilon = 0. The retarget produces non-force-closed contact sets.
+
+Ferrari-Canny computed from MuJoCo's own narrowphase, all object geoms, contact
+normals oriented into the object, friction from the model:
+
+    reference          state                   contacts   epsilon   grip
+    binoculars_see_1   frame 0 (penetrated)        6       0.00000  2472.5 N
+    binoculars_see_1   good frame, direct          6       0.06889    21.5 N
+    binoculars_see_1   good frame, closed          1       0.00000     2.6 N
+    mug_drink_1        frame 0 (penetrated)        5       0.00000  1194.9 N
+    mug_drink_1        good frame, direct          9       0.00000    71.3 N
+    mug_drink_1        good frame, closed          4       0.00000    42.1 N
+
+**Zero in five of six**, including the valid, non-penetrating, 42 N
+configurations. Epsilon zero means the origin is not interior to the convex hull
+of the contact wrench set: the grasp cannot resist an arbitrary wrench, however
+hard it presses. That is "the contacts do not oppose", measured with the metric
+this repository has had since the synthetic project and which nothing in
+`human/` has ever imported.
+
+It also explains the whole day in one line. A non-force-closed contact set
+cannot hold an object no matter how much normal force it generates, so:
+penetration was the pipeline's only way of faking a grasp, removing it exposed
+the absence, raising the force target pressed harder in a direction that does
+not hold, and every downstream stage was learning to track an object that was
+never actually held.
+
+**One discrepancy I cannot resolve and will not paper over.** A peer session
+computing epsilon on the same penetrated configurations, with its own multi-geom
+implementation, reported 0.155-0.344. I get 0.00000 on those. We are using
+different code and quite possibly a different normal-sign or friction
+convention, and I have not reconciled them. What is internally consistent in MY
+numbers is the comparison that matters here -- the valid closed configurations
+are zero -- but the penetrated row should not be quoted from this table until
+the two implementations are reconciled.
+
+**Next measurement**, and it is now a single well-posed question: can the fit be
+made to produce contact sets with epsilon > 0? The machinery exists
+(`grasping/epsilon.py`, `wrench_set`, `epsilon_from_wrenches`), the cost is one
+narrowphase pass plus a convex hull, and it is the term the objective has never
+had. Held-ness, tracking error, penetration and equilibrium residual between
+them cannot distinguish a grasp that resists a wrench from one that presses.
