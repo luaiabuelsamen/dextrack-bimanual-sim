@@ -4649,3 +4649,41 @@ Also worth noting as a small vindication of the subject-keying fix: the readout
 now prints `?` for the seed class of every row in this run, because the stored
 rows predate the subject field. It refuses to label rather than mislabel, which
 is what it should do.
+
+## The corrected seeds invert the population
+
+Subject-qualified seeds for g9's ten picks, against the contaminated ones the
+first run actually trained on:
+
+    reference                s2 (used, wrong)              s1 (correct)
+    mouse_use_1              19 con   4335.4 N BURIAL       4 con     3.6 N grasp
+    phone_call_1              6 con      2.8 N grasp        3 con     7.5 N grasp
+    gamecontroller_play_1    57 con  14042.2 N BURIAL       5 con     1.9 N thin
+    camera_takepicture_2     32 con   5800.5 N BURIAL       2 con     6.0 N grasp
+    binoculars_see_1          5 con    379.3 N FAILED       5 con   379.3 N FAILED
+    hammer_use_2              4 con     20.7 N grasp        7 con    29.9 N grasp
+    knife_lift                4 con      2.1 N grasp        4 con     2.1 N grasp
+    flashlight_on_2           3 con      0.6 N thin         8 con    35.4 N grasp
+    bowl_drink_1             94 con  35521.5 N BURIAL      94 con 35521.5 N BURIAL
+    mug_drink_2               9 con    528.2 N BURIAL       8 con  3250.8 N BURIAL
+
+    contaminated:  5 BURIAL, 3 grasp, 1 thin, 1 failed
+    corrected:     6 grasp,  2 BURIAL, 1 thin, 1 failed
+
+The population is inverted. The run whose results were reported all night was
+trained predominantly from burials; the corrected run trains predominantly from
+grasps. Three references flip class outright -- mouse from 4335 N to 3.6 N,
+gamecontroller from 14,042 N to 1.9 N, camera from 5800 N to 6.0 N -- and
+flashlight moves the other way, from a 0.6 N touch that was below the object's
+own weight to a 35.4 N grasp.
+
+Only three rows are unchanged, and they are the three that were subject-matched
+all along: binoculars (failed), knife, bowl. `mug_drink_2` stays BURIAL under
+both but is deeper when correct, 528 N against 3251 N.
+
+So v2 is not the same experiment with better labels. It is the first time this
+pipeline trains a full set of policies from grasps rather than burials, which is
+precisely the cell every version of the seed-class question has lacked. If all
+six grasp-seeded policies drop the object, that is the cleanest statement of the
+problem this project has produced. If any tracks and ends un-buried, it is the
+first such row in the repository.
