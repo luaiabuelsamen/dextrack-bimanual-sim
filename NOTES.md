@@ -4865,3 +4865,37 @@ a policy that MANUFACTURED a grip, driving contact force to 207 N and burying
 4.86 mm, and held on. The 35.4 N seed, a real grasp, let go. It is the only case
 in either run of a policy acquiring contact rather than losing it. Recorded as
 an anomaly, not as evidence: one row, and the thin arm had 2 start frames.
+
+## Sample size is now ruled out in both directions
+
+v2's first burial row settles what the grasp rows could only half-answer:
+
+    seed class   reference          starts   tracking      end state
+    BURIAL       mug_drink_2 (s1)      4       26.7 mm     11.10 mm in, 9 con, 1574 N
+    grasp        hammer_use_2 (s1)    11    32,462.6 mm     0.00 / 0 / 0
+    grasp        mouse_use_1 (s1)     32   116,129.9 mm     0.00 / 0 / 0
+    grasp        camera_tp_2 (s1)     33     2,587.1 mm     0.00 / 0 / 0
+
+A burial-class seed with **four** start frames tracks to 26.7 mm and finishes
+with the hand 11 mm inside the object at 802x its weight. Grasp-class seeds with
+eleven, thirty-two and thirty-three start frames all let the object go.
+
+So the confound is dead in both directions. More data does not rescue a grasp,
+and very little data does not prevent a burial from tracking. Whatever separates
+these rows, it is not how much the policy saw.
+
+It also weakens the one place the sample-size story survived. Mouse's burial arm
+dropped on 2 start frames and I recorded "burial with data tracks, burial
+without data does not" as the live remaining question; mug_drink_2 tracks on 4,
+which is barely more. So mouse's burial arm is more likely to be something about
+that clip -- a flat mouse on a surface -- than a data threshold.
+
+`mug_drink_2` has also now been trained from two different burial seeds on the
+same clip, and both track and both end buried:
+
+    s2 seed,  528 N, 27 starts    5.7 mm    ends 13.18 mm in, 15 con, 4834 N
+    s1 seed, 3251 N,  4 starts   26.7 mm    ends 11.10 mm in,  9 con, 1574 N
+
+Four within-clip pairs now exist (camera, mouse, hammer, flashlight) plus this
+same-class pair, and across all of them the pattern that holds is the seed's
+CLASS, not its start count, not its subject, and not the clip.
