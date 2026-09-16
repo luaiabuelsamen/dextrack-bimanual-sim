@@ -104,6 +104,28 @@ def main(a):
         if len(picked) >= a.n:
             break
 
+    # Train the grasp-class seeds FIRST. The references are otherwise in
+    # inventory order and each costs ~25 minutes, so the one question that
+    # matters -- can a policy track from a REAL grasp without burying the hand
+    # -- would be answered by whichever clean seed happened to sort late. The
+    # burial-seeded references will track well and tell us what a peer session
+    # already measured on the mug; they can go last. Within the grasp class,
+    # fewest contacts first, which puts the cleanest seed at the head.
+    # Selection is unchanged: `picked` is still the top --n by hold length,
+    # only the ORDER changes, so this cannot alter which references are run.
+    _rank = {"grasp": 0, "mixed": 1, "burial": 2, "unseeded": 3}
+
+    def _cls(nm):
+        row = grips.get(nm)
+        if row is None or not row.get("held"):
+            return "unseeded", 10_000
+        n = row["n_contact"]
+        return ("burial" if n > 30 else "grasp" if n <= 12 else "mixed"), n
+
+    picked.sort(key=lambda r: (_rank[_cls(r["seq"])[0]], _cls(r["seq"])[1]))
+    print("order: " + ", ".join(f"{r['seq']}({_cls(r['seq'])[0]})"
+                                for r in picked), flush=True)
+
     store, envs = [], []
     for i, r in enumerate(picked):
         t0 = time.time()
