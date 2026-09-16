@@ -4287,3 +4287,38 @@ Also: the Makefile sets `PYTHONPATH := $(CURDIR)`, the repo root, not `src`. In
 a git worktree that silently tests the MAIN checkout's `oppdef` through the
 editable install, so a worktree needs `PYTHONPATH=src:.` explicitly or its test
 results describe the wrong code.
+
+### The burial effect is confounded with training-set size
+
+Three stage-3 rows in, the binding constraint is not seed class but how much
+data each policy got:
+
+    reference          seed class   ppo          grasp frames   transitions
+    flashlight_on_2    THIN         112.9 mm          2             148
+    hammer_use_2       GRASP      80250.1 mm          4             566
+    knife_lift         thin-end      87.7 mm          1              25
+
+Every one of these policies was trained from a handful of start states, because
+`grasp_frames` returns single digits for them. The burial-seeded references
+coming later in the run have far more: gamecontroller 30, bowl 27, apple 23.
+
+So when those rows track well -- and the mug 2x2 says they will -- there will be
+TWO differences between them and hammer, not one. They start buried, and they
+are trained on five to thirty times as many start states. The burial effect and
+the sample-size effect run in the same direction, and this run cannot separate
+them.
+
+Writing it down before the rows land, because afterwards it will be tempting not
+to. The clean experiment is a burial-seeded reference trained on only the number
+of start frames its grasp-seeded counterpart had, or a grasp-seeded reference
+with its start set padded the way the peer session padded the mug's (they
+overrode `grasp_frames` and trained on all 23 candidate starts rather than the
+2 it accepted). The second is cheaper and is the one to run.
+
+Note also that knife's 87.7 mm mean is unexplained. Its end state matches
+hammer's exactly (0.00 mm, 0 contacts, 0 N) but its error is three orders of
+magnitude smaller, over roughly thirteen seconds of simulated time in which a
+released object would fall hundreds of metres. Either it was held until near the
+end, or it is resting on something, or the reference barely moves so the error
+against it stays small after release. Not measured; the row should carry no
+weight either way.
