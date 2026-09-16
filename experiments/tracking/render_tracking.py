@@ -393,7 +393,10 @@ def render(name, cache, out):
                 mean_contact_force_N_replay=float(np.mean(diag["contact_force_N_replay"])),
                 max_contact_force_N_replay=float(max(diag["contact_force_N_replay"])),
                 diagnostics_note=("*_replay columns are read from a fresh placement of each saved "
-                                  "state (qpos + mj_forward): geometry is exact, force is the "
+                                  "state (qpos + mj_forward): penetration and contact count are "
+                                  "geometric (fixed by qpos, restored exactly) and survive replay "
+                                  "unchanged; force depends on velocity and the warm-started "
+                                  "constraint solution, which replay does not reconstruct, so it is the "
                                   "placement's resolving force, and placement_residual is the "
                                   "equilibrium residual OF A FRESH PLACEMENT (hundreds of x by "
                                   "construction; the live residual of a tracking rollout is ~0.4x). "
