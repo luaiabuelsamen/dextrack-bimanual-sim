@@ -1045,6 +1045,7 @@ read as they land, end states live (`results/g9_ppo_distill_v2.json`):
 | `camera_takepicture_2` | grasp — 2 contacts, 6.0 N, eq 0.01 | **33** | 891 | 2587 mm | 0.00 mm | **0** | **0 N** |
 | `phone_call_1` | grasp — 3 contacts, 7.5 N, eq 0.10 | **1** | 120 | 42,603 mm | 0.00 mm | 0 | 0 N |
 | `mouse_use_1` | grasp — 4 contacts, 3.6 N, eq 0.10 | **32** | **1176** | 116,130 mm | 0.00 mm | **0** | **0 N** |
+| `knife_lift` ✓ | grasp — 4 contacts, 2.1 N | **1** | 25 | 87.7 mm | 0.00 mm | 0 | 0 N |
 
 **Camera drops — and it is a within-reference control, not a fresh row.**
 The seq-name collision means the same s1 camera clip has now been trained
@@ -1074,7 +1075,11 @@ consistent with camera, not independent evidence. Mouse (row 3) is
 independent evidence: 32 start frames and 1176 transitions — the
 best-supported policy trained tonight on either run — from a 4-contact,
 3.6 N seed at equilibrium 0.10, and it drops: 116 m, no contact at the end.
-Two well-supported grasp-class rows, two drops.
+Two well-supported grasp-class rows, two drops. Knife (row 4) was
+subject-matched in both runs and reproduces the old row **to the digit**
+(87.65951 mm, 1 start frame, 25 transitions, 0/0/0) — one start frame, so
+it carries nothing about the question, but it is a free determinism check
+on the whole stage-3 path across the seed-file rewrite.
 
 **Mouse is a second within-clip pair, and the two pairs disagree about the
 burial arm:**
