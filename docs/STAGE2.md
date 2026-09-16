@@ -1049,7 +1049,9 @@ read as they land, end states live (`results/g9_ppo_distill_v2.json`):
 | `gamecontroller_play_1` | thin — 5 contacts, 1.9 N (below object weight) | 3 | 276 | 51,778 mm | 0.00 mm | 0 | 0 N |
 | `hammer_use_2` | grasp — 7 contacts, 29.9 N, eq 0.16 | **11** | **684** | 32,463 mm | 0.00 mm | **0** | **0 N** |
 | `flashlight_on_2` | grasp — 8 contacts, 35.4 N (strongest in the set) | 4 | 131 | 218.9 mm | 0.00 mm | 0 | 0 N |
-| `mug_drink_2` | **burial** — 8 contacts, 3251 N | **4** | — | **26.7 mm** | **11.10 mm** | 9 | **1574 N (802×)** |
+| `mug_drink_2` | **burial** — 8 contacts, 3251 N | **4** | 144 | **26.7 mm** | **11.10 mm** | 9 | **1574 N (802×)** |
+| `bowl_drink_1` ✓ | **burial** — 94 contacts, 35,522 N | 27 | 711 | **8.2 mm** | **17.50 mm** | 81 | **29,118 N (14,850×)** |
+| `binoculars_see_1` ✓ | — (failed stage 2; unseeded) | 1 | 145 | — | 0.00 mm | 0 | 0 N |
 
 **Camera drops — and it is a within-reference control, not a fresh row.**
 The seq-name collision means the same s1 camera clip has now been trained
@@ -1139,7 +1141,17 @@ both ending buried: s2 seed 528 N, 27 starts → 5.7 mm ending 13.18 mm
 inside at 4834 N; s1 seed 3251 N, 4 starts → 26.7 mm ending 11.10 mm inside
 at 1574 N. Across the four within-clip pairs and this one, **the thing that
 predicts the outcome is the seed's class** — not its start count, not its
-subject, not the clip. Bowl is the last burial row; binoculars is unseeded.
+subject, not the clip. Bowl (subject-matched, so identical to its old row
+to the digit) confirms it: 8.2 mm, ending 17.50 mm inside on 81 contacts at
+29 kN. Binoculars is unseeded and reproduces its old row too.
+
+**v2 complete, ten rows.** Six grasp-class seeds and one thin seed: seven
+policies, seven objects on the floor. Two burial-class seeds: two policies
+that track (26.7 mm, 8.2 mm) and end with the hand 11–17 mm inside the
+object. No row tracks under 50 mm and ends un-buried. Shadow right hand,
+GRAB, 160,000 control steps per reference in 12 environments; the separate
+845k-step run on a valid `mug_drink_1` grasp (above) also dropped from
+every start.
 
 **Mouse is a second within-clip pair, and the two pairs disagree about the
 burial arm:**
