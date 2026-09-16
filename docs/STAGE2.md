@@ -1048,6 +1048,7 @@ read as they land, end states live (`results/g9_ppo_distill_v2.json`):
 | `knife_lift` ✓ | grasp — 4 contacts, 2.1 N | **1** | 25 | 87.7 mm | 0.00 mm | 0 | 0 N |
 | `gamecontroller_play_1` | thin — 5 contacts, 1.9 N (below object weight) | 3 | 276 | 51,778 mm | 0.00 mm | 0 | 0 N |
 | `hammer_use_2` | grasp — 7 contacts, 29.9 N, eq 0.16 | **11** | **684** | 32,463 mm | 0.00 mm | **0** | **0 N** |
+| `flashlight_on_2` | grasp — 8 contacts, 35.4 N (strongest in the set) | 4 | 131 | 218.9 mm | 0.00 mm | 0 | 0 N |
 
 **Camera drops — and it is a within-reference control, not a fresh row.**
 The seq-name collision means the same s1 camera clip has now been trained
@@ -1089,8 +1090,26 @@ well-supported independent drop: 11 start frames, 684 transitions, from
 the heaviest genuine grasp so far (7 contacts, 29.9 N, equilibrium 0.16) —
 32 m, no contact at the end. Its old-run arm was also grasp-class (s2's
 20.7 N seed, 4 starts) and also dropped, so hammer is a pair in which
-*both* arms are grasps and both let go. Six rows, six drops; flashlight
-remains.
+*both* arms are grasps and both let go. Flashlight (row 7), the strongest
+grasp in the set at 35.4 N on 8 contacts, drops on 4 start frames; its
+218.9 mm mean error with no contact at the end is the same shape as
+knife's 87.7 mm — a dropped object whose mean error stayed small for a
+reason not measured — and carries the same weight.
+
+**All six grasp-class seeds drop, and so does the thin one.** Seven rows,
+seven policies, seven objects on the floor at the end of the rollout: 0.00
+mm, 0 contacts, 0 N in every case. Three of the six are well-supported
+(camera 33 starts / 891 transitions, mouse 32 / 1176, hammer 11 / 684 —
+the three largest training sets of the night); two are within-clip pairs
+whose burial arm behaved differently; one (hammer) is a pair in which both
+arms were grasps and both dropped. This is the cleanest statement of the
+problem this project has produced, and it is a result: **a policy trained
+from a physically valid grasp lets go of the object, and more data does
+not change that.** Nothing in the reward asks for a grasp, and a policy
+cannot keep what it is not paid to keep. The burial arm remains
+heterogeneous (camera's tracks, mouse's does not) and is not part of the
+claim. The remaining three rows are the two burial seeds and the unseeded
+binoculars, read as end states only.
 
 **Mouse is a second within-clip pair, and the two pairs disagree about the
 burial arm:**
