@@ -29,43 +29,9 @@ from scipy.spatial import cKDTree
 from oppdef import paths
 from oppdef.human import grab
 
-CONTACT_M = 0.005     # 5 mm: GRAB's own contact threshold
-MIN_FRAMES = 5        # a contact shorter than this is a brush, not a grasp
-
-
-def _tree(seq, cache: dict) -> cKDTree:
-    if seq.obj not in cache:
-        cache[seq.obj] = cKDTree(seq.obj_mesh[0])
-    return cache[seq.obj]
-
-
-def contact_mask(seq, tree, side: str, thresh: float = CONTACT_M) -> np.ndarray:
-    """(T,) bool -- is this hand within `thresh` of the object surface."""
-    h = seq.hands.get(side)
-    if h is None or h.verts is None:
-        return np.zeros(seq.T, bool)
-    out = np.zeros(seq.T, bool)
-    for k in range(seq.T):
-        local = seq.to_object(h.verts[k], k)           # world -> object frame
-        out[k] = tree.query(local, k=1)[0].min() < thresh
-    return out
-
-
-def longest_run(mask: np.ndarray) -> tuple[int, int]:
-    """(start, length) of the longest True run."""
-    best = (0, 0)
-    i = 0
-    while i < len(mask):
-        if mask[i]:
-            j = i
-            while j < len(mask) and mask[j]:
-                j += 1
-            if j - i > best[1]:
-                best = (i, j - i)
-            i = j
-        else:
-            i += 1
-    return best
+from oppdef.human.windows import (       # noqa: E402  -- these moved into the
+    CONTACT_M, MIN_FRAMES, contact_mask, longest_run, object_tree, _tree,
+)                                        # library; see oppdef/human/windows.py
 
 
 def survey(subjects, stride: int, limit: int | None, thresh: float):

@@ -12,5 +12,5 @@ under `experiments/` or `src/` imports them.
 | `deficit_repair.py`, `fig_deficit.py` | the deficit cohort it conditions on does not exist on the corrected axis |
 | `pose_vs_wrench.py` | superseded by `matched.py` and `g1.py`, which match the search budget |
 | `chunk_bc.py`, `render_bc.py` | the task is solved by open-loop replay, so these measure no feedback control |
-| `floor_poses.py` | drew poses from the retracted axis |
+| `floor_poses.py`, `viz_floor_poses.py` | drew poses from the retracted axis; the renderer moved here from `src/oppdef/viz/` on 16 Sep, having been unimportable since 8cc4b63 removed the helpers it used |
 | `retracted_fig_thesis.py` | hardcoded a withdrawn p-value; refuses to run |

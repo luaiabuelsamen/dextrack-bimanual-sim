@@ -1,7 +1,7 @@
 """The shared benchmark cell: one hand, one object, one comparison.
 
-Both live comparisons (`experiments/matched.py`, `experiments/g1.py`) need the
-same three things: a scene, the retargeted finger pose that the human
+Both live comparisons (`experiments/grasp_metrics/matched.py` and `g1.py`)
+need the same three things: a scene, the retargeted finger pose that the human
 demonstration prescribes, and a way to score how faithfully a settled pose
 reproduces that demonstration. Those lived in an experiment script, so a live
 experiment imported a withdrawn one to get at them. They belong in the library.

@@ -566,7 +566,7 @@ class ReferenceTracker:
         from oppdef.human.retarget import retarget_sequence
 
         if window is None:
-            from experiments.tracking.grab_inventory import contact_mask, longest_run, _tree
+            from oppdef.human.windows import contact_mask, longest_run, object_tree as _tree
             mk = contact_mask(seq, _tree(seq, {}), side)
             window = longest_run(mk)
         self.seq, self.hand, self.side, self.window = seq, hand, side, window
@@ -1664,7 +1664,7 @@ class BimanualTracker:
         self.seq = seq
         self._park = {"r": np.zeros(3), "l": np.zeros(3)}
         if window is None:
-            from experiments.tracking.grab_inventory import contact_mask, longest_run, _tree
+            from oppdef.human.windows import contact_mask, longest_run, object_tree as _tree
             tr_ = _tree(seq, {})
             both = (contact_mask(seq, tr_, "rhand") & contact_mask(seq, tr_, "lhand"))
             window = longest_run(both)

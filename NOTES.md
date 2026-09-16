@@ -5083,3 +5083,28 @@ then I was comparing files rather than calling the code.
 
 The version-skew hazard is real and stays in the record: it crashed a peer's
 80-minute run. It simply did not cause this.
+
+### The three deferred src/ fixes, done
+
+All found by a peer session's test audit and held until no job was running.
+
+1. **`oppdef.human.track` no longer imports from `experiments/`.** `contact_mask`,
+   `longest_run` and the object KD-tree decide which frames every later stage
+   operates on -- the retarget's window, the tracker's window, the frames a
+   grasp search may start from -- so they are library code. They now live in
+   `src/oppdef/human/windows.py` and `experiments/tracking/grab_inventory.py`
+   imports them from there, which is the direction the dependency should run.
+   Verified by importing the package with only `src/` on the path: it works, and
+   before this it worked only because the Makefile puts the repo root on
+   PYTHONPATH. A plain `pip install -e .` would have failed.
+2. **`viz/floor_poses.py` retired to `experiments/retracted/`.** It drew poses
+   from the withdrawn opposition axis and imported `tip_ids`/`joint_set`, removed
+   from `hands/axis.py` in 8cc4b63 when that module stopped keeping its own hand
+   table. It had been unimportable for three days -- the only import failure
+   among 88 live modules -- and its sole consumer was the retracted script of the
+   same name. The retraction README is explicit that nothing under `src/` belongs
+   to that lineage, so it belongs beside its script rather than fixed in place.
+3. `bench.py`'s docstring cited pre-restructure experiment paths. Corrected.
+
+The package now has zero import failures, walked module by module, and the full
+suite is 75 passed / 0 failed.

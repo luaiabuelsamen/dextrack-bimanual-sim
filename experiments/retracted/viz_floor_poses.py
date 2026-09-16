@@ -1,4 +1,14 @@
-"""Render each hand AT its measured opposition floor -- the pose where the thumb
+"""RETRACTED. Kept for provenance; it does not import.
+
+It draws poses from the withdrawn opposition axis, and its imports `tip_ids`
+and `joint_set` were removed from `oppdef.hands.axis` in 8cc4b63, when that
+module stopped carrying its own hand table and loader. Moved here from
+src/oppdef/viz/ because the retraction README is explicit that nothing under
+src/ belongs to this lineage.
+
+Original docstring follows.
+
+Render each hand AT its measured opposition floor -- the pose where the thumb
 comes as close to the finger mean as the joint limits allow.
 
 This is the visual behind the axis table. For f5d6 it is NOT a grasp and is not

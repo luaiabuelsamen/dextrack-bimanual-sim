@@ -70,7 +70,7 @@ class DepthSensor:
 
     One renderer is kept for the life of the sensor: creating a second EGL
     context after closing the first raises EGL_NOT_INITIALIZED on this machine
-    (see viz/floor_poses.py, which hit the same thing).
+    (see experiments/retracted/viz_floor_poses.py, same thing).
     """
 
     def __init__(self, model, cam: Camera, obj_gids):
