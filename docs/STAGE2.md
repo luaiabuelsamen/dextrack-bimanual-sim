@@ -752,7 +752,12 @@ frames; carrying the finger angles as well makes it *worse* (`binoculars_lift`
 harmful. This run trained on the retarget with **no** wrist offset — the
 configuration stage 3 was wrongly starting from. On the mug, that offset *is*
 the burial. Remove it and nothing holds; keep it and you are tracking a burial.
-The mug is in the six-burial class, not the twenty-grasp class.
+**That is a property of this clip's seed, not of the mug** (`f12889c`):
+`mug_drink_2`'s stage-2 seed is grasp-class — 9 contacts, 11.5 mm drop,
+equilibrium 0.05 — while `mug_drink_1`'s is the 20.6 mm / 13.6 kN burial. Same
+object, different sequence, opposite class. Which makes `mug_drink_2` the
+nearest thing to a controlled comparison in the set: the same object the
+buried policy tracked at 22.2 mm, seeded from a clean grasp.
 
 **Two corrections to this section's own earlier entries.** *"Alive 0.839"* is
 `1 − mean(done)` over control steps, where `done` fires when position error
@@ -765,14 +770,26 @@ without either reading the definition. And *"the un-buried grasp is learnable"*
 was true of that signal and false of the thing that matters.
 
 **What this decides.** RL is not blocked on retraining; it is blocked on stage 2
-producing a **non-burial** wrist offset for this object class. Stage 2's own
+producing a **non-burial** wrist offset for the clip being trained. Stage 2's own
 sweep says it does so for 20 of 34 successes and not for the mug or bowl. The
 right next training run is on a grasp-class seed — and it is not yet done: the
 distillation run seeds from stage 2's offset, only 5 of its 16 picks had a seed
 at all, stage 2 is being recomputed for exactly those, and the first row back
 (`mouse_use_1`, equilibrium 2.62×) is the mixed class. Its analysis now reports
 tracking **split by seed class**, with burial-seeded rows labelled *read these
-as tracking the contact solver*. If grasp-seeded references track, that is the
+as tracking the contact solver*, and each row's end-of-rollout penetration,
+contacts and grip — naming only rows that both track under 50 mm *and* end
+un-buried, and printing *no row here is a tracking result* when there are none.
+The run is ordered by seed class then fewest contacts (`f12889c`), so the
+cleanest seeds train first: `flashlight_on_2` (3 contacts), `hammer_use_2` (4),
+`knife_lift` (4), `phone_call_1` (6, and only 2.8 N — thin on two axes),
+`mug_drink_2` (9); then `mouse_use_1` (mixed, 19); then the burials
+`camera_takepicture_2` (32), `gamecontroller_play_1` (57), `bowl_drink_1`
+(94); `binoculars_see_1` failed stage 2 outright at 1117 mm and trains
+unseeded, last — read nothing from that row. Two tail rows from the seed
+sweep: `cup_lift` came in at 1.1 mm raw drop and **4.7 mm after the search, on
+42 contacts** — the search made it worse *and* landed it in the burial class,
+the level-set failure and the burial failure in one row. If grasp-seeded references track, that is the
 first tracking number in this repository that is not measuring penetration. No
 raw-fit analogues on other objects were run; they would reproduce this table.
 
