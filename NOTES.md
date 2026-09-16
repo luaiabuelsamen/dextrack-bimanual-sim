@@ -5108,3 +5108,46 @@ All found by a peer session's test audit and held until no job was running.
 
 The package now has zero import failures, walked module by module, and the full
 suite is 75 passed / 0 failed.
+
+## The carry test: burial carries the object, and one grasp does too
+
+Thirty of the 34 held stage-2 grasps, carried along their reference with **no
+controller of any kind** -- feedforward only, no policy, no search.
+
+    seed class   n    carried to the end   median carried   median end pen
+    burial      13         10/13                100%           10.04 mm
+    mixed        2          1/2                  55%            4.05 mm
+    thin         2          0/2                  53%            4.36 mm
+    grasp       13          3/13                 41%            0.00 mm
+
+A burial carries the object through the entire demonstration open-loop in ten of
+thirteen cases. A grasp does it in three of thirteen, and its median run ends
+41% of the way through with the object on the floor at 0.00 mm penetration.
+
+**This is what every tracking number in this repository has been measuring.**
+`bowl_drink_1` carries its whole 131-frame reference at 9.9 mm mean error with
+nothing controlling it; the PPO policy trained on that same reference scored
+8.2 mm. The policy bought 1.7 mm. Stage 3 was never the variable, and now that
+is shown rather than inferred -- every stage-3 row had a policy in the loop and
+so could not separate "the policy tracks the burial" from "the burial carries
+itself".
+
+### stamp_lift: the first row in this repository that is a tracking result
+
+    stamp_lift   grasp seed, 4 contacts at 16.2 N
+                 carried 26/26 frames, mean 35.0 mm
+                 ends 0.31 mm penetration, 5 contacts, 4 N
+
+It tracks under 50 mm AND ends un-buried. Nothing in either stage-3 run passed
+both halves of that criterion; every row that tracked ended 9-17 mm inside the
+object and every row that ended clean had dropped the object. This one holds a
+2 N object with 4 N of grip, a third of a millimetre of penetration, through its
+whole reference, open-loop.
+
+One of thirty, on a 26-frame reference, which is short. But it is an existence
+proof and this project did not have one: three independent searches concluded
+the neighbourhood around the retarget contains nothing that both contacts and
+does not penetrate, and `stamp_lift` is a counterexample that the stage-2 search
+found on its own. Whatever makes it work is the thing to characterise next, and
+it is a property of the GRASP -- there is no controller in this measurement to
+credit.
