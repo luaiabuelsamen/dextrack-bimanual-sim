@@ -4981,3 +4981,33 @@ is the only thing that matters in this pipeline, by quoting a number from one
 run against a number from another without checking they shared a condition. The
 guard is the one I have been asking the peer session for all night: state the
 condition beside the number.
+
+## Stages 4 and 5 on correct seeds: the direction is right, the level is failure
+
+    held out               feedforward    own PPO    DISTILLED
+    camera_takepicture_2     2,256.4 mm   2,587.1 mm    992.7 mm
+    knife_lift               2,734.3         87.7         87.5
+    gamecontroller_play_1  175,291.4     51,777.5        450.5
+
+    median                   2,734.3       2,587.1        450.5
+    distilled beats feedforward           3/3
+    distilled within 2x of own PPO        3/3
+
+This is the reverse of the contaminated run, where distillation was 29x worse
+than feedforward on camera. On correct seeds the distilled network is the best
+of the three controllers on every held-out object, and it is better than the
+per-reference policy that trained on that object's own data -- which is the
+direction DexTrack's distillation claim predicts, reproduced here for the first
+time.
+
+And every one of those numbers is a dropped object. 450 mm, 88 mm and 993 mm are
+all far past the 50 mm bar, so the honest statement is that distillation is
+consistently the least bad of three failing controllers. The mechanism behaves
+as designed; what it is fed cannot hold an object, so what comes out cannot
+either.
+
+That is the whole pipeline in one line. Stages 3, 4 and 5 all work in the sense
+that each does what it was built to do, and none of it matters, because every
+one of them is downstream of an initial condition that either buries the hand or
+drops the object. Fixing stage 4 would improve nothing. The variable is upstream
+of all of them.
