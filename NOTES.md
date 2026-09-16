@@ -3399,3 +3399,41 @@ joint angles will not resemble the human's and should not be asked to.
 
 Everything downstream is invalid until that lands: stage 3's 29.4 mm, stage 6's
 28-65 mm, every PPO checkpoint, and the stage 5 distillation numbers below.
+
+## 2026-09-15 — the arm-side constraint is necessary and not sufficient
+
+Constraining forearm/wrist/palm/knuckles at 60x the finger weight, measured
+end-to-end through the rollout:
+
+    reference          w_arm   arm pen    force   residual   tracking
+    binoculars_see_1     1.0   5.20 mm    117 N     29.5x   175528 mm
+    binoculars_see_1      60   2.47 mm   2473 N     15.4x      106.2 mm
+    mug_drink_1          1.0   7.04 mm   2294 N      4.0x       33.9 mm
+    mug_drink_1           60   0.48 mm   1195 N      8.3x      146.8 mm
+    flashlight_on_2      1.0  12.96 mm    782 N      1.7x        8.5 mm
+    flashlight_on_2       60   1.39 mm    386 N      4.3x      107.5 mm
+
+**binoculars_see_1 goes from 175 metres to 106 mm.** That reference never
+reached within 17 mm of feasible at any of its 155 frames and was unreachable by
+every remedy tried today; constraining the arm makes it tractable. That is the
+constraint earning its place.
+
+**And mug_drink_1 and flashlight_on_2 get worse**, 33.9 -> 146.8 mm and 8.5 ->
+107.5 mm. This is not a regression to fix, it is the same finding again: those
+two were "working" BECAUSE of penetration. flashlight_on_2 tracked at 8.5 mm
+with its palm 12.96 mm inside the object. Remove the burial and the fake grip
+goes with it.
+
+So the arm constraint is necessary -- it is the only thing that has made a
+forearm-blocked reference tractable -- and it is not sufficient. Residual is
+4.3-15.4x everywhere and forces are 361-2488 N on a 1.96 N object, so none of
+these is an equilibrium. What is still missing is a finger-side contact set that
+is a grasp rather than an overlap, and that cannot come from placing fingertips
+either. It has to come from closing, which is what `reset_grasp` does and which
+works when the hand starts outside the object (gamecontroller_play_1, 4411 N ->
+10.5 N) and not otherwise.
+
+Stage 2 therefore needs both halves: the arm-side feasibility constraint, which
+now exists, and finger contact established by closing from a feasible pre-grasp,
+which exists but only fires correctly when the arm constraint has already put
+the hand outside. Those two were built in the wrong order today.
