@@ -3944,3 +3944,22 @@ the model and therefore the contact solver's problem are identical:
 
 That is the project's claim as a measured gap rather than an assertion, on one
 reference so far.
+
+### The search degrades its own best input
+
+Caught by the peer session in my own results file: on `apple_eat_1` the raw
+retarget already held at a drop of 0.23 mm, with 9 contacts and an equilibrium
+residual of 0.034x -- the one genuine equilibrium grasp the sweep was handed.
+The CEM search moved it OFF that, to 5.17 mm.
+
+Small in absolute terms and it still counts as a hold, but it is the same defect
+as the burial, seen from the other side. The score cannot tell a grasp from a
+burial, so it also cannot tell that it already had a grasp; drop distance of
+0.23 mm and 5.17 mm are both "held", and nothing in the objective prefers the
+first. A search that can degrade its best input is not selecting for the thing
+it is supposed to be selecting for -- it is wandering inside a level set, and
+the burials are simply where the wandering ends up when the level set is wide.
+
+Note for anyone re-running: the first candidate tried is always the unperturbed
+retarget, so the search CAN only improve its own score. That it got worse on the
+quantity we care about while improving its own score is the point.
