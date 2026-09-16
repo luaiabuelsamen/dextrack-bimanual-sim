@@ -99,9 +99,21 @@ def main(a):
         print(f"[{i+1}/{len(picked)}] {r['seq']:26s} {r['object']:12s} "
               f"PPO {errs.mean()*1000:7.1f} mm  {len(O)} transitions "
               f"({time.time()-t0:.0f}s)", flush=True)
+        # Written after EVERY reference. Stage 3 is a measured result on its
+        # own, and a multi-hour run that reaches the distillation gate with too
+        # few references must not throw away the policies it did train --
+        # which is exactly what happened on the first run of this file.
+        Path(a.out).write_text(json.dumps({
+            "hand": a.hand, "steps": a.steps, "seed": a.seed,
+            "per_reference": [{"seq": x["seq"], "object": x["obj"],
+                               "ppo_mm": x["ppo_mm"],
+                               "transitions": int(len(x["O"]))} for x in store],
+            "held_out": [],
+        }, indent=1))
 
     if len(store) < 3:
-        print("too few references solved")
+        print(f"too few references solved ({len(store)}) to hold an object out; "
+              f"stage 3 results are saved to {a.out}", flush=True)
         return
 
     objs = sorted({s["obj"] for s in store})
