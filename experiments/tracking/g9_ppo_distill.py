@@ -30,12 +30,29 @@ from oppdef.human import grab, track, rl, distill
 
 
 def per_reference(row, hand="shadow", steps=200_000, seed=0, verbose=False,
-                  n_envs=16):
+                  n_envs=16, grips=None):
     """Train one PPO policy and return it with its environment."""
     seq = grab.load(f"{row['subject']}/{row['seq']}.npz", verts=True, stride=8)
     rt = track.ReferenceTracker(seq, hand=hand)
-    rt.synthesize_grasp()
+    # Prefer stage 2's wrist offset over re-searching here. Stage 2 searches in
+    # the FITTING scene, where closing works; this stage's own search runs in
+    # the mocap scene, where it does not. Carrying the offset across rescues
+    # references that had NO graspable frame at all -- phone_call_1 0 -> 1,
+    # banana_eat_1 0 -> 2, alarmclock_lift 0 -> 8 -- which is what gates the
+    # sample size for stages 4 and 5. Only the wrist: carrying the finger
+    # angles or the servo press as well buys nothing and can cost frames
+    # (binoculars_lift 8 with the wrist alone, 2 with the grip too).
+    used = "own search"
+    if grips and row["seq"] in grips:
+        rt.apply_wrist_offset(np.asarray(grips[row["seq"]]["offset"], float))
+        used = "stage 2 offset"
+    else:
+        rt.synthesize_grasp()
     gf = rt.grasp_frames()
+    if len(gf) == 0 and used == "stage 2 offset":
+        rt.synthesize_grasp()          # fall back rather than discard
+        gf = rt.grasp_frames()
+        used = "stage 2 offset + own search"
     if len(gf) == 0:
         return None, None, None
     # The training horizon must COVER the reference. PPO learns a correction
@@ -73,6 +90,10 @@ def harvest(rt, net, gf, per_start=200, max_starts=6):
 
 def main(a):
     inv = json.loads(Path("results/grab_inventory.json").read_text())["rows"]
+    gp = Path(a.grips)
+    grips = ({x["seq"]: x for x in json.loads(gp.read_text())["rows"]}
+             if gp.exists() else {})
+    print(f"{len(grips)} stage-2 grasps available as wrist seeds", flush=True)
     rows = [r for r in inv if "error" not in r and r["rhand_hold_len"] >= 25]
     seen, picked = {}, []
     for r in sorted(rows, key=lambda r: (-r["rhand_hold_len"], r["seq"])):
@@ -87,7 +108,7 @@ def main(a):
     for i, r in enumerate(picked):
         t0 = time.time()
         rt, net, gf = per_reference(r, steps=a.steps, seed=a.seed,
-                                    hand=a.hand, n_envs=a.envs)
+                                    hand=a.hand, n_envs=a.envs, grips=grips)
         if rt is None:
             print(f"[{i+1}/{len(picked)}] {r['seq']}: no graspable frame", flush=True)
             continue
@@ -97,8 +118,8 @@ def main(a):
                       "ppo_mm": float(errs.mean() * 1000)})
         envs.append((rt, r["object"]))
         print(f"[{i+1}/{len(picked)}] {r['seq']:26s} {r['object']:12s} "
-              f"PPO {errs.mean()*1000:7.1f} mm  {len(O)} transitions "
-              f"({time.time()-t0:.0f}s)", flush=True)
+              f"PPO {errs.mean()*1000:7.1f} mm  {len(O)} transitions  "
+              f"{len(gf)} grasp frames ({time.time()-t0:.0f}s)", flush=True)
         # Written after EVERY reference. Stage 3 is a measured result on its
         # own, and a multi-hour run that reaches the distillation gate with too
         # few references must not throw away the policies it did train --
@@ -169,4 +190,5 @@ if __name__ == "__main__":
     ap.add_argument("--hand", default="shadow")
     ap.add_argument("--envs", type=int, default=16)
     ap.add_argument("--out", default="results/g9_ppo_distill.json")
+    ap.add_argument("--grips", default="results/stage2_grips.json")
     main(ap.parse_args())

@@ -4028,3 +4028,59 @@ The first two produced dramatic, publishable-looking numbers (3486 mm! the
 scenes disagree completely!) that were entirely my own error. Recording that
 because the pattern is the point: in this pipeline a large effect is evidence of
 a bug in the measurement until it survives being measured a second way.
+
+## The stage 2 -> stage 3 gap: five hypotheses, and the one that was right
+
+Stage 2 holds 34/40. Stage 3 discarded 4 of 6 references as having "no graspable
+frame", which sets the sample size for every stage after it -- at a one-in-three
+survival rate the cost of stages 4 and 5 triples. Five hypotheses, four dead:
+
+1. **Stage 3 never closes the grip.** True as a description and irrelevant.
+   `adopt_grip` carries stage 2's achieved angles across and changes the count
+   by nothing: 0 -> 0 phone_call_1, 0 -> 0 banana_eat_1, 23 -> 23 apple_eat_1,
+   27 -> 27 bowl_drink_1, 6 -> 3 binoculars_lift.
+2. **It needs re-establishing in the tracking scene.** Worse than nothing:
+   `reset_at(k, grip=8.0)` takes gamecontroller_play_1 from 30 frames to 1.
+3. **The scenes disagree about the grasp.** Mostly not. The same achieved state
+   transfers: apple at 30.9 mm on 7 contacts, banana 43.9 mm, bowl 17.0 mm.
+4. **The PRESS is left behind** -- a position servo makes force from the gap
+   between target and angle, and transferring the achieved angles as both
+   commands a hand that touches without pressing (apple carried across at
+   10.1 N from a grasp holding at 875 N). Real defect, correctly fixed by
+   `adopt_press` with all 20 finger actuators mapped by name, and it buys
+   nothing: 0 -> 0, 0 -> 0, 23 -> 23, 27 -> 27, 3 -> 4.
+5. **The weld is compliant and the hand gets pushed.** No: palm drift during a
+   hold is 1.8-3.9 mm on both a reference that holds and one that drops.
+
+Meanwhile the hand is demonstrably in contact the whole time -- phone_call_1
+makes 3 to 11 hand-object contacts at 2-12 mm penetration with the palm 69-110
+mm from the object. It touches, it presses, and it drops.
+
+**What was actually missing: the wrist offset.** Stage 2's CEM search optimises
+the WRIST POSE; that is its entire output. Every transfer above carried fingers
+-- angles, then servo press -- and left the one thing the search produces behind.
+Applying it with `apply_wrist_offset`:
+
+    reference           retarget   +wrist   +wrist+grip   offset
+    phone_call_1               0        1             5   17.2 mm
+    banana_eat_1               0        2             2  -17.7 mm
+    alarmclock_lift            0        8             4   12.9 deg
+    binoculars_lift            6        8             2  -15.5 mm
+    apple_eat_1               23       23            23   exactly 0
+    bowl_drink_1              27       27            27  -15.7 mm
+
+Three references go from ZERO graspable frames to some. `apple_eat_1`'s offset
+is exactly zero -- the unperturbed retarget won its search -- and its count does
+not move, which is the control this needed. And the wrist alone beats the wrist
+plus the grip, consistent with hypotheses 1 and 4: binoculars_lift is 8 with the
+offset and 2 once the fingers come too.
+
+So stage 3 now seeds from `results/stage2_grips.json` rather than re-searching,
+and falls back to its own search when a reference is not in the sweep. Stage 2
+searches in the FITTING scene where closing works; stage 3's own search runs in
+the mocap scene where it does not, which is the same asymmetry as hypothesis 2
+and remains unexplained at the mechanism level.
+
+Four wrong guesses before the right one, each of which sounded obvious while I
+was writing it. The one that worked was the only one I had not thought to check
+because it was the part I assumed was already being carried.

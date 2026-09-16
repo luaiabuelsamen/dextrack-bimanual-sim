@@ -714,12 +714,16 @@ class ReferenceTracker:
         """
         m, d = self.sim.model, self.sim.data
         mujoco.mj_resetData(m, d)
-        self._grip_offset = np.zeros(m.nu)
+        # An adopted press persists across resets: it is part of the grasp, not
+        # a transient of one episode. Without this the servos are commanded to
+        # exactly the angles the hand is already at and hold nothing.
+        self._grip_offset = getattr(self, "_adopted_press",
+                                    np.zeros(m.nu)).copy()
         k = int(np.clip(k, 0, self.T - 1))
         self.mh.place(self.P[k], self.Q[k], self.vals[k])
         d.qpos[self.obj_q:self.obj_q + 3] = self.ref_pos[k]
         d.qpos[self.obj_q + 3:self.obj_q + 7] = self.ref_quat[k]
-        d.ctrl[:] = self.ctrl_for(self.vals[k])
+        d.ctrl[:] = self.ctrl_for(self.vals[k]) + self._grip_offset
         mujoco.mj_forward(m, d)
         if settle > 0:
             g = m.opt.gravity.copy()
@@ -924,6 +928,58 @@ class ReferenceTracker:
         self.P, self.Q, self.vals = feedforward_se3(
             self.fit, self.tr.q, self.ref_pos, self.ref_quat)
         return n_set
+
+    def adopt_press(self, src_model, src_ctrl, src_q_ctrl):
+        """Adopt the PRESS a grip was holding, not just the angles it reached.
+
+        A position servo generates force from the gap between its target and
+        the joint's actual angle. `adopt_grip` transfers the achieved angles
+        and commands the servos to exactly those angles, which is a hand
+        touching the object with no press at all: measured, apple_eat_1 carried
+        across at 10.1 N from a grasp that had been holding at 875 N. That is
+        why adopting the grip bought no graspable frames -- the thing that does
+        the holding was left behind.
+
+        `src_ctrl - src_q_ctrl` is that gap in the source scene. Actuators are
+        matched by NAME because the scenes do not share indices: the hinge
+        scene carries six base actuators the mocap scene does not have, so nu
+        is 26 against 20 and a positional copy would silently shift every
+        finger onto its neighbour's target.
+
+        **It buys no graspable frames either**, so the hypothesis it was built
+        to test is dead alongside `adopt_grip`'s. With all 20 finger actuators
+        mapped: 0 -> 0 on phone_call_1 and banana_eat_1, 23 -> 23 on
+        apple_eat_1, 27 -> 27 on bowl_drink_1, 3 -> 4 on binoculars_lift
+        (against 6 for the plain retarget). The press transfers correctly and
+        changes nothing.
+
+        Four hypotheses about the stage 2 -> stage 3 gap are now refuted: that
+        the grip is never closed, that it needs re-establishing in the tracking
+        scene, that the scenes disagree about the grasp, and that the press is
+        left behind. Meanwhile the hand is demonstrably in CONTACT at reset --
+        phone_call_1 makes 3 to 11 hand-object contacts at 2-12 mm penetration
+        across its window, with the palm 69-110 mm from the object -- so it
+        touches, it presses, and it still drops.
+
+        The candidate not yet tested: the mocap body is welded to the hand, and
+        a weld is compliant where a hinge base is not. A grasp that holds when
+        the hand cannot be pushed may slip when it can. That would also explain
+        why closing against the weld fails (30 -> 1) while closing on the hinge
+        base works, which is currently unexplained.
+        """
+        m = self.sim.model
+        src = {mujoco.mj_id2name(src_model, mujoco.mjtObj.mjOBJ_ACTUATOR, i):
+               float(src_ctrl[i] - src_q_ctrl[i]) for i in range(src_model.nu)}
+        off = np.zeros(m.nu)
+        hit = 0
+        for a in range(m.nu):
+            n = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_ACTUATOR, a) or ""
+            key = n[5:] if n.startswith("hand_") else n
+            if key in src:
+                off[a] = src[key]
+                hit += 1
+        self._adopted_press = off
+        return hit
 
     def grasp_frames(self, seconds: float = 0.4, stride: int = 5) -> np.ndarray:
         """Which reference frames hold the object on their own.
