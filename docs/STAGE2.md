@@ -1001,7 +1001,24 @@ unseeded — read nothing from it. Bowl is a `mug_drink_2` replicate and does
 not discriminate. Camera and gamecontroller sit between hammer's 4 and mug's
 27: if both track and end buried on 8–10 starts, sample size weakens as the
 explanation before the 2×2 runs; if either drops, the start-count reading
-gains. The burial column
+gains.
+
+The other session's prediction, on record before camera landed (`2764084`):
+**both track and end buried, and gamecontroller (7157×) tracks better than
+camera (2956×)** — because if start count drove the outcome, mouse failing
+at 2 and mug succeeding at 27 put the threshold in the middle and 8–10 would
+be coin flips, while if seed *depth* drives it these are the two deepest
+seeds after bowl. The awkward case for that prediction is mouse itself:
+2210× and dropped on 2 starts; if camera tracks at 2956× on 10, mouse is
+either the start-count floor or something specific to a flat object on a
+surface, and this run cannot tell those apart. Two cautions for reading
+rows 7–9: bowl passes the gate at 27 of 27 candidates, the only row where it
+rejected nothing — a hand 35 kN inside the object holds it from anywhere —
+so bowl says burial makes the gate trivially passable, not anything about
+tracking; and the earlier "gamecontroller had 30 frames" came from this
+stage's *own* search (`synthesize_grasp` in the mocap scene), not the stage-2
+offset g9 applies — 30 versus 8 graspable frames on one clip is one more
+measurement of how far apart the two searches land. The burial column
 rests on `mug_drink_1` from a separate session; the burial-seeded g9 rows are
 7–9 and have not run. `knife_lift` (2.1 N) and `phone_call_1` (2.8 N) come
 next, and both sit at the thin end of the grasp class, so they will most
