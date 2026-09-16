@@ -10,12 +10,28 @@ Status as of 2026-09-15.
 | subproblem | state | evidence |
 |---|---|---|
 | **A. Arm-side placement** — forearm/wrist/palm inside the object | **fixed** | `W_PEN_ARM=60` → `binoculars_see_1` 175 m → **106 mm**; arm-side penetration 0.00 mm median over 40 sequences |
-| **B. Finger reach** — fingertips now too far to close | **open** | after A, fingertips sit 50–62 mm from the surface; `establish_grip` closes ≤1.2 rad ≈ 30–40 mm of tip travel |
-| **C. Vessel wrist target** — hand placed *inside* cups and mugs | **open, untouched** | 33–39 mm arm-side with **0.00 mm** finger contact; not weight-limited |
+| **B + C. The wrist pose** — the arm reaches the object before the fingers do | **open, and now one question** | on `mug_drink_1` the arm penetrates at 0.48 mm while the tips are 42.9 mm out; for vessels the palm is 33 mm inside with **zero** finger contact |
 
-RL/DexTrack is blocked behind all three: every PPO checkpoint is a correction to
-a specific initial condition, so changing the grasp invalidates it. Retraining
-is ~25 min per reference.
+**What stage 2 has to produce, stated precisely:** a configuration with **many
+contacts, on opposing sides, at bounded penetration** — a wrap. That is what
+separates the configurations that carry from the ones that do not (10 and 3
+engaged bodies at one-sidedness 0.055/0.191, against 1 body at ≈1.0), and
+nothing in the pipeline currently searches for it.
+
+**The hard finding, and the reason this is not a tuning problem:** across 3019
+sampled wrist poses under a 2 mm penetration gate, **not one made contact at
+all**. Every configuration that touches these objects penetrates them. That is
+the same result as the earlier 0-of-283 over translation, now over orientation.
+
+**Before proposing anything, look at it.** See
+[Look at the pose before trusting the number](#look-at-the-pose-before-trusting-the-number).
+Three conclusions recorded in this document were wrong until someone rendered
+the scene, and the corrections are kept inline rather than deleted.
+
+RL/DexTrack is blocked behind this: every PPO checkpoint is a correction to a
+specific initial condition, so changing the grasp invalidates it. Retraining is
+~25 min per reference, and nothing should be retrained until a grasp survives a
+rollout.
 
 ---
 
