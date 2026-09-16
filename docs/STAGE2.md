@@ -1069,11 +1069,27 @@ ruled out within a single reference, which no cross-reference comparison
 could have done. The collision that cost a night of mislabelled results
 produced the one comparison that settles the question, and it could not
 have been designed: nobody would deliberately train a clip from another
-recording's grasp. Beside it: on this clip the **feedforward alone** carries
-the object to 36.0 mm, and a policy trained from a physically valid grasp
-carries it to 2587 mm — worse than no policy by a factor of seventy.
-Whatever PPO extracts from a 2-contact, 6.0 N contact set, it is not how to
-keep hold of the object.
+recording's grasp. **Retracted from beside it:** "the feedforward carries
+this object to 36.0 mm and the policy trained from its valid grasp to
+2587 mm — worse than no policy by a factor of seventy." That compared the
+feedforward *from the s2 burial* against the policy *from the s1 grasp* —
+two initial conditions, ninety minutes after establishing that the initial
+condition is the only thing that matters. At a fixed initial condition:
+
+| camera, same clip | feedforward | own PPO |
+|---|---:|---:|
+| from the s1 valid grasp | 2256.4 mm | 2587.1 mm |
+| from the s2 burial | 36.0 mm | 34.6 mm |
+
+The policy is marginally worse than feedforward from the grasp and
+marginally better from the burial, and both differences are noise beside
+the two-orders-of-magnitude gap between the initial conditions. The
+feedforward drops a valid grasp too. So this is not "RL fails to learn a
+grasp it was given"; it is **nothing in this pipeline, open-loop or learned,
+keeps hold of a valid grasp, and everything holds a burial. Stage 3 was
+never the variable.** The guard that would have caught the retracted
+sentence is the one this document keeps asking for: state the initial
+condition beside the number.
 
 Phone (row 2) drops too, but on **one start frame and 120 transitions** —
 the same footing as the old run's knife row, and it carries the same weight:
