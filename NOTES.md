@@ -3437,3 +3437,36 @@ Stage 2 therefore needs both halves: the arm-side feasibility constraint, which
 now exists, and finger contact established by closing from a feasible pre-grasp,
 which exists but only fires correctly when the arm constraint has already put
 the hand outside. Those two were built in the wrong order today.
+
+## 2026-09-15 — what the finger half has to solve, measured
+
+After the arm-side constraint lands, the fingertips are **50-62 mm from the
+object surface**:
+
+    flashlight_on_2   49.5  51.7  50.1  15.8  70.0 mm   median 50.1
+    mug_drink_1       58.1  59.5  57.8  43.1  90.7 mm   median 58.1
+    binoculars_see_1  72.6  62.3  60.1  34.2  76.0 mm   median 62.3
+
+`establish_grip` closes by at most 1.2 rad, which moves a fingertip 30-40 mm. So
+it cannot reach, and closing finds nothing -- every closed configuration came
+out at 0.0 N with the object on the floor.
+
+That is the precise shape of the remaining problem, and it is a real tension
+rather than a tuning gap: the arm-side constraint and the fingertip targets
+share one wrist, so pushing the forearm out of the object pushes the fingers out
+with it. Constraining the arm makes the pose feasible and simultaneously makes
+it unable to grasp.
+
+What that means for stage 2: the wrist pose has to be CHOSEN so that the arm
+clears and the fingers are within closing range -- a pre-grasp placement
+problem, over approach directions, not another weight in the same objective.
+Both terms currently pull on the same six DoF and one of them always wins.
+
+I attempted a one-dimensional approach line search along the palm direction and
+reverted it. It computed the fingertip clearance and then never tested it, so it
+advanced the full 90 mm regardless and drove the hand past the object; every
+reference came back at 0.0 N. Recorded because the failure is informative about
+the shape of the fix: an approach search needs a termination condition on the
+FINGER side and a feasibility condition on the ARM side simultaneously, and
+getting one of the two wrong is worse than not doing it -- the unsearched
+arm-constrained pose at least tracks binoculars at 106 mm.
