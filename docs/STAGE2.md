@@ -66,6 +66,38 @@ prove non-penetration** — a hand a few millimetres inside would still report a
 small positive nearest-vertex distance. Establishing that properly needs a
 signed test against the convex decomposition, which has not been run.
 
+### Which links the human actually uses
+
+`6a1a954` recorded that "the fit targets the wrong links: the human wraps with
+its middle phalanges", and `913503a` reverted the implementation after a wiring
+error. The claim was never checked against the data. It does not hold as stated.
+
+Median distance from each MANO joint group to the nearest object vertex, over
+frames where any joint is within 30 mm:
+
+| reference | wrist | knuckle | middle | distal | **fingertip** |
+|---|---:|---:|---:|---:|---:|
+| `cup_lift` | 83.5 | 20.9 | 19.8 | 8.6 | **2.4** |
+| `mug_drink_1` | 104.0 | 40.1 | 14.2 | 7.8 | **4.1** |
+| `binoculars_see_1` | 93.6 | 36.2 | 18.0 | 7.0 | **2.1** |
+| `flashlight_on_2` | 52.4 | 12.8 | 14.4 | **3.7** | 9.7 |
+
+The human contacts with **fingertips and distal phalanges**. Middle phalanges
+are 14–20 mm out and knuckles further still. So targeting the middle phalanx to
+the *surface*, which is what the reverted change did, would have been wrong —
+the fix is not "add more links to the surface target".
+
+**Caveat.** These are joint centres, not surface vertices, and a finger's
+surface sits roughly 8–10 mm off its joint axis. So the middle phalanx *surface*
+is perhaps 5–12 mm from the object rather than 14–20 mm — close, still not
+contact. The fingertip figures are consistent with the sub-millimetre vertex
+measurement above.
+
+What the table does support is the weaker and more useful statement: the human
+engages **more than the five fingertips** — distal phalanges are within 3.7–8.6
+mm throughout — while the fit targets fingertips alone. The difference between
+touching and wrapping is the distal links, not the middle ones.
+
 ## The defect
 
 The retarget matched the human's fingertip **positions** with no non-penetration
