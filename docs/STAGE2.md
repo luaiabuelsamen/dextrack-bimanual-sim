@@ -1035,6 +1035,23 @@ question at any stage. The remaining differences from DexTrack are the
 retarget (which produces the buried pose) and the reward (which never asks
 for a grasp), and the sample scale.
 
+### v2 — the first policies trained from grasps rather than burials
+
+Subject-keyed seeds (`f79b826`), same stages, cleanest grasp first; rows
+read as they land, end states live (`results/g9_ppo_distill_v2.json`):
+
+| reference | s1 seed (force-aware) | start frames | transitions | PPO tracking | end penetration | end contacts | end grip |
+|---|---|---:|---:|---:|---:|---:|---:|
+| `camera_takepicture_2` | grasp — 2 contacts, 6.0 N, eq 0.01 | **33** | 891 | 2587 mm | 0.00 mm | **0** | **0 N** |
+
+**Camera drops.** The single most informative row — the lightest, most
+balanced seed in the set, on the one reference where the feedforward
+already tracked at 36 mm, with 33 start frames and 891 transitions, more
+support than any row of the old run — trains a policy that lets go of the
+object: 2.6 m of error, no contact at the end. Sample size is not the
+explanation here, and neither is the seed being a burial. This is the cell
+the seed-class question always lacked, and its first entry is a drop.
+
 ### The reward terms that would price a grasp — drafted, benchmarked, not landed
 
 Nothing in the PPO reward asks for a grasp: it prices position and rotation
