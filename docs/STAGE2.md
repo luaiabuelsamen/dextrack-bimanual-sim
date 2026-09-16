@@ -925,6 +925,25 @@ most-buried row, which is the thesis of this document in one line. It is
 also the best-supported row so far (27 start frames, 711 transitions), so it
 carries the confound below as well as the effect.
 
+The five-row readout, verbatim from the g9 analysis: *from a GRASP seed (3):
+median 80,250 mm; from a BURIAL seed (1): median 5.7 mm; tracking under 50 mm
+AND ending un-buried: 0/5 — no row here is a tracking result; END OF
+ROLLOUT: 3/5 finish under 3 mm of penetration, median 0.00 mm.* That last
+line is the one to put in front of anyone who proposes penetration as a
+quality metric: three of five rows finish pristine because the object is on
+the floor. And the force-based classifier earned itself here — `mug_drink_2`
+reads as a grasp by contact count (9) and was flagged burial on force alone
+(528 N) two hours before this row existed; by contact count the best
+tracking number in the repository would be sitting in the grasp column.
+
+**The confound is alive and now maximal**: the single burial-seeded row is
+also trained on 3–7× the data of the grasp-seeded rows (27 start frames
+against 4 and 9), and rows 7–9 will be the same. "Burial tracks and grasps
+drop" cannot be written without that clause, and this run cannot separate
+the two. The decisive experiment is cheap: train hammer on *all* candidate
+start frames rather than the 4 accepted, ~13 minutes after g9, and see
+whether it still lets go. Queued.
+
 **The binding constraint three rows in was the sample, not the seed class.**
 `grasp_frames` comes back in single digits — 2, 4, 1 — so every policy here
 is trained on a handful of start states, and stages 4–5 will pool exactly
