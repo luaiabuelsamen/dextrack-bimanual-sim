@@ -1190,11 +1190,29 @@ def establish_grip(sc, direction, obj_qadr, obj_vadr, obj_pose,
     # 16.45 mm and 5049 N, while gamecontroller_play_1 -- whose retarget makes
     # no contact at all -- reached 5.53 mm and 10.5 N, a plausible grip.
     sc.pregrasp_cleared = True
+
+    # Only back the fingers off if there is something to clear. At a
+    # representative frame the retarget already puts the fingertips 2-4 mm from
+    # the surface, and opening 0.30 rad from there moves them AWAY -- measured
+    # by a peer session, tips went 42.9 -> 58.3 mm on mug_drink_1, 23.5 ->
+    # 224.1 mm on flashlight_on_2, which also drove QACC non-finite. The
+    # pre-grasp exists to escape a buried pose, not to undo a good one.
+    mujoco.mj_forward(m, d)
+    start_pen = 0.0
+    _obj, _hand = set(sc.obj_gids), set(sc.hand_gids)
+    for i in range(d.ncon):
+        pr = {int(d.contact[i].geom1), int(d.contact[i].geom2)}
+        if pr & _obj and pr & _hand:
+            start_pen = max(start_pen, -float(d.contact[i].dist))
+    if start_pen <= 0.002:
+        open_by = 0.0
+
     amt = open_by
     for _try in range(6):
         d.ctrl[:] = np.clip(base - amt * direction, lo, hi)
-        for _ in range(pre_steps):
-            mujoco.mj_step(m, d)
+        if amt > 0.0:
+            for _ in range(pre_steps):
+                mujoco.mj_step(m, d)
         mujoco.mj_forward(m, d)
         worst = 0.0
         objset, handset = set(sc.obj_gids), set(sc.hand_gids)
@@ -1202,7 +1220,7 @@ def establish_grip(sc, direction, obj_qadr, obj_vadr, obj_pose,
             pair = {int(d.contact[i].geom1), int(d.contact[i].geom2)}
             if pair & objset and pair & handset:
                 worst = max(worst, -float(d.contact[i].dist))
-        if worst <= 0.001:
+        if worst <= 0.001 or amt == 0.0:
             break
         amt *= 1.6
     else:
@@ -1353,6 +1371,70 @@ def equilibrium_residual(sc, obj_bid, gravity=-9.81):
     weight = float(m.body_mass[obj_bid]) * abs(gravity)
     net[2] += float(m.body_mass[obj_bid]) * gravity
     return float(np.linalg.norm(net) / max(weight, 1e-9))
+
+
+def grasp_epsilon(sc, obj_bid=None) -> tuple[float, int]:
+    """Ferrari-Canny epsilon of the CURRENT contact set. (value, n_contacts)
+
+    The quantity nothing in this pipeline has ever scored. Held-ness, tracking
+    error, penetration and equilibrium residual between them cannot tell a grasp
+    that RESISTS a wrench from one that merely presses, and measured on valid
+    non-penetrating configurations carrying 42 N this comes out 0.00000 -- the
+    origin is not interior to the wrench hull, so the contact set cannot resist
+    an arbitrary wrench however hard it pushes. That is why raising the closing
+    force target changed nothing and why removing penetration dropped the object:
+    penetration was the only thing manufacturing a contact set that looked like a
+    grasp.
+
+    Computed across ALL of the object's geoms, since these objects are convex
+    decompositions of 12-42 parts and the single-geom helper in
+    `grasping.epsilon` cannot see them. Normals are oriented INTO the object.
+    """
+    from oppdef.grasping.epsilon import wrench_set, epsilon_from_wrenches
+
+    m, d = sc.model, sc.data
+    obj_bid = sc.obj_bid if obj_bid is None else obj_bid
+    objs, hands = set(sc.obj_gids), set(sc.hand_gids)
+    pts, nrm, mus = [], [], []
+    for i in range(d.ncon):
+        c = d.contact[i]
+        g1, g2 = int(c.geom1), int(c.geom2)
+        if not ({g1, g2} & objs and {g1, g2} & hands):
+            continue
+        n = np.array(c.frame[:3])
+        if g1 in objs:          # frame points geom1 -> geom2
+            n = -n
+        pts.append(np.array(c.pos))
+        nrm.append(n)
+        mus.append(float(m.geom_friction[g1][0]))
+    if len(pts) < 2:
+        return 0.0, len(pts)
+    com = d.xipos[obj_bid].copy()
+    lam = float(np.max(np.linalg.norm(np.array(pts) - com, axis=1))) or 1.0
+    W = wrench_set(np.array(pts), np.array(nrm), np.array(mus), com, lam)
+    return float(epsilon_from_wrenches(W)), len(pts)
+
+
+def one_sidedness(sc) -> float:
+    """|sum of unit contact normals| / count. 0 is opposed, 1 is all one way.
+
+    A cheap, always-defined stand-in for force closure: epsilon is 0 across
+    almost every configuration this pipeline produces, which makes it useless as
+    a search gradient even though it is the right acceptance test. This at least
+    points downhill.
+    """
+    d = sc.data
+    objs, hands = set(sc.obj_gids), set(sc.hand_gids)
+    acc, n = np.zeros(3), 0
+    for i in range(d.ncon):
+        c = d.contact[i]
+        g1, g2 = int(c.geom1), int(c.geom2)
+        if not ({g1, g2} & objs and {g1, g2} & hands):
+            continue
+        v = np.array(c.frame[:3])
+        acc += -v if g1 in objs else v
+        n += 1
+    return float(np.linalg.norm(acc) / n) if n else 1.0
 
 
 def total_grip(sc) -> tuple[float, int]:
@@ -1790,8 +1872,25 @@ class BimanualTracker:
         # frames -- the same horizon lesson PPO taught, now for the grasp
         # search: optimise what you will be judged on.
         nsteps = (self.T - k) if track_steps is None else track_steps
-        score = ((lambda: self.track_score(nsteps, k))
-                 if objective == "track" else (lambda: self.hold_test(k)))
+        def _oppose():
+            """Opposition-first score: one-sidedness, less any force closure.
+
+            Epsilon is the right acceptance test and a useless gradient -- it is
+            0.00000 across most configurations this pipeline produces, so a
+            search cannot follow it. One-sidedness is defined everywhere and
+            points the same way: measured over a window, epsilon 0.037 at
+            one-sidedness 0.71 dropped the object 170 cm in 0.8 s where epsilon
+            0.000 at 0.84 dropped it 305 cm, against 314 cm of free fall.
+            """
+            self.reset_at(k)
+            eps, n = grasp_epsilon(self.sim)
+            if n < 2:
+                return 2.0
+            return one_sidedness(self.sim) - 4.0 * eps
+
+        score = ({"track": lambda: self.track_score(nsteps, k),
+                  "oppose": _oppose}.get(objective)
+                 or (lambda: self.hold_test(k)))
         best = score()
         applied = {"r": np.zeros(6), "l": np.zeros(6)}
         for _ in range(rounds):
