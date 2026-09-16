@@ -1094,7 +1094,12 @@ the heaviest genuine grasp so far (7 contacts, 29.9 N, equilibrium 0.16) —
 grasp in the set at 35.4 N on 8 contacts, drops on 4 start frames; its
 218.9 mm mean error with no contact at the end is the same shape as
 knife's 87.7 mm — a dropped object whose mean error stayed small for a
-reason not measured — and carries the same weight.
+reason not measured — and carries the same weight. Flashlight is also a
+third within-clip pair, and it *inverts*: its old-run arm was the 0.6 N
+thin seed that re-buried to 207 N and held on; the real 35.4 N grasp let
+go. Not evidence — one row on 4 start frames — but it is the only case in
+either run of a policy *acquiring* contact rather than losing it, and it is
+recorded as an anomaly for that reason.
 
 **All six grasp-class seeds drop, and so does the thin one.** Seven rows,
 seven policies, seven objects on the floor at the end of the rollout: 0.00
