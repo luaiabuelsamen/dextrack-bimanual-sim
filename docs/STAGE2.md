@@ -1044,13 +1044,38 @@ read as they land, end states live (`results/g9_ppo_distill_v2.json`):
 |---|---|---:|---:|---:|---:|---:|---:|
 | `camera_takepicture_2` | grasp — 2 contacts, 6.0 N, eq 0.01 | **33** | 891 | 2587 mm | 0.00 mm | **0** | **0 N** |
 
-**Camera drops.** The single most informative row — the lightest, most
-balanced seed in the set, on the one reference where the feedforward
-already tracked at 36 mm, with 33 start frames and 891 transitions, more
-support than any row of the old run — trains a policy that lets go of the
-object: 2.6 m of error, no contact at the end. Sample size is not the
-explanation here, and neither is the seed being a burial. This is the cell
-the seed-class question always lacked, and its first entry is a drop.
+**Camera drops — and it is a within-reference control, not a fresh row.**
+The seq-name collision means the same s1 camera clip has now been trained
+twice, from two wrist offsets, with identical recording, horizon, seed and
+reference:
+
+| same s1 camera clip | start frames | tracking | end state |
+|---|---:|---:|---|
+| s2 offset — **burial** (32 contacts, 5800 N) | 28 | **34.6 mm** | 9.32 mm inside, 8 contacts, 509 N |
+| s1 offset — **grasp** (2 contacts, 6.0 N, eq 0.01) | **33** | 2587 mm | 0.00 mm, 0 contacts, 0 N |
+
+The only difference is the initial hand pose, and the grasp arm has *more*
+data. Sample size is not merely "not the explanation" in aggregate — it is
+ruled out within a single reference, which no cross-reference comparison
+could have done. The collision that cost a night of mislabelled results
+produced the one comparison that settles the question, and it could not
+have been designed: nobody would deliberately train a clip from another
+recording's grasp. Beside it: on this clip the **feedforward alone** carries
+the object to 36.0 mm, and a policy trained from a physically valid grasp
+carries it to 2587 mm — worse than no policy by a factor of seventy.
+Whatever PPO extracts from a 2-contact, 6.0 N contact set, it is not how to
+keep hold of the object.
+
+**Decided before the remaining rows land:** camera is the only clip with
+both arms; the other five grasp-class references have no burial
+counterpart. If all six drop, the sentence is *in this pipeline a policy can
+track only what it is handed buried, and a valid grasp is not something it
+can learn to keep* — a claim about the reward and the initial-condition
+distribution together, carried by the camera pair as evidence rather than
+by population counts. If any of the five tracks and ends un-buried, that
+does not contradict camera; it means seed class is not sufficient on its
+own, and that clip's burial counterpart is wanted before anything is
+concluded from it.
 
 ### The reward terms that would price a grasp — drafted, benchmarked, not landed
 
