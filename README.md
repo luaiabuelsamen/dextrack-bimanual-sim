@@ -73,7 +73,7 @@ is withdrawn.
 |---|---|---|
 | arm inside the object | **fixed** | `W_PEN_ARM`: `binoculars_see_1` 175 m → 106 mm |
 | the search rewards burial | **diagnosed, not fixed** | drop-scored synthesis cannot tell a grasp from a burial; the equilibrium residual describes it but does not steer it |
-| a policy trained on a real grasp | **measured — no** | PPO from the un-buried fit drops the mug from every start; from the buried start it tracks at 22.2 mm and ends 10.8 mm inside at 1330× weight, same as the original. The initial condition is everything; the policy is not. See [docs/STAGE2.md](docs/STAGE2.md) |
+| a policy trained on a real grasp | **measured — no, on one reference** | The only stage-2 seed that is a grasp by force (`hammer_use_2`, 4 contacts, 20.7 N, equilibrium 0.04×) trains a policy that lets go: 80 m, ending 0 contacts and 0 N. A thin seed (`flashlight_on_2`, 0.6 N — less than the object weighs) re-buries to 207 N at 4.86 mm. A buried seed tracks at 22 mm and ends at 1330× weight (`mug_drink_1`, separate session). One reference per condition so far; burial-seeded replicates are still training. Note the shape of the failure: hammer ends at 0.00 mm penetration, which on a depth criterion is the cleanest row in the run and is the object on the floor. See [docs/STAGE2.md](docs/STAGE2.md) |
 
 **→ [docs/STAGE2.md](docs/STAGE2.md)** is the full diagnosis and where to pick
 up. RL retraining is blocked behind all three.
