@@ -537,8 +537,15 @@ contacts is a real equilibrium. **Drop-scored synthesis cannot tell a grasp
 from burial**, because burial is a perfectly good way to stop an object moving
 and the score asks for nothing else. That is the mechanism behind the 6 mm →
 20.58 mm re-burial above, seen from the other side. The fix being implemented
-is to score synthesis by equilibrium residual, which places those two rows on
-opposite sides of the same line.
+is to score synthesis by equilibrium residual. First A/B (w_eq 0 → 0.05, same
+seed): `airplane_fly_1` grip **385 N → 6.9 N** on a 1.96 N object — the result;
+`bowl_drink_1` 35.5 kN → 11.4 kN — a 3× reduction that is still burial. An
+improvement, not a fix. **Caveat on the mechanism:** the 1.90× above was read
+before settling; every settled winner, the 11.4 kN bowl included, reads
+**0.00×**, because a settled burial's forces cancel. So the residual is not
+separating settled candidates — whatever is doing the selecting during the
+search is not yet identified, and the rationale should not be quoted until it
+is.
 
 Two further items from that session, also uncommitted at this writing: frame 0
 is the approach on the **bimanual** path too — a reported 312 *km* tracking
@@ -557,16 +564,24 @@ Wired properly it buys links *with* burial (4 → 5 links, 3.2 → 5.9 mm), and 
 now ships off at `W_MID = 0.0`. The line the session drew from that is the one
 this document converges on: **every knob in the retarget objective is a
 position, and a position objective has no term that says hold the object.**
-Equilibrium residual is the first term that does.
+Equilibrium residual is the first candidate for such a term — with the caveat
+that it only speaks at placement (see the instrumentation note below): whether
+it separates candidates *during* a search that settles them is being checked.
 
-**The run.** PPO trained from the raw `W_PEN_ARM` fit on `mug_drink_1`, no
-hold-scored synthesis, `Pool.reset` a plain `reset_at` so every environment
-starts from the 6.10 mm / 119 N grasp; horizon 160, 12 envs, 440 iterations
-= 844,800 control steps, starts `5..115` to match the buried checkpoint's set;
-saved to `results/ppo_mug_drink_1_h160_rawfit.pt`, existing checkpoint
-untouched; ends with a 2×2 of old/new policy × raw/buried initial condition.
-Launched 2026-09-15 late evening. Iteration 0: reward 0.225, **alive 0.770** —
-from a random-init policy the un-buried grasp is not instantly dropped.
+Launched 2026-09-15 late evening. Iteration 0: reward 0.225, **alive 0.770**,
+flat through iteration 30. For calibration, the original buried checkpoint's
+curve (from the session that trained it):
+
+| iter | 0 | 10 | 20 | 50 | 100 | 200 | 399 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| reward | 0.682 | 0.656 | 0.713 | 0.745 | 0.771 | 0.897 | 0.876 |
+| alive | 0.984 | 0.985 | 0.979 | 0.984 | 0.986 | 0.979 | 0.984 |
+
+It began at 98.4% alive and never left 0.97–0.99: it was handed a state that
+already held and spent 400 iterations polishing it. The raw-fit run at 0.77 is
+a different regime from its first sample, not an early transient. Compare
+`alive` first — the reward scales may differ — and do not call it before
+iteration 100, since the original also dipped before it rose.
 Measured rate **18.8 s/iteration, ~2.3 h total** (an earlier figure of
 103 s/iteration in this entry divided elapsed time by *logged lines*, which
 print every 10 iterations; it was wrong). The original checkpoint took
@@ -643,11 +658,15 @@ count on its face, and flags `CONTACT SET IS AN ARTIFACT / NOT A GRASP` above
 force, equilibrium residual, source and model hashes, and a replay check against
 the evaluator.
 
-**Equilibrium residual** is the scalar worth watching: net unbalanced wrench on
-the object at reset, gravity included, in multiples of object weight. **0× is
-equilibrium, 1× is freefall**, and these measure 142–337×. Unlike penetration
-depth it rejects both failure ends — a hand that misses the object scores
-exactly 1×, where depth would flatter it with 0 mm.
+**Equilibrium residual** is the scalar worth watching *at reset*: net
+unbalanced wrench on the object, gravity included, in multiples of object
+weight. **0× is equilibrium, 1× is freefall**, and freshly placed burials
+measure 142–337×. Unlike penetration depth it rejects both failure ends at
+placement — a hand that misses the object scores exactly 1×, where depth would
+flatter it with 0 mm. **Caveat:** a burial that has *settled* reads ~0×, the
+same as a real grasp, because its constraint forces cancel at rest. The metric
+discriminates how a pose was placed, not its steady state; read it at reset,
+never after stepping.
 
 Scan scripts used for the tables above are not committed; they are short and
 read-only, calling `ReferenceTracker` and `mj_forward` per frame at roughly

@@ -814,14 +814,13 @@ the failure that invalidated the repository's numbers.
 Two practical notes. `grasp_metrics` takes a single `obj_geom_id` while the GRAB
 objects are convex-decomposed into 23–42 geoms, so a multi-geom variant is
 needed to run ε here at all — plausibly why `src/oppdef/human/` never imported
-it. And the metric that *does* discriminate is cheap: the net unbalanced wrench
-on the object at reset, gravity included, in multiples of object weight. The
-scale is **0× equilibrium** (contacts balance gravity and nothing else), **1×
-freefall** (nothing supporting the object), and 142–337× for these four. One
-`mj_forward`, ungameable by manufacturing contacts, and — unlike penetration
-depth — it rejects the non-contacting failure as well as the buried one, since
-a hand that misses the object scores exactly 1×. Every zero-contact candidate
-in the sweep scored exactly 1.000×, which is how they are identified.
+it. And the metric that *does* discriminate **at placement** is cheap: the net
+unbalanced wrench on the object at reset, gravity included, ~0× for a
+configuration genuinely at rest and 142–337× for these freshly placed ones.
+One `mj_forward`; it rejects the non-contacting failure (exactly 1×, free fall)
+as well as a freshly placed burial. **It does not expose a burial that has
+settled** — cancelling constraint forces read ~0×, the same as a real grasp —
+so it discriminates how a pose was placed, not its steady state.
 
 (An earlier revision of this document and of the README described 1× as the
 resting value. That was wrong: 1× is freefall and 0× is rest. The ordering and
