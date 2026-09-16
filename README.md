@@ -306,7 +306,7 @@ The mug demo uses the checked-in PPO checkpoint and its original hold-scored
 grasp setup. Each new GIF has an adjacent JSON
 manifest with the exact source hashes, search settings, errors, and replay check.
 The full physics-state cache stays in `out/tracking_gifs/`; use
-`python -m experiments.render_tracking mug bowl binoculars camera --render-only`
+`python -m experiments.tracking.render_tracking mug bowl binoculars camera --render-only`
 to adjust presentation without rerunning the experiment.
 
 Renders need `MUJOCO_GL=egl`. GPU stepping uses `mujoco_warp`; **MJX-JAX does
