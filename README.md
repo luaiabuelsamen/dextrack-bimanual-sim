@@ -56,14 +56,18 @@ extend to two hands, then test under depth perception.
 | Instrumentation | every rollout GIF carries penetration, grip force and contact count on its face, with a per-frame JSON manifest and a replay check |
 | Stages 1, 4 | human reference, homotopy curriculum. *Stage 7 (depth → pose) is not on this list: its stored result was one clip from the approach frame, dropped in all three conditions — see [PIPELINE.md](docs/PIPELINE.md)* |
 
-**Stage 2 — the retarget — now has a number, and it is honest about what the
-number hides.** Hold rate **0.275 → 0.850** across 40 objects after a wrist
-search scored by a physical hold test, 95% CI [0.725, 0.950]. But of the 34
-"holds", **20 are grasps** (≤ 12 contacts, median drop 6.6 mm) and **6 are
-burials** — the hand inside the object, up to 94 contacts and 35.5 kN. The 6
-failures are one geometric class: featureless convex primitives, where a
-position objective has nothing to hook. Every tracking number reported before
-this was measured on a burial and is withdrawn.
+**Stage 2 — the retarget — moves most references from dropped to held, and
+the figure for that is pending.** A wrist search scored by a physical hold test
+took a 40-object sweep from 0.275 to 0.850 hold rate — but that number **does
+not reproduce across code versions** (`dca903b`): two sweeps sharing five
+references disagree on three, because one ran while `src/` was being edited.
+The simulator itself reproduces to the last digit; the sweeps ran different
+code. A clean figure waits on one sweep at frozen `HEAD`. What survives the
+caveat: of the references that hold, a substantial fraction hold by **burial**
+— the hand inside the object, up to 94 contacts and 35.5 kN — and the failures
+cluster on featureless convex primitives, though one of those six now holds on
+rerun. Every tracking number reported before this was measured on a burial and
+is withdrawn.
 
 | | state | |
 |---|---|---|

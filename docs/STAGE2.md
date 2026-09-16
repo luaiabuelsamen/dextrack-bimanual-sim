@@ -556,7 +556,25 @@ never gets the bowl below ~10 kN, worsens drop in all six. An improvement in
 the right direction, not the term. Reading `equilibrium` is how the burial was
 caught; it is not how it gets fixed.
 
-**Stage 2 now has a number** (`2e4c951`). Forty references, one per object:
+**Stage 2 had a number, and it is retracted pending a clean sweep** (`2e4c951`,
+retracted in `dca903b`). Two stage-2 sweeps sharing five references disagree
+on three — `apple_eat_1` 9 vs 18 contacts, `phone_call_1` 8.7 vs 15.3 mm,
+`cubelarge_inspect_1` FAILED vs held at 7.1 mm — because sweep A ran for thirty
+minutes while `src/` was being edited. Not simulator noise: six repeated hold
+tests on each of two references, fresh and reused environments, reproduce to
+the last digit. The sweeps ran different code. **The asymmetry is the lesson:
+version skew that crashes is the lucky case.** In this session it produced a
+loud `AttributeError`; in the other it silently changed a number that reached
+the front page and two documents here. And the verification that would have
+caught it compared the new build against itself rather than against the
+previous commit, while the commit message said "reproduces bit for bit,
+verified." The figures below are what sweep A reported; treat them as the
+shape of the result, not its value, until one sweep runs at frozen `HEAD`. The
+failure class is now five references, and `cubelarge_inspect_1` changed its
+mind. The g9 run is unaffected — it launched after every edit and `src/` has
+been frozen since.
+
+Forty references, one per object, as sweep A reported:
 hold rate **0.275** from the raw retarget → **0.850** after a CEM wrist search
 scored by a physical hold test, 95% CI [0.725, 0.950] clustered by object. What
 the 34 successes *are* matters more than the headline:
