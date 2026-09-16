@@ -1453,6 +1453,58 @@ def one_sidedness(sc) -> float:
     return float(np.linalg.norm(acc) / n) if n else 1.0
 
 
+def wrap_score(sc, pen_allow=0.003):
+    """How much of a WRAP the current contact set is. Lower is better.
+
+    The quantity that survives the control every other candidate failed. A grasp
+    that carries engages many distinct hand LINKS from opposing directions; one
+    that merely touches engages one fingertip from a single direction, and the
+    two can have identical fingertip geometry, identical contact normals and
+    identical Ferrari-Canny epsilon.
+
+    Validated against the human demonstration, which is the positive control
+    this pipeline has and which killed the two previous candidates. Distinct
+    hand parts in contact, at the middle of the hold window:
+
+        reference          human   robot
+        binoculars_see_1     13       4
+        flashlight_on_2       7       2
+        cup_lift             13       9
+
+    and a peer's measurement on the robot alone: configurations that carry the
+    object engage 10 and 3 links at contact one-sidedness 0.055 and 0.191, those
+    that fail engage ONE at ~1.0.
+
+    Penetration is gated rather than weighted. Unguarded, every opposition-like
+    measure rewards burial -- a buried hand engages many links from many
+    directions and scores beautifully, which is how this pipeline arrived at
+    kilonewton "grasps". Beyond the allowance the score is forced to its worst
+    value, so a wrap can only be improved among poses that are physically valid.
+    """
+    m, d = sc.model, sc.data
+    objs, hands = set(sc.obj_gids), set(sc.hand_gids)
+    bodies, acc, n, worst = set(), np.zeros(3), 0, 0.0
+    for i in range(d.ncon):
+        c = d.contact[i]
+        g1, g2 = int(c.geom1), int(c.geom2)
+        if not ({g1, g2} & objs and {g1, g2} & hands):
+            continue
+        hg = g1 if g1 in hands else g2
+        bodies.add(int(m.geom_bodyid[hg]))
+        v = np.array(c.frame[:3])
+        acc += -v if g1 in objs else v
+        n += 1
+        worst = max(worst, -float(c.dist))
+    if n == 0:
+        return 2.0, 0, 1.0
+    if worst > pen_allow:
+        return 2.0, len(bodies), 1.0
+    sided = float(np.linalg.norm(acc) / n)
+    # five links is the human's low end; more than that earns nothing extra
+    link_term = 1.0 - min(len(bodies), 5) / 5.0
+    return float(sided + link_term), len(bodies), sided
+
+
 def total_grip(sc) -> tuple[float, int]:
     """(sum of hand-object normal force in N, number of such contacts)."""
     m, d = sc.model, sc.data
