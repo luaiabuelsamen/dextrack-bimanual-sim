@@ -967,7 +967,10 @@ is its negative:
 | camera | 308× (604 N) | 124× | 650× | 36× | 0.13 |
 | mug (PPO) | 202× (397 N) | 85× | 282× | 17× | 0.27 |
 
-Zero of 541 frames under 2× object weight. The weld re-drives the hand to
+**All four rollouts are burial-class, and no clean-grasp rollout exists to
+contrast against** — that is not a weakness of the measurement, it is the
+finding restated: this repository has no non-burial tracking rollout to
+measure. Zero of 541 frames under 2× object weight. The weld re-drives the hand to
 the next reference pose every control frame, so tracking is a sequence of
 fresh placements and the net force never settles; cancellation removes
 73–95 % of the summed magnitude and leaves hundreds of newtons. At
@@ -977,9 +980,16 @@ soften the weld to a stiff spring (or replace it with a PD-driven free base),
 rerun the mug 2×2 and the four gallery rollouts — is decisive rather than
 suggestive: if burial stops tracking under compliance, every tracking number
 in this repository is reclassified; if it still tracks, the base is ruled out
-by measurement. Caveats: read after each control frame's substeps, not at
-reset; all four rollouts are burial-class, and no clean-grasp rollout exists
-to show the contrast — which is the point. Not yet run.
+by measurement. Two checks on the inference: the residual sums every contact
+with the object, so it is a hand force only if the object touches nothing
+else — the scene has no floor, plane or second object (mug scene: 87 geoms,
+52 hand, 23 object, the rest forearm/wrist and the mocap body), and the
+forearm and wrist are on the welded chain, so every contact force on the
+object is reacted by the base. And the values are read after each control
+frame's 33 substeps, not at reset — the state the weld holds the hand in,
+which is the right place for this argument. A rollout-only version (soften
+the weld on the built model, roll the existing mug policy) is cheap and runs
+first; the retrained version follows.
 
 ## Look at the pose before trusting the number
 
