@@ -12,6 +12,16 @@
    "end_contacts": 3,
    "grasp_frames": 2,
    "transitions": 148
+  },
+  {
+   "obj": "hammer",
+   "seq": "hammer_use_2",
+   "ppo_mm": 80250.11940304513,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 4,
+   "transitions": 566
   }
  ],
  "held_out": []

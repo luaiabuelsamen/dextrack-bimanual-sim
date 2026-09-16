@@ -4223,3 +4223,41 @@ The stored numbers from before -- 101.5 mm truth against 637.3 depth, which
 looked like structured estimator error and was carried onto a front page -- were
 the same failure at a smaller magnitude, on a single reference started at the
 approach frame.
+
+## Stage 3, first two rows: what tracks is penetration
+
+Ordered so the cleanest seeds train first, which put the answer 4.5 hours earlier
+than inventory order would have.
+
+    reference          seed class          PPO        end pen   end con   end grip
+    flashlight_on_2    THIN   (0.6 N)     112.9 mm    4.86 mm      3       207 N
+    hammer_use_2       GRASP  (20.7 N)  80250.1 mm    0.00 mm      0         0 N
+
+`hammer_use_2` is the best seed stage 2 produced -- 4 contacts, 20.7 N on a 2 N
+object, equilibrium 0.04, the only reference in the set that is a grasp by force
+as well as by geometry. The policy trained from it LETS GO. Eighty metres.
+
+Read with the peer session's mug 2x2, which found a policy trained on the raw
+6 mm / 119 N grasp dropping from every start while both policies tracked the
+buried initial condition at 22-23 mm, this is one coherent statement:
+
+    burial-seeded references track        (mug 22.2 mm at 1330x weight)
+    grasp-seeded references drop          (hammer, 80 m, 0 contacts)
+    thin-seeded ones re-bury to hold on   (flashlight, 0.6 N -> 207 N, 4.86 mm)
+
+What tracks in this pipeline is penetration. The policy either has burial handed
+to it, manufactures it, or fails. Nothing in the reward asks for a grasp, and a
+policy cannot invent one from a 20 N contact set it was given.
+
+**Hammer's end state is the trap, and it arrived unprompted.** 0.00 mm
+penetration, 0 contacts, 0 N. On a penetration criterion alone that is the
+cleanest row in the run; it is the object lying on the floor. This is why the
+readout requires tracking under 50 mm AND ending un-buried before it will call a
+row a tracking result, and it is the same both-ends problem that killed
+penetration depth as a grasp metric and that `equilibrium_residual` was built
+for. Any penetration penalty added to the PPO reward makes hammer's behaviour
+OPTIMAL unless something prices losing the object at the same time.
+
+So the missing reward term is not a penalty on penetration. It is a price on
+letting go -- and the penalty, alone, would make the failure worse while making
+the metric look better.

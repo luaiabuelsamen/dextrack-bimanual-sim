@@ -413,9 +413,17 @@ the defect.
 
 So the target is not "plausible contact force" and not "opposition" alone. It is
 **many contacts, on opposing sides, at bounded penetration** — which is a wrap.
-Nothing in the pipeline currently searches for that: `W_PEN_ARM` bounds
-penetration, the distance score reaches the surface, and neither asks how many
-links engage or from which directions.
+`wrap_score` in `human/track.py` measures exactly that (distinct hand links in
+contact plus one-sidedness, forced to its worst value past 3 mm of penetration),
+and it is validated against the human demonstration **as a discriminator**: it
+separates a wrap from a touch. It is **not** validated as a search objective.
+Used to steer the retarget, its neighbourhood is empty — the sweep found no
+candidate the gate accepts — and the gate saturates on essentially every
+configuration this pipeline produces (86–100 % of frames past 3 mm, both arms
+of an A/B). So the quantity that identifies a grasp exists; a search that
+reaches one does not. `W_PEN_ARM` bounds penetration and the distance score
+reaches the surface; neither asks how many links engage or from which
+directions.
 
 **Caveats.** Frame-0 delta applied as a constant offset across the trajectory.
 Two references in this comparison, three in the rollout. The rollout is
