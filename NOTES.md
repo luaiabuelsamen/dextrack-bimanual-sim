@@ -4610,3 +4610,42 @@ and stayed buried; one grasp seed with almost no training data, which let go.
 That is not enough to support the seed-class claim and it is not nothing. It is
 consistent with it, on n=1 per arm, with the grasp arm confounded by sample
 size -- which is exactly what the corrected rerun and the 2x2 exist to settle.
+
+## Stages 4 and 5 ran end to end. The distilled policy does not transfer.
+
+Nine policies trained, distilled into one network, held out by OBJECT:
+
+    held out          feedforward    its own PPO    DISTILLED
+    hammer_use_2          906.0 mm      80250.1 mm     847.6 mm
+    knife_lift           2734.3          87.7           81.1
+    camera_takepicture_2    36.0          34.6         1030.3
+
+    distilled beats feedforward on 2/3
+    distilled within 2x of that reference's own PPO on 2/3
+
+Read the headline counts and then ignore them, because the row that matters is
+camera. It is the one held-out reference where the feedforward already worked --
+36.0 mm, the best feedforward number in the set -- and the distilled policy
+turns it into 1030.3 mm, twenty-nine times worse. On the two references where
+feedforward had already failed at 906 and 2734 mm, the distilled policy also
+fails, at 848 and 81 mm, and "beats feedforward" is a comparison between two
+failures. Nothing here is under the 50 mm bar except knife's 81.1 mm, which is
+close to it and belongs to the row with a single start frame and an unexplained
+error.
+
+So the stage 4-5 mechanism works -- policies harvest, a network fits them, it
+evaluates on unseen objects -- and the thing it produces does not transfer. That
+is a real result about this pipeline and not a bug: the policies being distilled
+are the stage 3 policies, seven of ten of which were seeded from another
+subject's grasp, and of the ones that "succeed" none ends holding the object
+un-buried. A network fitted to that mixture has been shown burial and dropping,
+and it reproduces both.
+
+Stage 3's population statement, on all nine rows: **no row tracks under 50 mm
+while ending un-buried. Five of nine finish under 3 mm of penetration with a
+median of 0.00 mm, because the object is on the floor.**
+
+Also worth noting as a small vindication of the subject-keying fix: the readout
+now prints `?` for the seed class of every row in this run, because the stored
+rows predate the subject field. It refuses to label rather than mislabel, which
+is what it should do.

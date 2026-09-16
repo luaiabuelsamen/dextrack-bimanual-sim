@@ -2,6 +2,17 @@
  "hand": "shadow",
  "steps": 160000,
  "seed": 0,
+ "held_out_objects": [
+  "camera",
+  "hammer",
+  "knife"
+ ],
+ "mixture": {
+  "grasp": 5,
+  "mixed": 1,
+  "burial": 2,
+  "unseeded": 1
+ },
  "per_reference": [
   {
    "obj": "flashlight",
@@ -11,6 +22,7 @@
    "end_grip_n": 207.21804155396296,
    "end_contacts": 3,
    "grasp_frames": 2,
+   "seed_kind": "grasp",
    "transitions": 148
   },
   {
@@ -21,6 +33,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 4,
+   "seed_kind": "grasp",
    "transitions": 566
   },
   {
@@ -31,6 +44,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 1,
+   "seed_kind": "grasp",
    "transitions": 25
   },
   {
@@ -41,6 +55,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 9,
+   "seed_kind": "grasp",
    "transitions": 985
   },
   {
@@ -51,6 +66,7 @@
    "end_grip_n": 4833.664593486001,
    "end_contacts": 15,
    "grasp_frames": 27,
+   "seed_kind": "grasp",
    "transitions": 711
   },
   {
@@ -61,6 +77,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 2,
+   "seed_kind": "mixed",
    "transitions": 337
   },
   {
@@ -71,8 +88,53 @@
    "end_grip_n": 509.1972391157274,
    "end_contacts": 8,
    "grasp_frames": 28,
+   "seed_kind": "burial",
    "transitions": 836
+  },
+  {
+   "obj": "bowl",
+   "seq": "bowl_drink_1",
+   "ppo_mm": 8.223805563245975,
+   "end_pen_mm": 17.50050311870358,
+   "end_grip_n": 29118.18397741201,
+   "end_contacts": 81,
+   "grasp_frames": 27,
+   "seed_kind": "burial",
+   "transitions": 711
+  },
+  {
+   "obj": "binoculars",
+   "seq": "binoculars_see_1",
+   "ppo_mm": 131158.18115805893,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 1,
+   "seed_kind": "unseeded",
+   "transitions": 145
   }
  ],
- "held_out": []
+ "held_out": [
+  {
+   "seq": "hammer_use_2",
+   "object": "hammer",
+   "feedforward_mm": 906.0307188127299,
+   "ppo_mm": 80250.11940304513,
+   "distilled_mm": 847.6494112170313
+  },
+  {
+   "seq": "knife_lift",
+   "object": "knife",
+   "feedforward_mm": 2734.26488598859,
+   "ppo_mm": 87.65951234648011,
+   "distilled_mm": 81.05853420366432
+  },
+  {
+   "seq": "camera_takepicture_2",
+   "object": "camera",
+   "feedforward_mm": 36.0008655277678,
+   "ppo_mm": 34.63119153981698,
+   "distilled_mm": 1030.3053396120088
+  }
+ ]
 }
