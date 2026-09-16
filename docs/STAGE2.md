@@ -635,6 +635,23 @@ floor, which is the opposite of "nothing to learn from" — and it sits 19
 points below the buried run on the only axis that is comparable. Whether it
 climbs far enough to *track* is the 2×2 at the end of the run. Rate settled
 at 14.5 s/iteration, matching the original's 14.2.
+
+**Iteration 200:** reward 0.399, alive **0.822**. It did not reach 0.85.
+
+| iter | 140 | 150 | 160 | 170 | 180 | 190 | 200 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| alive | 0.816 | 0.821 | 0.810 | 0.799 | 0.810 | 0.809 | **0.822** |
+| reward | 0.388 | 0.401 | 0.349 | 0.337 | 0.372 | 0.357 | **0.399** |
+
+A plateau at 0.80–0.82 from iteration 140, with 0.822 and 0.399 both new
+highs at 200 — drifting up inside the band, not stuck. The original at 200:
+alive 0.979, reward 0.897. So the un-buried grasp is *learnable* and is not
+*learned* to the buried run's level at this horizon in 200 iterations: the
+policy holds ~82% of the 23 start frames and is not finding the rest, where
+the original never had to find anything because the burial held. Whether the
+policy *tracks* from the raw fit is the 2×2 at the end of the run, reported
+with end-of-rollout penetration and grip so that a policy which has learned
+to bury the hand itself cannot pass as a success.
 Measured rate **18.8 s/iteration, ~2.3 h total** (an earlier figure of
 103 s/iteration in this entry divided elapsed time by *logged lines*, which
 print every 10 iterations; it was wrong). The original checkpoint took

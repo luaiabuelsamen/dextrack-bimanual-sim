@@ -69,7 +69,7 @@ this was measured on a burial and is withdrawn.
 |---|---|---|
 | arm inside the object | **fixed** | `W_PEN_ARM`: `binoculars_see_1` 175 m → 106 mm |
 | the search rewards burial | **diagnosed, not fixed** | drop-scored synthesis cannot tell a grasp from a burial; the equilibrium residual describes it but does not steer it |
-| a policy trained on a real grasp | **running** | PPO from the un-buried fit, alive 0.77 → 0.82 by iter 160; 2×2 result pending |
+| a policy trained on a real grasp | **running** | PPO from the un-buried fit; alive plateaued 0.80–0.82 from iter 140 (0.822 at 200, original 0.979); whether it *tracks* is the 2×2 result, pending |
 
 **→ [docs/STAGE2.md](docs/STAGE2.md)** is the full diagnosis and where to pick
 up. RL retraining is blocked behind all three.
