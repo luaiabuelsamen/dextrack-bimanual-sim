@@ -4942,3 +4942,42 @@ every start).
 
 And the corollary that matters for everything upstream: every tracking number
 this repository has ever reported was produced from a buried initial condition.
+
+## RETRACTED: "the policy is worse than no policy"
+
+I compared two different initial conditions and the sentence reached the README
+before v2's own feedforward number existed. v2's held-out row:
+
+    camera_takepicture_2   feedforward 2256.4 mm   own PPO 2587.1 mm   distilled 992.7 mm
+
+The 36.0 mm feedforward I quoted was from the FIRST run, where camera carried
+the s2 BURIAL offset. From the s1 valid grasp the feedforward is 2256.4 mm. So
+"feedforward 36 mm against policy 2587 mm" is feedforward-from-a-burial against
+policy-from-a-grasp, and the factor of seventy measures the initial condition
+changing, not the policy.
+
+At a fixed initial condition:
+
+    from the s1 valid grasp    feedforward 2256.4 mm    PPO 2587.1 mm
+    from the s2 burial         feedforward   36.0 mm    PPO   34.6 mm
+
+The policy is marginally worse than feedforward from the grasp and marginally
+better from the burial. Both differences are noise beside the two-order-of-
+magnitude gap between the conditions.
+
+**The corrected finding is stronger than the retracted one.** The feedforward
+drops a valid grasp too. So this is not "RL cannot learn to keep a grasp it was
+handed" -- it is that nothing in this pipeline keeps hold of a valid grasp,
+open-loop or learned, and everything holds a burial. Stage 3 was never the
+variable. The initial condition determines the outcome and the controller barely
+moves it.
+
+That also reframes the six-of-six result one level up: those six policies drop
+the object, and so would no policy at all. The failure is not in the tracking
+stage.
+
+I made this error ninety minutes after establishing that the initial condition
+is the only thing that matters in this pipeline, by quoting a number from one
+run against a number from another without checking they shared a condition. The
+guard is the one I have been asking the peer session for all night: state the
+condition beside the number.

@@ -2,6 +2,16 @@
  "hand": "shadow",
  "steps": 160000,
  "seed": 0,
+ "held_out_objects": [
+  "camera",
+  "gamecontroller",
+  "knife"
+ ],
+ "mixture": {
+  "grasp": 8,
+  "burial": 1,
+  "unseeded": 1
+ },
  "per_reference": [
   {
    "obj": "camera",
@@ -12,6 +22,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 33,
+   "seed_kind": "grasp",
    "transitions": 891
   },
   {
@@ -23,6 +34,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 1,
+   "seed_kind": "grasp",
    "transitions": 120
   },
   {
@@ -34,6 +46,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 32,
+   "seed_kind": "grasp",
    "transitions": 1176
   },
   {
@@ -45,6 +58,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 1,
+   "seed_kind": "grasp",
    "transitions": 25
   },
   {
@@ -56,6 +70,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 3,
+   "seed_kind": "grasp",
    "transitions": 276
   },
   {
@@ -67,6 +82,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 11,
+   "seed_kind": "grasp",
    "transitions": 684
   },
   {
@@ -78,6 +94,7 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 4,
+   "seed_kind": "grasp",
    "transitions": 131
   },
   {
@@ -89,6 +106,7 @@
    "end_grip_n": 1574.179109522846,
    "end_contacts": 9,
    "grasp_frames": 4,
+   "seed_kind": "grasp",
    "transitions": 144
   },
   {
@@ -100,6 +118,7 @@
    "end_grip_n": 29118.18397741201,
    "end_contacts": 81,
    "grasp_frames": 27,
+   "seed_kind": "burial",
    "transitions": 711
   },
   {
@@ -111,8 +130,31 @@
    "end_grip_n": 0.0,
    "end_contacts": 0,
    "grasp_frames": 1,
+   "seed_kind": "unseeded",
    "transitions": 145
   }
  ],
- "held_out": []
+ "held_out": [
+  {
+   "seq": "camera_takepicture_2",
+   "object": "camera",
+   "feedforward_mm": 2256.4447952407263,
+   "ppo_mm": 2587.1408155807076,
+   "distilled_mm": 992.7468372537185
+  },
+  {
+   "seq": "knife_lift",
+   "object": "knife",
+   "feedforward_mm": 2734.26488598859,
+   "ppo_mm": 87.65951234648011,
+   "distilled_mm": 87.53469039439942
+  },
+  {
+   "seq": "gamecontroller_play_1",
+   "object": "gamecontroller",
+   "feedforward_mm": 175291.38076052585,
+   "ppo_mm": 51777.547901607155,
+   "distilled_mm": 450.52282999239986
+  }
+ ]
 }
