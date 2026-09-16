@@ -20,3 +20,6 @@ data/mano/
 data/grab_convex/
 logs/
 vendor/GRAB/
+
+# agent worktrees: separate checkouts, never part of this repo
+.claude/worktrees/
