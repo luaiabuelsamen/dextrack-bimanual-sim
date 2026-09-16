@@ -903,3 +903,72 @@ constraint on the arm-side bodies (wrist, palm, forearm) may be worth more than
 one on the fingers and is cheaper, being rigid-body placement rather than
 whole-hand IK. If it converts a useful fraction of the thirteen into the six,
 the existing closure routine handles the remainder.
+
+### The arm-side constraint: half the fix, measured
+
+Weighting non-penetration on arm-side bodies — forearm, wrist, palm, knuckles,
+anything not strictly below a knuckle — at 60× the finger weight, measured end
+to end through the rollout:
+
+| reference | w_arm | arm penetration | force | residual | tracking |
+|---|---:|---:|---:|---:|---:|
+| `binoculars_see_1` | 1 | 5.20 mm | 117 N | 29.5× | 175528 mm |
+| `binoculars_see_1` | 60 | 2.47 mm | 2473 N | 15.4× | **106.2 mm** |
+| `mug_drink_1` | 1 | 7.04 mm | 2294 N | 4.0× | 33.9 mm |
+| `mug_drink_1` | 60 | 0.48 mm | 1195 N | 8.3× | 146.8 mm |
+| `flashlight_on_2` | 1 | 12.96 mm | 782 N | 1.7× | 8.5 mm |
+| `flashlight_on_2` | 60 | 1.39 mm | 386 N | 4.3× | 107.5 mm |
+
+`binoculars_see_1` is the headline: 175 m to 106 mm, on the reference with no
+collision-free frame anywhere and the forearm deepest at all 155 frames.
+
+**The two rows that get worse are not regressions.** `flashlight_on_2` tracked
+at 8.5 mm with its palm 12.96 mm inside the object; the burial was the grip.
+This is the 0-of-283 candidate result and the `w_pen` end-to-end result
+appearing a third time: in this pipeline, removing penetration removes grip,
+because the contacts and the penetration are the same thing. State that wherever
+these rows are quoted or a reader will read the constraint as damage.
+
+**Necessary, not sufficient**, quantified over 40 s1 sequences with the
+constraint active:
+
+```
+median arm-side penetration across sequences  0.00 mm
+median finger penetration across sequences    6.26 mm
+sequences with median arm-side > 3 mm         11/40
+sequences with max    arm-side > 3 mm         30/40  (6% of frames at the median)
+```
+
+Arm-side penetration is zero at the median in 29 of 40, and where it spikes it
+is transient. The residual defect is the fingers. Equilibrium residual remains
+4.3–15.4× at 361–2488 N on a 1.96 N object, so none of these configurations is
+an equilibrium — the arm is outside the object and the finger contact is still
+an overlap.
+
+The eleven that retain a median arm-side problem cluster on **vessels**:
+
+| | arm-side | finger |
+|---|---:|---:|
+| `mug_drink_3` | 39.28 mm | **0.00 mm** |
+| `mug_toast_1` | 34.27 mm | **0.00 mm** |
+| `mug_drink_2` | 33.65 mm | **0.00 mm** |
+| `mug_drink_4` | 33.30 mm | **0.00 mm** |
+| `cup_pour_1` | 25.80 mm | 10.26 mm |
+| `bowl_drink_1` | 16.38 mm | 17.42 mm |
+| `cup_lift` | 12.26 mm | 13.58 mm |
+
+Four `mug_drink` variants and `mug_toast_1` sit at 33–39 mm arm-side with
+exactly zero finger contact — a hand through the vessel, not around it. These
+cannot be repaired by closing, because there is nothing to close onto; they
+should be excluded from tracking numbers until the approach into a concave
+object is addressed, rather than reported as poor tracking.
+
+Caveat: 40 of the 291 inventory rows, selected by `rhand_hold_len`, so biased
+toward long holds.
+
+**Provenance note.** `W_PEN_ARM` originated with the session working `src/`, in
+an uncommitted edit that commit `50bff98` swept up while restructuring. That
+commit's message describes only the restructure and does not mention the
+constraint. The content is correct and was pushed again deliberately in
+`abe0af9`; recorded here so a later reader of `50bff98` is not misled about
+where the change came from.

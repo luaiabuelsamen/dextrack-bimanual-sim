@@ -197,7 +197,42 @@ each was tried and measured, and retracting along contact normals actively
 diverges, because a hand wrapped around an object cannot be translated out of
 it (measured normal alignment 0.325 on the mug, where 0 is fully opposed).
 
-**Closing under physics helps the six sequences whose wrist already lands
+### The fix, half of it
+
+Weighting non-penetration on the **arm-side** bodies — forearm, wrist, palm,
+knuckles, anything not strictly below a knuckle — at 60× the finger weight:
+
+| reference | w_arm | arm penetration | force | residual | tracking |
+|---|---:|---:|---:|---:|---:|
+| `binoculars_see_1` | 1 | 5.20 mm | 117 N | 29.5× | 175528 mm |
+| `binoculars_see_1` | **60** | 2.47 mm | 2473 N | 15.4× | **106.2 mm** |
+| `flashlight_on_2` | 1 | 12.96 mm | 782 N | 1.7× | 8.5 mm |
+| `flashlight_on_2` | 60 | 1.39 mm | 386 N | 4.3× | 107.5 mm |
+
+`binoculars_see_1` is the result: **175 metres to 106 millimetres**, on the
+reference whose forearm was the deepest penetrating body at every one of its 155
+frames and which had no collision-free frame anywhere in the clip.
+
+**`flashlight_on_2` getting worse is not a regression.** It was tracking at
+8.5 mm with its palm 12.96 mm inside the object — the burial *was* the grip, and
+removing the penetration removed the fake grip. That is the 0-of-283 result
+arriving as a consequence rather than a prediction, and any reading of that row
+as damage has it exactly backwards.
+
+**Necessary, not sufficient.** Across 40 sequences the constraint drives
+arm-side penetration to **0.00 mm at the median**, but finger penetration
+remains at **6.26 mm** and the equilibrium residual stays at 4.3–15.4× with
+361–2488 N on a 1.96 N object. None of these is an equilibrium yet: the arm is
+out of the object, and the finger contact is still an overlap rather than a
+grasp. Eleven of the forty still have a median arm-side problem, and they
+cluster on **vessels** — four `mug_drink` variants and `mug_toast_1` sit at
+33–39 mm arm-side with *exactly zero* finger contact, which is a hand through
+the cup rather than around it.
+
+The second half is closing the fingers under simulation, which is built and
+works when the hand starts outside the object.
+
+**It helps the sequences whose wrist already lands
 outside the object.** It is to stop *placing* the hand
 and start *closing* it — backing the fingers off along the derived flexion
 direction, then closing under simulation to a force target:
@@ -389,7 +424,7 @@ measurement, not on the previous stage having compiled:
 | stage | what it does | state |
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
-| 2. retarget | human contact points → robot joint trajectory | **broken at the objective** — no non-penetration constraint, so 23/2866 scanned frames are under 1 mm and 13 of 20 sequences never come clean; the forearm alone is buried on all 155 frames of `binoculars_see_1` |
+| 2. retarget | human contact points → robot joint trajectory | **half fixed** — an arm-side non-penetration constraint takes `binoculars_see_1` from 175 m to 106 mm; arm-side penetration is now 0.00 mm at the median over 40 sequences, but finger penetration remains 6.26 mm |
 | 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **not physical** — 29.35 mm is achieved on 13.8 mm of penetration at 1530 N; `gamecontroller`'s 27.2 mm withdrawn; see [above](#physics-rollouts--four-failures) |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
 | 5. distillation | one neural tracking controller across references | **incomplete** — reported held-out position error is 158–456 mm; that error alone does not verify continued grasp retention |
