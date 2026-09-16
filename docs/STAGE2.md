@@ -854,196 +854,65 @@ follow.
 The 5.36 mm reading noted above was rerun under its exact original sequence and
 does not reproduce; five processes agree on 6.10 mm.
 
-### First grasp-class rows: the thin seed re-buries, the grasp seed lets go
+### The g9 run: end states survive, the seed labels do not
 
-The g9 run's first two rows, the ones the ordering was designed to reach
-early (`results/g9_ppo_distill.json`, `per_reference`):
+**Withdrawn, not hedged.** Everything below that described a row by its *seed
+class* — grasp, thin, burial, mixed — rested on labels that do not belong to
+the rows. GRAB has 80 sequence names that exist under more than one subject;
+`camera_takepicture_2` is one (s1: 161 frames, s2: 76). The stage-2 sweep
+resolved bare names with `{r["seq"]: r}`, silently keeping one subject, and
+g9 looked seeds up the same way — so for **7 of the 10 rows the policy
+trained on s1's clip with a wrist offset computed for s2's version of the
+same-named sequence**: mouse, phone, gamecontroller, camera, hammer,
+flashlight, mug_drink_2. Only knife, bowl and binoculars are matched, and
+knife has one start frame and binoculars failed stage 2. The offsets are
+still offsets and the training runs are valid training runs, but they are
+"retarget plus an arbitrary wrist perturbation", not "seeded from a validated
+stage-2 grasp". Found by the other session from the 28-versus-10 start-frame
+discrepancy on camera: both probes computed the right number for the wrong
+clip. Same shape as the version skew — a silent key collision producing
+plausible numbers for two hours. The lookup is being fixed to key on
+`subject/seq` and the run repeated.
 
-| reference | seed class (force) | start frames | transitions | PPO tracking | end penetration | end contacts | end grip |
+**What survives** — the end states, because they are live readings of
+whatever state each policy reached, and the seed column is shown only to
+record what was *believed* at the time:
+
+| reference | seed label (**void**, s2 seed on s1 clip unless marked ✓) | start frames | transitions | PPO tracking | end penetration | end contacts | end grip |
 |---|---|---:|---:|---:|---:|---:|---:|
-| `flashlight_on_2` | **thin** (0.6 N) | 2 | 148 | 112.9 mm | **4.86 mm** | 3 | **207 N** |
-| `hammer_use_2` | **grasp** (20.7 N, eq 0.04×) | 4 | 566 | 80,250 mm | 0.00 mm | **0** | **0 N** |
-| `knife_lift` | grasp, thin end (2.1 N) | **1** | **25** | 87.7 mm | 0.00 mm | 0 | 0 N |
-| `phone_call_1` | grasp, thin end (2.8 N) | **9** | **985** | 195,634 mm | 0.00 mm | **0** | **0 N** |
-| `mug_drink_2` | **near-burial** (528 N, 9 contacts) | 27 | 711 | **5.7 mm** | **13.18 mm** | 15 | **4834 N (2466×)** |
-| `mouse_use_1` | **burial** by force (19 contacts, **4335 N**, 2210×) | **2** | 337 | 291,168 mm | 0.00 mm | 0 | 0 N |
-| `camera_takepicture_2` | **burial** (32 contacts, 5800 N, 2956×) | 28 | 836 | **34.6 mm** | **9.32 mm** | 8 | 509 N (260×) |
+| `flashlight_on_2` | thin 0.6 N | 2 | 148 | 112.9 mm | 4.86 mm | 3 | 207 N |
+| `hammer_use_2` | grasp 20.7 N | 4 | 566 | 80,250 mm | 0.00 mm | 0 | 0 N |
+| `knife_lift` ✓ | grasp 2.1 N | 1 | 25 | 87.7 mm | 0.00 mm | 0 | 0 N |
+| `phone_call_1` | grasp 2.8 N | 9 | 985 | 195,634 mm | 0.00 mm | 0 | 0 N |
+| `mug_drink_2` | burial 528 N | 27 | 711 | **5.7 mm** | **13.18 mm** | 15 | **4834 N (2466×)** |
+| `mouse_use_1` | burial 4335 N | 2 | 337 | 291,168 mm | 0.00 mm | 0 | 0 N |
+| `camera_takepicture_2` | burial 5800 N | 28 | 836 | **34.6 mm** | **9.32 mm** | 8 | 509 N (260×) |
 
-`hammer_use_2` is the one reference in the set that is a grasp by force as
-well as geometry — 4 contacts, 20.7 N, equilibrium residual 0.04×, the best
-seed stage 2 produced. Under a policy trained on it, **the object is on the
-floor**: 80 m of accumulated error, zero contacts, zero force. The thin seed
-went the other way: the policy drove 0.6 N to 207 N and 4.86 mm inside to hold
-on. Beside the mug 2×2 above, that is one statement in three rows:
+Statements that stand on the end states alone:
 
-- burial-seeded references **track** (mug, 22–23 mm, ending 1330× weight);
-- grasp-seeded references **drop**;
-- thin-seeded references **re-bury** to hold.
+- **No row tracks under 50 mm and ends holding the object un-buried.** The
+  g9 readout prints *no row here is a tracking result*, and it is right.
+- The two rows that track (`mug_drink_2` 5.7 mm, `camera` 34.6 mm) **end
+  with the hand inside the object** — 13.18 mm at 2466× weight, 9.32 mm at
+  260×. The best tracking number in this repository ends the deepest.
+- Four of seven rows finish at **0.00 mm, 0 contacts, 0 N — because the
+  object is on the floor.** On a penetration criterion alone those are the
+  cleanest rows in the run. Any quality measure for this pipeline that
+  reports penetration must report held-ness beside it.
+- `flashlight` re-buried from a near-zero contact set to 207 N / 4.86 mm: a
+  policy will manufacture penetration to hold on when nothing forbids it.
+- `knife` (1 start frame, 25 transitions) carries no weight either way.
 
-At this level of control, what tracks is penetration. The policy either has
-burial handed to it, manufactures it, or fails. Nothing in the reward asks for
-a grasp, and a policy cannot invent one from a 20 N contact set it was given.
+Statements that are **withdrawn** with the labels: "burial-seeded tracks,
+grasp-seeded drops", the seed-class 2×2, the start-count-versus-depth
+pre-registration and the prediction scored against it (void, not hit), and
+the README sentence that rested on hammer being a grasp seed. The
+`mug_drink_1` 2×2 above is unaffected — its buried and raw conditions were
+built in-process on one clip, not from the seed file.
 
-**Read the hammer row's end state carefully**, because it is the trap a
-penetration criterion sets: 0.00 mm, 0 contacts, 0 N is the *cleanest* row in
-the run on penetration alone, and it is the object on the floor. Any quality
-measure for this pipeline that reports penetration must report held-ness
-beside it, or hammer becomes its best result. The g9 readout requires tracking
-under 50 mm *and* ending un-buried *and* in contact, and prints *no row here
-is a tracking result* — which is what it prints.
-
-**What this changes about the fix.** A penetration cost in the PPO reward
-(drafted, `rl-penetration-cost`) addresses flashlight's re-burial — the least
-important of the three rows — and taken alone it would make hammer's behaviour
-*optimal*: letting go is the zero-penetration solution. The missing reward
-term prices **losing** the object — a held-ness or contact-persistence term,
-bounded at one object weight of grip so it cannot pay for burial — and the
-penalty is only safe to turn on beside it. Both are drafted at weight 0 with
-their per-iteration means logged next to `alive`; neither is a result until a
-retrain on hammer's seed ends held, un-buried, and under 50 mm.
-
-**Read nothing from the knife row, in either direction.** It trained from
-**one** start frame and harvested **25 transitions** — a rounding error of a
-training set against hammer's 566. Its end state matches hammer's (0.00 mm,
-0 contacts, 0 N), and its 87.7 mm mean error is *unexplained*: the rollout is
-~25 control steps, ~13 s of simulated time, and an object released at the
-start would be hundreds of metres down like hammer. Held until late, resting
-on something, or a reference that barely moves — not measured, so the row
-carries no weight. The prediction that knife would replicate flashlight is
-retracted; flashlight remains the only thin-end row with enough data to read.
-
-`phone_call_1` (row 4) is the best-supported grasp-class row in the run — 9
-start frames, 985 transitions, nearly twice hammer's — and it drops: 196 m,
-0 contacts, 0 N. So the two grasp-class rows with enough data to read both
-let go, and the better-trained one let go harder. That takes the sample-size
-objection off the *drop* result: more transitions did not move it. It does
-not take it off the burial rows still to come.
-
-`mug_drink_2` (row 5, the near-burial control: 528 N on 9 contacts at the
-seed) posts **5.7 mm — the best tracking number in this repository** — and
-ends **13.18 mm inside the mug on 15 bodies at 4834 N**, 2466× the object's
-weight: deeper and harder than it started. The best-tracking row is the
-most-buried row, which is the thesis of this document in one line. It is
-also the best-supported row so far (27 start frames, 711 transitions), so it
-carries the confound below as well as the effect.
-
-The five-row readout, verbatim from the g9 analysis: *from a GRASP seed (3):
-median 80,250 mm; from a BURIAL seed (1): median 5.7 mm; tracking under 50 mm
-AND ending un-buried: 0/5 — no row here is a tracking result; END OF
-ROLLOUT: 3/5 finish under 3 mm of penetration, median 0.00 mm.* That last
-line is the one to put in front of anyone who proposes penetration as a
-quality metric: three of five rows finish pristine because the object is on
-the floor. And the force-based classifier earned itself here — `mug_drink_2`
-reads as a grasp by contact count (9) and was flagged burial on force alone
-(528 N) two hours before this row existed; by contact count the best
-tracking number in the repository would be sitting in the grasp column.
-
-**The confound is alive and now maximal**: the single burial-seeded row is
-also trained on 3–7× the data of the grasp-seeded rows (27 start frames
-against 4 and 9), and rows 7–9 will be the same. "Burial tracks and grasps
-drop" cannot be written without that clause, and this run cannot separate
-the two. The decisive experiment is cheap: train hammer on *all* candidate
-start frames rather than the 4 accepted, ~13 minutes after g9, and see
-whether it still lets go. Queued.
-
-**The binding constraint three rows in was the sample, not the seed class.**
-`grasp_frames` comes back in single digits — 2, 4, 1 — so every policy here
-is trained on a handful of start states, and stages 4–5 will pool exactly
-this. The burial-seeded rows (7–9) had 20–30 graspable frames each
-(`gamecontroller_play_1`: 30), so when they arrive they will also be the
-**best-trained policies in the set** — a confound running in the same
-direction as the burial effect. Written down before those rows land and look
-convincing. `phone_call_1` (7 frames) is the first row with more support than
-any of the first three.
-
-**Sample size, stated plainly:** one grasp-by-force reference and one
-well-supported thin-end reference, both drop; one thin reference re-buries;
-one near-burial reference tracks at 5.7 mm and ends deeper; one
-uninformative row; and **one burial-class reference drops**.
-
-**Row 6 is a counter-example, not a confirmation.** `mouse_use_1` reads as
-*mixed* by contact count (19) and as **burial** by force — 4335 N at the
-seed, 2210× the object's weight, far past the 200× threshold; the same catch
-that reclassified `mug_drink_2`. It drops: 291 m, 0 contacts, 0 N, on 2
-start frames. So the two burial-class rows point in opposite directions:
-
-| | seed | starts | PPO | end |
-|---|---|---:|---:|---|
-| `mug_drink_2` | 528 N | **27** | **5.7 mm** | 13.18 mm in, 15 contacts, 4834 N |
-| `mouse_use_1` | 4335 N | **2** | 291,168 mm | 0.00 mm, 0 contacts, 0 N |
-
-Same class, opposite outcome, and the variable that differs is the start
-count. "Burial-seeded tracks and grasp-seeded drops" **does not survive row
-6.** The honest six-row statement is narrower: exactly one row of six both
-tracks and ends holding the object, and it is simultaneously the most-buried
-seed *and* the best-supported by a factor of three; every other row lets go
-or re-buries a thin contact set. Which property does the work cannot be
-said, and mouse is the row that proves it — burial without the data, and it
-fails.
-
-That makes the queued 2×2 load-bearing rather than a tidy-up:
-
-| | few starts | many starts |
-|---|---|---|
-| `hammer_use_2` (grasp seed) | 80,250 mm (4) — measured | queued: all candidate starts |
-| `mug_drink_2` (burial seed) | queued: capped to 4 evenly spaced | 5.7 mm (27) — measured |
-
-Capping mug to four starts is the cleaner half: rescuing hammer can fail for
-reasons unrelated to sample size, but removing data from the one row that
-works tests one thing. If mug still tracks at four starts, the sample is
-ruled out and seed class stands. If it drops, start count is the effect and
-the seed-class sentence on the README comes off.
-
-**Camera (row 7) tracks at 34.6 mm and ends buried** — 9.32 mm inside on 8
-contacts at 509 N — as predicted below. It ends *shallower* than its seed
-(5800 N → 509 N): burial that tracks does not always deepen. But its row
-reports **28 start frames, not the 10 pre-registered**, so it is as
-well-supported as `mug_drink_2` and does not discriminate. The
-pre-registered counts are therefore **not on the same footing as the g9
-field** — 28 is impossible at the probe's footing (T = 79 at stride 5 gives
-16 candidates) — and the "between 4 and 27" reading is withdrawn until the
-difference is explained; the `grasp_frames` field on each row is what
-describes that row. Nothing in `track.py` was committed after g9 launched
-(23:39), so this is not committed version skew; being measured.
-
-**Pre-registered before rows 7–9 ran**, start counts computed with the
-stage-2 offset and `grasp_frames` at its default stride 5 — *not* what the
-rows report, see above: `camera` 10 of
-16 candidates (seed 5800 N, 2956×), `gamecontroller` 8 of 13 (14,042 N,
-7157×), `bowl` 27 of 27 (35,522 N, 18,105×); `binoculars` 1 of 31 and
-unseeded — read nothing from it. Bowl is a `mug_drink_2` replicate and does
-not discriminate. Camera and gamecontroller sit between hammer's 4 and mug's
-27: if both track and end buried on 8–10 starts, sample size weakens as the
-explanation before the 2×2 runs; if either drops, the start-count reading
-gains.
-
-The other session's prediction, on record before camera landed (`2764084`):
-**both track and end buried, and gamecontroller (7157×) tracks better than
-camera (2956×)** — because if start count drove the outcome, mouse failing
-at 2 and mug succeeding at 27 put the threshold in the middle and 8–10 would
-be coin flips, while if seed *depth* drives it these are the two deepest
-seeds after bowl. The awkward case for that prediction is mouse itself:
-2210× and dropped on 2 starts; if camera tracks at 2956× on 10, mouse is
-either the start-count floor or something specific to a flat object on a
-surface, and this run cannot tell those apart. Two cautions for reading
-rows 7–9: bowl passes the gate at 27 of 27 candidates, the only row where it
-rejected nothing — a hand 35 kN inside the object holds it from anywhere —
-so bowl says burial makes the gate trivially passable, not anything about
-tracking; and the earlier "gamecontroller had 30 frames" came from this
-stage's *own* search (`synthesize_grasp` in the mocap scene), not the stage-2
-offset g9 applies — 30 versus 8 graspable frames on one clip is one more
-measurement of how far apart the two searches land. The burial column
-rests on `mug_drink_1` from a separate session; the burial-seeded g9 rows are
-7–9 and have not run. `knife_lift` (2.1 N) and `phone_call_1` (2.8 N) come
-next, and both sit at the thin end of the grasp class, so they will most
-likely replicate flashlight, not hammer — the grasp-by-force condition may
-stay at n = 1 for this entire run. A second grasp-by-force seed needs stage 2
-to produce one.
-
-A third harness failed on its own event tonight: the watcher armed for
-hammer's row counted `d.get('rows', [])` where the file's key is
-`per_reference`, so it read zero rows before and after the row landed and
-never fired. Same lesson as the other two, so it goes in the same list.
+**What is needed before stage 3 is written again:** the subject-keyed seed
+file and a repeated run, and a row that ends held, un-buried, under 50 mm.
+Nothing in this table is that row.
 
 ### The base is rigid — and that is ruled out, by the rollout sweep
 
