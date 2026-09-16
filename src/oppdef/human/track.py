@@ -591,6 +591,7 @@ class ReferenceTracker:
         self._ctrl_lo = mm.actuator_ctrlrange[:, 0].copy()
         self._ctrl_hi = mm.actuator_ctrlrange[:, 1].copy()
         self._hold_env = None
+        self._dirs_cache = None
         self.grasp_fit = None
         self._grip_offset = np.zeros(self.sim.model.nu)
         self._ctrl_closure = self._raw_ctrl(self.sim.q_closure)
@@ -641,6 +642,51 @@ class ReferenceTracker:
         m = self.sim.model
         q = self.mh.config_from(values)
         return np.clip(self._act_mat @ q, self._ctrl_lo, self._ctrl_hi)
+
+    def reset_grasp(self, k: int = 0, target_n: float = 8.0, verify: bool = True):
+        """Place an APPROACH pose, then build the grasp by closing under physics.
+
+        This replaces placing the retargeted pose directly, which was never a
+        grasp. Matching the human's fingertip POSITIONS is a kinematic proxy
+        with no connection to whether contact forces exist: a Shadow finger is
+        not shaped like a human's, so the nearest position-matching pose is
+        usually inside the object. Sampled across three references, **0 of 283**
+        wrist offsets were simultaneously non-penetrating and touching -- every
+        pose under 2 mm of penetration had fewer than three contacts, and
+        contacts correlated with penetration at +0.50 to +0.61. The contacts
+        WERE the burial. There is no good pose to find, so no reweighting of the
+        fit objective can find one.
+
+        What the field does instead, and what this now does: pose the hand open
+        near the object, close the fingers in simulation until forces build.
+        The demonstration supplies the approach and the contact region, not the
+        joint angles. Measured, the difference is 4411 N against 10.5 N on a
+        1.96 N object.
+
+        Returns the equilibrium residual: 0 is a grasp at rest, 1.0 is free
+        fall, and direct placement measured 142-337x.
+        """
+        self.reset_at(k)
+        d = self.sim.data
+        if self._dirs_cache is None:
+            self._dirs_cache = closing_direction(self.sim, self._acts)
+        def _retract(unit, dist):
+            """Back the wrist out along `unit` by `dist`, mocap and state."""
+            self.mh.command(self._pg_palm + unit * dist, self._pg_quat)
+            fq = self.mh.free_q
+            d.qpos[fq:fq + 3] += unit * dist
+            mujoco.mj_forward(self.sim.model, d)
+            self._pg_palm = self._pg_palm + unit * dist
+
+        self._pg_palm, self._pg_quat = palm_pose(self.sim, d.qpos[self.sim.qadr])
+        establish_grip(self.sim, self._dirs_cache, self.obj_q, self.obj_v,
+                       (self.ref_pos[k], self.ref_quat[k]), target_n=target_n,
+                       retract=_retract)
+        self._grip_offset = d.ctrl - self.ctrl_for(self.vals[k])
+        mujoco.mj_forward(self.sim.model, d)
+        if not verify:
+            return None
+        return equilibrium_residual(self.sim, self.sim.obj_bid)
 
     def reset_at(self, k: int, settle: float = 0.0, grip: float | None = None):
         """Start from reference frame `k` rather than the window's first frame.
@@ -1092,7 +1138,7 @@ def closing_direction(sc, acts):
 
 def establish_grip(sc, direction, obj_qadr, obj_vadr, obj_pose,
                    target_n=8.0, open_by=0.30, step=0.015, settle_steps=10,
-                   max_close=1.2, pre_steps=60):
+                   max_close=1.2, pre_steps=60, retract=None):
     """Pre-grasp, then close until the contact force reaches `target_n`.
 
     G5 measured that a retargeted pose held the object in only 25.5% of frames,
@@ -1112,9 +1158,58 @@ def establish_grip(sc, direction, obj_qadr, obj_vadr, obj_pose,
     lo, hi = m.actuator_ctrlrange[:, 0], m.actuator_ctrlrange[:, 1]
     base = d.ctrl.copy()
 
-    d.ctrl[:] = np.clip(base - open_by * direction, lo, hi)
-    for _ in range(pre_steps):
-        mujoco.mj_step(m, d)
+    # RETRACT THE WRIST FIRST. Opening the fingers cannot clear a palm that is
+    # inside the object, and for these retargets the palm is usually the
+    # deepest part: on mug_drink_1 the palm holds 12 contacts at ~7 mm both
+    # before and after finger opening, because `closing_direction` drives only
+    # finger actuators and the palm's placement comes from the wrist. The
+    # adaptive loop below could never satisfy its exit condition there. A
+    # pre-grasp has to put the whole hand outside the object, which means
+    # backing the wrist out along the contact normal that is deepest.
+    if retract is not None:
+        for _ in range(8):
+            mujoco.mj_forward(m, d)
+            worst, nrm = 0.0, np.zeros(3)
+            objset, handset = set(sc.obj_gids), set(sc.hand_gids)
+            for i in range(d.ncon):
+                pair = {int(d.contact[i].geom1), int(d.contact[i].geom2)}
+                if pair & objset and pair & handset:
+                    dep = -float(d.contact[i].dist)
+                    if dep > worst:
+                        worst = dep
+                        sgn = 1.0 if int(d.contact[i].geom1) in objset else -1.0
+                        nrm = np.array(d.contact[i].frame[:3]) * sgn
+            if worst <= 0.001:
+                break
+            retract(nrm / max(np.linalg.norm(nrm), 1e-9), worst + 0.002)
+
+    # Open until the pre-grasp actually CLEARS the object, rather than by a
+    # fixed amount. A fixed 0.30 rad is enough when the retargeted pose is
+    # merely close and not enough when it starts buried: on mug_drink_2, which
+    # begins 11 mm inside, closing from a still-overlapping pre-grasp ended at
+    # 16.45 mm and 5049 N, while gamecontroller_play_1 -- whose retarget makes
+    # no contact at all -- reached 5.53 mm and 10.5 N, a plausible grip.
+    sc.pregrasp_cleared = True
+    amt = open_by
+    for _try in range(6):
+        d.ctrl[:] = np.clip(base - amt * direction, lo, hi)
+        for _ in range(pre_steps):
+            mujoco.mj_step(m, d)
+        mujoco.mj_forward(m, d)
+        worst = 0.0
+        objset, handset = set(sc.obj_gids), set(sc.hand_gids)
+        for i in range(d.ncon):
+            pair = {int(d.contact[i].geom1), int(d.contact[i].geom2)}
+            if pair & objset and pair & handset:
+                worst = max(worst, -float(d.contact[i].dist))
+        if worst <= 0.001:
+            break
+        amt *= 1.6
+    else:
+        # Say so. Closing from a pre-grasp that never cleared the object is
+        # exactly the condition that produces a garbage grasp, and it was
+        # previously silent.
+        sc.pregrasp_cleared = False
     d.qpos[obj_qadr:obj_qadr + 3] = obj_pose[0]
     d.qpos[obj_qadr + 3:obj_qadr + 7] = obj_pose[1]
     d.qvel[:] = 0.0
@@ -1218,6 +1313,46 @@ def mppi_track(rt, horizon=5, samples=48, sigma_pos=0.004, sigma_rot=0.03,
     return Rollout(pos_err=pos_err[sel], rot_err=rot_err[sel],
                    dropped=bool(pos_err[rt.T - 1] > 0.10),
                    steps=int(sel.sum())), chosen
+
+
+def equilibrium_residual(sc, obj_bid, gravity=-9.81):
+    """Net force on the object at rest, as a multiple of its own weight.
+
+    Scale, stated explicitly because the two obvious conventions disagree on
+    what "1" means. Gravity is subtracted from the contact sum here, so:
+
+        0.0x   equilibrium -- contacts balance gravity and nothing else. Target.
+        1.0x   FREE FALL -- nothing supports the object at all.
+        >>1x   violently unbalanced, i.e. penetrated. Measured 142-337x on four
+               reset states from this pipeline.
+
+    That 1.0 is the property that makes this reject BOTH failure ends: a
+    non-contacting "grasp" is exactly 1.0, a buried one is hundreds.
+
+    Why this rather than penetration depth or a grasp-quality metric: it cannot
+    be gamed by manufacturing contacts, because more penetrating contacts make
+    the imbalance worse rather than better, and it rejects the opposite failure
+    too -- a non-contacting "grasp" leaves the object in free fall, which is
+    exactly 1x unbalanced. Depth only rejects one end. Static wrench metrics
+    reject neither: computed on these same four states, Ferrari-Canny epsilon
+    came out 0.155-0.344 (strongly force-closed) and ranked BACKWARDS against
+    the actual outcome, because it takes the contact set as given and the
+    contact set is an artifact of the overlap. Credit to the peer session that
+    measured both.
+    """
+    m, d = sc.model, sc.data
+    f = np.zeros(6)
+    net = np.zeros(3)
+    for i in range(d.ncon):
+        g1, g2 = int(d.contact[i].geom1), int(d.contact[i].geom2)
+        if int(m.geom_bodyid[g1]) == obj_bid or int(m.geom_bodyid[g2]) == obj_bid:
+            mujoco.mj_contactForce(m, d, i, f)
+            frame = np.array(d.contact[i].frame).reshape(3, 3)
+            w = frame.T @ f[:3]
+            net += w if int(m.geom_bodyid[g2]) == obj_bid else -w
+    weight = float(m.body_mass[obj_bid]) * abs(gravity)
+    net[2] += float(m.body_mass[obj_bid]) * gravity
+    return float(np.linalg.norm(net) / max(weight, 1e-9))
 
 
 def total_grip(sc) -> tuple[float, int]:

@@ -3341,3 +3341,61 @@ room and no amount of training helps.
 
 `camera` gets worse (17.7 -> 57.7 mm), so this is not free. `phone_call_1` is
 still poor at 5069 mm and is the remaining single-hand failure.
+
+## 2026-09-15 — stage 2 is the whole problem, and it is measured
+
+Two scans, one mine and one from a peer session working the same tree, settle
+what has been going wrong all day.
+
+**Every frame of every reference penetrates.** Across 20 s1 sequences, 2866
+frames, **23 frames are under 1 mm**. Per-sequence minimum penetration: median
+2.51 mm, max 17.15 mm, and 7 of 20 never get below 5 mm at their BEST frame.
+`flashlight_on_2` spends all 144 frames with its palm inside the object;
+`binoculars_see_1` spends all 155 with its FOREARM inside, 17.15 mm deep.
+
+**The split is structural.** Sequences that reach a clean frame are ones where
+the deepest body is a distal link. Sequences that never do are ones where it is
+the forearm, the palm, or a proximal link:
+
+    forearm   binoculars 17.15, camera_takepicture_1
+    palm      flashlight_on_2 12.82, scissors_use_2 8.36
+    proximal  cup_drink_2 11.73, cup_lift 9.40, mug_drink_1 6.81
+
+That is exactly what a retarget with no non-penetration constraint on the ARM
+would produce. Fingertips can sometimes land outside the object by luck of the
+pose; a forearm placed by matching a human wrist cannot.
+
+**And the feasible poses do not hold the object.** Raising the fit's penetration
+weight works -- on `mug_drink_1`, w_pen 1 -> 25 takes median penetration
+10.80 mm -> 0.96 mm -- and the resulting grasp tracks WORSE, not better:
+
+    reference      w_pen   pen      force   residual   tracking
+    mug_drink_1      1.0  10.13 mm  2294 N     4.0x      33.9 mm
+    mug_drink_1     25.0   1.35 mm  1202 N    12.3x     148.7 mm
+    binoculars       1.0   0.02 mm    44 N    32.6x  176578 mm
+
+The binoculars row is the clearest: 0.02 mm of penetration, 44 N, and the object
+on the floor. Contacts fall from 30 to 2.8 as penetration clears, because the
+contacts WERE the penetration. A peer sweep of 283 candidate wrist offsets found
+**0** that were simultaneously non-penetrating and touching.
+
+**So every physics remedy attempted today was compensating for stage 2.**
+Closing under physics, adaptive finger opening, wrist retraction along the
+contact normal, penetration terms in the search objective, multi-restarts --
+each addressed a symptom of a fit that has no feasibility constraint. Two of
+them are still worth keeping on their own merits (closing under physics is the
+standard way to make a grasp, and it took `gamecontroller_play_1` from 4411 N to
+10.5 N), but none of them can repair a wrist that is inside the object, and
+wrist retraction along contact normals actively diverges when the hand is
+wrapped -- normals oppose, so escaping one drives others deeper (binoculars:
+17.15 -> 62.44 mm over 11 iterations).
+
+**What stage 2 needs.** A hard non-penetration constraint on the arm-side bodies
+-- forearm, wrist, palm -- treated as a rigid-body placement problem, with the
+fingers free to find contact afterwards. Matching the human's wrist pose is what
+puts the forearm inside the object, and a Shadow forearm is not shaped like a
+human's. The contact REGION on the object is what should be matched; the robot's
+joint angles will not resemble the human's and should not be asked to.
+
+Everything downstream is invalid until that lands: stage 3's 29.4 mm, stage 6's
+28-65 mm, every PPO checkpoint, and the stage 5 distillation numbers below.
