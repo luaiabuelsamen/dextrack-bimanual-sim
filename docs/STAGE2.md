@@ -895,8 +895,20 @@ term prices **losing** the object — a held-ness or contact-persistence term,
 bounded at one object weight of grip so it cannot pay for burial — and the
 penalty is only safe to turn on beside it. Both are drafted at weight 0 with
 their per-iteration means logged next to `alive`; neither is a result until a
-retrain on hammer's seed ends held, un-buried, and under 50 mm. Knife, phone
-and `mug_drink_2` are the replicates, then the burial-seeded rows from row 7.
+retrain on hammer's seed ends held, un-buried, and under 50 mm.
+
+**Sample size, stated plainly:** one reference per condition. The burial column
+rests on `mug_drink_1` from a separate session; the burial-seeded g9 rows are
+7–9 and have not run. `knife_lift` (2.1 N) and `phone_call_1` (2.8 N) come
+next, and both sit at the thin end of the grasp class, so they will most
+likely replicate flashlight, not hammer — the grasp-by-force condition may
+stay at n = 1 for this entire run. A second grasp-by-force seed needs stage 2
+to produce one.
+
+A third harness failed on its own event tonight: the watcher armed for
+hammer's row counted `d.get('rows', [])` where the file's key is
+`per_reference`, so it read zero rows before and after the row landed and
+never fired. Same lesson as the other two, so it goes in the same list.
 
 ## Look at the pose before trusting the number
 
