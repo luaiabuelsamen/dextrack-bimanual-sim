@@ -1190,6 +1190,21 @@ burial arm**, and those two are also the two deepest seeds in the set (94
 and 8 contacts at 35.5 kN and 3.3 kN). The grasp arm is characterised at
 n = 6; burial is observed, not characterised.
 
+**Stages 4–5 on the correct seeds reverse the contaminated run** (`1aa8ac4`).
+Held out by object — feedforward / own PPO / distilled: camera 2256.4 /
+2587.1 / **992.7** mm; knife 2734.3 / 87.7 / **87.5**; gamecontroller
+175,291 / 51,778 / **450.5**. Distilled beats feedforward 3/3 and is within
+2× of the per-reference policy 3/3 — on correct seeds the distilled network
+is the best of the three controllers on every held-out object, which is the
+direction DexTrack's distillation claim predicts and the first time this
+repository has reproduced it. And every one of those numbers is a dropped
+object — 450, 88 and 993 mm against a 50 mm bar. Distillation is the least
+bad of three failing controllers: the mechanism behaves as designed, what
+it is fed cannot hold an object, so neither can what comes out. **Stages 3,
+4 and 5 each do what they were built to do, and none of it matters, because
+all three are downstream of an initial condition that either buries the
+hand or drops the object. Fixing stage 4 would improve nothing.**
+
 And the trap in its strongest form yet, as a full-run statistic rather than
 an anecdote: **eight of ten rows finish under 3 mm of penetration, median
 0.00 mm.** On a depth criterion this is the cleanest run in the repository.
