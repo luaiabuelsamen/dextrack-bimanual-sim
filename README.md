@@ -76,7 +76,7 @@ measured on a burial and is withdrawn.
 | | state | |
 |---|---|---|
 | arm inside the object | **fixed** | `W_PEN_ARM`: `binoculars_see_1` 175 m → 106 mm |
-| the search rewards burial | **objective replaced — measured** | the static hold cannot tell a grasp from a burial. Scoring the **end of an open-loop carry** instead (`stage2_carry.py`: held, < 3 mm, ≥ 2 links, opposed, over the whole remaining reference) takes clean end states from **1 to 19 of 40** on the same seeds — every one rebuilt from its stored offset, re-carried under 8 wrist perturbations of 0.5 mm / 0.6° (19 survive at least half, **5 survive all**), and rendered ([the five](figures/carry_robust_five.jpg)). All start buried and relax out under motion. The search is seed-dependent (15 vs 21 clean on two seeds; quote the union), a 25-frame window overfits (4 of 5 longer references drop past it), and one in-process "clean" pose dropped when rebuilt — the perturbation test exists because of it. Twelve references never touch the object from their seed; four stay buried under every offset. **PPO on the five robust seeds lowers tracking error on all five (1.4–3.2×, e.g. flashlight 18.1 → 5.6 mm) and ends exactly where the feedforward ends: out of the object, held** — the first stage-3 rows that track a grasp rather than a burial (`results/stage3_carry.json`; scored at the training start, n = 5). See [docs/STAGE2.md](docs/STAGE2.md) |
+| the search rewards burial | **objective replaced — measured** | the static hold cannot tell a grasp from a burial. Scoring the **end of an open-loop carry** instead (`stage2_carry.py`: held, < 3 mm, ≥ 2 links, opposed, over the whole remaining reference) takes clean end states from **1 to 19 of 40** on the same seeds — every one rebuilt from its stored offset, re-carried under 8 wrist perturbations of 0.5 mm / 0.6° (19 survive at least half, **5 survive all**), and rendered ([the five](figures/carry_robust_five.jpg)). All start buried and relax out under motion. The search is seed-dependent (15 vs 21 clean on two seeds; quote the union), a 25-frame window overfits (4 of 5 longer references drop past it), and one in-process "clean" pose dropped when rebuilt — the perturbation test exists because of it. Twelve references never touch the object from their seed; four stay buried under every offset. **PPO on the five robust seeds lowers tracking error on all five (1.4–3.2×, e.g. flashlight 18.1 → 5.6 mm) and ends exactly where the feedforward ends: out of the object, held** — the first stage-3 rows that track a grasp rather than a burial (`results/stage3_carry.json`; scored at the training start, n = 5). Rendered with the README’s own verdict rule, one of the five (camera) squeezes at 65–100× weight for its whole clip: the carry gate has no force cap, and with the 40× cap the count is **17 of 40, 4 under all perturbations**. See [docs/STAGE2.md](docs/STAGE2.md) |
 | a policy trained on a real grasp | **measured — it lets go, six of six** | Shadow right hand on GRAB, seeds keyed on their own subject: every grasp-class reference (2–8 contacts, 2–35 N, equilibrium 0.01–0.16) trains a PPO policy that ends the rollout with the object on the floor — 0.00 mm penetration, 0 contacts, 0 N, in all six — including the three largest training sets of the run (camera 33 start frames, mouse 32, hammer 11). At 160k control steps per reference in 12 environments; a separate 845k-step run on a valid mug grasp also dropped from every start. At a fixed initial condition the policy barely moves the outcome — camera from its valid grasp: feedforward 2256 mm, PPO 2587 mm; from a burial: feedforward 36 mm, PPO 35 mm — so nothing in this pipeline, open-loop or learned, keeps hold of a valid grasp, and everything holds a burial. Policies that track exist only from burial-class seeds, on both runs, and end with the hand 9–17 mm inside the object (v2: `mug_drink_2` 26.7 mm at 11.1 mm inside, on 4 start frames). Sorted by tracking error, the ten rows separate perfectly by seed class — burial median 17.5 mm, grasp median 17,525 mm, no row crosses — and nothing else measured predicts the outcome: not start frames, subject, clip, object or budget. The tracking class has two members, so burial is observed, not characterised. Stages 3, 4 and 5 each do what they were built to do — on these seeds the distilled network beats feedforward on 3/3 held-out objects, the direction DexTrack predicts — and none of it matters, because all three are downstream of an initial condition that either buries the hand or drops the object: rolled open-loop with no controller, burial seeds carry the object through the whole reference in 10 of 13 (bowl at 9.9 mm mean, against 8.2 mm for the policy trained on it), grasp seeds in 3 of 13. One reference, `stamp_lift`, ends its open-loop carry at 35 mm mean, **0.3 mm inside at 3.4 N on five fingers** — the first held, un-buried end state here, n = 1; rendered, it starts as a burial (14 mm, 878 N) and relaxes into a grasp as the hand moves ([figure](figures/stamp_lift_carry.jpg)) — as do all three grasp seeds that carried to the end. **The property the search needs is dynamic, not static**: not a pose that touches without penetrating (three searches found none), but one that penetrates enough to relax into contact under motion; the stage-2 objective should score the end of a short carry. On all 30 seeds, 14 carry through the whole reference with no controller, and they start *more* buried than the 16 that drop (median 17.7 mm on 42 contacts vs 11.8 mm on 12); no reset quantity discriminates (depth is the worst, 70 %), and the fully clean end state is n = 1 ([the three grasp-class carriers, reset → end](figures/burial_relaxation.png)). Nothing in the reward asks for a grasp. See [docs/STAGE2.md](docs/STAGE2.md) |
 
 **→ [docs/STAGE2.md](docs/STAGE2.md)** is the full diagnosis and where to pick
@@ -124,21 +124,32 @@ was wrong.
 
 ### Carry-scored seeds — the ones that hold (2026-09-16)
 
-Same instrumentation as the failures below: object translucent, any link
-deeper than 2 mm red, every frame's penetration, contacts, grip and error
-on its face, read live. Left column is the retargeted trajectory with **no
-controller**; right is the PPO policy trained from that start. Both begin
-buried and relax out of the object under motion; the policy tracks closer
-and ends in the same grasp. Per-frame manifests sit beside each GIF.
+Same renderer and the same verdict rule as the failures below: object
+translucent, any link deeper than 2 mm red, and the banner turns red whenever
+penetration passes 2 mm **or grip passes 40× the object's weight**, read live
+each frame. Every clip starts red — the seed is a burial at reset, 16–32 mm
+inside at 75–2600 N — and turns green within a few frames as the contact set
+relaxes. Left, the retargeted trajectory with **no controller**; right, the
+PPO policy trained from that start.
 
-| Flashlight — 18.1 → 5.6 mm | Camera — 9.7 → 5.2 mm |
+| Flashlight — no controller, 18.1 mm | Flashlight — PPO, 5.6 mm |
 |---|---|
-| ![Shadow hand starts with red links inside a translucent flashlight and ends pinching it on three links; the PPO column tracks the same grasp at a third of the error](figures/carry_flashlight_lift.gif) | ![Shadow hand starts buried in a translucent camera and ends wrapping it on five links; the PPO column tracks the same grasp closer](figures/carry_camera_browse_1.gif) |
+| ![Shadow hand starts with red links inside a translucent flashlight, relaxes out, and carries it in a three-finger pinch; the banner turns from NOT A GRASP to A GRASP](figures/physics_carry_flashlight.gif) | ![The same start under the PPO policy, tracking the reference at a third of the error in the same pinch](figures/physics_carryppo_flashlight.gif) |
 
-The other three of the five robust seeds: [cube](figures/carry_cubemedium_inspect_1.gif),
-[doorknob](figures/carry_doorknob_use_1.gif), [pyramid](figures/carry_pyramidlarge_inspect_1.gif).
-`experiments/tracking/render_carry_gif.py` regenerates them from the stored
-offsets and checkpoints.
+| Cube — no controller, 7.1 mm | Cube — PPO, 3.5 mm |
+|---|---|
+| ![Shadow hand starts with a red fingertip inside a translucent cube and ends holding it between thumb and fingers](figures/physics_carry_cube.gif) | ![The same start under PPO, holding the cube closer to the reference path](figures/physics_carryppo_cube.gif) |
+
+The other three of the five robust seeds:
+[pyramid](figures/physics_carry_pyramid.gif) ([PPO](figures/physics_carryppo_pyramid.gif)),
+[doorknob](figures/physics_carry_doorknob.gif) ([PPO](figures/physics_carryppo_doorknob.gif)),
+and [camera](figures/physics_carry_camera1.gif) ([PPO](figures/physics_carryppo_camera1.gif)) —
+**which stays red for the whole clip**: it is under 3 mm and held, and it
+squeezes at 130–200 N, 65–100× the weight. The carry gate had no force
+term; the renderer's did, and caught it. Each GIF has a JSON beside it with
+the per-frame live values and a replay check against the evaluator.
+`python experiments/tracking/render_tracking.py carry_flashlight carryppo_flashlight …`
+regenerates them from the stored offsets and checkpoints.
 
 ### The four failures this project was measured on
 

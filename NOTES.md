@@ -5332,3 +5332,21 @@ out of the object. The first stage-3 rows here that track a grasp rather than
 a burial. Caveats as stated in STAGE2.md: scored at the training start, not
 held-out starts; handed a grasp, not asked to make one; n = 5.
 
+### The GIFs, redone in the repository's renderer, and what they caught
+
+My first GIFs of the carry seeds (own renderer, 360 px panels, camera
+chasing the object, forearm cylinder filling the frame) were unreadable
+next to `physics_mug.gif` and are removed. The five seeds are now demos of
+`render_tracking.py` (`carry_*`, `carryppo_*`): reset frame prepended so the
+burial is on screen, live diagnostics in the footer labelled "live", replay
+delta 0 m on all ten, statistics over rolled frames only (the reset frame's
+zero error had flattered the mean by a millimetre before I excluded it).
+
+What the renderer's verdict rule caught: `camera_browse_1` is red for its
+entire clip. The carry gate is penetration / links / one-sidedness with NO
+force cap; the renderer's banner also demands grip under 40x weight, and the
+camera squeezes at 130-200 N (65-100x). Under the 40x cap: 2 of the 19
+robust poses fail (camera 88x, banana 67x); 17 of 40 remain, 4 under all
+eight perturbations (cube, flashlight, pyramid, doorknob). Recorded against
+yesterday's count of 19 / 5.
+

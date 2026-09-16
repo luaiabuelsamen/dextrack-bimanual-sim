@@ -125,6 +125,24 @@ against the earlier runs' budgets (same 160k steps, different horizon), or
 evidence that a policy can *make* a grasp — it was handed one. 9–14 minutes
 per reference on the Jetson.
 
+**The gate has no force term, and the README renderer caught it.** Rendered
+with `render_tracking.py` (`figures/physics_carry_*.gif`, ten clips, no
+controller and PPO for each of the five robust seeds, live per-frame
+values, replay delta 0 against the evaluator), every clip starts red and
+turns green as the burial relaxes — except the camera, which stays red for
+all 32 frames: 1.4–3.4 mm inside, held, at 130–200 N, **65–100× the
+object's weight**. The clean criterion above is penetration, links and
+one-sidedness; the renderer's verdict also caps grip at 40× weight, the
+threshold this repository has used since the first physics gallery. Under
+that cap two of the nineteen robust poses fail — camera (88×) and banana
+(67×) — and the count to quote with a force cap is **17 of 40, 4 of them
+under all eight perturbations** (cube 6.5×, flashlight 7.7×, pyramid 2.7×,
+doorknob 24×). The camera is a squeeze that happens not to penetrate. The
+next revision of the score should carry the cap; it was left out here
+because the first three searches had been gamed by contact *count*, and
+force had read as a symptom of penetration rather than a failure of its
+own.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with

@@ -30,6 +30,31 @@ DEMOS = {
 }
 CHECKPOINT = Path("results/ppo_mug_drink_1_h160.pt")
 
+# Carry-scored seeds (stage2_carry.py, the five that stay clean under all eight
+# wrist perturbations), each rendered twice: the retargeted trajectory with no
+# controller, and the PPO policy stage3_carry.py trained from that start.
+# The subject, start frame and wrist offset come from the seeds file, keyed on
+# SUBJECT/SEQ; the bare name here is only a label.
+CARRY_SEEDS = Path("results/stage2_carry_robust_seeds.json")
+CARRY_CKPT = Path("results/ppo_carry")
+for _key, _seq, _title in (
+        ("flashlight", "flashlight_lift", "FLASHLIGHT / LIFT"),
+        ("camera1", "camera_browse_1", "CAMERA / BROWSE"),
+        ("cube", "cubemedium_inspect_1", "CUBE / INSPECT"),
+        ("doorknob", "doorknob_use_1", "DOORKNOB / USE"),
+        ("pyramid", "pyramidlarge_inspect_1", "PYRAMID / INSPECT")):
+    DEMOS[f"carry_{_key}"] = (_seq, "carry", _title)
+    DEMOS[f"carryppo_{_key}"] = (_seq, "carry_ppo", _title)
+
+
+def carry_seed(seq_name):
+    rows = json.loads(CARRY_SEEDS.read_text())["rows"]
+    by = {f"{r['subject']}/{r['seq']}": r for r in rows}
+    hits = [k for k in by if k.split("/", 1)[1] == seq_name]
+    if len(hits) != 1:
+        raise SystemExit(f"{seq_name!r} matches {len(hits)} carry seeds: {hits}")
+    return by[hits[0]]
+
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -79,10 +104,11 @@ def capture(name, cache, seed):
     from oppdef.human import grab, track
 
     seq_name, mode, _title = DEMOS[name]
-    print(f"{name}: fitting s1/{seq_name}", flush=True)
-    seq = grab.load(f"s1/{seq_name}.npz", verts=True, stride=8)
+    subject = carry_seed(seq_name)["subject"] if mode.startswith("carry") else "s1"
+    print(f"{name}: fitting {subject}/{seq_name}", flush=True)
+    seq = grab.load(f"{subject}/{seq_name}.npz", verts=True, stride=8)
     metadata = {
-        "sequence": f"s1/{seq_name}", "mode": mode, "seed": seed,
+        "sequence": f"{subject}/{seq_name}", "mode": mode, "seed": seed,
         "source_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], text=True).strip(),
         "mujoco": mujoco.__version__, "numpy": np.__version__,
@@ -92,7 +118,47 @@ def capture(name, cache, seed):
         "scope": "Selected per-reference simulation; assisted initial grasp; "
                  "mocap-driven wrists and actuated fingers; free object under gravity.",
     }
-    if mode == "ppo":
+    if mode.startswith("carry"):
+        # The wrist offset the carry-scored search accepted, applied to the
+        # whole trajectory; nothing is searched or closed here. Rolled from
+        # the frame the carry was scored from, exactly as stage3_carry.py
+        # evaluates it.
+        row = carry_seed(seq_name)
+        rt = track.ReferenceTracker(seq)
+        rt.apply_wrist_offset(np.asarray(row["offset"], float))
+        start = int(row["start"])
+        metadata.update(grasp_search={
+            "objective": "carry", "search_seed": row.get("search_seed"),
+            "offset": row["offset"], "robust_clean_of_8": row.get("robust_clean"),
+            "seeds_file": str(CARRY_SEEDS), "seeds_sha256": digest(CARRY_SEEDS)})
+        if mode == "carry_ppo":
+            import torch
+            from oppdef.human import rl
+
+            torch.set_num_threads(1)
+            ck = CARRY_CKPT / f"ppo_{seq_name}_carry.pt"
+            net = rl.make_policy(rt.n_obs, rt.n_action)
+            net.load_state_dict(torch.load(ck, map_location="cpu", weights_only=True))
+            net.eval()
+            cfg = rl.RLConfig()
+            scale = np.r_[np.full(3, cfg.a_pos), np.full(3, cfg.a_rot),
+                          np.full(rt.n_action - 6, cfg.a_fin)]
+            metadata.update(checkpoint=str(ck), checkpoint_sha256=digest(ck),
+                            controller="Per-reference PPO residual + retargeted feedforward",
+                            observation="Simulator state and reference lookahead")
+
+            def command(k):
+                with torch.no_grad():
+                    obs = torch.as_tensor(rt.observe(k), dtype=torch.float32)[None]
+                    action = net.dist(obs).mean.numpy()[0]
+                rt.apply(k, np.clip(action, -1, 1) * scale)
+        else:
+            metadata.update(controller="Retargeted feedforward only; no controller",
+                            observation="None")
+
+            def command(k):
+                rt.apply(k, None)
+    elif mode == "ppo":
         import torch
         from oppdef.human import rl
 
@@ -152,6 +218,22 @@ def capture(name, cache, seed):
     initial = d.qpos.copy()
     states, controls, positions, orientations, errors, contacts = [], [], [], [], [], []
     pens, forces, residuals = [], [], []
+    lead = 0
+    if mode.startswith("carry"):
+        # Show the RESET state as the first frame. The carry seeds start as
+        # burials -- 10 to 32 mm inside, hundreds of newtons -- and relax out
+        # in the first control frame; a movie that starts one step in never
+        # shows what the search accepted. Zero error by construction.
+        mujoco.mj_forward(m, d)
+        states.append(d.qpos.copy()); controls.append(d.ctrl.copy())
+        positions.append(d.qpos[rt.obj_q:rt.obj_q + 3].copy())
+        orientations.append(d.qpos[rt.obj_q + 3:rt.obj_q + 7].copy())
+        errors.append((0.0, 0.0))
+        pen, force, ncon, residual = contact_diagnostics(
+            m, d, rt.sim.obj_gids, rt.sim.obj_bid)
+        contacts.append(ncon); pens.append(pen); forces.append(force)
+        residuals.append(residual)
+        lead = 1
     for k in range(start, rt.T):
         command(k)
         mujoco.mj_step(m, d, nstep=rt.ctrl_every)
@@ -172,22 +254,28 @@ def capture(name, cache, seed):
     errors = np.asarray(errors)
     if not np.all(np.isfinite(errors)):
         raise RuntimeError(f"{name}: non-finite rollout")
+    # Statistics over the ROLLED frames only; the leading reset frame (carry
+    # demos) has zero error by construction and would flatter the mean.
+    rolled = errors[lead:]
     metadata.update(start_frame=start, frames=len(errors), reference_window=list(rt.window),
                     reference_dt_s=seq.dt, physics_dt_s=float(m.opt.timestep),
+                    leading_reset_frame=lead,
                     substeps=rt.ctrl_every,
                     object_mass_kg=float(m.body_mass[rt.sim.obj_bid]),
-                    mean_position_error_mm=float(errors[:, 0].mean() * 1000),
-                    max_position_error_mm=float(errors[:, 0].max() * 1000),
-                    final_position_error_mm=float(errors[-1, 0] * 1000),
-                    mean_orientation_error_deg=float(np.rad2deg(errors[:, 1]).mean()),
-                    frames_within_50mm=int((errors[:, 0] < 0.05).sum()),
-                    frames_above_100mm=int((errors[:, 0] > 0.10).sum()),
-                    min_object_contacts=int(min(contacts)),
-                    max_penetration_mm=float(max(pens)),
-                    mean_penetration_mm=float(np.mean(pens)),
-                    mean_contact_force_N=float(np.mean(forces)),
-                    max_contact_force_N=float(max(forces)),
-                    mean_equilibrium_residual_x_weight=float(np.mean(residuals)),
+                    mean_position_error_mm=float(rolled[:, 0].mean() * 1000),
+                    max_position_error_mm=float(rolled[:, 0].max() * 1000),
+                    final_position_error_mm=float(rolled[-1, 0] * 1000),
+                    mean_orientation_error_deg=float(np.rad2deg(rolled[:, 1]).mean()),
+                    frames_within_50mm=int((rolled[:, 0] < 0.05).sum()),
+                    frames_above_100mm=int((rolled[:, 0] > 0.10).sum()),
+                    min_object_contacts=int(min(contacts[lead:])),
+                    max_penetration_mm=float(max(pens[lead:])),
+                    mean_penetration_mm=float(np.mean(pens[lead:])),
+                    mean_contact_force_N=float(np.mean(forces[lead:])),
+                    max_contact_force_N=float(max(forces[lead:])),
+                    mean_equilibrium_residual_x_weight=float(np.mean(residuals[lead:])),
+                    reset_penetration_mm=float(pens[0]) if lead else None,
+                    reset_contact_force_N=float(forces[0]) if lead else None,
                     penetration_mm=pens, contact_force_N=forces,
                     equilibrium_residual_x_weight=residuals,
                     live_diagnostics=True,
@@ -196,12 +284,15 @@ def capture(name, cache, seed):
                     object_contacts=contacts)
     # Replay through the existing evaluator from the same reset. This checks
     # that the movie loop did not change the experiment's control protocol.
-    if mode == "ppo":
+    if mode in ("ppo", "carry_ppo"):
         replay, _ = rl.evaluate(rt, net, start=start)
+    elif mode == "carry":
+        rt.reset_at(start)
+        replay = rt.rollout(start=start, steps=rt.T - start).pos_err
     else:
         rt.reset_at(start)
         replay = rt.rollout(start=start).pos_err
-    delta = float(np.max(np.abs(replay - errors[:, 0])))
+    delta = float(np.max(np.abs(replay - errors[lead:, 0])))
     if delta > 1e-8:
         raise RuntimeError(f"{name}: capture/evaluator mismatch {delta} m")
     metadata["evaluator_replay_max_difference_m"] = delta
@@ -209,17 +300,18 @@ def capture(name, cache, seed):
     mujoco.mj_saveModel(m, str(cache / "scene.mjb"), None)
     np.savez_compressed(cache / "states.npz", qpos=states, ctrl=controls,
                         object_pos=positions, object_quat=orientations,
-                        ref_pos=rt.ref_pos[start:], ref_quat=rt.ref_quat[start:],
+                        ref_pos=rt.ref_pos[start - lead:], ref_quat=rt.ref_quat[start - lead:],
                         initial_qpos=initial)
     metadata["model_sha256"] = digest(cache / "scene.mjb")
     (cache / "metrics.json").write_text(json.dumps(metadata, indent=2) + "\n")
     print(f"{name}: {metadata['mean_position_error_mm']:.1f} mm mean, "
-          f"{metadata['frames_within_50mm']}/{len(errors)} within 50 mm; "
+          f"{metadata['frames_within_50mm']}/{len(rolled)} within 50 mm; "
           f"replay delta {delta:.2g} m", flush=True)
-    print(f"{name}: penetration {np.mean(pens):.2f} mm mean / {max(pens):.2f} mm max, "
-          f"grip {np.mean(forces):.1f} N "
-          f"({np.mean(forces) / (metadata['object_mass_kg'] * 9.81):.0f}x weight), "
-          f"equilibrium residual {np.mean(residuals):.1f}x weight", flush=True)
+    print(f"{name}: penetration {np.mean(pens[lead:]):.2f} mm mean / {max(pens[lead:]):.2f} mm max, "
+          f"grip {np.mean(forces[lead:]):.1f} N "
+          f"({np.mean(forces[lead:]) / (metadata['object_mass_kg'] * 9.81):.0f}x weight), "
+          f"equilibrium residual {np.mean(residuals[lead:]):.1f}x weight"
+          + (f"; at reset {pens[0]:.2f} mm / {forces[0]:.0f} N" if lead else ""), flush=True)
 
 
 def font(size, bold=False):
@@ -272,6 +364,8 @@ def render(name, cache, out):
     cam.distance, cam.azimuth, cam.elevation = 0.62, 135.0, -22.0
     if name == "mug":
         cam.distance = 0.44
+    if meta["mode"].startswith("carry"):
+        cam.distance = 0.40           # hand-sized objects; the mug framing
     obj_set = set(obj_gids)
     hand_reset = {g: m.geom_rgba[g].copy() for g in range(m.ngeom)
                   if int(m.geom_bodyid[g]) != obj_bid and m.geom_rgba[g, 3] > 0}
@@ -291,7 +385,13 @@ def render(name, cache, out):
     diag = {"penetration_mm_replay": [], "contact_force_N_replay": [],
             "object_contacts_replay": [], "placement_residual_x_weight_replay": []}
     pos, ref = z["object_pos"], z["ref_pos"]
-    mode_label = "PER-CLIP PPO" if meta["mode"] == "ppo" else "BIMANUAL / GRASP SEARCH"
+    mode_label = {"ppo": "PER-CLIP PPO",
+                  "carry": "CARRY-SCORED SEED  |  NO CONTROLLER",
+                  "carry_ppo": "CARRY-SCORED SEED  |  PER-CLIP PPO"}.get(
+                      meta["mode"], "BIMANUAL / GRASP SEARCH")
+    # Carry demos captured live per-frame diagnostics; show those, labelled,
+    # rather than the force a fresh placement of the state would need.
+    live = meta["mode"].startswith("carry") and meta.get("live_diagnostics")
     title_font, body_font, small_font = font(20, True), font(14), font(12)
     with mujoco.Renderer(m, height=height, width=width) as renderer:
         for k, state in enumerate(z["qpos"]):
@@ -341,10 +441,14 @@ def render(name, cache, out):
             # A grasp and a hand buried in the object look identical above and
             # are told apart here. Red is not decoration: it is the threshold
             # past which the contact set is manufactured rather than measured.
+            if live:
+                pen, force = meta["penetration_mm"][k], meta["contact_force_N"][k]
             bad = pen > 2.0 or force > 40 * weight
             draw.text((20, height - 62), f"Penetration {pen:5.2f} mm", font=body_font,
                       fill="#ff6b6b" if pen > 2.0 else "#7ddc8a")
-            draw.text((205, height - 62), f"Grip {force:7.1f} N ({force / weight:4.0f}x weight) replayed",
+            draw.text((205, height - 62),
+                      f"Grip {force:7.1f} N ({force / weight:4.0f}x weight) "
+                      + ("live" if live else "replayed"),
                       font=body_font, fill="#ff6b6b" if force > 40 * weight else "#7ddc8a")
             draw.text((width - 152, height - 62), f"{ncon:3d} contacts", font=body_font,
                       fill="#ff6b6b" if bad else "#98adbf")
@@ -354,6 +458,10 @@ def render(name, cache, out):
                 draw.text((width - 232, 14), "CONTACT SET IS AN ARTIFACT",
                           font=small_font, fill="#ff6b6b")
                 draw.text((width - 232, 30), "NOT A GRASP", font=title_font, fill="#ff6b6b")
+            elif live and ncon > 0 and e < 100:
+                draw.text((width - 232, 14), "OUT OF THE OBJECT, HELD",
+                          font=small_font, fill="#7ddc8a")
+                draw.text((width - 232, 30), "A GRASP", font=title_font, fill="#7ddc8a")
             draw.text((width - 222, height - 40), f"Frame {k+1:03d}/{len(pos):03d}  |  {k*meta['reference_dt_s']:.1f}s",
                       font=small_font, fill="#98adbf")
             draw.rectangle((20, height - 13, width - 20, height - 10), fill="#293548")
