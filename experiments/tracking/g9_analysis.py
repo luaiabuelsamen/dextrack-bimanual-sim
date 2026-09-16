@@ -97,6 +97,17 @@ def main():
               "so an object can be held out.")
         return
 
+    mix = d.get("mixture") or {}
+    if mix:
+        tot = sum(mix.values())
+        gr = mix.get("grasp", 0)
+        print(f"\ndistillation mixture: "
+              + ", ".join(f"{v} {k}-seeded" for k, v in sorted(mix.items())))
+        if gr * 2 <= tot:
+            print("  WARNING: at most half the mixture started from a grasp. A "
+                  "distilled\n  policy trained mostly on burials has been shown "
+                  "the contact solver,\n  not a grasp, and its transfer number "
+                  "means correspondingly less.")
     print(f"\nSTAGE 4-5 -- distilled on all but {d.get('held_out_objects')}, "
           f"evaluated on the held-out objects")
     print(f"  {'reference':26s} {'object':14s} {'feedfwd':>10} {'own PPO':>10} "

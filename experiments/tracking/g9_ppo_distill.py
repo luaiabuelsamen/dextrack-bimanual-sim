@@ -152,6 +152,26 @@ def main(a):
               f"stage 3 results are saved to {a.out}", flush=True)
         return
 
+    # Composition of the distillation mixture. The gate is a COUNT of
+    # references, so three burial-seeded ones would clear it and produce a
+    # distilled policy that has only ever been shown the contact solver. Not
+    # made a blocking condition -- that would usually leave stage 4 with
+    # nothing at all -- but reported, so the result is read as what it is.
+    def _seed_kind(n):
+        r = (grips or {}).get(n)
+        if r is None or not r.get("held"):
+            return "unseeded"
+        return ("burial" if r["n_contact"] > 30
+                else "grasp" if r["n_contact"] <= 12 else "mixed")
+    comp = {}
+    for x in store:
+        k = _seed_kind(x["seq"])
+        comp[k] = comp.get(k, 0) + 1
+        x["seed_kind"] = k
+    print(f"\ndistillation mixture: "
+          + ", ".join(f"{v} {k}-seeded" for k, v in sorted(comp.items())),
+          flush=True)
+
     objs = sorted({s["obj"] for s in store})
     rng = np.random.default_rng(a.seed)
     rng.shuffle(objs)
@@ -188,6 +208,7 @@ def main(a):
     Path(a.out).write_text(json.dumps({
         "hand": a.hand, "steps": a.steps, "seed": a.seed,
         "held_out_objects": sorted(test),
+        "mixture": comp,
         "per_reference": [{k: v for k, v in x.items() if k not in ("O", "A")}
                           | {"transitions": int(len(x["O"]))} for x in store],
         "held_out": held,
