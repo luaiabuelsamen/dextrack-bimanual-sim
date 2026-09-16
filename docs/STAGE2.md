@@ -987,9 +987,23 @@ else — the scene has no floor, plane or second object (mug scene: 87 geoms,
 forearm and wrist are on the welded chain, so every contact force on the
 object is reacted by the base. And the values are read after each control
 frame's 33 substeps, not at reset — the state the weld holds the hand in,
-which is the right place for this argument. A rollout-only version (soften
-the weld on the built model, roll the existing mug policy) is cheap and runs
-first; the retrained version follows.
+which is the right place for this argument.
+
+**The rollout-only version can establish only the negative result.** Softening
+the weld on the built model and rolling the *existing* mug policy is cheap,
+but it confounds itself twice: a softer weld also follows its mocap target
+more slowly, so tracking can worsen for a reason that has nothing to do with
+contact; and the policy was trained at the stiff setting, so a soft cell is
+off-distribution, and "burial stops tracking" is indistinguishable from "the
+policy is off-distribution." So each stiffness carries a **no-contact
+control** — the same rollout with the object's contacts disabled, recording
+the base's following error against its mocap target — and a cell whose
+following error is already tens of millimetres is uninterpretable and is
+said to be. If burial *still tracks* under a soft weld with acceptable
+following error, the base is ruled out cheaply and no retrain is needed. If
+burial *stops* tracking, that is suggestive only, and the retrain is
+mandatory before anyone writes it down. The tempting outcome is precisely
+the one the sweep cannot establish on its own.
 
 ## Look at the pose before trusting the number
 
