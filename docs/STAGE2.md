@@ -887,6 +887,8 @@ record what was *believed* at the time:
 | `mug_drink_2` | burial 528 N | 27 | 711 | **5.7 mm** | **13.18 mm** | 15 | **4834 N (2466×)** |
 | `mouse_use_1` | burial 4335 N | 2 | 337 | 291,168 mm | 0.00 mm | 0 | 0 N |
 | `camera_takepicture_2` | burial 5800 N | 28 | 836 | **34.6 mm** | **9.32 mm** | 8 | 509 N (260×) |
+| `gamecontroller_play_1` | burial 14,042 N | 0 | — | no graspable frame | — | — | — |
+| `bowl_drink_1` ✓ | burial 35,522 N | 27 | 711 | **8.2 mm** | **17.50 mm** | 81 | **29,118 N (14,850×)** |
 
 Statements that stand — and the line is sharper than first drawn: they are
 about the **population of rows**, not about any named reference, because
@@ -897,9 +899,11 @@ may behave completely differently, and so may every other row.
 
 - **No row tracks under 50 mm and ends holding the object un-buried.** The
   g9 readout prints *no row here is a tracking result*, and it is right.
-- The rows that track (5.7 mm, 34.6 mm) **end with the hand inside the
-  object** — 13.18 mm at 2466× weight, 9.32 mm at 260×.
-- Four of seven rows finish at **0.00 mm, 0 contacts, 0 N — because the
+- The rows that track (5.7, 8.2, 34.6 mm) **end with the hand inside the
+  object** — 13.18 mm at 2466× weight, 17.50 mm at 14,850×, 9.32 mm at
+  260×. The only tracking row whose seed label is its own (bowl, ✓) is the
+  deepest and hardest of all.
+- Four of eight rows finish at **0.00 mm, 0 contacts, 0 N — because the
   object is on the floor.** The error column alone ranks a dropped object
   above a held one; any quality measure for this pipeline that reports
   penetration must report held-ness beside it.
