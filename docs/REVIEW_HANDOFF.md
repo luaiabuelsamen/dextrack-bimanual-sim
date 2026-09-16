@@ -202,7 +202,7 @@ Several current implementation issues should be resolved before changing framewo
 
    Profile model construction, repeated closure optimization, candidate simulation, epsilon computation, disturbance testing, and Python overhead. Cache reusable models/closures, then batch independent candidates where the pin/release lifecycle can be preserved. CPU MuJoCo already exposes threaded rollout execution in its [Python rollout interface](https://mujoco.readthedocs.io/en/stable/python.html#rollout). A trainer migration is unnecessary to exploit that.
 
-6. **Parity is narrower than its headline.** The current [warp_parity.py](../experiments/warp_parity.py) imports `warp_fix` as a top-level module, although the packaged implementation is `oppdef.sim.warp_fix`. Its Warp success calculation also omits the tilt clause used by the CPU expert. These are source-inspection findings; the GPU command was not rerun during this handoff.
+6. **Parity is narrower than its headline.** The current [warp_parity.py](../experiments/infra/warp_parity.py) imports `warp_fix` as a top-level module, although the packaged implementation is `oppdef.sim.warp_fix`. Its Warp success calculation also omits the tilt clause used by the CPU expert. These are source-inspection findings; the GPU command was not rerun during this handoff.
 
    Use the same complete outcome definition on both backends, with an independent audit of the raw trajectory. Validate contact-rich rollouts including successes, failures, and conditions near the task boundary. Agreement on the scripted expert and one control is useful but does not establish agreement for every learned policy or grasp. Preserve collision geometry and actuation during performance comparisons; parameter changes need a recorded model-accuracy experiment.
 
@@ -269,10 +269,10 @@ The response handled the most serious model errors candidly:
 - The six independent f5d6 actuators now have force limits: ±1.0 N·m on the two independent thumb joints and ±0.5 N·m on the four independent finger joints.
 - Fingertip measurement was moved from distal-body origins to points derived from collision geometry. Regression tests now cover the observed f5d6 tip, coupling, and effort-limit failures.
 - `SyntheticSource` now describes the same cube used by the physical experiment and places the analytic reference points on its faces.
-- The replacement comparison in [matched.py](../experiments/matched.py) gives both conditions the same parameter space, 144 attempted candidates, and the same three random seeds for each hand/width.
+- The replacement comparison in [matched.py](../experiments/grasp_metrics/matched.py) gives both conditions the same parameter space, 144 attempted candidates, and the same three random seeds for each hand/width.
 - The replacement log uses the accurate phrase “survives the probe” and explicitly withdraws the claim that the sampled pure-force/pure-torque test represents every possible six-dimensional wrench.
 - The follow-up commit adds `hands/model.py`, rewires the public `hands/axis.py` command to the corrected tip/coupling/self-collision implementation, and adds public-entry-point regression tests.
-- The matched result files now include provenance, arguments, selected placement/finger targets, per-direction values, rejection counts, mass/gain, and elapsed time. `experiments/fig_matched.py` is checked in and derives its plotted discordance values from the saved rows.
+- The matched result files now include provenance, arguments, selected placement/finger targets, per-direction values, rejection counts, mass/gain, and elapsed time. `experiments/grasp_metrics/fig_matched.py` is checked in and derives its plotted discordance values from the saved rows.
 
 I reran the complete non-GPU suite after these changes: **61 tests passed in 52.14 seconds**. I also inspected a newly built f5d6 scene and confirmed the five equalities, six actuators, and their force limits directly.
 
@@ -309,7 +309,7 @@ That is useful evidence that the optimization objective affects search efficienc
 
 5. **Replayability is now substantially fixed, with provenance still needing one clean rerun.** Each `results/matched_*.json` row now saves selected parameters, finger targets, per-direction values, rejection counts, timing, and run arguments, and the file-level metadata records commit, package versions, machine, and dirty state. The recorded runs have `dirty=true` because the working tree contains an unrelated pre-existing `results/bimanual_expert.json` modification. Their metadata also says commit `247a62f`, while the writer/provenance changes are in the later `30df0fe` commit. For a paper-quality artifact, rerun from a clean commit and add source asset/model hashes so an external reviewer can confirm the exact physical model bytes.
 
-6. **The live matched figure generator is now fixed.** `experiments/fig_matched.py` computes the plotted discordances from the input rows, and the old hardcoded generator was moved to `experiments/retracted_fig_thesis.py`. The retracted figure is quarantined. This item is resolved, subject to keeping the retracted path clearly out of release instructions.
+6. **The live matched figure generator is now fixed.** `experiments/grasp_metrics/fig_matched.py` computes the plotted discordances from the input rows, and the old hardcoded generator was moved to `experiments/retracted_fig_thesis.py`. The retracted figure is quarantined. This item is resolved, subject to keeping the retracted path clearly out of release instructions.
 
 7. **The second-hand causal claim remains unfixed.** The new commits did not rerun the two-hand comparison with a controlled force/torque budget during disturbance. The old 1.983× ratio is still a descriptive normalization by pre-disturbance contact force, based on 14 force directions. It does not establish that contact allocation, rather than resources or controller response, causes the gain. The old strict count remains 17 improvements, 5 declines, and 1 tie.
 
@@ -352,7 +352,7 @@ the right next gate before interpreting a metric null.
 
 ### G3 analysis caveats that must be fixed or explicitly re-analyzed
 
-1. `experiments/g3.py` seeds each hand/shape cell with
+1. `experiments/grasp_metrics/g3.py` seeds each hand/shape cell with
    `a.seed + hash(hk + shape) % 9973`. Python's `hash()` is salted per process,
    so a rerun with the same command and recorded seed can sample different
    grasps. Replace it with a stable mapping (for example an explicit cell index
@@ -375,7 +375,7 @@ the right next gate before interpreting a metric null.
 ### G4 status
 
 `docs/G4_PREREGISTRATION.md` is committed and has a clear stopping rule, but
-the experiment has not been run. `experiments/g4.py` is currently untracked,
+the experiment has not been run. `experiments/grasp_metrics/g4.py` is currently untracked,
 so there is no committed implementation or result to review yet. Before running
 it, verify that the determinism repeat is compared against the exact saved G3
 outcome, that perturbations are applied after grasp formation as intended, and
@@ -399,7 +399,7 @@ reference until those gates pass.
 
 ### Verification on this checkout
 
-`python -m py_compile experiments/g4.py` and `git diff --check` pass. The full
+`python -m py_compile experiments/grasp_metrics/g4.py` and `git diff --check` pass. The full
 non-GPU suite currently reports **66 passed, 1 failed** in 87.6 seconds. The
 failure is `tests/test_claims.py::test_opposition_floor_separates_f5d6_from_the_others`,
 which imports the removed `oppdef.hands.axis.extremes` function. That test still
@@ -427,7 +427,7 @@ their partial contents are not a completed result.
 
 ### Immediate issues before another interpretation of G3
 
-- **Task B's tilt is discarded.** `experiments/g3.py:29` puts its Y rotation in
+- **Task B's tilt is discarded.** `experiments/grasp_metrics/g3.py:29` puts its Y rotation in
   `traj.cmd[:, 4]`, but `object_path` and `base_command` in
   `src/oppdef/grasping/task.py:89` and `:110` use only column 3, the X rotation. A direct
   diagnostic on this checkout produces requested Y rotation **1.0472 rad**,
@@ -437,8 +437,8 @@ their partial contents are not a completed result.
   detect this specification error. Fix the full path from task specification
   through commands and evaluation, and record the correction before collection.
 - **The task-specific predictor is paired with the wrong outcome.**
-  `experiments/g3.py:96` saves both `margin` for A and `margin_b` for B, but
-  `experiments/g3_analysis.py:73` duplicates A's `margin` and `margin_per_N` for
+  `experiments/grasp_metrics/g3.py:96` saves both `margin` for A and `margin_b` for B, but
+  `experiments/grasp_metrics/g3_analysis.py:73` duplicates A's `margin` and `margin_per_N` for
   both outcomes. Use B's margin, divided by the matching force for its normalized
   version, for B observations in both pooled and subgroup analyses. The earlier
   statement that the margin contains no information is not established by this
@@ -571,7 +571,7 @@ synthetic-grasp project. This is useful engineering progress; evidence for a
 new generalizable method still needs a separate comparison.
 
 The user requested new GIFs and a README update if the work supported them.
-`experiments/render_tracking.py` captures actual MuJoCo dynamics, then renders
+`experiments/tracking/render_tracking.py` captures actual MuJoCo dynamics, then renders
 the captured states in a separate `MjData`. The object has a free joint, gravity
 is active, and it is not welded to a hand. Floating wrists are driven through
 mocap constraints and fingers through actuators. These are assisted-start,
@@ -776,7 +776,7 @@ once initial conditions are valid — one rollout at `solref` 0.005 and one at
 0.004, compared on force and penetration — since a 2.5× ratio to the timestep
 that is fine at 2 mm of overlap may not be at 8 mm.
 
-The renderer is not implicated. `experiments/render_tracking.py` asserts a free
+The renderer is not implicated. `experiments/tracking/render_tracking.py` asserts a free
 joint, no weld, and negative gravity, and its saved `qpos`, `scene.mjb`, and
 manifests are what made this audit possible at all. The instrumentation is
 sound; what it instrumented was not.

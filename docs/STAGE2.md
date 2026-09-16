@@ -199,7 +199,7 @@ went wrong, so it does not go wrong again:
   and then violated by the agent who proposed it.
 - **Split by file, not by task.** What worked: one session owned `src/` and
   `NOTES.md`, the other owned `README.md`, `docs/`, and
-  `experiments/render_tracking.py`. Announce before crossing.
+  `experiments/tracking/render_tracking.py`. Announce before crossing.
 - **Reading the other's uncommitted diff is high value.** The per-body
   breakdown that found the buried palm — and later the buried forearm — came
   from testing code that had not been committed yet, not from waiting for a

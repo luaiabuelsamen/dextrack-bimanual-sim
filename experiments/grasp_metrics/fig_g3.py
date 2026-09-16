@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
-from experiments.g3_analysis import load, METRICS, auc, cluster_bootstrap
+from experiments.grasp_metrics.g3_analysis import load, METRICS, auc, cluster_bootstrap
 
 LABEL = {"epsilon": "Ferrari–Canny $\\epsilon$", "hold_N": "static probe hold",
          "margin": "task margin", "margin_per_N": "task margin / N",

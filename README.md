@@ -19,22 +19,47 @@ number.**
 > `oppdef`; renaming it is a mechanical change deliberately deferred so it does
 > not collide with active work.
 
-## Where this stands
+## What this repository establishes
 
-**The pipeline runs end to end and its numbers were wrong.** On 2026-09-15 the
-tracking stage was stepped as real physics for the first time rather than
-kinematic playback, and the instrumentation immediately showed every rollout was
-a contact artifact: the hand placed *inside* the object, which manufactures
-contacts, which inflates grip, which flatters every metric downstream. Tracking
-numbers across stages 2, 3 and 6 are withdrawn.
+Two research programs share this codebase. Both are measured; one is finished
+and one is live.
 
-The cause is located and measured. It is **stage 2, the retarget** — it matched
-the human's fingertip positions with no non-penetration constraint, and for the
-Shadow hand on these objects that optimum is inside the object at every frame,
-not just at the grasp. Every downstream remedy was tried and rejected by
-measurement, including the one that looked obvious.
+### A · Grasp quality and retargeting objectives — settled
 
-Stage 2 decomposes into three subproblems. One is fixed:
+Does the objective everyone retargets against actually predict whether a grasp
+does the job? 238 sampled grasps × 4 hands × 4 shapes × 2 carry tasks,
+pre-registered, clustered by grasp.
+
+| finding | |
+|---|---|
+| **A wrench objective beats the shipped keypoint pipeline** | pre-registered, n=60, McNemar p = 0.0075 — and by *selecting* better, not searching more |
+| **Contact force predicts task success** | ρ +0.325, **AUC 0.800**; the strongest single predictor tested |
+| **Every metric inverts on capsules** | survived three bug fixes and an external audit — whatever these metrics capture does not transfer across object geometry |
+| ε is informative but weak | AUC 0.684, below the pre-declared threshold |
+| Outcomes are reproducible under perturbation | 0.928 unanimity, CI [0.897, 0.956] |
+| The peg task genuinely requires two hands | 13.49 cm vs 5.32 cm, by force balance |
+
+Four claims from this program were **retracted or withdrawn**, including the one
+the repository was named after. That history is in [Status](#status) and
+[NOTES.md](NOTES.md), not buried.
+
+### B · Human motion → robot tracking — live, blocked at stage 2
+
+The DexTrack pipeline rebuilt on real [GRAB](https://grab.is.tue.mpg.de/)
+references: retarget contacts, form a grasp, train a tracker per clip, distil,
+extend to two hands, then test under depth perception.
+
+| built and validated | |
+|---|---|
+| GRAB reconstruction | recall **0.919** against the dataset's own contact labels (0.158 under a transposed-rotation bug, since fixed) |
+| Convex decomposition | a mug handle is a genuine hole, not a filled hull — 0.92× volume |
+| Instrumentation | every rollout GIF carries penetration, grip force and contact count on its face, with a per-frame JSON manifest and a replay check |
+| Stages 1, 4, 7 | human reference, homotopy curriculum, depth→pose evaluation of a frozen tracker |
+
+**Stage 2 is broken and everything downstream inherited it.** The retarget
+matched fingertip positions with no non-penetration constraint, so every
+reported tracking number was measured on a hand *inside* the object. Those
+numbers are withdrawn. The defect is now located, decomposed and half fixed:
 
 | | state | |
 |---|---|---|
@@ -42,12 +67,8 @@ Stage 2 decomposes into three subproblems. One is fixed:
 | **B** finger reach | open | hand now feasible but 50–62 mm out of reach |
 | **C** vessel wrist target | open | hand placed *through* cups and mugs |
 
-**→ [docs/STAGE2.md](docs/STAGE2.md)** is the full diagnosis and the place to
-start work. RL/DexTrack retraining is blocked behind all three.
-
-This is not a stuck project. It is a project whose measurement log caught a
-systematic error that had been inflating everything in it, which is what the log
-is for.
+**→ [docs/STAGE2.md](docs/STAGE2.md)** is the full diagnosis and where to pick
+up. RL retraining is blocked behind all three.
 
 ### Where to start
 
@@ -60,6 +81,31 @@ is for.
 | reproduce a figure | [Reproduce](#reproduce) |
 
 ---
+
+## Status
+
+| claim | status | evidence |
+|---|---|---|
+| A wrench objective beats the shipped retargeting pipeline | **supported** | pre-registered, n=60, McNemar p = 0.0075 |
+| …by *selecting* better, not searching more | **supported** | finds fewer valid grasps, survives 2.3× as often |
+| References improve the earlier synthetic objectives | **benefit not established** | G1 initialisation p = 1.0000; G2 specification p = 0.180; this does not test all uses of human data |
+| Contact **force** predicts task success | **supported** | ρ +0.325, AUC 0.800, clustered by grasp; survives G4 |
+| ε predicts task success | **weakly** | AUC 0.684 (0.679 excluding non-reproducible grasps), below the pre-declared ρ = 0.3 |
+| Every metric inverts on capsules | **robust across three bug fixes and an audit** | see the figure below |
+| GRAB tracking rollouts are physically valid | **NOT SUPPORTED** | 8–14 mm penetration on 541/541 frames at 1530–7549 N mean on a 1.96 N object; grasp search was climbing toward it |
+| The retarget can produce a usable grasp | **NOT SUPPORTED** | its grasps are either interpenetrating or non-contacting; on `phone_call_1` the only 0 mm-penetration grasp found never touches the object |
+| Scoring the grasp search on tracking improved it (`d5b49ca`, 248 m → 35 mm) | **WITHDRAWN** | compared an unphysical grasp against a failed one; the 35 mm is achieved at 19.4 mm penetration and 4551 N |
+| Perturbed repeats agree | **high agreement, with replay failures** | G4: 0.928 unanimity, CI [0.897, 0.956]; five grasps did not re-form |
+| The peg task requires two hands | **supported** | 13.49 cm vs 5.32 cm, by force balance |
+| An opposition deficit exists among these hands | **RETRACTED** | all four oppose within 2.8 mm once measured correctly |
+| A second hand repairs that deficit | **WITHDRAWN** | force-only data labelled as wrench; budget uncontrolled |
+| Earlier peg-task BC / action chunking demonstrate feedback | **RETRACTED** | open-loop replay scores 8/8 on that task; separate from the new GRAB PPO result |
+| "No metric predicts task success" (earlier G3) | **WITHDRAWN** | it was three bugs — see below |
+
+**[NOTES.md](NOTES.md) is the authoritative log. Read it before quoting any
+number.** Withdrawn work lives under `results/retracted/`,
+`figures/retracted/`, `experiments/retracted/`, each with a README saying what
+was wrong.
 
 ## Physics rollouts
 
@@ -111,31 +157,6 @@ with a pipeline inspired by [DexTrack](https://meowuu7.github.io/DexTrack/):
 retarget contacts, establish a feasible grasp, train a tracker per reference,
 then distil a shared policy. Two-hand experiments currently use joint
 retargeting and grasp search. See [From human motion to a robot hand](#from-human-motion-to-a-robot-hand).
-
-## Status
-
-| claim | status | evidence |
-|---|---|---|
-| A wrench objective beats the shipped retargeting pipeline | **supported** | pre-registered, n=60, McNemar p = 0.0075 |
-| …by *selecting* better, not searching more | **supported** | finds fewer valid grasps, survives 2.3× as often |
-| References improve the earlier synthetic objectives | **benefit not established** | G1 initialisation p = 1.0000; G2 specification p = 0.180; this does not test all uses of human data |
-| Contact **force** predicts task success | **supported** | ρ +0.325, AUC 0.800, clustered by grasp; survives G4 |
-| ε predicts task success | **weakly** | AUC 0.684 (0.679 excluding non-reproducible grasps), below the pre-declared ρ = 0.3 |
-| Every metric inverts on capsules | **robust across three bug fixes and an audit** | see the figure below |
-| GRAB tracking rollouts are physically valid | **NOT SUPPORTED** | 8–14 mm penetration on 541/541 frames at 1530–7549 N mean on a 1.96 N object; grasp search was climbing toward it |
-| The retarget can produce a usable grasp | **NOT SUPPORTED** | its grasps are either interpenetrating or non-contacting; on `phone_call_1` the only 0 mm-penetration grasp found never touches the object |
-| Scoring the grasp search on tracking improved it (`d5b49ca`, 248 m → 35 mm) | **WITHDRAWN** | compared an unphysical grasp against a failed one; the 35 mm is achieved at 19.4 mm penetration and 4551 N |
-| Perturbed repeats agree | **high agreement, with replay failures** | G4: 0.928 unanimity, CI [0.897, 0.956]; five grasps did not re-form |
-| The peg task requires two hands | **supported** | 13.49 cm vs 5.32 cm, by force balance |
-| An opposition deficit exists among these hands | **RETRACTED** | all four oppose within 2.8 mm once measured correctly |
-| A second hand repairs that deficit | **WITHDRAWN** | force-only data labelled as wrench; budget uncontrolled |
-| Earlier peg-task BC / action chunking demonstrate feedback | **RETRACTED** | open-loop replay scores 8/8 on that task; separate from the new GRAB PPO result |
-| "No metric predicts task success" (earlier G3) | **WITHDRAWN** | it was three bugs — see below |
-
-**[NOTES.md](NOTES.md) is the authoritative log. Read it before quoting any
-number.** Withdrawn work lives under `results/retracted/`,
-`figures/retracted/`, `experiments/retracted/`, each with a README saying what
-was wrong.
 
 ## Earlier benchmark: which metrics predict task success?
 
@@ -270,7 +291,7 @@ reconstructed object and asked whether they were close; they always were, and
 for a while they were close in the wrong place — the object's rotation was
 transposed and a 0.1 mm minimum-distance check passed the whole time.
 
-`experiments/grab_validate.py` scores the reconstruction against the labels the
+`experiments/tracking/grab_validate.py` scores the reconstruction against the labels the
 dataset ships: **recall 0.919, minimum 0.846** over the sequences checked, where
 recall is the fraction of GRAB's own contacted vertices the reconstruction also
 marks as touched. Under the transposed transform that number was 0.158.
@@ -452,7 +473,11 @@ src/oppdef/        package README: src/oppdef/README.md
   embodiment.py paths.py objects.py   hand/object abstractions, asset paths
   bench.py policy.py sensing.py data.py vec.py control/ sim/ viz/
                    earlier synthetic-grasp work; backs the supported G3 findings
-experiments/       live experiments; retracted/ holds the withdrawn ones
+experiments/       grouped by program -- see experiments/README.md
+  grasp_metrics/   program A: g1-g5, matched, the peg task, figures
+  tracking/        program B: grab_*, render_tracking, g7-g9
+  infra/           backend parity and batched-stepping benchmarks
+  retracted/       withdrawn experiments, each saying what was wrong
 docs/              task definitions, pre-registrations, external reviews
 results/ figures/  live results with provenance; retracted/ holds the rest
 attic/             superseded scripts, two kept as retraction evidence
@@ -472,8 +497,8 @@ make install
 make test                 # fast + slow invariants
 make axis                 # the opposition axis, with provenance
 make g1 && make g1-analysis    # pre-registered three-arm comparison
-python experiments/g3.py       # metric-vs-task dataset
-python experiments/g3_analysis.py
+python experiments/grasp_metrics/g3.py       # metric-vs-task dataset
+python experiments/grasp_metrics/g3_analysis.py
 make expert               # the bimanual peg task and its one-handed control
 make render-tasks         # synthetic grasp / peg GIFs
 make render-tracking     # the physical GRAB rollouts at the top of this README

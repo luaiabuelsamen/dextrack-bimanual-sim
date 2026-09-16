@@ -26,7 +26,7 @@ def shots(seq_name, hand="shadow", window=None, n=5, w=560, h=560,
     s = grab.load(seq_name, verts=True, stride=stride)
     sc = scene.build(hand, s.obj)
     if window is None:                      # longest run of hand-object contact
-        from experiments.grab_inventory import contact_mask, longest_run, _tree
+        from experiments.tracking.grab_inventory import contact_mask, longest_run, _tree
         m = contact_mask(s, _tree(s, {}), "rhand")
         window = longest_run(m)
     tr = retarget_sequence(s, "rhand", hand, window=window, sc=sc, w_pen=w_pen)

@@ -54,7 +54,7 @@ For Claude, the next work should be bounded by the following acceptance criteria
 
 The main local minimum is continuing to enlarge or reframe a synthetic static-grasp sweep until its statistics look decisive while the model, representation, and task remain unresolved. A second is treating a model-building artifact as a property of hand anatomy. The fastest useful next step is a corrected, small experiment that could falsify the proposed mechanism.
 
-The stack recommendation from the earlier handoff remains applicable. CPU MuJoCo is sufficient to expose and resolve these problems. The new Warp capacity and reset changes are useful, but [Warp parity](../experiments/warp_parity.py#L90) still omits the tilt condition included by the CPU expert. No GPU benchmark was rerun for this review. A migration to MJX, PufferLib, or another training framework does not address the present completion blockers; select a scaling path after the corrected experiment identifies a measured throughput bottleneck.
+The stack recommendation from the earlier handoff remains applicable. CPU MuJoCo is sufficient to expose and resolve these problems. The new Warp capacity and reset changes are useful, but [Warp parity](../experiments/infra/warp_parity.py#L90) still omits the tilt condition included by the CPU expert. No GPU benchmark was rerun for this review. A migration to MJX, PufferLib, or another training framework does not address the present completion blockers; select a scaling path after the corrected experiment identifies a measured throughput bottleneck.
 
 Verification: **56 non-GPU tests passed in 20.40 seconds** using:
 

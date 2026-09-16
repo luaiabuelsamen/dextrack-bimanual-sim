@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
-from experiments.g4_analysis import wilson
+from experiments.grasp_metrics.g4_analysis import wilson
 
 H1_THRESHOLD = 0.50
 EARLY, LATE = 0.20, 0.80       # window-position split, fixed in advance

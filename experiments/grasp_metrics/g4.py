@@ -18,7 +18,7 @@ import mujoco
 from oppdef.grasping.synth import GraspScene
 from oppdef.hands.axis import provenance
 from oppdef.grasping.task import run_task
-from experiments.g3 import task_spec
+from experiments.grasp_metrics.g3 import task_spec
 
 R = 5
 

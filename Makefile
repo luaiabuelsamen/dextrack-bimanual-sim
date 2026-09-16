@@ -27,39 +27,39 @@ axis:             ## M1: the opposition axis (floor + aperture, with provenance)
 	$(PY) -m oppdef.hands.axis
 
 inventory:        ## what hands and arms this machine can build
-	$(PY) -m experiments.inventory
+	$(PY) -m experiments.grasp_metrics.inventory
 
 # -- tasks and comparisons -------------------------------------------------
 g1:               ## T1: the pre-registered three-arm comparison (docs/G1_PREREGISTRATION.md)
-	$(PY) experiments/g1.py
+	$(PY) experiments/grasp_metrics/g1.py
 
 g1-analysis:      ## the pre-registered analysis of the above
-	$(PY) experiments/g1_analysis.py
+	$(PY) experiments/grasp_metrics/g1_analysis.py
 
 matched:          ## T1: budget-matched pose vs wrench (two arms)
-	$(PY) experiments/matched.py
+	$(PY) experiments/grasp_metrics/matched.py
 
 matched-fig:      ## figure for the matched comparison (statistics derived, not typed)
-	$(PY) experiments/fig_matched.py
+	$(PY) experiments/grasp_metrics/fig_matched.py
 
 expert:           ## T2: the bimanual peg task and its one-handed control
-	$(PY) -m experiments.bimanual_expert
+	$(PY) -m experiments.grasp_metrics.bimanual_expert
 
 render-tasks:     ## re-render every task GIF by replaying saved grasps
-	MUJOCO_GL=egl $(PY) experiments/render_tasks.py
+	MUJOCO_GL=egl $(PY) experiments/grasp_metrics/render_tasks.py
 
 render-tracking:  ## capture and render the README's measured GRAB tracking demos
-	OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl PYTHONPATH=src:. $(PY) -m experiments.render_tracking mug bowl binoculars camera
+	OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl PYTHONPATH=src:. $(PY) -m experiments.tracking.render_tracking mug bowl binoculars camera
 
 # -- infrastructure --------------------------------------------------------
 vec:              ## batched-stepping throughput and agreement, CPU backend
-	$(PY) -m experiments.vec_bench
+	$(PY) -m experiments.infra.vec_bench
 
 parity:           ## CPU MuJoCo vs warp, outcome level (needs GPU)
-	$(GPU) -m experiments.warp_parity
+	$(GPU) -m experiments.infra.warp_parity
 
 parity-mjx:       ## CPU MuJoCo vs MJX (BLOCKED here: cuSolver, see NOTES)
-	PYTHONPATH=src $(GPU) -m experiments.mjx_parity
+	PYTHONPATH=src $(GPU) -m experiments.infra.mjx_parity
 
 vendor:           ## fetch the MuJoCo Menagerie hand models (sparse, ~30 MB)
 	@test -d vendor/mujoco_menagerie || git clone --depth 1 --filter=blob:none --sparse \

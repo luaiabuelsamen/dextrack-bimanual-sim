@@ -19,7 +19,7 @@ from PIL import Image
 
 from oppdef.human import grab, scene, track
 from oppdef.human.retarget import retarget_sequence
-from experiments.grab_inventory import contact_mask, longest_run, _tree
+from experiments.tracking.grab_inventory import contact_mask, longest_run, _tree
 
 
 def render(seq_name, hand="shadow", stride=8, w=620, h=620, fps=12,
