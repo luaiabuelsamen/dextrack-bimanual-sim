@@ -28,9 +28,17 @@ from oppdef.human import grab, track, perception as P
 
 
 def run(seq_name, hand="shadow", alpha=0.4, cam_offset=(0.35, -0.30, 0.25),
-        width=200, noise_m=0.0, seed=0):
+        width=200, noise_m=0.0, seed=0, grips=None):
     s = grab.load(seq_name, verts=True, stride=8)
     rt = track.ReferenceTracker(s, hand)
+    # Seed the wrist from stage 2, for the same reason stage 3 does: without it
+    # references have no graspable frame at all and this stage silently reduces
+    # to whichever one clip happened to pass. The stored run was exactly that --
+    # a single reference starting at frame 0, which is the APPROACH, with every
+    # condition dropping the object.
+    seed_row = (grips or {}).get(s.name)
+    if seed_row is not None and seed_row.get("held"):
+        rt.apply_wrist_offset(np.asarray(seed_row["offset"], float))
     gf = rt.grasp_frames()
     if len(gf) == 0:
         return None
@@ -100,6 +108,13 @@ def run(seq_name, hand="shadow", alpha=0.4, cam_offset=(0.35, -0.30, 0.25),
     out["seq"] = s.name
     out["object"] = s.obj
     out["start"] = k0
+    out["n_grasp_frames"] = int(len(gf))
+    out["seeded"] = bool(seed_row is not None and seed_row.get("held"))
+    # The class of the grasp this started from, so a perception number is not
+    # read as a perception result when it is a burial being tracked.
+    if seed_row is not None:
+        out["seed_contacts"] = int(seed_row["n_contact"])
+        out["seed_grip_n"] = float(seed_row["grip_n"])
     return out
 
 
@@ -108,15 +123,28 @@ if __name__ == "__main__":
     ap.add_argument("--seqs", default="s1/mug_drink_1.npz,s1/apple_lift.npz")
     ap.add_argument("--alpha", type=float, default=0.4)
     ap.add_argument("--out", default="results/g7_perception.json")
+    ap.add_argument("--grips", default="results/stage2_grips_g9.json")
     a = ap.parse_args()
+    grips = {}
+    for cand in (a.grips, "results/stage2_grips.json"):
+        q = Path(cand)
+        if q.exists():
+            for r in json.loads(q.read_text())["rows"]:
+                grips.setdefault(f"{r['subject']}/{r['seq']}.npz", r)
+                grips.setdefault(r["seq"], r)
+    print(f"{len(grips)//2} stage-2 grasps available as wrist seeds")
     rows = []
     for nm in a.seqs.split(","):
-        r = run(nm, alpha=a.alpha)
+        r = run(nm, alpha=a.alpha, grips=grips)
         if r is None:
             print(f"{nm}: no graspable frame")
             continue
         rows.append(r)
-        print(f"\n{r['seq']} ({r['object']}), from frame {r['start']}")
+        print(f"\n{r['seq']} ({r['object']}), from frame {r['start']} of "
+              f"{r['n_grasp_frames']} graspable"
+              + (f", seed {r.get('seed_contacts')} contacts at "
+                 f"{r.get('seed_grip_n'):.0f} N" if r.get("seeded") else
+                 ", UNSEEDED"))
         for m in ("truth", "depth", "noise"):
             v = r[m]
             print(f"  {m:6s} track {v['mean_mm']:8.1f} mm mean, "

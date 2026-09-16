@@ -4110,3 +4110,39 @@ phase cannot cost the training; write results incrementally; and do not edit
 `src/` while someone's job is running. The peer's run survived on the first of
 those. Mine survived on timing alone -- every src/ edit happened before launch,
 which was luck rather than discipline.
+
+## Stage 7 was not working, and I repeated that it was
+
+I told the user stage 7 was "already working and untouched", carrying that claim
+forward from a summary rather than opening the file. The stored result is:
+
+    seq mug_drink_1, start 0, ONE reference
+      truth   101.5 mm mean, 152.6 final, held 0.22, dropped TRUE
+      depth   637.3 mm mean, 8927.7 final, held 0.02, dropped TRUE
+      noise   102.5 mm mean, 128.0 final, held 0.10, dropped TRUE
+
+Every condition drops the object. `start: 0` is the approach frame -- not
+hardcoded, the script asks `grasp_frames()` and that is what came back -- and
+the second reference in its default list returned no graspable frame at all, so
+a stage designed to compare three pose sources ran on one clip that failed in
+all three.
+
+The comparison it exists to make is still the right one, and it is worth saying
+why: if `depth` degrades tracking and `noise` of the same magnitude does not,
+the estimator's error is structured and the fix is perception; if both degrade
+equally the controller is merely pose-sensitive and the fix is control. On the
+stored numbers depth is 6x worse than noise of the same size, which would be a
+real finding -- structured error -- except that the truth condition drops the
+object too, so all three are measuring the same failure and none of them is
+measuring perception.
+
+Fixed the same way as stage 3: seed the wrist from stage 2, which is what gives
+these references a graspable frame in the first place. The stage now also
+records how many graspable frames it had and the contact count and grip force of
+the seed it started from, so a perception number cannot be read as a perception
+result when it is a burial being tracked.
+
+The lesson is the cheap one. I had the file open in the same session where I
+found that frame 0 is the approach and that the gate was dropping references,
+and I still asserted the stage worked because a summary said so. One `cat` of
+the results file would have caught it.

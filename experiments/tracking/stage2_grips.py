@@ -64,10 +64,25 @@ def main():
     ap.add_argument("--rounds", type=int, default=2)
     ap.add_argument("--stride", type=int, default=8)
     ap.add_argument("--out", default="results/stage2_grips.json")
+    ap.add_argument("--seqs", default="",
+                    help="comma-separated sequence names; overrides the "
+                         "one-per-object default. Used to compute seeds for "
+                         "exactly the references a downstream stage selects -- "
+                         "the two stages otherwise pick different sequences of "
+                         "the same object and the seeds do not apply.")
+    ap.add_argument("--min-hold", type=int, default=5)
     a = ap.parse_args()
 
     rows = json.load(open("results/grab_inventory.json"))["rows"]
-    cand = [r for r in rows if (r.get("rhand_hold_len") or 0) >= 5]
+    if a.seqs:
+        want = [x.strip() for x in a.seqs.split(",") if x.strip()]
+        by = {r["seq"]: r for r in rows}
+        order = [by[w] for w in want if w in by]
+        missing = [w for w in want if w not in by]
+        if missing:
+            print(f"  not in inventory: {missing}", file=sys.stderr, flush=True)
+        return _run(a, order)
+    cand = [r for r in rows if (r.get("rhand_hold_len") or 0) >= a.min_hold]
     # one sequence per object first, so the sample is not eight mugs
     seen, order = set(), []
     for r in sorted(cand, key=lambda x: x["seq"]):
@@ -75,7 +90,10 @@ def main():
             seen.add(r["object"]); order.append(r)
     order += [r for r in sorted(cand, key=lambda x: x["seq"]) if r not in order]
     order = order[:a.n]
+    return _run(a, order)
 
+
+def _run(a, order):
     out, t0 = [], time.time()
     for i, r in enumerate(order):
         try:
