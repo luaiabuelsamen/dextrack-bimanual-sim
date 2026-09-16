@@ -40,6 +40,10 @@ def rt():
     from experiments.tracking.grab_inventory import contact_mask, longest_run, _tree
     seq = grab.load(CLIP, verts=True, stride=8)
     w = longest_run(contact_mask(seq, _tree(seq, {}), "rhand"))
+    # The REAL control rate is ~33 substeps per control step (one reference
+    # frame, see ReferenceTracker.ctrl_every). 4 is a test convenience that
+    # keeps the buried state in view; nothing here is evidence about what the
+    # policy or the object does at the real rate.
     return track.ReferenceTracker(seq, window=(w[0], 8), ctrl_every=4)
 
 
@@ -107,9 +111,10 @@ def test_stats_are_finite_and_read_from_the_right_data(rt):
         pool.reset_all(rng)
         a = np.zeros((N_ENVS, rt.n_action))
         a[1, :3] = 1.0                        # env 1's palm moves, env 0's does not
-        pool.step(a, rl.RLConfig())
+        pool.step(a, rl.RLConfig(), measure_grip=True)
         assert np.all(np.isfinite(pool.pen)) and np.all(pool.pen >= 0)
         assert np.all(pool.ncon >= 0) and np.all(pool.grip >= 0)
+        assert np.all(np.isfinite(pool.pe)) and np.all(pool.pe >= 0)
         assert pool.pen[0] != pool.pen[1], "both envs read the same data"
         for i in range(N_ENVS):
             pool._use(i)
@@ -119,6 +124,13 @@ def test_stats_are_finite_and_read_from_the_right_data(rt):
             assert (cs.pen, cs.n) == rt.sim.penetration()       # the scene's own
             grip_n, ncon = track.total_grip(rt.sim)
             assert cs.grip == pytest.approx(grip_n) and cs.n == ncon
+            assert pool.pe[i] == rt.error(0)[0]
+        # at defaults, and not asked for, the force is not read: nan, while
+        # depth, count and bodies are still on
+        pool.step(a, rl.RLConfig())
+        assert np.all(np.isnan(pool.grip))
+        assert np.all(np.isfinite(pool.pen)) and np.all(pool.ncon > 0)
+        assert np.all(pool.nbody > 0)
     finally:
         pool.restore()
         pool.close()
@@ -211,11 +223,20 @@ def test_evaluate_reports_end_state(rt, capsys):
 # -- train() logs burying and held-ness every iteration ---------------------
 def test_train_logs_penetration_and_heldness(rt, capsys):
     pytest.importorskip("torch")
-    cfg = rl.RLConfig(n_envs=N_ENVS, horizon=4, iters=2, epochs=1, minibatch=8)
+    cfg = rl.RLConfig(n_envs=N_ENVS, horizon=4, iters=3, epochs=1, minibatch=8)
     _net, log = rl.train(rt, cfg, starts=[0], verbose=True)
-    for k in ("pen_mm", "frac_held", "grip_n", "r_pen", "r_hold"):
+    for k in ("pen_mm", "frac_held", "err_mm", "r_pen", "r_hold"):
         v = getattr(log, k)
-        assert len(v) == 2 and np.all(np.isfinite(v)) and np.all(np.asarray(v) >= 0)
+        assert len(v) == 3 and np.all(np.isfinite(v)) and np.all(np.asarray(v) >= 0)
     assert np.all(np.asarray(log.r_pen) == 0) and np.all(np.asarray(log.r_hold) == 0)
+    # grip is measured on logged iterations only (0 and the last, log_every=10)
+    assert len(log.grip_n) == 3
+    assert np.isfinite(log.grip_n[0]) and np.isfinite(log.grip_n[2])
+    assert np.isnan(log.grip_n[1])
     out = capsys.readouterr().out
-    assert "pen" in out and "held" in out and "grip" in out
+    assert "pen" in out and "held" in out and "grip" in out and "err" in out
+    assert out.count("iter") == 2
+    # a term that prices the force turns the measurement on everywhere
+    _net, log = rl.train(rt, rl.RLConfig(n_envs=N_ENVS, horizon=4, iters=3, epochs=1,
+                                         minibatch=8, w_hold=0.5), starts=[0], verbose=False)
+    assert np.all(np.isfinite(log.grip_n))

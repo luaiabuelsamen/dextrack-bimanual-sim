@@ -96,6 +96,13 @@ class RLConfig:
     #: [0, w_hold]. Default 0, as above.
     w_hold: float = 0.0
     hold_ref: float = 1.0        # object weights of normal force for the full bonus
+    #: Iterations on which grip force is measured for the log and the verbose
+    #: line printed (every log_every-th, and the last). Penetration depth,
+    #: contact count, body count and position error come free from the
+    #: contact list and are always on; the force needs `mj_contactForce` per
+    #: contact per env per step -- ~58k calls an iteration on a buried hand --
+    #: so it runs only when a term prices it or the iteration is logged.
+    log_every: int = 10
     seed: int = 0
 
 
@@ -105,21 +112,26 @@ class ContactSummary:
     pen: float        #: deepest hand-object penetration, metres (0 if none)
     n: int            #: number of hand-object contacts
     bodies: int       #: distinct HAND bodies in contact, as track.wrap_score counts
-    grip: float       #: total hand-object normal force, N, as track.total_grip
+    grip: float       #: total hand-object normal force, N, as track.total_grip (nan if not measured)
 
 
-def contact_summary(sc) -> ContactSummary:
+def contact_summary(sc, force: bool = True) -> ContactSummary:
     """One pass over `sc.data.contact` for what the reward and the log need.
 
     `sc.penetration()` and `track.total_grip(sc)` compute two of these; this
     walks the contact list once because it runs for every environment on every
     control step. Same identification as both: a contact counts when one geom
     is the object's and the other is the hand's.
+
+    `force=False` skips `mj_contactForce` and reports grip as nan. Depth,
+    count and bodies are read off the contact list; the force is a solver
+    call per contact, and this repo has paid "reward identical, training 15%
+    slower" for a per-step Python loop like that before.
     """
     m, d = sc.model, sc.data
     objs, hands = set(sc.obj_gids), set(sc.hand_gids)
     f = np.zeros(6)
-    pen, n, grip, bodies = 0.0, 0, 0.0, set()
+    pen, n, grip, bodies = 0.0, 0, 0.0 if force else float("nan"), set()
     for i in range(d.ncon):
         c = d.contact[i]
         g1, g2 = int(c.geom1), int(c.geom2)
@@ -128,8 +140,9 @@ def contact_summary(sc) -> ContactSummary:
         n += 1
         pen = max(pen, -float(c.dist))
         bodies.add(int(m.geom_bodyid[g1 if g1 in hands else g2]))
-        mujoco.mj_contactForce(m, d, i, f)
-        grip += abs(float(f[0]))           # normal component, contact frame
+        if force:
+            mujoco.mj_contactForce(m, d, i, f)
+            grip += abs(float(f[0]))       # normal component, contact frame
     return ContactSummary(pen=pen, n=n, bodies=len(bodies), grip=grip)
 
 
@@ -170,8 +183,11 @@ class Pool:
         #: per-environment contact state after the latest `step`, kept as
         #: attributes rather than widening step's return so callers are
         #: unchanged: deepest penetration (m), hand-object contacts, distinct
-        #: hand bodies, total normal force (N), and the two shaping terms as
-        #: they entered the reward (0 while their weights are 0).
+        #: hand bodies, total normal force (N; nan unless a term prices it or
+        #: `step(..., measure_grip=True)`), object position error (m), and
+        #: the two shaping terms as they entered the reward (0 while their
+        #: weights are 0).
+        self.pe = np.zeros(n_envs)
         self.pen = np.zeros(n_envs)
         self.ncon = np.zeros(n_envs, int)
         self.nbody = np.zeros(n_envs, int)
@@ -203,9 +219,14 @@ class Pool:
     def reset_all(self, rng):
         return np.stack([self.reset(i, rng) for i in range(self.n)])
 
-    def step(self, actions, cfg: RLConfig):
-        """Apply one control step in every environment."""
+    def step(self, actions, cfg: RLConfig, measure_grip: bool = False):
+        """Apply one control step in every environment.
+
+        `measure_grip` forces the per-contact force read (see RLConfig.log_every);
+        it is on regardless whenever `w_force` or `w_hold` prices the force.
+        """
         rt = self.rt
+        need_force = bool(cfg.w_force or cfg.w_hold or measure_grip)
         obs = np.empty((self.n, rt.n_obs))
         rew = np.empty(self.n)
         done = np.zeros(self.n, bool)
@@ -245,7 +266,8 @@ class Pool:
             # Contact state of THIS environment: `_use(i)` above made
             # `rt.sim.data` the i-th MjData, which is what the summary reads.
             # Always measured, so the log reports burying whatever the weights.
-            cs = contact_summary(rt.sim)
+            cs = contact_summary(rt.sim, force=need_force)
+            self.pe[i] = pe
             self.pen[i], self.ncon[i] = cs.pen, cs.n
             self.nbody[i], self.grip[i] = cs.bodies, cs.grip
             self.r_pen[i] = self.r_hold[i] = 0.0
@@ -309,9 +331,12 @@ class TrainLog:
     reward: list = field(default_factory=list)
     err_mm: list = field(default_factory=list)
     frac_alive: list = field(default_factory=list)
-    #: Per-iteration means over every env-step. Read `pen_mm` and `frac_held`
-    #: TOGETHER: penetration falling while held fraction falls with it means
-    #: the policy bought clean numbers by dropping the object.
+    #: Per-iteration means over every env-step. Read `pen_mm`, `frac_held`
+    #: and `err_mm` TOGETHER: penetration falling while held fraction falls
+    #: with it means the policy bought clean numbers by dropping the object,
+    #: and held fraction high while the error grows is a hand riding a
+    #: falling object down while touching it. `grip_n` is nan on iterations
+    #: where the force was not measured (RLConfig.log_every).
     pen_mm: list = field(default_factory=list)      # mean deepest penetration
     frac_held: list = field(default_factory=list)   # >= 1 hand-object contact
     grip_n: list = field(default_factory=list)      # mean total normal force
@@ -348,6 +373,8 @@ def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
             GRIP = np.empty((cfg.horizon, cfg.n_envs))
             RP = np.empty((cfg.horizon, cfg.n_envs))
             RH = np.empty((cfg.horizon, cfg.n_envs))
+            PE = np.empty((cfg.horizon, cfg.n_envs))
+            logged = it % cfg.log_every == 0 or it == cfg.iters - 1
 
             for t in range(cfg.horizon):
                 x = torch.as_tensor(obs, dtype=torch.float32)
@@ -357,10 +384,10 @@ def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
                     LP[t] = d.log_prob(a).sum(-1).numpy()
                     V[t] = net.v(x).squeeze(-1).numpy()
                 O[t], A[t] = obs, a.numpy()
-                obs, rew, done = pool.step(A[t], cfg)
+                obs, rew, done = pool.step(A[t], cfg, measure_grip=logged)
                 R[t], D[t] = rew, done
                 PEN[t], HELD[t], GRIP[t] = pool.pen, pool.ncon > 0, pool.grip
-                RP[t], RH[t] = pool.r_pen, pool.r_hold
+                RP[t], RH[t], PE[t] = pool.r_pen, pool.r_hold, pool.pe
                 for i in np.nonzero(done)[0]:
                     obs[i] = pool.reset(int(i), rng)
             with torch.no_grad():
@@ -401,14 +428,15 @@ def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
 
             log.reward.append(float(R.mean()))
             log.frac_alive.append(float(1.0 - D.mean()))
+            log.err_mm.append(float(PE.mean() * 1000))
             log.pen_mm.append(float(PEN.mean() * 1000))
             log.frac_held.append(float(HELD.mean()))
-            log.grip_n.append(float(GRIP.mean()))
+            log.grip_n.append(float(GRIP.mean()))     # nan unless measured
             log.r_pen.append(float(RP.mean()))
             log.r_hold.append(float(RH.mean()))
-            if verbose and (it % 10 == 0 or it == cfg.iters - 1):
+            if verbose and logged:
                 print(f"    iter {it:3d}  reward {R.mean():6.3f}  "
-                      f"alive {1 - D.mean():.3f}  "
+                      f"alive {1 - D.mean():.3f}  err {PE.mean() * 1000:6.1f} mm  "
                       f"pen {PEN.mean() * 1000:5.2f} mm  held {HELD.mean():.3f}  "
                       f"grip {GRIP.mean():7.1f} N  "
                       f"r_pen {RP.mean():.3f}  r_hold {RH.mean():.3f}", flush=True)
