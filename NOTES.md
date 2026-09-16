@@ -4818,3 +4818,50 @@ right remedy rather than a hope that the number settles down.
 It also means every difference between the old run and v2 is attributable to the
 seed change, since nothing else moved. That is what makes the camera and mouse
 within-clip pairs interpretable at all.
+
+## Six grasp-class seeds, six drops
+
+v2, seeds keyed on their own subject, grasp-class rows in training order:
+
+    reference          seed                 starts  tracking     end state
+    camera_tp_2        2 con,  6.0 N        33      2,587.1 mm   0.00 / 0 / 0
+    phone_call_1       3 con,  7.5 N         1     42,603.0      0.00 / 0 / 0
+    mouse_use_1        4 con,  3.6 N        32    116,129.9      0.00 / 0 / 0
+    knife_lift         4 con,  2.1 N         1         87.7      0.00 / 0 / 0
+    gamecontroller     5 con,  1.9 N (thin)  3     51,777.5      0.00 / 0 / 0
+    hammer_use_2       7 con, 29.9 N        11     32,462.6      0.00 / 0 / 0
+    flashlight_on_2    8 con, 35.4 N         4        218.9      0.00 / 0 / 0
+
+Every one ends with the object on the floor: zero penetration, zero contacts,
+zero newtons. Three of them are well supported -- camera at 33 start frames,
+mouse at 32 and hammer at 11 are the three largest training sets produced
+tonight on either run -- so this is not an artifact of thin sampling, and the
+thin rows (phone, knife at 1) agree with the well-supported ones.
+
+The claim this supports, and its exact limits: **on GRAB with a Shadow right
+hand, at 160,000 control steps per reference, a PPO policy trained from a
+physically valid grasp lets go of the object, and more training data does not
+change that.** A separate 845,000-step run on a valid mug grasp, from a peer
+session, also dropped from every start, so the budget is not the explanation
+either.
+
+The burial arm is outside the claim. Policies that track at all (5.7-34.6 mm in
+the earlier run) came only from burial-class seeds and ended with the hand 9-17
+mm inside the object, but camera's burial arm tracked while mouse's dropped, so
+burial is necessary in everything measured and not sufficient. v2's own burial
+rows have not run yet.
+
+The sharpest single number remains camera: the feedforward alone carries that
+object to 36.0 mm, and the policy trained from its valid grasp carries it to
+2,587 mm. **The policy is worse than no policy.**
+
+### flashlight is a third pair, and it inverts
+
+    flashlight, s2 thin  (3 con,  0.6 N)   112.9 mm   ends 4.86 mm in, 3 con, 207 N
+    flashlight, s1 grasp (8 con, 35.4 N)   218.9 mm   ends 0.00 / 0 / 0
+
+The 0.6 N seed -- less than the object's own weight, barely touching -- produced
+a policy that MANUFACTURED a grip, driving contact force to 207 N and burying
+4.86 mm, and held on. The 35.4 N seed, a real grasp, let go. It is the only case
+in either run of a policy acquiring contact rather than losing it. Recorded as
+an anomaly, not as evidence: one row, and the thin arm had 2 start frames.
