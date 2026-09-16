@@ -66,37 +66,41 @@ prove non-penetration** — a hand a few millimetres inside would still report a
 small positive nearest-vertex distance. Establishing that properly needs a
 signed test against the convex decomposition, which has not been run.
 
-### Which links the human actually uses
+### Which links the human uses — and a retraction
 
-`6a1a954` recorded that "the fit targets the wrong links: the human wraps with
-its middle phalanges", and `913503a` reverted the implementation after a wiring
-error. The claim was never checked against the data. It does not hold as stated.
+**Retracted.** An earlier revision of this section claimed, from MANO joint
+positions, that "the human contacts with fingertips and distal phalanges;
+middle phalanges sit 14–20 mm out", and used that to argue a middle-phalanx
+contact term would be the wrong fix. That argument does not hold and the
+measurement behind it could not support it.
 
-Median distance from each MANO joint group to the nearest object vertex, over
-frames where any joint is within 30 mm:
+`human/retarget.py` already carries `W_MID = 0.6`, a middle-phalanx **contact**
+target — explicitly distinguished there from a joint-position target — with
+per-finger surface gaps measured against a 15 mm tolerance:
 
-| reference | wrist | knuckle | middle | distal | **fingertip** |
-|---|---:|---:|---:|---:|---:|
-| `cup_lift` | 83.5 | 20.9 | 19.8 | 8.6 | **2.4** |
-| `mug_drink_1` | 104.0 | 40.1 | 14.2 | 7.8 | **4.1** |
-| `binoculars_see_1` | 93.6 | 36.2 | 18.0 | 7.0 | **2.1** |
-| `flashlight_on_2` | 52.4 | 12.8 | 14.4 | **3.7** | 9.7 |
+| reference | TIP gaps (mm) | MID gaps (mm) | fires |
+|---|---|---|---|
+| `binoculars_see_1` | 3.1 7.8 6.5 10.8 0.9 | 5.8 10.3 18.4 24.5 16.1 | 2/5 |
+| `flashlight_on_2` | 10.3 15.4 12.8 23.3 27.9 | 7.8 2.9 5.4 24.0 13.1 | 4/5 |
+| `cup_lift` | 6.8 21.8 11.6 18.8 5.5 | 4.8 7.7 6.3 5.3 0.5 | 5/5 |
+| `mug_drink_1` | 12.8 13.1 13.6 16.4 1.1 | 7.6 8.2 9.8 26.0 27.7 | 3/5 |
 
-The human contacts with **fingertips and distal phalanges**. Middle phalanges
-are 14–20 mm out and knuckles further still. So targeting the middle phalanx to
-the *surface*, which is what the reverted change did, would have been wrong —
-the fix is not "add more links to the surface target".
+On `cup_lift` every middle phalanx is closer to the object than the fingertips
+are. The claim that the human holds that cup with the middles of its fingers is
+measured, per finger, at the surface.
 
-**Caveat.** These are joint centres, not surface vertices, and a finger's
-surface sits roughly 8–10 mm off its joint axis. So the middle phalanx *surface*
-is perhaps 5–12 mm from the object rather than 14–20 mm — close, still not
-contact. The fingertip figures are consistent with the sub-millimetre vertex
-measurement above.
+**Why my contradiction was invalid.** I measured MANO *joint centres*, which sit
+roughly 8–10 mm inside the finger, and aggregated as a minimum over the five
+fingers then a median over engaged frames. That is a different quantity from a
+per-finger surface gap at the grasp, and it cannot refute one. The two are not
+comparable and I treated them as though they were.
 
-What the table does support is the weaker and more useful statement: the human
-engages **more than the five fingertips** — distal phalanges are within 3.7–8.6
-mm throughout — while the fit targets fingertips alone. The difference between
-touching and wrapping is the distal links, not the middle ones.
+The general lesson, which cost more than this one entry: **read the module
+before contradicting its measurements.** The rationale was in the file, with the
+numbers, above the constant it justifies.
+
+What survives from my measurement is only the weakest reading — that the human
+engages more than the five fingertips — which `W_MID` already encodes.
 
 ## The defect
 
