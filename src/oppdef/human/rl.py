@@ -15,6 +15,7 @@ each and the policy is evaluated on the whole batch at once.
 """
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -54,7 +55,139 @@ class RLConfig:
     w_rot: float = 0.35
     alive: float = 0.10
     drop_m: float = 0.15
+    #: Penetration. Everything above prices where the object IS; nothing
+    #: prices how the hand holds it there, and in this pipeline the hand
+    #: reaches its targets by going INTO the object -- the contact solver's
+    #: restoring force is the "grip". A policy seeded with a genuine 0.6 N touch
+    #: re-buried the hand to 207 N / 4.9 mm within one rollout. This is the RL
+    #: side of the gate `track.wrap_score` already applies to the grasp search,
+    #: with the same 3 mm allowance. The cost is a hinge on the DEEPEST
+    #: hand-object contact, in units of the allowance -- 6 mm costs w_pen, 9 mm
+    #: costs 2 w_pen -- so the gradient does not vanish at the depths the
+    #: retarget actually sits at (5-25 mm, docs/STAGE2.md), which a saturating
+    #: shape would repeat the flat-exp mistake on. Bounded by `pen_max` (reward
+    #: units, shared with the force term): unbounded, a few millimetres cost
+    #: more than the ~1.5/step that staying alive on target earns, and the
+    #: cheapest way to satisfy the penalty is to LET GO -- zero penetration is
+    #: what a dropped object looks like, and the drop costs only 1.0 once.
+    #: Default 0 leaves the reward bit-for-bit as it was: machinery for the
+    #: owner to switch on, not a tuned weight.
+    w_pen: float = 0.0
+    pen_allow: float = 0.003     # metres, as track.wrap_score
+    pen_max: float = 1.0         # cap on the pen + force cost per step, reward units
+    #: The same hinge on total hand-object normal force, in multiples of the
+    #: object's weight. Two measured references on a 0.2 kg object: the genuine
+    #: hammer_use_2 seed holds at 20.7 N (~10x), the buried one at 207 N
+    #: (~105x); the allowance sits at the former.
+    w_force: float = 0.0
+    force_allow: float = 10.0
+    #: Holding -- a PROXY for it, not a hold condition. The penetration cost on
+    #: its own makes the WORST behaviour optimal: the genuine hammer_use_2 seed
+    #: under PPO ended at 0.00 mm, 0 contacts, 0 N, object on the floor, and on
+    #: a penetration criterion that is the cleanest row in the run. This term
+    #: pays, per step, for a hand-object contact set that PERSISTS: contacts on
+    #: at least two distinct hand bodies (a single finger pressed hard against
+    #: a falling object earns nothing), carrying at least `hold_ref` object
+    #: weights of total normal force. Force rather than contact count because
+    #: count is the burial-favouring quantity -- a buried hand has dozens -- and
+    #: it saturates at one object weight because that is what supporting the
+    #: object needs; more earns nothing, so it cannot reward burial either.
+    #: What it does NOT do is verify equilibrium: this pipeline has measured
+    #: 44.8 N of normal force on an object that still free-fell. Bounded to
+    #: [0, w_hold]. Default 0, as above.
+    w_hold: float = 0.0
+    hold_ref: float = 1.0        # object weights of normal force for the full bonus
+    #: Iterations on which the contact set is measured for the log and the
+    #: verbose line printed (every log_every-th, and the last). Measured on a
+    #: quiet machine, reading the contact list for every env on every step
+    #: cost 5-8% of an iteration against 3216767 even with the force read
+    #: gated off, so at defaults the whole summary runs only on logged
+    #: iterations and the step is otherwise the old step: the log's
+    #: penetration, held fraction and grip are SAMPLED every log_every-th
+    #: iteration at defaults, and continuous whenever a term prices them.
+    #: Position error is always on (it is already computed for the reward).
+    log_every: int = 10
     seed: int = 0
+
+
+@dataclass
+class ContactSummary:
+    """The hand-object contact set of one `MjData`, read in a single pass."""
+    pen: float        #: deepest hand-object penetration, metres (0 if none)
+    n: int            #: number of hand-object contacts
+    bodies: int       #: distinct HAND bodies in contact, as track.wrap_score counts
+    grip: float       #: total hand-object normal force, N, as track.total_grip (nan if not measured)
+
+
+@dataclass
+class ContactMasks:
+    """Which geom ids are the object's and the hand's, as boolean arrays over
+    geom id, plus the geom->body map. Built once per scene, not per step."""
+    is_obj: np.ndarray
+    is_hand: np.ndarray
+    geom_bodyid: np.ndarray
+
+
+def contact_masks(sc) -> ContactMasks:
+    m = sc.model
+    is_obj = np.zeros(m.ngeom, bool)
+    is_obj[list(sc.obj_gids)] = True
+    is_hand = np.zeros(m.ngeom, bool)
+    is_hand[list(sc.hand_gids)] = True
+    return ContactMasks(is_obj, is_hand, np.asarray(m.geom_bodyid))
+
+
+def contact_summary(sc, force: bool = True, masks: ContactMasks | None = None
+                    ) -> ContactSummary:
+    """The hand-object contact set of `sc.data`, read as arrays.
+
+    `sc.penetration()` and `track.total_grip(sc)` compute two of these with a
+    Python loop over `d.contact[i]`; this runs for every environment on every
+    measured control step, and the loop itself -- dist, geoms, body per
+    contact -- cost 5-8% of a PPO iteration on a buried hand (bench_rl_step).
+    So the contact list is read as numpy: `d.contact.geom` (ncon, 2) and
+    `d.contact.dist`, masked by precomputed boolean arrays over geom id. Same
+    identification as both: a contact counts when one geom is the object's
+    and the other is the hand's; the body is the HAND geom's, as
+    `track.wrap_score` counts them.
+
+    Only the force read loops, and only over the selected contacts:
+    `mj_contactForce` is a solver call per contact. `force=False` skips it and
+    reports grip as nan.
+    """
+    m, d = sc.model, sc.data
+    mk = contact_masks(sc) if masks is None else masks
+    n = int(d.ncon)
+    grip = 0.0 if force else float("nan")
+    if n == 0:
+        return ContactSummary(pen=0.0, n=0, bodies=0, grip=grip)
+    con = d.contact
+    if hasattr(con, "geom"):
+        g = np.asarray(con.geom)[:n]
+        g1, g2 = g[:, 0], g[:, 1]
+    else:                                   # older bindings: two arrays
+        g1, g2 = np.asarray(con.geom1)[:n], np.asarray(con.geom2)[:n]
+    h1 = mk.is_hand[g1]
+    sel = (mk.is_obj[g1] & mk.is_hand[g2]) | (h1 & mk.is_obj[g2])
+    idx = np.flatnonzero(sel)
+    if len(idx) == 0:
+        return ContactSummary(pen=0.0, n=0, bodies=0, grip=grip)
+    pen = max(0.0, float(-np.asarray(con.dist)[:n][idx].min()))
+    hg = np.where(h1[idx], g1[idx], g2[idx])
+    bodies = int(len(np.unique(mk.geom_bodyid[hg])))
+    if force:
+        f = np.zeros(6)
+        for i in idx:
+            mujoco.mj_contactForce(m, d, int(i), f)
+            grip += abs(float(f[0]))       # normal component, contact frame
+    return ContactSummary(pen=pen, n=int(len(idx)), bodies=bodies, grip=grip)
+
+
+def object_weight(rt) -> float:
+    """m g of the tracked object, N, from the model the tracker runs on."""
+    m = rt.sim.model
+    g = float(np.linalg.norm(m.opt.gravity)) or 9.81
+    return float(m.body_mass[rt.sim.obj_bid]) * g
 
 
 class Pool:
@@ -83,6 +216,23 @@ class Pool:
         self.k = np.zeros(n_envs, int)
         self._orig = rt.sim.data
         self._grip = [np.zeros(rt.sim.model.nu) for _ in range(n_envs)]
+        self.weight = object_weight(rt)
+        self._masks = contact_masks(rt.sim)
+        #: per-environment state after the latest `step`, kept as attributes
+        #: rather than widening step's return so callers are unchanged:
+        #: object position error (m, always), and the contact set -- deepest
+        #: penetration (m), hand-object contacts, distinct hand bodies, total
+        #: normal force (N) -- which is nan unless a term prices it or
+        #: `step(..., measure=True)`; `measured` says which. The two shaping
+        #: terms are as they entered the reward (0 while their weights are 0).
+        self.pe = np.zeros(n_envs)
+        self.pen = np.full(n_envs, np.nan)
+        self.ncon = np.full(n_envs, np.nan)
+        self.nbody = np.full(n_envs, np.nan)
+        self.grip = np.full(n_envs, np.nan)
+        self.measured = False
+        self.r_pen = np.zeros(n_envs)
+        self.r_hold = np.zeros(n_envs)
         from concurrent.futures import ThreadPoolExecutor
         self._pool = ThreadPoolExecutor(max_workers=min(n_envs, 8))
 
@@ -108,9 +258,18 @@ class Pool:
     def reset_all(self, rng):
         return np.stack([self.reset(i, rng) for i in range(self.n)])
 
-    def step(self, actions, cfg: RLConfig):
-        """Apply one control step in every environment."""
+    def step(self, actions, cfg: RLConfig, measure: bool = False):
+        """Apply one control step in every environment.
+
+        `measure` reads the contact set for the log (see RLConfig.log_every);
+        it is read regardless whenever a term prices it, and the force part
+        of it only when `w_force`/`w_hold` do or `measure` asks. Otherwise
+        this is the step as it was at 3216767.
+        """
         rt = self.rt
+        need = bool(cfg.w_pen or cfg.w_force or cfg.w_hold or measure)
+        need_force = bool(cfg.w_force or cfg.w_hold or measure)
+        self.measured = need
         obs = np.empty((self.n, rt.n_obs))
         rew = np.empty(self.n)
         done = np.zeros(self.n, bool)
@@ -147,6 +306,33 @@ class Pool:
                  - cfg.w_lin * pe
                  + cfg.w_rot * np.exp(-re / cfg.s_rot)
                  + cfg.alive)
+            self.pe[i] = pe
+            self.r_pen[i] = self.r_hold[i] = 0.0
+            if not need:
+                self.pen[i] = self.ncon[i] = self.nbody[i] = self.grip[i] = np.nan
+            else:
+                # Contact state of THIS environment: `_use(i)` above made
+                # `rt.sim.data` the i-th MjData, which is what the summary reads.
+                cs = contact_summary(rt.sim, force=need_force, masks=self._masks)
+                self.pen[i], self.ncon[i] = cs.pen, cs.n
+                self.nbody[i], self.grip[i] = cs.bodies, cs.grip
+            if cfg.w_pen or cfg.w_force:
+                # Hinges in units of their allowance; the sum is capped at
+                # pen_max so that, per step, penetration can never cost more
+                # than the alive + tracking reward is worth -- otherwise the
+                # optimum is to drop the object (see RLConfig). At the
+                # defaults the cap equals the one-off drop penalty.
+                hp = max(0.0, cs.pen - cfg.pen_allow) / cfg.pen_allow
+                hf = max(0.0, cs.grip / self.weight - cfg.force_allow) / cfg.force_allow
+                self.r_pen[i] = min(cfg.w_pen * hp + cfg.w_force * hf, cfg.pen_max)
+                r -= self.r_pen[i]
+            if cfg.w_hold and cs.bodies >= 2:
+                # A persisting multi-body contact set with one object weight
+                # of normal force earns the full bonus; more earns nothing.
+                # A proxy for holding, not a test of it (see RLConfig).
+                self.r_hold[i] = cfg.w_hold * min(
+                    1.0, cs.grip / (cfg.hold_ref * self.weight))
+                r += self.r_hold[i]
             self.k[i] = k + 1
             if pe > cfg.drop_m or self.k[i] >= rt.T:
                 done[i] = True
@@ -190,6 +376,20 @@ class TrainLog:
     reward: list = field(default_factory=list)
     err_mm: list = field(default_factory=list)
     frac_alive: list = field(default_factory=list)
+    #: Per-iteration means over every env-step. Read `pen_mm`, `frac_held`
+    #: and `err_mm` TOGETHER: penetration falling while held fraction falls
+    #: with it means the policy bought clean numbers by dropping the object,
+    #: and held fraction high while the error grows is a hand riding a
+    #: falling object down while touching it. At defaults the contact set is
+    #: SAMPLED: `pen_mm`, `frac_held` and `grip_n` are nan except on every
+    #: log_every-th iteration and the last (RLConfig.log_every); they are
+    #: continuous whenever a term prices them. `err_mm` is always on.
+    pen_mm: list = field(default_factory=list)      # mean deepest penetration
+    frac_held: list = field(default_factory=list)   # >= 1 hand-object contact
+    grip_n: list = field(default_factory=list)      # mean total normal force
+    r_pen: list = field(default_factory=list)       # mean penetration cost paid
+    r_hold: list = field(default_factory=list)      # mean hold bonus earned
+    t_iter: list = field(default_factory=list)      # wall-clock seconds per iteration
 
 
 def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
@@ -210,12 +410,20 @@ def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
     obs = pool.reset_all(rng)
     try:
         for it in range(cfg.iters):
+            t_it = time.perf_counter()
             O = np.empty((cfg.horizon, cfg.n_envs, rt.n_obs), np.float32)
             A = np.empty((cfg.horizon, cfg.n_envs, rt.n_action), np.float32)
             LP = np.empty((cfg.horizon, cfg.n_envs), np.float32)
             R = np.empty((cfg.horizon, cfg.n_envs), np.float32)
             D = np.zeros((cfg.horizon, cfg.n_envs), np.float32)
             V = np.empty((cfg.horizon + 1, cfg.n_envs), np.float32)
+            PEN = np.empty((cfg.horizon, cfg.n_envs))
+            HELD = np.empty((cfg.horizon, cfg.n_envs))
+            GRIP = np.empty((cfg.horizon, cfg.n_envs))
+            RP = np.empty((cfg.horizon, cfg.n_envs))
+            RH = np.empty((cfg.horizon, cfg.n_envs))
+            PE = np.empty((cfg.horizon, cfg.n_envs))
+            logged = it % cfg.log_every == 0 or it == cfg.iters - 1
 
             for t in range(cfg.horizon):
                 x = torch.as_tensor(obs, dtype=torch.float32)
@@ -225,8 +433,11 @@ def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
                     LP[t] = d.log_prob(a).sum(-1).numpy()
                     V[t] = net.v(x).squeeze(-1).numpy()
                 O[t], A[t] = obs, a.numpy()
-                obs, rew, done = pool.step(A[t], cfg)
+                obs, rew, done = pool.step(A[t], cfg, measure=logged)
                 R[t], D[t] = rew, done
+                PEN[t], GRIP[t] = pool.pen, pool.grip
+                HELD[t] = (pool.ncon > 0) if pool.measured else np.nan
+                RP[t], RH[t], PE[t] = pool.r_pen, pool.r_hold, pool.pe
                 for i in np.nonzero(done)[0]:
                     obs[i] = pool.reset(int(i), rng)
             with torch.no_grad():
@@ -267,17 +478,58 @@ def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
 
             log.reward.append(float(R.mean()))
             log.frac_alive.append(float(1.0 - D.mean()))
-            if verbose and (it % 10 == 0 or it == cfg.iters - 1):
+            log.err_mm.append(float(PE.mean() * 1000))
+            log.pen_mm.append(float(PEN.mean() * 1000))
+            log.frac_held.append(float(HELD.mean()))
+            log.grip_n.append(float(GRIP.mean()))     # these three: nan unless measured
+            log.r_pen.append(float(RP.mean()))
+            log.r_hold.append(float(RH.mean()))
+            log.t_iter.append(time.perf_counter() - t_it)
+            if verbose and logged:
                 print(f"    iter {it:3d}  reward {R.mean():6.3f}  "
-                      f"alive {1 - D.mean():.3f}", flush=True)
+                      f"alive {1 - D.mean():.3f}  err {PE.mean() * 1000:6.1f} mm  "
+                      f"pen {PEN.mean() * 1000:5.2f} mm  held {HELD.mean():.3f}  "
+                      f"grip {GRIP.mean():7.1f} N  "
+                      f"r_pen {RP.mean():.3f}  r_hold {RH.mean():.3f}", flush=True)
     finally:
         pool.restore()
         pool.close()
     return net, log
 
 
-def evaluate(rt, net, start=None, deterministic=True):
-    """Roll the policy out on the reference and score it on the truth."""
+@dataclass
+class EndState:
+    """Where a rollout ENDED, alongside its tracking error.
+
+    A tracking number without this cannot be read: a policy has ended a
+    "successful" 111-frame track 10.83 mm inside the mug on 12 bodies, and
+    another ended at 0.00 mm / 0 contacts / 0 N with the object on the floor.
+    The same triple `experiments/tracking/g9_ppo_distill.py` stores per row.
+    """
+    pen_mm: float
+    contacts: int
+    bodies: int
+    grip_n: float
+
+    def __str__(self):
+        return (f"ends {self.pen_mm:5.2f} mm in, {self.contacts:3d} contacts "
+                f"on {self.bodies} bodies, {self.grip_n:8.1f} N")
+
+
+def end_state(rt) -> EndState:
+    cs = contact_summary(rt.sim)
+    return EndState(pen_mm=cs.pen * 1000, contacts=cs.n, bodies=cs.bodies,
+                    grip_n=cs.grip)
+
+
+def evaluate(rt, net, start=None, deterministic=True, end=False, verbose=False):
+    """Roll the policy out on the reference and score it on the truth.
+
+    Returns `(errs, acts)`; with `end=True`, `(errs, acts, EndState)` -- the
+    existing callers unpack two, so the end state is opt-in rather than a
+    third element they would trip on. `verbose` prints it either way, so a
+    rollout ending at 0.00 mm / 0 contacts / 0 N is visible.
+    """
     import torch
 
     if start is None:
@@ -299,4 +551,9 @@ def evaluate(rt, net, start=None, deterministic=True):
             mujoco.mj_step(rt.sim.model, rt.sim.data)
         errs.append(rt.error(k)[0])
     errs = np.array(errs)
+    es = end_state(rt)
+    if verbose:
+        print(f"    eval {errs.mean() * 1000:7.1f} mm  {es}", flush=True)
+    if end:
+        return errs, np.array(acts), es
     return errs, np.array(acts)
