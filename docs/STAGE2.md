@@ -516,6 +516,64 @@ model untouched, so neither nondeterminism nor state leakage explains the 5.36.
 Its cause was not found. The table uses 6.10 / 7 / 119 N; the PPO result below
 was measured on that pristine harness and does not depend on which is right.
 
+### Why synthesis re-buries, and the run that tests the alternative
+
+**Corroboration from the other session (reported, uncommitted as of this
+entry).** A 40-reference sweep — retarget → CEM wrist search scored by drop
+distance → hold — with an equilibrium-residual column added:
+
+| reference | drop | contacts | residual |
+|---|---:|---:|---:|
+| `apple_eat_1` | 5.2 mm | 9 | **0.03×** |
+| `banana_eat_1` | 7.2 mm | 5 | 0.09× |
+| `binoculars_lift` | 9.1 mm | 10 | 0.10× |
+| `airplane_fly_1` | 7.8 mm | 8 | 1.28× |
+| `alarmclock_lift` | 6.3 mm | 50 | 1.48× |
+| `bowl_drink_1` | **1.6 mm** | **94** | **1.90×** |
+
+Every row "holds" by drop distance. `bowl_drink_1` holds *best* — on 94
+contacts at 1.90× weight, which is the re-burial. `apple_eat_1` at 0.03× on 9
+contacts is a real equilibrium. **Drop-scored synthesis cannot tell a grasp
+from burial**, because burial is a perfectly good way to stop an object moving
+and the score asks for nothing else. That is the mechanism behind the 6 mm →
+20.58 mm re-burial above, seen from the other side. The fix being implemented
+is to score synthesis by equilibrium residual, which places those two rows on
+opposite sides of the same line.
+
+Two further items from that session, also uncommitted at this writing: frame 0
+is the approach on the **bimanual** path too — a reported 312 *km* tracking
+error on `gamecontroller_play_1` was an integrator artifact from a diverged
+sim, fixed by starting from the first self-holding frame and truncating on
+loss (6.6 mm drop, 131 mm tracking) — and the first controlled two-hand
+comparison, left hand parked rather than deleted so the model is identical:
+**131.0 mm two-handed against 647.7 mm solo.**
+
+**On the middle-phalanx term, one more correction.** The retraction above stands
+on its data: a joint-centre measurement cannot refute a per-finger surface
+measurement. But the other session found that `solve()` scaled every shape
+target by `W_JOINT = 0`, so the entire `joint_targets` path — `W_MID`
+included — was dead code. Nothing tonight ever measured that term in effect.
+Wired properly it buys links *with* burial (4 → 5 links, 3.2 → 5.9 mm), and it
+now ships off at `W_MID = 0.0`. The line the session drew from that is the one
+this document converges on: **every knob in the retarget objective is a
+position, and a position objective has no term that says hold the object.**
+Equilibrium residual is the first term that does.
+
+**The run.** PPO trained from the raw `W_PEN_ARM` fit on `mug_drink_1`, no
+hold-scored synthesis, `Pool.reset` a plain `reset_at` so every environment
+starts from the 6.10 mm / 119 N grasp; horizon 160, 12 envs, 440 iterations
+= 844,800 control steps, starts `5..115` to match the buried checkpoint's set;
+saved to `results/ppo_mug_drink_1_h160_rawfit.pt`, existing checkpoint
+untouched; ends with a 2×2 of old/new policy × raw/buried initial condition.
+Launched 2026-09-15 late evening. Iteration 0: reward 0.225, **alive 0.770** —
+from a random-init policy the un-buried grasp is not instantly dropped.
+Measured rate **103 s/iteration**, so ~12.5 h, not the 25 min estimated; the
+source of that discrepancy is being checked, and it matters because it bounds
+how the original checkpoint could have been produced. Result to follow.
+
+The 5.36 mm reading noted above was rerun under its exact original sequence and
+does not reproduce; five processes agree on 6.10 mm.
+
 ## Look at the pose before trusting the number
 
 `experiments/tracking/inspect_pose.py` renders a configuration from two angles
