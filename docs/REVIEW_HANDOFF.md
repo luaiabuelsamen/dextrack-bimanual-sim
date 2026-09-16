@@ -92,7 +92,7 @@ The six main research local minima are:
 
    The existing f5d6 hold benchmark imports the whole Vega model and adds finger actuators while leaving its arm joints unactuated. In a diagnostic of the 5 cm box trial, the palm moved **1.05336 m during closure**, leaving zero object contacts. The initial palm position was approximately `[0.67575, -0.22946, 1.11012]`; after closure it was `[-0.14942, -0.20560, 0.45582]`. All seven right-arm joints had no actuators. The initial state also contained hand-object penetration and `clear_start=False`.
 
-   The saved f5d6 rows already show `clear_start=False`, zero grip force, and approximately 19.64 m of free fall for every attempted width. This is evidence of an invalid fixture, not evidence that opposition alone explains failure. See [hand_bench.py](../src/oppdef/envs/hand_bench.py), especially `build`, `open_until_clear`, and `trial`, and [hand_axis_f5d6.json](../results/hand_axis_f5d6.json).
+   The saved f5d6 rows already show `clear_start=False`, zero grip force, and approximately 19.64 m of free fall for every attempted width. This is evidence of an invalid fixture, not evidence that opposition alone explains failure. See [hand_bench.py](../src/oppdef/envs/hand_bench.py), especially `build`, `open_until_clear`, and `trial`, and [hand_axis_f5d6.json](../results/retracted/hand_axis_f5d6.json).
 
    More broadly, the thumb-to-finger-mean distance uses body reference points and does not encode surface extent, contact normals, self-collision, or the full range of alternative grasps. A nonzero floor does not prove that larger objects cannot be grasped. A finite multi-start search is also not an impossibility certificate. The hold bench follows one derived joint trajectory, so it measures the interaction between that controller and the hand.
 
@@ -100,7 +100,7 @@ The six main research local minima are:
 
 2. **Replacing keypoint error with another overextended proxy.**
 
-   Ferrari–Canny epsilon measures worst-direction resistance in a normalized six-dimensional force-and-torque space under a particular contact-force model. Holding against gravity is a narrower requirement. The saved LEAP 6 cm cell has `eps=0` and `held=True`; the 11 cm cell also holds despite a reconstructed `delta` of approximately 1.83. See [hand_axis.json](../results/hand_axis.json) and [grasp_metrics](../src/oppdef/grasping/epsilon.py).
+   Ferrari–Canny epsilon measures worst-direction resistance in a normalized six-dimensional force-and-torque space under a particular contact-force model. Holding against gravity is a narrower requirement. The saved LEAP 6 cm cell has `eps=0` and `held=True`; the 11 cm cell also holds despite a reconstructed `delta` of approximately 1.83. See [hand_axis.json](../results/retracted/hand_axis.json) and [grasp_metrics](../src/oppdef/grasping/epsilon.py).
 
    These examples do not invalidate epsilon as a geometric grasp descriptor. They undermine treating `delta=1` as an already established universal boundary for these physical outcomes. Multiplying epsilon by the measured sum of normal forces also does not model the complete set of forces that the actuators can redistribute across contacts.
 
@@ -110,7 +110,7 @@ The six main research local minima are:
 
 3. **Assuming simulated closure makes every synthesized grasp physically realizable.**
 
-   Closing in MuJoCo is an improvement over the retracted point-fingertip surrogate. It still requires validation of contact compliance, actuation, and initialization. The partial f5d6 results inspected during the review included a single-hand 3 cm grasp with `hold_N=1.0` and **4.66 mm penetration**, and a two-hand counterpart with `hold_N=2.0` and **10.61 mm penetration**. See [deficit_f5d6.json](../results/deficit_f5d6.json). These are provisional outputs, not established counterexamples to a physical hardware claim.
+   Closing in MuJoCo is an improvement over the retracted point-fingertip surrogate. It still requires validation of contact compliance, actuation, and initialization. The partial f5d6 results inspected during the review included a single-hand 3 cm grasp with `hold_N=1.0` and **4.66 mm penetration**, and a two-hand counterpart with `hold_N=2.0` and **10.61 mm penetration**. See [deficit_f5d6.json](../results/retracted/deficit_f5d6.json). These are provisional outputs, not established counterexamples to a physical hardware claim.
 
    `GraspScene.attempt` checks initial object penetration, but its final acceptance records penetration without rejecting on that quantity. Its displacement gate is not a penetration gate. The object is also pinned during closure and then released before measurement. That can support a conditional grasp-stability experiment, but acquisition from an unassisted scene remains a separate question.
 
@@ -134,7 +134,7 @@ The six main research local minima are:
 
 5. **Drifting from retargeting into generic grasp synthesis.**
 
-   The active [deficit_repair.py](../experiments/deficit_repair.py) searches grasps without human data and maximizes epsilon. It is useful supporting work, but it does not test whether a demonstrated interaction transfers better under a new representation. Real demonstration readers remain unfinished in [data.py](../src/oppdef/data.py).
+   The active [deficit_repair.py](../experiments/retracted/deficit_repair.py) searches grasps without human data and maximizes epsilon. It is useful supporting work, but it does not test whether a demonstrated interaction transfers better under a new representation. Real demonstration readers remain unfinished in [data.py](../src/oppdef/data.py).
 
    Two hands outperforming one can result from a larger contact or actuator budget. That alone does not show that a deficit metric predicted the required assistance, or that a retargeting method recovered a demonstrated task. The peg expert likewise tests stabilization and extraction under a specified control protocol; its one-handed control does not exhaust every possible one-hand strategy.
 
