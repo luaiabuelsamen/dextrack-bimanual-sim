@@ -537,19 +537,24 @@ from burial**, because burial is a perfectly good way to stop an object moving
 and the score asks for nothing else. That is the mechanism behind the 6 mm →
 20.58 mm re-burial above, seen from the other side.
 
-**The mechanism, confirmed** (`2e4c951`): the residual discriminates
-**placement**, not steady state. The saved sweep's `equilibrium` column is the
-placement reading — bowl 1.900, apple 0.034, spread 0.013–5.1 across 40
-winners, correlated +0.33 with grip and +0.35 with contacts — and that is
-where it separates the buried rows from the clean ones. After the hold test
-settles a candidate, forces cancel and every winner reads 0.00. So a search
-that scores at placement has a gradient; one that scores after settling has
-none. Shipped as a synthesis term at `w_eq = 0.0` after measurement: it helps
-in 4 of 6 paired runs (`airplane_fly_1` grip **385 N → 6.9 N** on a 1.96 N
-object), hurts in one, never gets the bowl below ~10 kN, and worsens drop in
-all six. An improvement in the right direction, not the term. `equilibrium` is
-recorded on every `GraspFit` regardless — reading it is how the burial was
-caught.
+**The mechanism — and a refuted prediction** (`2e4c951`, `28e695c`). The
+residual discriminates **placement**, not steady state, and both readings are
+correct: the sweep's `equilibrium` column reads 0.2 s after the grip forms
+(still transient — bowl 1.900, apple 0.034, spread 0.013–5.1 across 40
+winners, correlated +0.33 with grip and +0.35 with contacts), while the w_eq
+term read after 0.9 s (fully settled — every winner 0.00, forces cancelled).
+The obvious inference was that the term should score the transient reading,
+since that is where the spread is. **It was tested and it is wrong.** Scoring
+`eq_place`, captured right after the grip is established and before any
+settling, improves **2 of 6** paired runs against **4 of 6** for the settled
+version — worse, not better. So *the quantity that best describes burial is
+not the one that best steers a search away from it*. `w_eq` stays 0.0;
+`GraspFit.equilibrium` is now the placement reading, kept as a **diagnostic
+only** because it is the one with spread. The settled term's own record: helps
+4 of 6 (`airplane_fly_1` grip **385 N → 6.9 N** on a 1.96 N object), hurts one,
+never gets the bowl below ~10 kN, worsens drop in all six. An improvement in
+the right direction, not the term. Reading `equilibrium` is how the burial was
+caught; it is not how it gets fixed.
 
 **Stage 2 now has a number** (`2e4c951`). Forty references, one per object:
 hold rate **0.275** from the raw retarget → **0.850** after a CEM wrist search
@@ -592,7 +597,8 @@ this document converges on: **every knob in the retarget objective is a
 position, and a position objective has no term that says hold the object.**
 Equilibrium residual is the first candidate for such a term — with the caveat
 that it only speaks at placement (see the instrumentation note below): it
-separates candidates only at placement, not after settling (`2e4c951`).
+has spread only at placement, not after settling — and scoring it there
+steers the search *worse* (`28e695c`).
 
 **The run.** PPO trained from the raw `W_PEN_ARM` fit on `mug_drink_1`, no
 hold-scored synthesis, `Pool.reset` a plain `reset_at` so every environment
