@@ -4261,3 +4261,29 @@ OPTIMAL unless something prices losing the object at the same time.
 So the missing reward term is not a penalty on penetration. It is a price on
 letting go -- and the penalty, alone, would make the failure worse while making
 the metric look better.
+
+### Deferred src/ fixes (found by a peer's test audit, deliberately not applied yet)
+
+`src/` is frozen while g9 runs -- editing it mid-run is the version-skew hazard
+that silently moved the 0.850 earlier tonight -- so these are recorded rather
+than fixed:
+
+1. `src/oppdef/viz/floor_poses.py:14` imports `tip_ids, joint_set` from
+   `oppdef.hands.axis`, removed in 8cc4b63 on 13 Sep. Nothing imports it and no
+   test covers it, so it has been dead for three days: the only import failure
+   across all 88 non-retracted modules.
+2. **`src/oppdef/human/track.py` imports `experiments.tracking.grab_inventory`
+   at lines 569 and 1667.** Package code depending on `experiments/` being on
+   sys.path. It works under the Makefile's `PYTHONPATH := $(CURDIR)` and would
+   break under a plain `pip install -e .`. The dependency points the wrong way:
+   `grab_inventory` supplies `contact_mask` and `longest_run`, which are data
+   routines the library needs, so they belong in `oppdef/human/` with the
+   experiment importing them rather than the reverse. This is the one worth
+   doing properly.
+3. `src/oppdef/bench.py:3` cites `experiments/matched.py` and `experiments/g1.py`,
+   both now under `grasp_metrics/`. Cosmetic.
+
+Also: the Makefile sets `PYTHONPATH := $(CURDIR)`, the repo root, not `src`. In
+a git worktree that silently tests the MAIN checkout's `oppdef` through the
+editable install, so a worktree needs `PYTHONPATH=src:.` explicitly or its test
+results describe the wrong code.
