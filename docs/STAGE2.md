@@ -80,6 +80,8 @@ Everything downstream of the retarget. None of these is a matter of tuning.
 | Open the fingers before closing | clears nothing at any amount: mug 10.13 → 10.64 / 9.91 / 11.35 / 11.36 mm at 0.3 / 0.8 / 1.5 / 3.0 rad; palm invariant at ~6 mm |
 | Retract the wrist along the contact normal | **diverges** — binoculars runs to a 186 mm offset with penetration *rising* 17.15 → 62.44 mm, because a wrapped hand cannot be translated out (normal alignment 0.325) |
 | Let it settle | gravity off 0.5 s takes 12.7 → 11.8 mm while ejecting the object 28 mm and losing every contact |
+| Advance the wrist to contact before closing | **0.0 mm of advance** on 4 references — the arm is already touching while the tips are 43 mm out, so translation drives the arm deeper first |
+| Close the fingers to a force target | close stops after **one 0.015 rad step**: penetrating contacts already read 362 N and 2487 N against an 8 N target, so the grip is declared formed before the hand closes |
 
 And the result that explains why: **making the pose feasible makes the tracking
 worse**, because the contacts and the penetration are the same thing.
@@ -132,6 +134,35 @@ target, and the weld. **Anything repositioning the wrist must update `qpos`,
 then the mocap target, then `mj_forward`, and must not call `palm_pose()` to
 read the current palm** (it zeroes `qpos` internally). Two of the three died on
 exactly that.
+
+## B and C are probably one defect: the wrist *pose*
+
+Tested 2026-09-15 evening. `advance_to_contact` exists in `human/retarget.py`,
+is **never called**, and advances **0.0 mm** on all four references tested.
+
+Its gate is `pen > 0.5 mm`, but the starting pose already carries 0.48–8.17 mm
+of residual arm penetration — `W_PEN_ARM` is a soft penalty and never reaches
+zero — so the exit condition trips before the first step. That is a one-line
+bug, and fixing it does not rescue the idea. With a *relative* gate (terminate
+when penetration exceeds its starting value plus 1 mm), three of four still
+advance 0.0 mm; only `mug_drink_2` moves, 8 mm, closing its tip gap 17.2 → 12.1 mm.
+
+The reason is structural. On `mug_drink_1` the arm is penetrating at 0.48 mm
+**while the fingertips are 42.9 mm away**. The arm is already the binding
+contact. Translating the hand toward the object drives the arm deeper before the
+fingers get anywhere, so the allowance is zero. No translation brings the
+fingers in.
+
+That makes B and C the same defect seen from two sides. The wrist *pose* —
+position **and orientation** — presents the arm to the object where the fingers
+ought to be. For vessels it shows as 33 mm of arm inside with zero finger
+contact; elsewhere as the arm grazing at 0.5–2.5 mm with the tips 43 mm out.
+`W_PEN_ARM` constrains where the arm may *be*; nothing constrains where the
+fingers *point*.
+
+So the open question is probably one, not two: **how should the wrist be posed
+relative to the object, given it cannot be the human's wrist pose?** Orientation
+is the part nothing has touched.
 
 ## C. Vessel wrist target — open, untouched
 
