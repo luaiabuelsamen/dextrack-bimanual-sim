@@ -872,6 +872,59 @@ class ReferenceTracker:
         self.P, self.Q, self.vals = feedforward_se3(
             self.fit, self.tr.q, self.ref_pos, self.ref_quat)
 
+    def adopt_grip(self, values: dict):
+        """Adopt a CLOSED grip produced elsewhere, for every frame.
+
+        `reset_at` places the retargeted joint angles, which are an open hand:
+        the retarget solves fingertip positions against a static object and
+        nothing in it closes anything. Stage 2 produces the grip by closing the
+        fingers under physics in a hinge-based scene, so this carries the
+        achieved angles across the stage boundary.
+
+        Transferring at the STATE level works, and that much is measured. The
+        same grasp, in the scene that produced it and in the tracking scene:
+
+            apple_eat_1    hinge  5.2 mm   9 contacts    875 N
+                           mocap 30.9 mm   7 contacts   10.1 N
+            banana_eat_1   hinge  7.2 mm   5 contacts   15.2 N
+                           mocap 43.9 mm   8 contacts   12.8 N
+            bowl_drink_1   hinge  1.6 mm  54 contacts 13,849 N
+                           mocap 17.0 mm  46 contacts 11,010 N
+
+        Transfer the SEED q instead of the achieved state and the hand arrives
+        open and touches nothing -- 0 contacts on three of those four -- which
+        is worth knowing, because it is the obvious way to write this and it
+        silently produces a hand that never grips.
+
+        **It does not, however, increase the number of graspable frames**, which
+        is what it was built to do and the reason it exists is therefore not the
+        reason it was built. Measured: 0 -> 0 on phone_call_1 and banana_eat_1,
+        23 -> 23 on apple_eat_1, 27 -> 27 on bowl_drink_1, and 6 -> 3 on
+        binoculars_lift. So the references stage 3 discards are not discarded
+        for want of a closed grip, and that hypothesis is dead. Also note that
+        re-running the closing routine inside the tracking scene is actively
+        harmful -- `establish_grip` there took `gamecontroller_play_1` from 30
+        graspable frames to 1 -- so the two scenes disagree about closing in
+        both directions, and why is open.
+
+        The grip is held constant across frames because it is constant in the
+        OBJECT frame: a rigid hold is a near-constant pose there whatever the
+        object is doing in the world, which is the same assumption the wrist
+        offset already relies on.
+        """
+        names = [mujoco.mj_id2name(self.fit.model, mujoco.mjtObj.mjOBJ_JOINT, j)
+                 for j in self.fit.jids]
+        n_set = 0
+        for i, n in enumerate(names):
+            key = n[5:] if n and n.startswith("hand_") else n
+            if key in values:
+                self.tr.q[:, i] = values[key]
+                n_set += 1
+        self._palm_obj = None
+        self.P, self.Q, self.vals = feedforward_se3(
+            self.fit, self.tr.q, self.ref_pos, self.ref_quat)
+        return n_set
+
     def grasp_frames(self, seconds: float = 0.4, stride: int = 5) -> np.ndarray:
         """Which reference frames hold the object on their own.
 

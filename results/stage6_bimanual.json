@@ -23,6 +23,122 @@
    "solo_tracked_steps": 1,
    "solo_tracked_frac": 0.005813953488372093,
    "two_handed_helps": true
+  },
+  {
+   "seq": "camera_takepicture_2",
+   "subject": "s1",
+   "object": "camera",
+   "intent": "takepicture",
+   "window": [
+    24,
+    161
+   ],
+   "no_grasp_frame": true
+  },
+  {
+   "seq": "binoculars_see_1",
+   "subject": "s1",
+   "object": "binoculars",
+   "intent": "see",
+   "window": [
+    59,
+    138
+   ],
+   "start_frame": 45,
+   "n_grasp_frames": 19,
+   "raw_drop_m": 0.015559634065966985,
+   "drop_m": 0.017307081120446495,
+   "held": true,
+   "track_mm": 112.03506146380644,
+   "tracked_steps": 9,
+   "span": 93,
+   "tracked_frac": 0.0967741935483871,
+   "solo_drop_m": 0.017307081120446495,
+   "solo_track_mm": 138.94081511701924,
+   "solo_tracked_steps": 8,
+   "solo_tracked_frac": 0.08602150537634409,
+   "two_handed_helps": false
+  },
+  {
+   "seq": "bowl_drink_1",
+   "subject": "s1",
+   "object": "bowl",
+   "intent": "drink",
+   "window": [
+    36,
+    131
+   ],
+   "start_frame": 10,
+   "n_grasp_frames": 13,
+   "raw_drop_m": 0.01317871202200835,
+   "drop_m": 0.005625936511502474,
+   "held": true,
+   "track_mm": 64.45473502928354,
+   "tracked_steps": 65,
+   "span": 121,
+   "tracked_frac": 0.5371900826446281,
+   "solo_drop_m": 1.927153477920658,
+   "solo_track_mm": 2392.884276025413,
+   "solo_tracked_steps": 1,
+   "solo_tracked_frac": 0.008264462809917356,
+   "two_handed_helps": true
+  },
+  {
+   "seq": "mug_drink_2",
+   "subject": "s1",
+   "object": "mug",
+   "intent": "drink",
+   "window": [
+    56,
+    104
+   ],
+   "no_grasp_frame": true
+  },
+  {
+   "seq": "flute_play_1",
+   "subject": "s1",
+   "object": "flute",
+   "intent": "play",
+   "window": [
+    72,
+    90
+   ],
+   "no_grasp_frame": true
+  },
+  {
+   "seq": "teapot_pass_1",
+   "subject": "s1",
+   "object": "teapot",
+   "intent": "pass",
+   "window": [
+    65,
+    69
+   ],
+   "start_frame": 5,
+   "n_grasp_frames": 5,
+   "raw_drop_m": 0.009508301507233433,
+   "drop_m": 0.02092153431725736,
+   "held": true,
+   "track_mm": 115.35024661803413,
+   "tracked_steps": 11,
+   "span": 64,
+   "tracked_frac": 0.171875,
+   "solo_drop_m": 2.030360101845105,
+   "solo_track_mm": 2498.546950608366,
+   "solo_tracked_steps": 1,
+   "solo_tracked_frac": 0.015625,
+   "two_handed_helps": true
+  },
+  {
+   "seq": "doorknob_use_fun_1",
+   "subject": "s1",
+   "object": "doorknob",
+   "intent": "use",
+   "window": [
+    78,
+    67
+   ],
+   "no_grasp_frame": true
   }
  ]
 }

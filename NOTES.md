@@ -3963,3 +3963,68 @@ the burials are simply where the wandering ends up when the level set is wide.
 Note for anyone re-running: the first candidate tried is always the unperturbed
 retarget, so the search CAN only improve its own score. That it got worse on the
 quantity we care about while improving its own score is the point.
+
+## Stage 6 has a number, and it discriminates
+
+Eight bimanual references, one per object, both hands Shadow, started from the
+first frame that holds on its own. Four have such a frame; all four hold after
+the two-handed grasp search. Each was then run again with the left hand PARKED
+rather than deleted, so the model and the contact solver's problem are identical
+and only the hand's reach changes:
+
+    reference               two-handed            one-handed
+    gamecontroller_play_1    97.4 mm / 14%        2496.7 mm /  1%
+    binoculars_see_1        112.0 mm / 10%         138.9 mm /  9%
+    bowl_drink_1             64.5 mm / 54%        2392.9 mm /  1%
+    teapot_pass_1           115.4 mm / 17%        2498.5 mm /  2%
+    median                  104.7 mm / 16%        2444.8 mm /  1%
+
+Two hands track further on 4 of 4. What makes this worth trusting is that it is
+NOT uniform: `binoculars_see_1` shows essentially no two-handed advantage --
+112 mm over 10% against 139 mm over 9% -- and that is correct. Binoculars are
+held one-handed all the time; the second hand in that clip steadies rather than
+carries. The three that collapse without it are a game controller held for
+two-thumb use, a bowl, and a teapot being passed. A measure that said "two hands
+always win" would be measuring the harness; this one says two hands win where
+the task needs them, which is the claim.
+
+The percentages are the honest part and they are low: 16% of the clip at the
+median. These are feedforward rollouts truncated at the frame the object is
+lost, with no tracking controller -- stage 6 evaluated at stage 2's level of
+machinery. The gap is the result, not the absolute number.
+
+Four references have no frame that holds at all: camera, mug, flute, doorknob.
+
+### Three refuted hypotheses about the stage 2 -> stage 3 gap
+
+Stage 2 holds 34/40. Stage 3 discarded 4 of 6 references as having "no graspable
+frame". Something is lost at the boundary, and it is none of the following:
+
+1. **That stage 3 never closes the grip.** True as a description -- `reset_at`
+   places the retargeted angles, which are an open hand -- and irrelevant.
+   Adding `adopt_grip` to carry stage 2's achieved angles across changes the
+   graspable-frame count by nothing: 0 -> 0 on phone_call_1 and banana_eat_1,
+   23 -> 23 on apple_eat_1, 27 -> 27 on bowl_drink_1, and 6 -> 3 on
+   binoculars_lift, which is worse.
+2. **That the grip simply needs establishing in the tracking scene.** Worse than
+   nothing: `reset_at(k, grip=8.0)` takes `gamecontroller_play_1` from 30
+   graspable frames to 1. The mocap body is welded to the hand and closing
+   against that weld is a different problem from closing on a hinge base.
+3. **That the two scenes disagree about the grasp itself.** They mostly do not.
+   The same achieved state, transferred by palm pose and joint values, survives:
+   apple_eat_1 at 30.9 mm on 7 contacts and 10.1 N against 875 N in the scene
+   that produced it, banana at 43.9 mm, bowl at 17.0 mm. Only phone_call_1 fails
+   outright, at 0 contacts.
+
+So the grip transfers, closing it again hurts, and carrying it across does not
+buy frames. The gap is real and unexplained, and it is the thing standing
+between a stage 2 that works and a stage 3 that runs on more than two clips.
+
+Three of my probes in this investigation were wrong before any of the above was
+true -- a joint-name map that returned 0/29 because the mocap scene prefixes
+every joint with `hand_`, a transfer of the seed q instead of the achieved state
+which sent an open hand and read 0 contacts, and the grip hypothesis itself.
+The first two produced dramatic, publishable-looking numbers (3486 mm! the
+scenes disagree completely!) that were entirely my own error. Recording that
+because the pattern is the point: in this pipeline a large effect is evidence of
+a bug in the measurement until it survives being measured a second way.
