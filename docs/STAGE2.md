@@ -865,6 +865,7 @@ early (`results/g9_ppo_distill.json`, `per_reference`):
 | `hammer_use_2` | **grasp** (20.7 N, eq 0.04×) | 4 | 566 | 80,250 mm | 0.00 mm | **0** | **0 N** |
 | `knife_lift` | grasp, thin end (2.1 N) | **1** | **25** | 87.7 mm | 0.00 mm | 0 | 0 N |
 | `phone_call_1` | grasp, thin end (2.8 N) | **9** | **985** | 195,634 mm | 0.00 mm | **0** | **0 N** |
+| `mug_drink_2` | **near-burial** (528 N, 9 contacts) | 27 | 711 | **5.7 mm** | **13.18 mm** | 15 | **4834 N (2466×)** |
 
 `hammer_use_2` is the one reference in the set that is a grasp by force as
 well as geometry — 4 contacts, 20.7 N, equilibrium residual 0.04×, the best
@@ -916,6 +917,14 @@ let go, and the better-trained one let go harder. That takes the sample-size
 objection off the *drop* result: more transitions did not move it. It does
 not take it off the burial rows still to come.
 
+`mug_drink_2` (row 5, the near-burial control: 528 N on 9 contacts at the
+seed) posts **5.7 mm — the best tracking number in this repository** — and
+ends **13.18 mm inside the mug on 15 bodies at 4834 N**, 2466× the object's
+weight: deeper and harder than it started. The best-tracking row is the
+most-buried row, which is the thesis of this document in one line. It is
+also the best-supported row so far (27 start frames, 711 transitions), so it
+carries the confound below as well as the effect.
+
 **The binding constraint three rows in was the sample, not the seed class.**
 `grasp_frames` comes back in single digits — 2, 4, 1 — so every policy here
 is trained on a handful of start states, and stages 4–5 will pool exactly
@@ -928,7 +937,8 @@ any of the first three.
 
 **Sample size, stated plainly:** one grasp-by-force reference and one
 well-supported thin-end reference, both drop; one thin reference re-buries;
-one uninformative row. The burial column
+one near-burial reference tracks at 5.7 mm and ends deeper; one
+uninformative row. The burial column
 rests on `mug_drink_1` from a separate session; the burial-seeded g9 rows are
 7–9 and have not run. `knife_lift` (2.1 N) and `phone_call_1` (2.8 N) come
 next, and both sit at the thin end of the grasp class, so they will most
