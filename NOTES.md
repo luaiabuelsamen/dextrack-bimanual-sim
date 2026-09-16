@@ -3590,3 +3590,48 @@ grasps, and removing it reveals that nothing underneath was holding the object.
 So stage 2 does not have three problems. It has one: the pipeline has no step
 that produces GRIP. `reset_grasp` is meant to be that step and reaches only
 0-13 N against a target of 8 N, which is the number to chase next.
+
+## 2026-09-15 — the contacts are a touch, not a grip. Which is this project's own thesis.
+
+Closing at a valid start frame, zero penetration, sweeping the force target:
+
+    reference          target   grip reached   object drop in 1 s
+    binoculars_see_1     8 N        7.8 N          513.8 cm
+    binoculars_see_1    40 N        2.6 N          489.9 cm
+    binoculars_see_1   150 N        2.6 N          489.9 cm
+    mug_drink_1          8 N        9.8 N          480.3 cm
+    mug_drink_1         40 N       42.1 N          359.5 cm
+    mug_drink_1        150 N       44.8 N          275.8 cm
+
+Free fall over one second is 490 cm. So at 44.8 N of measured contact force on a
+1.96 N object, the object is still falling at essentially the unimpeded rate.
+Force is being generated and it is not opposing gravity.
+
+That is the end of the chain the whole day has been following:
+
+    the poses penetrate           -> no, that was one frame in a hundred
+    the fingers cannot reach      -> no, median gap is 2-4 mm
+    the pose is not feasible      -> no, 0.00 mm penetration at a good frame
+    closing cannot build force    -> no, it reaches 44.8 N
+    the contacts do not OPPOSE    -> yes
+
+A contact set that touches an object at several points on the same side
+produces force without producing a grasp. Raising the force target just presses
+harder in a direction that does not hold. This is exactly the quantity
+Ferrari-Canny epsilon measures, and `src/oppdef/grasping/epsilon.py` has
+implemented it since the synthetic project -- and nothing in `human/` has ever
+imported it. The GRAB pipeline scores held-ness, tracking error, penetration and
+now equilibrium residual, and not one of those distinguishes a grasp that
+resists a wrench from one that presses.
+
+The earlier epsilon measurement on these contact sets is not evidence against
+this: it was computed on PENETRATED configurations, where deep overlap
+manufactures 20-42 well-distributed contacts and any static wrench metric reads
+strongly force-closed. On the valid configurations measured here -- zero
+penetration, a handful of contacts -- it has not been computed at all.
+
+So the single outstanding question for stage 2 is whether the retarget can be
+made to produce OPPOSING contacts, and the natural next measurement is epsilon
+on the valid contact sets rather than the penetrated ones. This project is
+called opposition-deficit; it turns out the DexTrack pipeline built inside it
+never checked for opposition.
