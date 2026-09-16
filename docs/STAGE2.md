@@ -866,6 +866,7 @@ early (`results/g9_ppo_distill.json`, `per_reference`):
 | `knife_lift` | grasp, thin end (2.1 N) | **1** | **25** | 87.7 mm | 0.00 mm | 0 | 0 N |
 | `phone_call_1` | grasp, thin end (2.8 N) | **9** | **985** | 195,634 mm | 0.00 mm | **0** | **0 N** |
 | `mug_drink_2` | **near-burial** (528 N, 9 contacts) | 27 | 711 | **5.7 mm** | **13.18 mm** | 15 | **4834 N (2466×)** |
+| `mouse_use_1` | mixed (19 contacts, eq 2.62×) | 2 | 337 | 291,168 mm | 0.00 mm | 0 | 0 N |
 
 `hammer_use_2` is the one reference in the set that is a grasp by force as
 well as geometry — 4 contacts, 20.7 N, equilibrium residual 0.04×, the best
@@ -956,8 +957,9 @@ any of the first three.
 
 **Sample size, stated plainly:** one grasp-by-force reference and one
 well-supported thin-end reference, both drop; one thin reference re-buries;
-one near-burial reference tracks at 5.7 mm and ends deeper; one
-uninformative row. The burial column
+one near-burial reference tracks at 5.7 mm and ends deeper; one mixed
+reference (`mouse_use_1`, row 6, 2 start frames) drops; one uninformative
+row. Rows 7–9 are the burial-seeded set. The burial column
 rests on `mug_drink_1` from a separate session; the burial-seeded g9 rows are
 7–9 and have not run. `knife_lift` (2.1 N) and `phone_call_1` (2.8 N) come
 next, and both sit at the thin end of the grasp class, so they will most
