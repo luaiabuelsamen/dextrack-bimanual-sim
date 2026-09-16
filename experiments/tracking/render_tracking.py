@@ -48,8 +48,11 @@ def contact_diagnostics(m, d, obj_gids, obj_bid):
     is unmissable here. `residual` is the net unbalanced wrench on the object
     including gravity, in multiples of object weight. The scale is: 0x is
     equilibrium (contacts balance gravity and nothing else), 1x is freefall
-    (nothing supports the object), and 100x+ is a penetrated configuration.
-    Rejecting BOTH failure ends is the property depth alone does not have.
+    (nothing supports the object), and 100x+ is a FRESHLY PLACED penetrated
+    configuration. Rejecting both failure ends at placement is the property
+    depth alone does not have -- but a burial that has settled reads ~0x like
+    a real grasp, so this discriminates how a pose was placed, not its steady
+    state. Read it at reset, not after stepping.
     """
     obj = set(obj_gids)
     weight = float(m.body_mass[obj_bid]) * 9.81

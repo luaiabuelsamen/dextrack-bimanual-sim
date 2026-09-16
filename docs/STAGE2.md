@@ -568,6 +568,12 @@ Equilibrium residual is the first candidate for such a term — with the caveat
 that it only speaks at placement (see the instrumentation note below): whether
 it separates candidates *during* a search that settles them is being checked.
 
+**The run.** PPO trained from the raw `W_PEN_ARM` fit on `mug_drink_1`, no
+hold-scored synthesis, `Pool.reset` a plain `reset_at` so every environment
+starts from the 6.10 mm / 119 N grasp; horizon 160, 12 envs, 440 iterations
+= 844,800 control steps, starts `5..115` to match the buried checkpoint's set;
+saved to `results/ppo_mug_drink_1_h160_rawfit.pt`, existing checkpoint
+untouched; ends with a 2×2 of old/new policy × raw/buried initial condition.
 Launched 2026-09-15 late evening. Iteration 0: reward 0.225, **alive 0.770**,
 flat through iteration 30. For calibration, the original buried checkpoint's
 curve (from the session that trained it):
