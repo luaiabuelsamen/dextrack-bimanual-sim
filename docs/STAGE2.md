@@ -864,6 +864,7 @@ early (`results/g9_ppo_distill.json`, `per_reference`):
 | `flashlight_on_2` | **thin** (0.6 N) | 2 | 148 | 112.9 mm | **4.86 mm** | 3 | **207 N** |
 | `hammer_use_2` | **grasp** (20.7 N, eq 0.04×) | 4 | 566 | 80,250 mm | 0.00 mm | **0** | **0 N** |
 | `knife_lift` | grasp, thin end (2.1 N) | **1** | **25** | 87.7 mm | 0.00 mm | 0 | 0 N |
+| `phone_call_1` | grasp, thin end (2.8 N) | **9** | **985** | 195,634 mm | 0.00 mm | **0** | **0 N** |
 
 `hammer_use_2` is the one reference in the set that is a grasp by force as
 well as geometry — 4 contacts, 20.7 N, equilibrium residual 0.04×, the best
@@ -908,7 +909,14 @@ on something, or a reference that barely moves — not measured, so the row
 carries no weight. The prediction that knife would replicate flashlight is
 retracted; flashlight remains the only thin-end row with enough data to read.
 
-**The binding constraint three rows in is the sample, not the seed class.**
+`phone_call_1` (row 4) is the best-supported grasp-class row in the run — 9
+start frames, 985 transitions, nearly twice hammer's — and it drops: 196 m,
+0 contacts, 0 N. So the two grasp-class rows with enough data to read both
+let go, and the better-trained one let go harder. That takes the sample-size
+objection off the *drop* result: more transitions did not move it. It does
+not take it off the burial rows still to come.
+
+**The binding constraint three rows in was the sample, not the seed class.**
 `grasp_frames` comes back in single digits — 2, 4, 1 — so every policy here
 is trained on a handful of start states, and stages 4–5 will pool exactly
 this. The burial-seeded rows (7–9) had 20–30 graspable frames each
@@ -918,8 +926,9 @@ direction as the burial effect. Written down before those rows land and look
 convincing. `phone_call_1` (7 frames) is the first row with more support than
 any of the first three.
 
-**Sample size, stated plainly:** one grasp-by-force reference; one readable
-thin-end reference. The burial column
+**Sample size, stated plainly:** one grasp-by-force reference and one
+well-supported thin-end reference, both drop; one thin reference re-buries;
+one uninformative row. The burial column
 rests on `mug_drink_1` from a separate session; the burial-seeded g9 rows are
 7–9 and have not run. `knife_lift` (2.1 N) and `phone_call_1` (2.8 N) come
 next, and both sit at the thin end of the grasp class, so they will most
