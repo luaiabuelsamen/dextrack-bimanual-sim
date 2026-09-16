@@ -27,6 +27,28 @@ night of two sessions measuring each other's claims:
   (the feedforward fails the same way); base stiffness (burial tracks at 20×
   the weld compliance and contact displaces the base by nothing); sample
   size (dead in both directions); the policy class (interchangeable).
+- **Shown, not inferred, by the open-loop carry sweep** (`2afbaa0`,
+  `experiments/tracking/stage2_survives.py`, `results/stage2_survives.json`):
+  each of the 30 carried stage-2 seeds rolled along its reference with **no
+  controller of any kind**. Burial seeds carry the object to the end in
+  **10 of 13** (median 100 % of the reference, ending 10 mm inside); grasp
+  seeds in 3 of 13 (median 41 %, ending 0.00 mm — dropped). The sharpest
+  pair: `bowl_drink_1` carries its whole 131-frame reference at **9.9 mm
+  mean error with nothing controlling it**; the PPO policy trained on that
+  reference scored 8.2 mm. The policy bought 1.7 mm. Every stage-3 row had
+  a policy in the loop and could not separate "the policy tracks the
+  burial" from "the burial carries itself"; this can, and it is the latter.
+- **And one positive existence proof, n = 1:** `stamp_lift` — a grasp seed,
+  4 contacts at 16.2 N, equilibrium 0.06 — carries its 26-frame reference
+  at **35.0 mm mean, ending 0.31 mm penetration, 5 contacts, 4 N**, holding
+  a 2 N object with 4 N of grip, open-loop. It tracks under 50 mm *and* ends
+  un-buried, which nothing in either stage-3 run did. One of thirty on a
+  short reference, so not a capability — but three independent searches had
+  concluded the retarget's neighbourhood contains nothing that both contacts
+  and does not penetrate, and this is a counterexample the stage-2 search
+  found on its own, with no controller to credit. Whatever makes it work is
+  a property of the grasp, and it is the thing to characterise next: point
+  `wrap_score` at the one case where the answer should come out positive.
 - **So the next real experiment is upstream of all four learning stages:**
   whether stage 2 can produce a grasp that survives contact *along the
   reference*, not only at rest — `wrap_score` is the only validated
