@@ -85,6 +85,14 @@ class HoldResult:
     n_contact: int         # hand-object contacts at the end
     pen_mm: float          # worst penetration at the start, after placement
     seconds: float
+    #: Equilibrium residual AT PLACEMENT -- after the grip is established and
+    #: before the object is allowed to settle. This is the reading that carries
+    #: information about burial. Once settled, a buried object's constraint
+    #: forces cancel and the NET force is ~0 however deep the hand is: measured,
+    #: a 94-contact 35.5 kN bowl reads 1.90 here and 0.00 after 0.9 s. Read at
+    #: the wrong moment the residual is only a free-fall detector, which drop
+    #: distance already is.
+    eq_place: float = float("nan")
 
 
 class GrabTrackEnv:
@@ -196,6 +204,8 @@ class GrabTrackEnv:
                                 d.qpos[self.obj_qadr + 3:self.obj_qadr + 7].copy())
             establish_grip(self.sc, self._dir, self.obj_qadr, self.obj_vadr,
                            pose, target_n=grip)
+        eq_place = equilibrium_residual(
+            self.sc, int(m.jnt_bodyid[self.obj_jid]))
         n_settle = int(settle / m.opt.timestep)
         for _ in range(n_settle):
             mujoco.mj_step(m, d)
@@ -214,7 +224,7 @@ class GrabTrackEnv:
             held=bool(drop < 0.05), drop_m=drop,
             settle_m=float(np.linalg.norm(tail[-1] - tail[0])),
             n_contact=self.n_hand_contacts(), pen_mm=pen0 * 1000,
-            seconds=seconds)
+            seconds=seconds, eq_place=float(eq_place))
 
 
 # --------------------------------------------------------------------------

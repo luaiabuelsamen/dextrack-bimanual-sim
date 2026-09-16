@@ -83,7 +83,7 @@ def synthesize(env, q0, samples: int = 24, sigma_pos: float = 0.012,
     and 13.6 kN wherever the fit started, which is how a policy trained on a
     buried initial condition kept scoring well.
 
-    What does not work is fixing it with THIS quantity. Two measurements:
+    What does not work is fixing it with THIS quantity. Three measurements:
 
     1. `equilibrium_residual` discriminates PLACEMENT, not steady state. Its
        142-337x burial readings were all taken on a placed reset state before
@@ -104,18 +104,39 @@ def synthesize(env, q0, samples: int = 24, sigma_pos: float = 0.012,
        six. The 385 -> 6.9 N row read like a 56x win on its own and is not one;
        it is the tail of a noisy distribution.
 
+    3. Scoring the PLACEMENT reading instead does not rescue it, which is the
+       result that closes the question. The placement residual is the one with
+       information -- across the 40 accepted grasps it ranges 0.013 to 5.107
+       with zero rows below 0.01, correlating +0.33 with grip force and +0.35
+       with contact count, where the settled reading is flat. Scored, it is
+       WORSE than the settled version: 2 of 6 pairs improve against 4 of 6.
+
+           reference        w_eq=0     settled eq    placement eq
+           airplane_fly_1      385   ->     6.9   ->     2,473
+           airplane_fly_1    1,968   ->   499     ->         5.5
+           airplane_fly_1      663   ->   684     ->     3,549
+           bowl_drink_1     35,521   -> 11,359    ->     7,500
+           bowl_drink_1      7,324   ->  9,219    ->    11,736
+           bowl_drink_1     16,301   -> 10,467    ->    16,301
+
+       So the quantity that best DESCRIBES burial is not the one that best
+       STEERS a search away from it, and both readings are worse on drop than
+       scoring drop alone. Credit to the peer session for identifying the two
+       read points; the prediction that scoring the placement one would work is
+       mine, and it is refuted.
+
     So the term is available and off. The diagnosis it came from is the durable
     part: the search needs a quantity that separates a grasp from a burial in a
     SETTLED state, and net force is not it, because burial cancels. `equilibrium`
-    is recorded on every `GraspFit` regardless, since it costs nothing and
-    reading it is how the burial was caught.
+    is recorded on every `GraspFit` regardless, taken at PLACEMENT because that
+    is the reading with spread -- it costs nothing, and reading it is how the
+    burial was caught in the first place.
     """
     rng = np.random.default_rng(seed)
     mean = np.zeros(6)
     sig = np.array([sigma_pos] * 3 + [sigma_rot] * 3)
     best = None
     tried = 0
-    obj_bid = int(env.sc.model.jnt_bodyid[env.obj_jid])
 
     for r in range(rounds):
         deltas = rng.normal(size=(samples, 6)) * sig + mean
@@ -127,7 +148,13 @@ def synthesize(env, q0, samples: int = 24, sigma_pos: float = 0.012,
             res = env.hold(q, seconds=seconds, settle=0.1,
                            grip=grip if grip else None)
             tried += 1
-            eq = T.equilibrium_residual(env.sc, obj_bid) if w_eq else 0.0
+            # AT PLACEMENT, not after settling. A settled buried object has
+            # cancelling constraint forces and reads ~0 however deep the hand
+            # is, so the settled residual is only a free-fall detector and drop
+            # distance already is one. The placement reading is where the
+            # burial is visible: bowl_drink_1 reads 1.90 there and 0.00 after
+            # 0.9 s, against apple_eat_1's 0.03 for a real equilibrium grasp.
+            eq = float(res.eq_place)
             if not np.isfinite(eq):
                 eq = 1e3
             cost = float(res.drop_m + w_eq * eq)
