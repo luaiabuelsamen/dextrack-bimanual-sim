@@ -936,21 +936,33 @@ the README sentence that rested on hammer being a grasp seed. The
 `mug_drink_1` 2×2 above is unaffected — its buried and raw conditions were
 built in-process on one clip, not from the seed file.
 
-**The corrected seeds are a different class of grasp.** With the lookup
-keyed on subject, the s1 seeds for the same-named clips are not variants of
-the s2 ones we trained on:
+**The corrected population is inverted** (`f79b826`). With the lookup keyed
+on subject, the s1 seeds are not variants of the s2 ones the run used:
 
-| reference | s2 seed (what the run used) | s1 seed (correct) |
+| reference | s2 seed (used, wrong) | s1 seed (correct) |
 |---|---|---|
-| `gamecontroller_play_1` | 57 contacts, 14,042 N (7157×) | **5 contacts**, 12.2 mm drop, eq 0.09 |
-| `camera_takepicture_2` | 32 contacts, 5,800 N (2956×) | **2 contacts**, 1.0 mm drop, eq 0.01 |
+| `mouse_use_1` | 19 contacts, 4335 N — burial | 4 contacts, **3.6 N — grasp** |
+| `gamecontroller_play_1` | 57 contacts, 14,042 N — burial | 5 contacts, **1.9 N — thin** |
+| `camera_takepicture_2` | 32 contacts, 5800 N — burial | 2 contacts, **6.0 N — grasp** |
+| `flashlight_on_2` | 3 contacts, 0.6 N — thin | 8 contacts, **35.4 N — grasp** |
+| `hammer_use_2` | 4 contacts, 20.7 N — grasp | 7 contacts, 29.9 N — grasp |
+| `phone_call_1` | 6 contacts, 2.8 N — grasp | 3 contacts, 7.5 N — grasp |
+| `mug_drink_2` | 9 contacts, 528 N — burial | 8 contacts, 3251 N — burial |
+| knife, bowl, binoculars | unchanged (subject-matched) | |
 
-The run trained camera and gamecontroller from heavy burials belonging to
-another recording; the v2 run trains them from light contact sets close to
-an actual grasp, with real start counts — the cell the seed-class question
-always lacked. So v2 is informative, not a tidy-up. Nothing about camera
-from the old run carries forward, and it is the row the held-out
-distillation cell turns on.
+Contaminated: 5 burial, 3 grasp, 1 thin, 1 failed. Corrected: **6 grasp, 2
+burial, 1 thin, 1 failed.** Three references flip class outright and
+flashlight moves the other way, from a touch below the object's own weight
+to a 35 N grasp. Every seed-class statement made tonight was about a
+population that was majority-burial when the real one is majority-grasp.
+
+**What v2 decides, stated before it runs.** Six grasp-class policies with
+real start counts is the cell that has been missing from every version of
+this question. If all six drop, that is the cleanest statement of the
+problem this project has produced, and it is a result rather than a failure.
+If any one tracks under 50 mm *and* ends under 3 mm of penetration, it is
+the first row in this repository that is not measuring the contact solver,
+and it goes on the front page with its start count and end state beside it.
 
 **Stages 4–5 did run end to end on the old seeds** (`ca50919`), recorded as
 a *mechanism*, not a result. Held out by object — feedforward / own PPO /
