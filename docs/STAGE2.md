@@ -1046,6 +1046,7 @@ read as they land, end states live (`results/g9_ppo_distill_v2.json`):
 | `phone_call_1` | grasp — 3 contacts, 7.5 N, eq 0.10 | **1** | 120 | 42,603 mm | 0.00 mm | 0 | 0 N |
 | `mouse_use_1` | grasp — 4 contacts, 3.6 N, eq 0.10 | **32** | **1176** | 116,130 mm | 0.00 mm | **0** | **0 N** |
 | `knife_lift` ✓ | grasp — 4 contacts, 2.1 N | **1** | 25 | 87.7 mm | 0.00 mm | 0 | 0 N |
+| `gamecontroller_play_1` | thin — 5 contacts, 1.9 N (below object weight) | 3 | 276 | 51,778 mm | 0.00 mm | 0 | 0 N |
 
 **Camera drops — and it is a within-reference control, not a fresh row.**
 The seq-name collision means the same s1 camera clip has now been trained
@@ -1079,7 +1080,11 @@ Two well-supported grasp-class rows, two drops. Knife (row 4) was
 subject-matched in both runs and reproduces the old row **to the digit**
 (87.65951 mm, 1 start frame, 25 transitions, 0/0/0) — one start frame, so
 it carries nothing about the question, but it is a free determinism check
-on the whole stage-3 path across the seed-file rewrite.
+on the whole stage-3 path across the seed-file rewrite. Gamecontroller
+(row 5, the one thin seed — 1.9 N, less than the object weighs) drops on 3
+start frames; consistent, thin, and its s2 burial arm had no graspable
+frame at all, so this clip has no pair. Five rows, five drops; hammer and
+flashlight remain.
 
 **Mouse is a second within-clip pair, and the two pairs disagree about the
 burial arm:**
