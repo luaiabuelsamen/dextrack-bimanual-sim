@@ -62,6 +62,16 @@
    "end_contacts": 0,
    "grasp_frames": 2,
    "transitions": 337
+  },
+  {
+   "obj": "camera",
+   "seq": "camera_takepicture_2",
+   "ppo_mm": 34.63119153981698,
+   "end_pen_mm": 9.317021398914356,
+   "end_grip_n": 509.1972391157274,
+   "end_contacts": 8,
+   "grasp_frames": 28,
+   "transitions": 836
   }
  ],
  "held_out": []

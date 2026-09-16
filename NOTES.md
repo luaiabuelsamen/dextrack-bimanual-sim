@@ -4526,3 +4526,62 @@ that can settle it.
 Stating it in advance because on this question I have now been wrong about the
 mechanism four times and right once, and a prediction written after the fact is
 worth nothing.
+
+## WITHDRAWN: the stage 3 seed-class analysis. 7 of 10 rows got another subject's grasp
+
+GRAB has **80 sequence names that exist under more than one subject**.
+`camera_takepicture_2` is one: s1's version holds for 161 frames, s2's for 76.
+
+My `stage2_grips.py --seqs` handler resolves bare names with
+`by = {r["seq"]: r for r in rows}`, which silently keeps one subject, and
+`g9_ppo_distill` looks seeds up the same way -- `grips = {x["seq"]: x for x in
+rows}`, then `if row["seq"] in grips`. So g9 selected its reference from the
+inventory, loaded the clip for THAT row's subject, and applied a wrist offset
+computed on a different subject's version of the same-named sequence.
+
+    reference                g9 subj   seed subj   match
+    mouse_use_1              s1        s2          NO
+    phone_call_1             s1        s2          NO
+    gamecontroller_play_1    s1        s2          NO
+    camera_takepicture_2     s1        s2          NO
+    binoculars_see_1         s1        s1          yes
+    hammer_use_2             s1        s2          NO
+    knife_lift               s1        s1          yes
+    flashlight_on_2          s1        s2          NO
+    bowl_drink_1             s1        s1          yes
+    mug_drink_2              s1        s2          NO
+
+Caught because a peer's pre-registered start count (10, computed on s2) did not
+match the row's own `grasp_frames` field (28, computed on s1). Neither number
+was wrong; they described different clips.
+
+**What is withdrawn.** Every seed-class label in the stage 3 table -- grasp,
+burial, thin -- describes a grasp belonging to a different recording than the
+policy trained on. "hammer_use_2, grasp seed, 20.7 N" is s2's hammer grasp
+applied to s1's hammer clip. The runs are valid training runs of "retarget plus
+an arbitrary wrist perturbation", and nothing more. The grasp-versus-burial
+story, the burial-tracks/grasp-drops headline, the mouse counter-example and my
+pre-registered prediction all rest on those labels and go with them. Only knife,
+bowl and binoculars are correctly labelled, and knife has one start frame while
+binoculars failed stage 2 outright.
+
+**What survives**, because it is live measurement of whatever state was actually
+reached rather than a claim about its provenance:
+
+    mug_drink_2      5.7 mm, ends 13.18 mm inside, 15 contacts, 4834 N (2466x)
+    camera_tp_2     34.6 mm, ends  9.32 mm inside,  8 contacts,  509 N ( 260x)
+    flashlight     112.9 mm, ends  4.86 mm inside,  3 contacts,  207 N
+    knife           87.7 mm, ends 0.00 / 0 / 0 -- object on the floor
+    hammer        80250.1 mm, ends 0.00 / 0 / 0
+    phone        195633.5 mm, ends 0.00 / 0 / 0
+    mouse        291168.2 mm, ends 0.00 / 0 / 0
+
+and with it: no row tracks under 50 mm while ending un-buried; four of seven
+finish under 3 mm of penetration because the object is on the floor; and reading
+the error column alone would rank knife's dropped object above camera's held one.
+
+Fix is to key on `subject/seq` everywhere a seed is looked up, and rerun. The
+shape of the bug is the night's recurring one -- a silent key collision that
+produced plausible numbers for two hours -- and the thing that exposed it was
+two sessions computing the same quantity independently and getting different
+answers.
