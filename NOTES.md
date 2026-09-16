@@ -5189,3 +5189,43 @@ have reached for does not work, which is worth knowing before building a search
 on it -- and that whatever distinguishes `stamp_lift` (3 contacts, 2.2 N on a
 light object, 0.31 mm of penetration) is not captured by any quantity this
 project currently computes.
+
+## Burial at reset is the PRECONDITION, not the disease
+
+A peer session rendered `stamp_lift` rather than trusting its numbers and found
+its tracking-scene reset is a burial -- 14.23 mm, 878 N -- that resolves into a
+five-finger pinch by the end. I measured the trajectory on the other two
+grasp-class rows that carried to the end, and on two that did not:
+
+    reference       reset            25%           50%          end
+    stamp_lift      14.23 mm 878 N   0.35 /   3.2  1.50 /   6.8  0.31 mm   3.6 N  carried
+    hammer_lift     18.91   7320     8.86 / 828.5  3.99 / 323.3  4.77     343.1   carried
+    banana_eat_1    22.75   1225     8.45 / 727.3  8.42 / 692.5  4.19     284.4   carried
+    knife_lift       0.00      0     --            --            0.00       0.0   never touched
+    phone_call_1    11.52     78     0.00 /   0.0  --            0.00       0.0   dropped at 4%
+
+**All three carriers start buried and relax under motion.** stamp_lift falls 46x
+in depth and 244x in force between reset and the end. The contact solver resolves
+an over-constrained initial pose into a stable contact set during the first
+frames of the carry, and what remains is a real grasp -- stamp ends on five
+bodies at one-sidedness 0.159.
+
+The two failures fail in different ways, and neither is "too buried". `knife_lift`
+makes ZERO contacts at reset: its stage-2 grasp does not touch the object at all
+in the tracking scene, which is the stage 2 -> 3 asymmetry in its starkest form,
+and its 87.7 mm mean error is an object falling next to a hand that never held
+it. `phone_call_1` is buried at 11.52 mm but engaged at only 78 N, an order of
+magnitude below the carriers' 878-7320 N, and it is gone by the first quarter.
+
+**This reframes the empty-neighbourhood result that has shaped the whole
+project.** Three independent searches concluded there is no pose that both
+contacts the object and does not penetrate it, and all three were looking for the
+wrong thing. You do not need such a pose. You need one that penetrates ENOUGH to
+relax into contact once the hand starts moving -- and the relaxation is what
+produces the grasp, not the fit.
+
+Candidate discriminator, measurable at reset, n=5 and clean on it: total grip
+force in the tracking scene. Carriers 878, 1225 and 7320 N; failures 0 and 78 N.
+That is not wrap_score, not epsilon, and not penetration depth -- all of which
+this project has measured extensively -- and it is the one quantity that
+separates these five. It wants testing on the other 25.
