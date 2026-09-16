@@ -1331,9 +1331,26 @@ bench times 3 iterations and the summary runs on every tenth and the last,
 so 2 of the 3 timed iterations are measured (67 %) against 7 of 60 (12 %)
 in a real run; the observed numbers are consistent with that (2/3 × 4.5 %
 ≈ 3 %) and project to ~0.5 % at a real cadence. A projection is not a
-measurement, so the branch does not land on it: re-taken with 10 timed
-iterations (20 % measured) at the next quiet window, and it lands only if
-that measured number is under 1 %.
+measurement, so the harness was changed (`90bade1`) to time every iteration
+and drop each run's final one — the same timer applied to the baseline as a
+textual patch — so that 10 iterations at `log_every = 10` measure exactly
+one of nine (11 %, a point off a real run's 7/60), and the re-take prints
+"N timed, M measured" per variant:
+
+| seed | 3216767 | defaults (2/18 measured) | always-on (18/18) |
+|---|---:|---:|---:|
+| bowl, quiet machine | 13.831 s/iter | 13.901 (**×1.005**) | 14.345 (×1.037) |
+| gamecontroller, on the sweep's load tail | 7.521 | 7.126 (×0.947) | 8.203 (×1.091) |
+
+Bowl is the measurement: **the default path costs 0.5 % at realistic
+cadence, and a run that turns a term on pays 3.7–4.5 %** (×1.037 here,
+×1.042 and ×1.045 on the two earlier quiet readings). Gamecontroller ran
+first, on the tail of the clean sweep's load — its baseline reads 7.52
+against 6.70 on the quiet 3-iteration run — and "defaults 5 % faster than
+baseline" is noise, not a result; it is kept so the contended row is on the
+record beside the quiet one. Against the landing rule agreed in advance
+(always-on ≤ ~5 % acceptable for a run that uses the feature, default path
+measured at realistic cadence and stated), the branch lands at defaults.
 
 **v2 caveat, before its rows are quoted:** the run's own `order:` and
 `distillation mixture:` lines label seeds by contact count only — its
