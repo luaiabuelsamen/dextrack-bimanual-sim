@@ -941,6 +941,46 @@ hammer's row counted `d.get('rows', [])` where the file's key is
 `per_reference`, so it read zero rows before and after the row landed and
 never fired. Same lesson as the other two, so it goes in the same list.
 
+### The base is rigid, and the net force on it never settles
+
+Both scenes pin the hand: stage 2's search runs against base servos
+(`x_act`/`y_act`/`z_act` kp = 4000 N/m, rotational kp = 200, force unlimited)
+and stage 3 against a mocap weld (`solref` [0.01, 1]). DexTrack's hand is a
+free body under PD control. Under a rigid base a contact can only move the
+*object* — the hand cannot be pushed out — so penetration costs the hand
+nothing, which is a candidate mechanism for "penetration is the grip" in
+both stages.
+
+The objection, stated before the measurement: burial is self-cancelling — a
+hand buried in an object has contacts pointing every way, and the *vector*
+sum is near zero (a settled 94-contact, 35.5 kN bowl read 0.00× net at rest),
+so a compliant base would have nothing to push against. That is true at rest.
+It is not true during tracking. The per-frame equilibrium residual in the
+gallery manifests (`figures/physics_*.json`) is |net contact force on the
+object + gravity| / weight, and by the third law the net force on the *hand*
+is its negative:
+
+| rollout | net hand force, median | p10 | p90 | min over frames | net / summed magnitude |
+|---|---:|---:|---:|---:|---:|
+| binoculars | 158× (310 N) | 84× | 347× | 57× | 0.05 |
+| bowl | 184× (361 N) | 133× | 272× | 38× | 0.16 |
+| camera | 308× (604 N) | 124× | 650× | 36× | 0.13 |
+| mug (PPO) | 202× (397 N) | 85× | 282× | 17× | 0.27 |
+
+Zero of 541 frames under 2× object weight. The weld re-drives the hand to
+the next reference pose every control frame, so tracking is a sequence of
+fresh placements and the net force never settles; cancellation removes
+73–95 % of the summed magnitude and leaves hundreds of newtons. At
+kp = 4000 N/m a 400 N net push is a 0.1 m base displacement: a compliant base
+would be pushed out of the object every frame. So the weld experiment —
+soften the weld to a stiff spring (or replace it with a PD-driven free base),
+rerun the mug 2×2 and the four gallery rollouts — is decisive rather than
+suggestive: if burial stops tracking under compliance, every tracking number
+in this repository is reclassified; if it still tracks, the base is ruled out
+by measurement. Caveats: read after each control frame's substeps, not at
+reset; all four rollouts are burial-class, and no clean-grasp rollout exists
+to show the contrast — which is the point. Not yet run.
+
 ## Look at the pose before trusting the number
 
 `experiments/tracking/inspect_pose.py` renders a configuration from two angles
