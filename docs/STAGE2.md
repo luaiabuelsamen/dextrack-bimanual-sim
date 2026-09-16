@@ -201,6 +201,41 @@ with `W_PEN_ARM` constraining where the arm may be. Wrist *orientation* is
 inherited from the human and never searched — and it is what decides whether the
 arm or the fingers reach the object first.
 
+### Under physics: one real grip, and the score's limit
+
+`orient_to_clear` is implemented in `human/retarget.py` (not wired into the
+default fit). Applying its frame-0 delta to the whole trajectory, recomputing
+the feedforward, and measuring **in the simulation scene at reset**:
+
+| reference | | penetration | force | ×weight | contacts | residual |
+|---|---|---:|---:|---:|---:|---:|
+| `binoculars_see_1` | baseline | 56.77 mm | 90888 N | 46324× | 84 | 15.40× |
+| | **oriented** | 9.63 mm | **14.3 N** | **7×** | 8 | **4.84×** |
+| `flashlight_on_2` | baseline | 17.33 mm | 769 N | 392× | 6 | 4.33× |
+| | oriented | 0.00 mm | 0.0 N | 0× | **0** | **1.00×** |
+| `cup_lift` | baseline | 11.65 mm | 4642 N | 2366× | 43 | 4.85× |
+| | oriented | 0.00 mm | 0.0 N | 0× | **0** | **1.00×** |
+
+`binoculars_see_1` drops from 90 kN to **14.3 N — 7× object weight**, the first
+plausible grip this pipeline has produced on a bimanual reference, at 8 contacts
+and a residual of 4.84×.
+
+The other two land at residual **1.00×, which is freefall**: zero contacts,
+nothing held. Clean, and not a grasp. That is the familiar dichotomy — except
+the tips are now 1.5–3.1 mm out rather than 42–62 mm, which is well inside
+`establish_grip`'s 30–40 mm of travel.
+
+**Closing afterwards does not help.** `binoculars` 14.3 → 14.8 N, and the other
+two stay at zero contacts. So the fingers are near the surface but not *facing*
+it: curling them does not engage. A minimum-distance score cannot distinguish a
+hand poised to grasp from one merely adjacent, which is exactly what an
+opposition or force-closure term is for. `grasp_epsilon` and `one_sidedness`
+exist in `human/track.py` for this; combining them with the orientation search
+is the obvious next step and has not been tried.
+
+**Caveats.** Frame-0 delta applied as a constant offset to the whole trajectory,
+measured at reset only — no rollout, no tracking number. Three references.
+
 ## C. Vessel wrist target — open, untouched
 
 Eleven of 40 sequences retain a median arm-side problem, and they cluster on
