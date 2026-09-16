@@ -1043,6 +1043,7 @@ read as they land, end states live (`results/g9_ppo_distill_v2.json`):
 | reference | s1 seed (force-aware) | start frames | transitions | PPO tracking | end penetration | end contacts | end grip |
 |---|---|---:|---:|---:|---:|---:|---:|
 | `camera_takepicture_2` | grasp — 2 contacts, 6.0 N, eq 0.01 | **33** | 891 | 2587 mm | 0.00 mm | **0** | **0 N** |
+| `phone_call_1` | grasp — 3 contacts, 7.5 N, eq 0.10 | **1** | 120 | 42,603 mm | 0.00 mm | 0 | 0 N |
 
 **Camera drops — and it is a within-reference control, not a fresh row.**
 The seq-name collision means the same s1 camera clip has now been trained
@@ -1065,6 +1066,10 @@ the object to 36.0 mm, and a policy trained from a physically valid grasp
 carries it to 2587 mm — worse than no policy by a factor of seventy.
 Whatever PPO extracts from a 2-contact, 6.0 N contact set, it is not how to
 keep hold of the object.
+
+Phone (row 2) drops too, but on **one start frame and 120 transitions** —
+the same footing as the old run's knife row, and it carries the same weight:
+consistent with camera, not independent evidence.
 
 **Decided before the remaining rows land:** camera is the only clip with
 both arms; the other five grasp-class references have no burial
