@@ -66,6 +66,19 @@ SPECS = {
                          "R_ff_j1", "R_ff_j2", "R_mf_j1", "R_mf_j2",
                          "R_rf_j1", "R_rf_j2", "R_lf_j1", "R_lf_j2"],
                  note="Dexmate f5d6, 11 joints (underactuated)"),
+    #: The left f5d6 comes from the SAME URDF as the right, distinguished by
+    #: link prefix rather than by a separate file -- unlike the Menagerie hands
+    #: above, which ship a left_hand.xml. It was registered in embodiment.py
+    #: and never here, so every bimanual path that resolved a hand through
+    #: `specs.load` raised KeyError on it; all eleven joints and six links below
+    #: were checked against the URDF before being written down.
+    "f5d6_left": dict(kind="urdf", path=VEGA_URDF, palm="L_arm_l7",
+                      tips=["L_ff_l2", "L_mf_l2", "L_rf_l2", "L_lf_l2"],
+                      thumb="L_th_l2",
+                      joints=["L_th_j0", "L_th_j1", "L_th_j2",
+                              "L_ff_j1", "L_ff_j2", "L_mf_j1", "L_mf_j2",
+                              "L_rf_j1", "L_rf_j2", "L_lf_j1", "L_lf_j2"],
+                      note="Dexmate f5d6 left, 11 joints (underactuated)"),
 }
 
 

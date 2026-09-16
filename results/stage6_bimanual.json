@@ -1,0 +1,28 @@
+{
+ "rows": [
+  {
+   "seq": "gamecontroller_play_1",
+   "subject": "s1",
+   "object": "gamecontroller",
+   "intent": "play",
+   "window": [
+    46,
+    192
+   ],
+   "start_frame": 20,
+   "n_grasp_frames": 25,
+   "raw_drop_m": 0.006558337433713255,
+   "drop_m": 0.008611233403097721,
+   "held": true,
+   "track_mm": 97.43461015710716,
+   "tracked_steps": 24,
+   "span": 172,
+   "tracked_frac": 0.13953488372093023,
+   "solo_drop_m": 2.0594560198470124,
+   "solo_track_mm": 2496.656834159746,
+   "solo_tracked_steps": 1,
+   "solo_tracked_frac": 0.005813953488372093,
+   "two_handed_helps": true
+  }
+ ]
+}

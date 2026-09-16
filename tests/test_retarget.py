@@ -181,6 +181,14 @@ def test_every_hand_builds_with_a_floating_base():
                  for j in rt.jids]
         assert {"x", "y", "z", "rx", "ry", "rz"} <= set(names), hk
         # and the optimiser must not be handed the rest of the robot: f5d6's
-        # file is the whole Vega, head and left hand included
-        assert not any(n.startswith("L_") or n.startswith("head") for n in names), hk
+        # file is the whole Vega, head and BOTH hands included. Which prefix is
+        # foreign depends on the side -- the left hand's own joints are L_, and
+        # asserting against L_ unconditionally is what made this test fail on
+        # f5d6_left rather than any defect in the hand.
+        own = getattr(HANDS[hk], "joint_prefix", None) or ""
+        foreign = {"R_": "L_", "L_": "R_"}.get(own)
+        bad = [p for p in (foreign, "head") if p]
+        assert not any(n.startswith(p) for p in bad for n in names), hk
+        if own:
+            assert any(n.startswith(own) for n in names), f"{hk} exposes no {own} joint"
         assert len(rt.jids) <= 32, f"{hk} exposes {len(rt.jids)} joints"
