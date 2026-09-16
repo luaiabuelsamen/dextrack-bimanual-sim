@@ -941,69 +941,61 @@ hammer's row counted `d.get('rows', [])` where the file's key is
 `per_reference`, so it read zero rows before and after the row landed and
 never fired. Same lesson as the other two, so it goes in the same list.
 
-### The base is rigid, and the net force on it never settles
+### The base is rigid — and that is ruled out, by the rollout sweep
 
 Both scenes pin the hand: stage 2's search runs against base servos
 (`x_act`/`y_act`/`z_act` kp = 4000 N/m, rotational kp = 200, force unlimited)
 and stage 3 against a mocap weld (`solref` [0.01, 1]). DexTrack's hand is a
 free body under PD control. Under a rigid base a contact can only move the
-*object* — the hand cannot be pushed out — so penetration costs the hand
-nothing, which is a candidate mechanism for "penetration is the grip" in
-both stages.
+*object* — the hand cannot be pushed out — so the candidate mechanism was
+that penetration costs the hand nothing, in both stages.
 
-The objection, stated before the measurement: burial is self-cancelling — a
-hand buried in an object has contacts pointing every way, and the *vector*
-sum is near zero (a settled 94-contact, 35.5 kN bowl read 0.00× net at rest),
-so a compliant base would have nothing to push against. That is true at rest.
-It is not true during tracking. The per-frame equilibrium residual in the
-gallery manifests (`figures/physics_*.json`) is |net contact force on the
-object + gravity| / weight, and by the third law the net force on the *hand*
-is its negative:
+**A retraction first.** An earlier version of this section claimed the net
+force on the hand during tracking was 300–600 N on every frame, from the
+per-frame equilibrium residual in `figures/physics_*.json`. That number is a
+measurement artifact. The renderer's `--render-only` path *replays* the saved
+trajectory by writing `qpos` and calling `mj_forward` at every frame — a
+fresh placement, with no velocity and no warm-started constraint state — and
+then overwrites the live diagnostics captured during the rollout with the
+replayed ones. A fresh placement reads hundreds of object weights *by
+construction*; the docstring on the residual says so, and I read the replay
+column as if it were live. The live value, measured in the sweep below on
+the same policy and start: **median 0.4×, p90 2.8×**. Burial is
+self-cancelling during tracking, not only at rest — the prediction that was
+stated before the run, and that I argued against with the wrong column. The
+renderer is being fixed to keep live diagnostics and label replayed ones.
 
-| rollout | net hand force, median | p10 | p90 | min over frames | net / summed magnitude |
-|---|---:|---:|---:|---:|---:|
-| binoculars | 158× (310 N) | 84× | 347× | 57× | 0.05 |
-| bowl | 184× (361 N) | 133× | 272× | 38× | 0.16 |
-| camera | 308× (604 N) | 124× | 650× | 36× | 0.13 |
-| mug (PPO) | 202× (397 N) | 85× | 282× | 17× | 0.27 |
+**The sweep.** Weld time constant raised on the built model (no source edit),
+OLD mug policy rolled from the buried and raw starts at frame 5, with a
+no-contact control per stiffness (object contacts disabled; the base's own
+following error against its mocap target):
 
-**All four rollouts are burial-class, and no clean-grasp rollout exists to
-contrast against** — that is not a weakness of the measurement, it is the
-finding restated: this repository has no non-burial tracking rollout to
-measure. Zero of 541 frames under 2× object weight. The weld re-drives the hand to
-the next reference pose every control frame, so tracking is a sequence of
-fresh placements and the net force never settles; cancellation removes
-73–95 % of the summed magnitude and leaves hundreds of newtons. At
-kp = 4000 N/m a 400 N net push is a 0.1 m base displacement: a compliant base
-would be pushed out of the object every frame. So the weld experiment —
-soften the weld to a stiff spring (or replace it with a PD-driven free base),
-rerun the mug 2×2 and the four gallery rollouts — is decisive rather than
-suggestive: if burial stops tracking under compliance, every tracking number
-in this repository is reclassified; if it still tracks, the base is ruled out
-by measurement. Two checks on the inference: the residual sums every contact
-with the object, so it is a hand force only if the object touches nothing
-else — the scene has no floor, plane or second object (mug scene: 87 geoms,
-52 hand, 23 object, the rest forearm/wrist and the mocap body), and the
-forearm and wrist are on the welded chain, so every contact force on the
-object is reacted by the base. And the values are read after each control
-frame's 33 substeps, not at reset — the state the weld holds the hand in,
-which is the right place for this argument.
+| weld tc | control: following error (median / p90) | buried: tracking | buried: end state | base pushed off target by contact | raw start |
+|---:|---|---|---|---|---|
+| 0.01 (shipped) | 0.41 / 1.11 mm | **23.2 mm, 111/111** | 10.83 mm in, 12 bodies, 1443× | 0.44 mm (= control) | drops, 1/111 |
+| 0.03 (20× softer) | 8.9 / 29.0 mm | **29.5 mm, 111/111** | 10.80 mm in, 12 bodies, 1448× | 9.56 mm (= control) | drops, 1/111 |
+| 0.10 | 54 / 159 mm | 252 mm, 2/111 | 10.82 mm in, 12 bodies, 1338× | 58 mm (= control) | drops |
+| 0.30 | 238 / 443 mm | 642 mm, 2/111 | 10.81 mm in, 12 bodies, 1392× | 246 mm (= control) | drops |
 
-**The rollout-only version can establish only the negative result.** Softening
-the weld on the built model and rolling the *existing* mug policy is cheap,
-but it confounds itself twice: a softer weld also follows its mocap target
-more slowly, so tracking can worsen for a reason that has nothing to do with
-contact; and the policy was trained at the stiff setting, so a soft cell is
-off-distribution, and "burial stops tracking" is indistinguishable from "the
-policy is off-distribution." So each stiffness carries a **no-contact
-control** — the same rollout with the object's contacts disabled, recording
-the base's following error against its mocap target — and a cell whose
-following error is already tens of millimetres is uninterpretable and is
-said to be. If burial *still tracks* under a soft weld with acceptable
-following error, the base is ruled out cheaply and no retrain is needed. If
-burial *stops* tracking, that is suggestive only, and the retrain is
-mandatory before anyone writes it down. The tempting outcome is precisely
-the one the sweep cannot establish on its own.
+Net hand force in the buried rollouts: 0.4×, 0.4×, 0.2×, 0.3× median. In
+every cell the base is displaced from its target by exactly the control's
+following error — **contact pushes the hand nowhere, at any stiffness** — and
+the hand ends 10.8 mm inside on 12 bodies at ~1400× weight whether the weld
+is stiff or 30× softer. At 0.03 the base is 20× more compliant and burial
+tracks the same; 0.10 and 0.30 are uninterpretable for tracking (the
+control's own error is 54 and 238 mm) but the end state is identical there
+too. The raw start drops at every stiffness. This is the clean negative the
+sweep was able to establish: **the rigid base is not the mechanism.** A
+compliant base has nothing to push against because the buried contact set
+cancels while tracking, and the retrain is not needed. The frame-60 looks
+confirm each cell (buried: hand wrapped through the mug wall; raw: mug alone
+in frame).
+
+What this leaves: the burial is a *geometric* equilibrium — the hand is
+inside the object and the contacts balance — so it is not a stiffness
+question at any stage. The remaining differences from DexTrack are the
+retarget (which produces the buried pose) and the reward (which never asks
+for a grasp), and the sample scale.
 
 ## Look at the pose before trusting the number
 
