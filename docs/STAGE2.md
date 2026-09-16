@@ -1047,6 +1047,7 @@ read as they land, end states live (`results/g9_ppo_distill_v2.json`):
 | `mouse_use_1` | grasp — 4 contacts, 3.6 N, eq 0.10 | **32** | **1176** | 116,130 mm | 0.00 mm | **0** | **0 N** |
 | `knife_lift` ✓ | grasp — 4 contacts, 2.1 N | **1** | 25 | 87.7 mm | 0.00 mm | 0 | 0 N |
 | `gamecontroller_play_1` | thin — 5 contacts, 1.9 N (below object weight) | 3 | 276 | 51,778 mm | 0.00 mm | 0 | 0 N |
+| `hammer_use_2` | grasp — 7 contacts, 29.9 N, eq 0.16 | **11** | **684** | 32,463 mm | 0.00 mm | **0** | **0 N** |
 
 **Camera drops — and it is a within-reference control, not a fresh row.**
 The seq-name collision means the same s1 camera clip has now been trained
@@ -1083,8 +1084,13 @@ it carries nothing about the question, but it is a free determinism check
 on the whole stage-3 path across the seed-file rewrite. Gamecontroller
 (row 5, the one thin seed — 1.9 N, less than the object weighs) drops on 3
 start frames; consistent, thin, and its s2 burial arm had no graspable
-frame at all, so this clip has no pair. Five rows, five drops; hammer and
-flashlight remain.
+frame at all, so this clip has no pair. Hammer (row 6) is the third
+well-supported independent drop: 11 start frames, 684 transitions, from
+the heaviest genuine grasp so far (7 contacts, 29.9 N, equilibrium 0.16) —
+32 m, no contact at the end. Its old-run arm was also grasp-class (s2's
+20.7 N seed, 4 starts) and also dropped, so hammer is a pair in which
+*both* arms are grasps and both let go. Six rows, six drops; flashlight
+remains.
 
 **Mouse is a second within-clip pair, and the two pairs disagree about the
 burial arm:**
