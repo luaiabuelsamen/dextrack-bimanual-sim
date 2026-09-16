@@ -889,6 +889,7 @@ record what was *believed* at the time:
 | `camera_takepicture_2` | burial 5800 N | 28 | 836 | **34.6 mm** | **9.32 mm** | 8 | 509 N (260×) |
 | `gamecontroller_play_1` | burial 14,042 N | 0 | — | no graspable frame | — | — | — |
 | `bowl_drink_1` ✓ | burial 35,522 N | 27 | 711 | **8.2 mm** | **17.50 mm** | 81 | **29,118 N (14,850×)** |
+| `binoculars_see_1` ✓ | — (failed stage 2 at 1117 mm; unseeded) | 1 | 145 | — | 0.00 mm | 0 | 0 N |
 
 Statements that stand — and the line is sharper than first drawn: they are
 about the **population of rows**, not about any named reference, because
@@ -903,7 +904,7 @@ may behave completely differently, and so may every other row.
   object** — 13.18 mm at 2466× weight, 17.50 mm at 14,850×, 9.32 mm at
   260×. The only tracking row whose seed label is its own (bowl, ✓) is the
   deepest and hardest of all.
-- Four of eight rows finish at **0.00 mm, 0 contacts, 0 N — because the
+- Five of nine rows finish at **0.00 mm, 0 contacts, 0 N — because the
   object is on the floor.** The error column alone ranks a dropped object
   above a held one; any quality measure for this pipeline that reports
   penetration must report held-ness beside it.
