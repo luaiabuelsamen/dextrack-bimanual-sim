@@ -38,17 +38,31 @@ night of two sessions measuring each other's claims:
   reference scored 8.2 mm. The policy bought 1.7 mm. Every stage-3 row had
   a policy in the loop and could not separate "the policy tracks the
   burial" from "the burial carries itself"; this can, and it is the latter.
-- **And one positive existence proof, n = 1:** `stamp_lift` — a grasp seed,
-  4 contacts at 16.2 N, equilibrium 0.06 — carries its 26-frame reference
-  at **35.0 mm mean, ending 0.31 mm penetration, 5 contacts, 4 N**, holding
-  a 2 N object with 4 N of grip, open-loop. It tracks under 50 mm *and* ends
-  un-buried, which nothing in either stage-3 run did. One of thirty on a
-  short reference, so not a capability — but three independent searches had
-  concluded the retarget's neighbourhood contains nothing that both contacts
-  and does not penetrate, and this is a counterexample the stage-2 search
-  found on its own, with no controller to credit. Whatever makes it work is
-  a property of the grasp, and it is the thing to characterise next: point
-  `wrap_score` at the one case where the answer should come out positive.
+- **And one positive existence proof, n = 1 — looked at before it was
+  believed:** `stamp_lift` carries its 26-frame reference at **35.0 mm
+  mean, ending 0.31 mm penetration, 5 contacts on 5 bodies, 3.4 N,
+  one-sidedness 0.159**, holding a 2 N object open-loop. It tracks under
+  50 mm *and* ends un-buried, which nothing in either stage-3 run did. But
+  the render (`figures/stamp_lift_carry.jpg`, reproduced independently:
+  same 35.0 mm, same end state) shows what the numbers alone would have
+  hidden: **at reset it is a burial** — 14.23 mm inside on 10 contacts and
+  7 bodies at 878 N (447×), equilibrium 5.2× — and it *relaxes into a grasp
+  as the hand moves*: 1.55 mm / 6.8 N on 3 bodies at mid-reference, then a
+  five-finger pinch on the stamp's knob at the end. The stage-2 row calls
+  the seed 4 contacts at 16.2 N; the tracking scene's reset reads 878 N —
+  the stage 2→3 scene asymmetry again. So this is not "a grasp survives
+  being carried"; it is "a burial resolved into a grasp under motion and
+  the object stayed held". Still an existence proof of a held, un-buried
+  end state, the first here, and still one of thirty on a short reference.
+  Three independent searches had concluded the retarget's neighbourhood
+  contains nothing that both contacts and does not penetrate; the end
+  state of this rollout is such a configuration, reached by physics rather
+  than search, with no controller to credit. It is the thing to
+  characterise next — point `wrap_score` at its end state, where the
+  answer should come out positive, and ask what the motion did that the
+  search could not.
+
+  ![stamp_lift at reset (buried, 878 N), mid-reference (1.55 mm, 6.8 N) and end (0.31 mm, 3.4 N, five-finger pinch on the knob)](../figures/stamp_lift_carry.jpg)
 - **So the next real experiment is upstream of all four learning stages:**
   whether stage 2 can produce a grasp that survives contact *along the
   reference*, not only at rest — `wrap_score` is the only validated
