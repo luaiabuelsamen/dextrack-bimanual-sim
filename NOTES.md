@@ -4366,3 +4366,45 @@ tonight on the stage 2/3 gap alone. What would make it decisive is logging the
 NET force on the hand rather than the summed magnitude: the same vector sum the
 equilibrium residual takes over the object, taken over the hand. Nothing in the
 pipeline measures that today, and it is the quantity base compliance acts on.
+
+### Refuted: the forces do NOT cancel while tracking
+
+The prediction above is wrong and the peer session measured it. Net force on the
+hand during tracking, from the per-frame residuals persisted in
+`figures/physics_*.json` (net contact force on the hand is the negative of that
+on the object, so away from gravity's 1x the residual IS the net hand force in
+object weights):
+
+    rollout       median   p10    p90    min    net N    summed |F|   ratio
+    binoculars      158x    84x   347x    57x    310      6766        0.05
+    bowl            184x   133x   272x    38x    361      2207        0.16
+    camera          308x   124x   650x    36x    604      4502        0.13
+    mug (PPO)       202x    85x   282x    17x    397      1486        0.27
+
+Zero frames of 541 under 2x weight. Cancellation takes 5-27% of the magnitude,
+not all of it, and 300-600 N survives as a net push -- which at the base servos'
+kp = 4000 N/m is a ten-centimetre displacement. The weld does continuous
+mechanical work holding the hand inside the object, every control frame.
+
+Where my prediction failed: I took a measurement of a SETTLED hold -- the
+94-contact bowl reading 0.00 net at rest -- and generalised it to tracking,
+which never settles. The weld re-drives the hand to a fresh reference pose every
+control frame, so tracking is a sequence of placements. I had written the
+placement-versus-settled distinction into a docstring two hours earlier and then
+reasoned from the settled number anyway. Same shape as reading frame 0 as the
+grasp.
+
+This is the strongest structural account anyone has given of "penetration is the
+grip", and it makes the compliant-base experiment decisive rather than
+suggestive by the criterion I set for it.
+
+Two caveats to carry with it. The residual sums over every contact involving the
+OBJECT, so if an object ever touches something other than the hand those forces
+are not hand forces and the third-law step fails for them; scene.py has no floor
+or table, so this looks clean, but a bimanual clip would break it. And the
+readings are taken after each control frame's substeps rather than at reset --
+which is the right place for this argument, since it is the state the weld holds
+the hand in, but a reader will assume reset unless told.
+
+And the caveat that is really the finding: all four rollouts are burial-class.
+There is no clean-grasp tracking rollout in this repository to contrast against.
