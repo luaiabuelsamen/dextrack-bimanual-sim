@@ -266,11 +266,44 @@ corruption as ε: an opposition measure computed on a manufactured contact set
 rewards manufacturing one. Any such term needs a penetration gate before it can
 be used as an objective.
 
-**Caveats.** Frame-0 delta applied as a constant offset to the whole trajectory,
-measured at reset only — **no rollout and no tracking number**. Residuals of
-0.94–1.77× are near or above freefall (1.0×), so none of these is an equilibrium
-and none is a demonstrated grasp; they are configurations with plausible contact
-forces. Three references.
+### Rolled out, it does not track — and that is the real finding
+
+The measurement the section above was missing. Same configurations, rolled out:
+
+| reference | baseline mean | **oriented mean** | frames < 50 mm |
+|---|---:|---:|---|
+| `binoculars_see_1` | 106.2 mm | **170032 mm** | 2/155 → 1/155 |
+| `flashlight_on_2` | 107.5 mm | **149409 mm** | 1/144 → 1/144 |
+| `cup_lift` | **23.1 mm** | **116743 mm** | **128/128** → 1/128 |
+
+The oriented poses have plausible contact forces at reset and cannot carry the
+object at all. `cup_lift` was tracking at 23.1 mm with every frame under 50 mm —
+on 2366× object weight of penetration — and orientation destroys it.
+
+**So do not read the 1–2× weight result as progress toward tracking.** It is
+progress toward physical validity, and the two are in direct opposition here.
+This is the third independent confirmation of the same fact:
+
+| measured | finding |
+|---|---|
+| `w_pen` sweep, end to end | 1.35 mm penetration bought at 148.7 mm of tracking |
+| 283 sampled candidates | zero both touch the object and stay out of it |
+| orientation search, rolled out | 1–2× weight grips fly the object 100+ metres |
+
+**In this pipeline, tracking comes from penetration.** 1–2× object weight is
+what a physically valid contact set produces, and it is nowhere near enough to
+carry anything. The kilonewtons were doing the carrying.
+
+That reframes what stage 2 has to deliver. A feasible pose is necessary and
+nowhere near sufficient: the grasp must also generate real grip force from
+non-penetrating contact, which means the fingers have to *wrap*, not merely
+touch. Nothing measured so far produces that, and no scoring function tried —
+distance, held-ness, tracking error, penetration depth, equilibrium residual,
+ε, one-sidedness — distinguishes a wrap from a touch.
+
+**Caveats.** Frame-0 delta applied as a constant offset across the trajectory.
+Three references. The rollout is feedforward with no PPO correction, so these
+are not comparable to per-clip PPO numbers.
 
 ## C. Vessel wrist target — open, untouched
 
