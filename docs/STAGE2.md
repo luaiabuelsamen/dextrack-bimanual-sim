@@ -840,7 +840,14 @@ built to read the *partial* results file early crashed on its first partial
 file, on an `obj`/`object` key mismatch between writer and reader — the same
 shape as the wrong-pid watcher: **two harnesses tonight failed on exactly the
 event they were built to catch.** A harness is untested until it has fired
-once on real data; fire it on the first row, not the last.
+once on real data; fire it on the first row, not the last. Two more before
+the night was out: the watcher armed for hammer's row counted
+`d.get('rows', [])` where the file's key is `per_reference`, so it read zero
+rows before and after the row landed; and the launcher that was to start the
+benchmark when g9 exited tested `pgrep -f g9_ppo_distill.py` — its own
+command line contained that string, so it found itself forever (the row
+watchers used the same test and only worked because rows landed). Four
+harnesses, one lesson, and `pgrep -f` must exclude the caller.
 Measured rate **18.8 s/iteration, ~2.3 h total** (an earlier figure of
 103 s/iteration in this entry divided elapsed time by *logged lines*, which
 print every 10 iterations; it was wrong). The original checkpoint took
@@ -928,6 +935,30 @@ pre-registration and the prediction scored against it (void, not hit), and
 the README sentence that rested on hammer being a grasp seed. The
 `mug_drink_1` 2×2 above is unaffected — its buried and raw conditions were
 built in-process on one clip, not from the seed file.
+
+**The corrected seeds are a different class of grasp.** With the lookup
+keyed on subject, the s1 seeds for the same-named clips are not variants of
+the s2 ones we trained on:
+
+| reference | s2 seed (what the run used) | s1 seed (correct) |
+|---|---|---|
+| `gamecontroller_play_1` | 57 contacts, 14,042 N (7157×) | **5 contacts**, 12.2 mm drop, eq 0.09 |
+| `camera_takepicture_2` | 32 contacts, 5,800 N (2956×) | **2 contacts**, 1.0 mm drop, eq 0.01 |
+
+The run trained camera and gamecontroller from heavy burials belonging to
+another recording; the v2 run trains them from light contact sets close to
+an actual grasp, with real start counts — the cell the seed-class question
+always lacked. So v2 is informative, not a tidy-up. Nothing about camera
+from the old run carries forward, and it is the row the held-out
+distillation cell turns on.
+
+**Stages 4–5 did run end to end on the old seeds** (`ca50919`), recorded as
+a *mechanism*, not a result. Held out by object — feedforward / own PPO /
+distilled: hammer 906.0 / 80,250 / 847.6 mm; knife 2734 / 87.7 / 81.1 mm;
+camera 36.0 / 34.6 / **1030.3** mm. "Distilled beats feedforward on 2 of 3"
+is true and misleading: camera is the one held-out reference where
+feedforward already worked, and distillation made it twenty-nine times
+worse; the other two comparisons are between two failures.
 
 **What is needed before stage 3 is written again:** seeds regenerated
 subject-qualified for g9's ten picks, stages 3–5 rerun against them
