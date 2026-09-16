@@ -991,9 +991,17 @@ Capping mug to four starts is the cleaner half: rescuing hammer can fail for
 reasons unrelated to sample size, but removing data from the one row that
 works tests one thing. If mug still tracks at four starts, the sample is
 ruled out and seed class stands. If it drops, start count is the effect and
-the seed-class sentence on the README comes off. Rows 7–9 are burial-seeded
-*and* well-supported, so they do not discriminate unless one of them has a
-low start count. The burial column
+the seed-class sentence on the README comes off.
+
+**Pre-registered before rows 7–9 ran**, start counts computed the way g9
+computes them (stage-2 offset, `grasp_frames` at stride 5): `camera` 10 of
+16 candidates (seed 5800 N, 2956×), `gamecontroller` 8 of 13 (14,042 N,
+7157×), `bowl` 27 of 27 (35,522 N, 18,105×); `binoculars` 1 of 31 and
+unseeded — read nothing from it. Bowl is a `mug_drink_2` replicate and does
+not discriminate. Camera and gamecontroller sit between hammer's 4 and mug's
+27: if both track and end buried on 8–10 starts, sample size weakens as the
+explanation before the 2×2 runs; if either drops, the start-count reading
+gains. The burial column
 rests on `mug_drink_1` from a separate session; the burial-seeded g9 rows are
 7–9 and have not run. `knife_lift` (2.1 N) and `phone_call_1` (2.8 N) come
 next, and both sit at the thin end of the grasp class, so they will most
