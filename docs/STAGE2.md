@@ -567,9 +567,15 @@ saved to `results/ppo_mug_drink_1_h160_rawfit.pt`, existing checkpoint
 untouched; ends with a 2×2 of old/new policy × raw/buried initial condition.
 Launched 2026-09-15 late evening. Iteration 0: reward 0.225, **alive 0.770** —
 from a random-init policy the un-buried grasp is not instantly dropped.
-Measured rate **103 s/iteration**, so ~12.5 h, not the 25 min estimated; the
-source of that discrepancy is being checked, and it matters because it bounds
-how the original checkpoint could have been produced. Result to follow.
+Measured rate **18.8 s/iteration, ~2.3 h total** (an earlier figure of
+103 s/iteration in this entry divided elapsed time by *logged lines*, which
+print every 10 iterations; it was wrong). The original checkpoint took
+**6237 s = 14.2 s/iteration** (NOTES.md:3209) using **24 threaded
+environments**; this run uses 12. Same 844,800 control steps and horizon, but
+half the batch per PPO update and twice the updates — a confound to name: a
+marginal result would not be attributable to the initial condition alone, and
+would be rerun at 24 environments before anything was drawn from it. Result to
+follow.
 
 The 5.36 mm reading noted above was rerun under its exact original sequence and
 does not reproduce; five processes agree on 6.10 mm.
