@@ -5043,3 +5043,43 @@ itself, cannot outlive the work, and says what it means.
 The remaining one, the wrong dict key, is the same family as the `obj`/`object`
 crash and the seq-name collision: an instrument that reads a name and gets
 silence rather than an error.
+
+## RETRACTED: "the 0.850 does not reproduce". It reproduces exactly.
+
+The clean sweep at frozen HEAD (b7e2e49) is **identical to the original, 0 of 40
+references differing** -- same hold flags, same drop distances to the nanometre,
+same contact counts. Hold rate 0.275 -> 0.850, CI [0.725, 0.950]; 20 of 34
+successes are grasps, 8 mixed, 6 burials; and the six failures are the same six,
+cubelarge among them.
+
+So the entry above claiming irreproducibility was wrong, and the cause was not
+version skew. It was the sequence-name collision again. The three "disagreeing"
+references were different subjects:
+
+    reference              sweep A        sweep B
+    apple_eat_1            s1,  5.17 mm   s2,  4.50 mm
+    cubelarge_inspect_1    s1, 2508.10    s2,  7.12
+    phone_call_1           s1,  8.71      s2, 15.32
+
+Different clips, correctly giving different answers. I compared s1 rows against
+s2 rows, concluded the pipeline was irreproducible, wrote it up, and had a peer
+session pull the number off the README front page.
+
+**Restored, with the failure class intact.** The six that never hold are
+cubelarge, cubesmall, pyramidlarge, spherelarge, spheremedium and flashlight --
+featureless convex primitives, five of six `inspect` intent, all at 0-1 contacts
+and equilibrium 0.99-1.00, i.e. free fall. That story stands as originally
+written; I weakened it on the strength of a cubelarge row belonging to a
+different subject.
+
+This is the third diagnosis I have retracted tonight and the second caused by
+this one bug. What makes it worth recording rather than just fixing: at the time
+I had already run an in-process determinism check, seen it pass, and concluded
+"the simulator is reproducible, therefore the difference is the code". The
+inference was sound and the premise -- that the two rows described the same clip
+-- was never checked. The guard test I wrote afterwards (`test_seed_keys.py`)
+would have caught the bug; it would not have caught this reasoning, because by
+then I was comparing files rather than calling the code.
+
+The version-skew hazard is real and stays in the record: it crashed a peer's
+80-minute run. It simply did not cause this.

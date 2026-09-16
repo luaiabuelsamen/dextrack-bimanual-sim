@@ -2,7 +2,7 @@
 import json, sys
 import numpy as np
 
-d = json.load(open("results/stage2_grips.json"))
+d = json.load(open(__import__("sys").argv[1] if len(__import__("sys").argv)>1 else "results/stage2_grips.json"))
 r = d["rows"]
 held = np.array([x["held"] for x in r])
 raw = np.array([x["raw_held"] for x in r])
