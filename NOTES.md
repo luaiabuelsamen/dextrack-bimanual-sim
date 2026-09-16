@@ -3470,3 +3470,31 @@ the shape of the fix: an approach search needs a termination condition on the
 FINGER side and a feasibility condition on the ARM side simultaneously, and
 getting one of the two wrong is worse than not doing it -- the unsearched
 arm-constrained pose at least tracks binoculars at 106 mm.
+
+## 2026-09-15 — approach line search, second attempt, also reverted
+
+Two attempts, both wrong in the same area — keeping the hand's state consistent
+across `qpos`, the mocap target and the weld that ties them.
+
+    attempt 1   computed the fingertip clearance and never tested it, so it
+                advanced the full 80 mm regardless and drove the hand past the
+                object.
+    attempt 2   terminated correctly on arm-side contact, but synced the mocap
+                by calling `palm_pose()`, which zeroes qpos internally and so
+                computed the palm as if the base were at the origin. Reading the
+                palm from the live `d.xpos` instead still advanced the full
+                80 mm with zero contacts on all three references.
+
+Reverted both. The measurement that motivated them stands and is the useful
+part: after the arm-side constraint the fingertips sit 50-62 mm from the object
+surface while the closing routine moves them 30-40 mm, so the wrist has to be
+PLACED rather than traded off. But three passes at it produced nothing that
+works, and an unsearched arm-constrained pose still tracks binoculars at 106 mm,
+which is better than a broken search.
+
+Recorded rather than quietly dropped because the failure is specific and the
+next person (me, later) should not rediscover it: this codebase drives the hand
+through a mocap body welded to a free joint, so ANY routine that repositions the
+wrist has to update `qpos`, the mocap target, and call `mj_forward`, in that
+order, and must not call `palm_pose()` to read the current palm because that
+helper zeroes qpos by design. Two of my three attempts died on exactly that.
