@@ -611,3 +611,65 @@ def advance_to_contact(sc, q, max_mm=90.0, step_mm=2.0, clear_mm=0.5):
     q[idx] = base + u * best
     sc.set_q(q)
     return q, best
+
+
+def approach_opposition(sc, q, tip_offsets=None, max_gap=0.030):
+    """How OPPOSED the fingertips are about the object, with no contact needed.
+
+    The orientation search that fixed arm clearance scores minimum
+    fingertip-to-surface distance, and distance cannot tell a hand poised to
+    grasp from one merely adjacent: it took `flashlight_on_2` and `cup_lift` to
+    tips 1.5-3.1 mm off the surface with ZERO contacts and exact free fall, and
+    closing from there engages nothing because the fingers are near the surface
+    and not facing it.
+
+    This measures facing. For each fingertip, take the nearest point on the
+    object and the outward surface normal there; a hand that can grasp has those
+    normals pointing in opposed directions, one that is merely adjacent has them
+    all pointing the same way. Returns |mean unit normal|, so 0 is fully opposed
+    and 1 is every finger on the same side -- the same convention as
+    `one_sidedness`, which needs contacts and therefore cannot be used before
+    the hand is touching.
+    """
+    from oppdef.hands.tips import tip_offset
+    from scipy.spatial import cKDTree
+
+    m, d = sc.model, sc.data
+    if tip_offsets is None:
+        tip_offsets = [tip_offset(m, b) for b in sc.tip_bids]
+    sc.set_q(q)
+
+    pts = []
+    for g in sc.obj_gids:
+        g = int(g)
+        if m.geom_type[g] != mujoco.mjtGeom.mjGEOM_MESH:
+            continue
+        mid = int(m.geom_dataid[g])
+        a, n = int(m.mesh_vertadr[mid]), int(m.mesh_vertnum[mid])
+        v = m.mesh_vert[a:a + n].astype(np.float64)
+        R = np.zeros(9)
+        mujoco.mju_quat2Mat(R, m.geom_quat[g])
+        pts.append(v @ R.reshape(3, 3).T + m.geom_pos[g])
+    if not pts:
+        return 1.0
+    P = np.concatenate(pts)
+    tree = cKDTree(P)
+    com = P.mean(0)
+
+    acc, used = np.zeros(3), 0
+    for b, off in zip(sc.tip_bids, tip_offsets):
+        tip = d.xpos[b] + d.xmat[b].reshape(3, 3) @ off
+        dist, idx = tree.query(tip, k=1)
+        if dist > max_gap:
+            continue
+        # outward normal approximated from the object's centroid; exact enough
+        # for a direction test and free of a normal-buffer lookup
+        nrm = P[idx] - com
+        nn = np.linalg.norm(nrm)
+        if nn < 1e-9:
+            continue
+        acc += nrm / nn
+        used += 1
+    if used < 2:
+        return 1.0
+    return float(np.linalg.norm(acc) / used)

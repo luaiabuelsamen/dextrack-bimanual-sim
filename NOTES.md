@@ -3678,3 +3678,41 @@ made to produce contact sets with epsilon > 0? The machinery exists
 narrowphase pass plus a convex hull, and it is the term the objective has never
 had. Held-ness, tracking error, penetration and equilibrium residual between
 them cannot distinguish a grasp that resists a wrench from one that presses.
+
+## 2026-09-15 — geometric opposition does NOT separate the human from the robot
+
+I added `approach_opposition` -- for each fingertip, the outward surface
+direction at its nearest object point, scored as |mean unit direction|, so 0 is
+opposed and 1 is all on one side. It reads 1.000 on every robot configuration
+tried, which looked like the missing quantity.
+
+It is not. Measured at the middle of the hold window, same object, same frame:
+
+    reference          HUMAN tips   HUMAN whole-hand   ROBOT tips
+    binoculars_see_1      0.836          0.879            0.830
+    flashlight_on_2       0.528          0.447            0.607
+    mug_drink_1           0.937          0.949            0.945
+
+The human's own contact set -- the one that demonstrably holds the object, with
+100-145 vertices within 5 mm -- is as one-sided by this measure as the robot's,
+and on binoculars and mug it is MORE so. So whatever makes the human grasp work
+is not captured by the spread of outward surface directions, and a search
+scored on this would not find it.
+
+That is my fourth wrong hypothesis today, after the finger-reach problem, the
+1:1 translation trade, and the epsilon-as-search-gradient idea. Recorded with
+the measurement rather than deleted, because the negative is informative: it
+rules out the cheapest geometric proxy for "opposition" and it does so using the
+human demonstration as the positive control, which is the right way to test any
+proposed grasp-quality term in this pipeline. Any future candidate should be
+required to separate the human's contact set from the robot's before it is put
+in an objective.
+
+A peer session measured the quantity that DOES separate carrying from failing,
+on contact sets rather than surface geometry: configurations that carry engage
+10 and 3 distinct hand BODIES at contact one-sidedness 0.055 and 0.191, while
+those that fail engage ONE body at ~1.0. That is a wrap versus a touch, and it
+is a property of how many links engage and from which directions -- not of where
+the fingertips happen to sit. Both their measurement and mine point at the same
+conclusion from opposite sides: fingertip geometry is the wrong level of
+description for this problem.

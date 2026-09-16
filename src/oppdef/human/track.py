@@ -32,6 +32,10 @@ GRAVITY = np.array([0.0, 0.0, -9.81])
 #: 1.5-13 kN across four clips and 13-21 mm at reset.
 PEN_ALLOW = 0.003
 W_PEN_SCORE = 40.0
+
+#: A contact deeper than this is not "pressing on the object", it is inside it,
+#: and its normal force must not count toward a closing force target.
+PRESS_MAX_DEPTH = 0.003
 BASE_DOF = ("x", "y", "z", "rx", "ry", "rz")
 
 
@@ -745,7 +749,8 @@ class ReferenceTracker:
                      + W_PEN_SCORE * max(0.0, pen0 - PEN_ALLOW))
 
     def synthesize_grasp(self, k=None, samples=12, rounds=2, seconds=0.4,
-                         grip=8.0, seed=0, objective="track", restarts=1):
+                         grip=8.0, seed=0, objective="track", restarts=1,
+                         sigma_pos=0.015, sigma_rot=0.35):
         """Search near the retargeted wrist for a pose that actually holds, and
         apply that correction to the WHOLE trajectory.
 
@@ -804,7 +809,18 @@ class ReferenceTracker:
             # two-handed stage does. Scored on holding, the search cannot see
             # that a grasp survives gravity and not the motion.
             rng = np.random.default_rng(seed)
-            sig = np.array([0.012] * 3 + [0.08] * 3)
+            # Rotation is searched WIDE -- 0.35 rad is 20 degrees, against the
+            # 0.08 (4.6 deg) this used before. Wrist ORIENTATION is the degree
+            # of freedom the fit never searches: it is inherited from the human,
+            # and it decides whether the arm or the fingers reach the object
+            # first. Sweeping rx/ry/rz over +/-40 deg finds poses with arm
+            # penetration 0.00 mm AND fingertips in contact -- 47 of 1029 for
+            # binoculars_see_1, 21 of 1029 for flashlight_on_2 -- at rotations
+            # of 12-40 deg. A 4.6 deg search cannot reach them, which is why
+            # every translation-only remedy failed: the advance only becomes
+            # available once the hand is rotated so the arm is no longer the
+            # leading contact.
+            sig = np.array([sigma_pos] * 3 + [sigma_rot] * 3)
             best = self.track_score()
             base = np.zeros(6)
             for _rnd in range(rounds):
@@ -1886,7 +1902,25 @@ class BimanualTracker:
             eps, n = grasp_epsilon(self.sim)
             if n < 2:
                 return 2.0
-            return one_sidedness(self.sim) - 4.0 * eps
+            # Arm penetration MUST be in this score. Without it the search buys
+            # opposition by burying the arm -- measured, widening the rotation
+            # search from 0.08 to 0.45 rad took binoculars_see_1 from 2.47 mm of
+            # arm penetration to 15.52 mm and called it an improvement, because
+            # a buried arm manufactures well-distributed contacts exactly the
+            # way a buried hand manufactures a high epsilon. The same defect,
+            # inside the scorer meant to detect it.
+            armp = 0.0
+            d = self.sim.data
+            objs, tips = set(self.sim.obj_gids), set(self.sim.tip_gids)
+            hands = set(self.sim.hand_gids)
+            for i in range(d.ncon):
+                pr = {int(d.contact[i].geom1), int(d.contact[i].geom2)}
+                if not (pr & objs and pr & hands):
+                    continue
+                if [g for g in pr if g in hands][0] not in tips:
+                    armp = max(armp, -float(d.contact[i].dist))
+            return (one_sidedness(self.sim) - 4.0 * eps
+                    + 40.0 * max(0.0, armp - 0.001))
 
         score = ({"track": lambda: self.track_score(nsteps, k),
                   "oppose": _oppose}.get(objective)
