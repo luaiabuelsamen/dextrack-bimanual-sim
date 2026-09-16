@@ -1076,16 +1076,36 @@ best-supported policy trained tonight on either run — from a 4-contact,
 3.6 N seed at equilibrium 0.10, and it drops: 116 m, no contact at the end.
 Two well-supported grasp-class rows, two drops.
 
-**Decided before the remaining rows land:** camera is the only clip with
-both arms; the other five grasp-class references have no burial
-counterpart. If all six drop, the sentence is *in this pipeline a policy can
-track only what it is handed buried, and a valid grasp is not something it
-can learn to keep* — a claim about the reward and the initial-condition
-distribution together, carried by the camera pair as evidence rather than
-by population counts. If any of the five tracks and ends un-buried, that
-does not contradict camera; it means seed class is not sufficient on its
-own, and that clip's burial counterpart is wanted before anything is
-concluded from it.
+**Mouse is a second within-clip pair, and the two pairs disagree about the
+burial arm:**
+
+| clip | arm | start frames | tracking | end |
+|---|---|---:|---:|---|
+| camera | s2 burial (32 contacts, 5800 N) | 28 | **34.6 mm** | 9.32 mm inside |
+| camera | s1 grasp (2 contacts, 6.0 N) | 33 | 2587 mm | 0.00 / 0 / 0 |
+| mouse | s2 burial (19 contacts, 4335 N) | 2 | 291,168 mm | 0.00 / 0 / 0 |
+| mouse | s1 grasp (4 contacts, 3.6 N) | 32 | 116,130 mm | 0.00 / 0 / 0 |
+
+Both pairs agree the grasp arm drops; camera's burial tracks and mouse's
+burial drops. So burial is **not sufficient** for tracking — it is
+necessary in everything seen so far, and not sufficient — and the sentence
+drafted for the front page ("a policy can track only what it is handed
+buried") was half wrong. The confound survives exactly there: mouse's
+burial arm had 2 start frames against camera's 28, so "burial with data
+tracks, burial without does not" is live, unresolved, and a smaller
+question than the one set out to answer.
+
+**The decision rule, revised before the remaining three land:** the claim
+is about the grasp arm only — *a policy trained from a physically valid
+grasp lets go, and more data does not change that* — carried by two
+independent references with the two largest training sets of the night
+(camera 33 frames / 891 transitions, mouse 32 / 1176), both clean grasps,
+both let go. The burial arm is reported as heterogeneous and unexplained,
+not as the other half of a dichotomy. Knife has 4 starts and will be
+consistent-but-thin like phone; hammer (7 contacts, 29.9 N) and flashlight
+(8, 35.4 N) are the two that can still add independent weight. If either
+tracks and ends un-buried, seed class is not sufficient on its own and that
+clip's burial counterpart is wanted before anything is concluded from it.
 
 ### The reward terms that would price a grasp — drafted, benchmarked, not landed
 
