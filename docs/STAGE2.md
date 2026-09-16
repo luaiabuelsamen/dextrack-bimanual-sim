@@ -1049,6 +1049,7 @@ read as they land, end states live (`results/g9_ppo_distill_v2.json`):
 | `gamecontroller_play_1` | thin — 5 contacts, 1.9 N (below object weight) | 3 | 276 | 51,778 mm | 0.00 mm | 0 | 0 N |
 | `hammer_use_2` | grasp — 7 contacts, 29.9 N, eq 0.16 | **11** | **684** | 32,463 mm | 0.00 mm | **0** | **0 N** |
 | `flashlight_on_2` | grasp — 8 contacts, 35.4 N (strongest in the set) | 4 | 131 | 218.9 mm | 0.00 mm | 0 | 0 N |
+| `mug_drink_2` | **burial** — 8 contacts, 3251 N | **4** | — | **26.7 mm** | **11.10 mm** | 9 | **1574 N (802×)** |
 
 **Camera drops — and it is a within-reference control, not a fresh row.**
 The seq-name collision means the same s1 camera clip has now been trained
@@ -1113,8 +1114,32 @@ from a physically valid grasp lets go of the object, and more data does
 not change that.** Nothing in the reward asks for a grasp, and a policy
 cannot keep what it is not paid to keep. The burial arm remains
 heterogeneous (camera's tracks, mouse's does not) and is not part of the
-claim. The remaining three rows are the two burial seeds and the unseeded
-binoculars, read as end states only.
+claim.
+
+**v2's `mug_drink_2` closes the sample-size question from the direction
+the grasp rows could not reach: a burial seed with four start frames
+tracks** — 26.7 mm, ending 11.10 mm inside on 9 contacts at 1574 N (802×).
+
+| seed class | reference | start frames | tracking | end |
+|---|---|---:|---:|---|
+| **burial** | `mug_drink_2` (s1) | **4** | **26.7 mm** | 11.10 mm inside, 9 contacts, 1574 N |
+| grasp | `hammer_use_2` | 11 | 32,463 mm | 0.00 / 0 / 0 |
+| grasp | `mouse_use_1` | 32 | 116,130 mm | 0.00 / 0 / 0 |
+| grasp | `camera_takepicture_2` | 33 | 2587 mm | 0.00 / 0 / 0 |
+
+More data does not rescue a grasp, and very little data does not prevent a
+burial from tracking: the confound is dead in both directions. It also
+removes the last refuge of the sample-size story — "burial with data
+tracks, burial without does not" was the live remaining question after
+mouse's burial arm dropped on 2 starts; mug tracks on 4, barely more, so
+mouse's burial arm is written as *unexplained* (plausibly something about a
+flat object on a surface), not as evidence of a data effect. And
+`mug_drink_2` is itself a same-class pair, both arms burial, both tracking,
+both ending buried: s2 seed 528 N, 27 starts → 5.7 mm ending 13.18 mm
+inside at 4834 N; s1 seed 3251 N, 4 starts → 26.7 mm ending 11.10 mm inside
+at 1574 N. Across the four within-clip pairs and this one, **the thing that
+predicts the outcome is the seed's class** — not its start count, not its
+subject, not the clip. Bowl is the last burial row; binoculars is unseeded.
 
 **Mouse is a second within-clip pair, and the two pairs disagree about the
 burial arm:**
