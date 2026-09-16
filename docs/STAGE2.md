@@ -1063,10 +1063,30 @@ Gating `mj_contactForce` buys under 1 %; the other 5–8 % is the per-contact
 Python loop reading depth, geom and body for every env on every step — the
 same shape as the per-actuator loop that once cost 11 % of wall clock. The
 reward is provably unchanged at defaults and training would be 5–8 % slower,
-which is exactly the regression nobody would look for. Being fixed on the
-branch by vectorising the summary over the contact arrays and computing it
-only when a term is on or the iteration is logged; re-benchmarked on the
-same seeds at the next quiet window before anything lands.
+which is exactly the regression nobody would look for. And the gate was a
+fix aimed at the wrong half of the cost: the concern was the force
+computation, the cost was reading depth and geoms per contact in Python, and
+gating alone would have shipped the 5 % while looking like it had fixed the
+problem. A fix that targets the wrong half of a cost can be worse than no
+fix, because it retires the concern. Being fixed on the branch by
+vectorising the summary over the contact arrays and computing it only when
+a term is on or the iteration is logged; re-benchmarked on the same seeds
+at the next quiet window before anything lands (under 1 % to land).
+
+**v2 caveat, before its rows are quoted:** the run's own `order:` and
+`distillation mixture:` lines label seeds by contact count only — its
+internal `_seed_kind` was never made force-aware while the analysis was —
+so the run calls `mug_drink_2` a grasp on 8 contacts where the analysis
+correctly calls it a burial at 3251 N. Take the analysis, not the run's
+line; the two are to be replaced by one shared classifier after v2, since
+two implementations of one definition is how the contact-count label
+survived long enough to mislabel `mug_drink_2` in the first place. Training
+order, force-aware, cleanest grasp first: camera (2 contacts, 6.0 N),
+phone (3, 7.5), mouse (4, 3.6), knife (4, 2.1), gamecontroller (5, 1.9 —
+thin), hammer (7, 29.9), flashlight (8, 35.4), then the two burials, then
+binoculars. The first six rows are the experiment; camera is the single
+most informative — 2 contacts at 6.0 N, equilibrium 0.01, on the one
+reference where the feedforward already tracked at 36 mm.
 
 ## Look at the pose before trusting the number
 
