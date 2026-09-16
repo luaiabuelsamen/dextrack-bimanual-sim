@@ -3802,3 +3802,36 @@ What stands, and what the next session starts from:
                                       before it enters an objective. That test
                                       kills epsilon and fingertip spread in
                                       minutes.
+
+## 2026-09-15 — the fit targets the wrong links, and the human data says so
+
+Retracting my "inert" conclusion above: the middle-phalanx contact term SHOULD
+have fired, so its no-op was a wiring bug and not a dead end. The human's middle
+phalanx joints are within the 15 mm contact tolerance on 2-5 fingers of every
+reference tested:
+
+    reference          TIP gaps (mm)                MID gaps (mm)         mid<15mm
+    binoculars_see_1   3.1  7.8  6.5 10.8  0.9      5.8 10.3 18.4 24.5 16.1   2/5
+    flashlight_on_2   10.3 15.4 12.8 23.3 27.9      7.8  2.9  5.4 24.0 13.1   4/5
+    cup_lift           6.8 21.8 11.6 18.8  5.5      4.8  7.7  6.3  5.3  0.5   5/5
+    mug_drink_1       12.8 13.1 13.6 16.4  1.1      7.6  8.2  9.8 26.0 27.7   3/5
+
+On `cup_lift` every one of the five middle phalanges is CLOSER to the object
+than the fingertips are -- 0.5-7.7 mm against 5.5-21.8 mm. The human is holding
+that cup with the middles of its fingers, and the fit has only ever been asked
+to place the tips.
+
+That is the objective defect stated at the level it actually lives at. Not
+penetration, not reach, not opposition, not force: the retarget optimises the
+wrong five points. A hand whose fingertips are on the surface and whose middle
+phalanges are 20 mm off is touching; the human's, with the middles at 0.5 mm, is
+wrapping. And this is measurable directly from the demonstration, for every
+reference, before any simulation runs -- which makes it the cheapest possible
+term to add and to validate.
+
+So the next session has a concrete, validated change rather than a direction:
+give the middle phalanges surface-contact targets on the fingers where the
+human's own middle joint is within tolerance -- 2 to 5 of them per reference --
+and check the result with `wrap_score`, which counts exactly the engaged-link
+property this would produce. My attempt at it was inert through a wiring fault
+and is reverted; the idea is not what failed.
