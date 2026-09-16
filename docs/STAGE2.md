@@ -888,20 +888,34 @@ record what was *believed* at the time:
 | `mouse_use_1` | burial 4335 N | 2 | 337 | 291,168 mm | 0.00 mm | 0 | 0 N |
 | `camera_takepicture_2` | burial 5800 N | 28 | 836 | **34.6 mm** | **9.32 mm** | 8 | 509 N (260×) |
 
-Statements that stand on the end states alone:
+Statements that stand — and the line is sharper than first drawn: they are
+about the **population of rows**, not about any named reference, because
+*which* reference reached *which* state is a property of a seeding that was
+wrong. Row 8 made the point: `gamecontroller_play_1` under s2's offset came
+back with **no graspable frame at all**; under its own subject's offset it
+may behave completely differently, and so may every other row.
 
 - **No row tracks under 50 mm and ends holding the object un-buried.** The
   g9 readout prints *no row here is a tracking result*, and it is right.
-- The two rows that track (`mug_drink_2` 5.7 mm, `camera` 34.6 mm) **end
-  with the hand inside the object** — 13.18 mm at 2466× weight, 9.32 mm at
-  260×. The best tracking number in this repository ends the deepest.
+- The rows that track (5.7 mm, 34.6 mm) **end with the hand inside the
+  object** — 13.18 mm at 2466× weight, 9.32 mm at 260×.
 - Four of seven rows finish at **0.00 mm, 0 contacts, 0 N — because the
-  object is on the floor.** On a penetration criterion alone those are the
-  cleanest rows in the run. Any quality measure for this pipeline that
-  reports penetration must report held-ness beside it.
-- `flashlight` re-buried from a near-zero contact set to 207 N / 4.86 mm: a
+  object is on the floor.** The error column alone ranks a dropped object
+  above a held one; any quality measure for this pipeline that reports
+  penetration must report held-ness beside it.
+- One row re-buried from a near-zero contact set to 207 N / 4.86 mm: a
   policy will manufacture penetration to hold on when nothing forbids it.
-- `knife` (1 start frame, 25 transitions) carries no weight either way.
+
+The fix is `a34adb1`: every seed lookup keyed on `subject/seq` across the
+stage-2 sweep, g9, g7, stage3_padded and the analysis; bare names accepted
+only when unambiguous, otherwise refused with the list of subjects; the
+subject stored on every row. `tests/test_seed_keys.py` guards that the
+collision is real, that colliding names are different clips, that every
+seed file carries a subject per row, and — the one that would have caught
+this on the day it was written — that no file under `experiments/` builds a
+dict keyed on a bare sequence name. Two independent computations
+disagreeing is what caught it; that is not a mechanism to count on, so it
+is a test now.
 
 Statements that are **withdrawn** with the labels: "burial-seeded tracks,
 grasp-seeded drops", the seed-class 2×2, the start-count-versus-depth
@@ -910,9 +924,12 @@ the README sentence that rested on hammer being a grasp seed. The
 `mug_drink_1` 2×2 above is unaffected — its buried and raw conditions were
 built in-process on one clip, not from the seed file.
 
-**What is needed before stage 3 is written again:** the subject-keyed seed
-file and a repeated run, and a row that ends held, un-buried, under 50 mm.
-Nothing in this table is that row.
+**What is needed before stage 3 is written again:** seeds regenerated
+subject-qualified for g9's ten picks, stages 3–5 rerun against them
+(`results/g9_ppo_distill_v2.json`), then the clean stage-2 sweep; the
+seed-class-versus-sample 2×2 goes back in the queue after that, on seeds
+that mean what they say. And a row that ends held, un-buried, under 50 mm —
+nothing in this table is that row.
 
 ### The base is rigid — and that is ruled out, by the rollout sweep
 
