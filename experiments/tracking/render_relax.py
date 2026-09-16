@@ -54,10 +54,17 @@ def main():
     ap.add_argument("--azim", type=float, default=135.0)
     a = ap.parse_args()
 
-    grips = {x["seq"]: x for x in json.loads(Path(a.grips).read_text())["rows"]}
+    # keyed on SUBJECT/SEQ, never the bare name (tests/test_seed_keys.py)
+    grips = {f"{x['subject']}/{x['seq']}": x
+             for x in json.loads(Path(a.grips).read_text())["rows"]}
     rows = []
     for name in a.seqs.split(","):
-        g = grips[name]
+        hits = [k for k in grips if k == name or k.split("/", 1)[1] == name]
+        if len(hits) != 1:
+            raise SystemExit(f"{name!r} matches {len(hits)} grip rows "
+                             f"({hits}); name it as SUBJECT/SEQ")
+        g = grips[hits[0]]
+        name = g["seq"]
         seq = grab.load(f"{g['subject']}/{name}.npz", verts=True, stride=8)
         rt = T.ReferenceTracker(seq, hand="shadow")
         rt.apply_wrist_offset(np.asarray(g["offset"], float))

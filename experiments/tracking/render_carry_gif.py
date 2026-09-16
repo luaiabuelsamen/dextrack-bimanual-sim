@@ -109,9 +109,17 @@ def main():
     ap.add_argument("--fps", type=float, default=7.5)
     a = ap.parse_args()
 
-    rows = {r["seq"]: r for r in json.loads(Path(a.seeds).read_text())["rows"]}
+    # keyed on SUBJECT/SEQ: GRAB sequence names collide across subjects, and
+    # a bare-name dict silently keeps one recording (tests/test_seed_keys.py)
+    rows = {f"{r['subject']}/{r['seq']}": r
+            for r in json.loads(Path(a.seeds).read_text())["rows"]}
     for name in [x.strip() for x in a.seqs.split(",") if x.strip()]:
-        row = rows[name]
+        hits = [k for k in rows if k == name or k.split("/", 1)[1] == name]
+        if len(hits) != 1:
+            raise SystemExit(f"{name!r} matches {len(hits)} seed rows "
+                             f"({hits}); name it as SUBJECT/SEQ")
+        row = rows[hits[0]]
+        name = row["seq"]
         seq = grab.load(f"{row['subject']}/{name}.npz", verts=True, stride=8)
         rt = T.ReferenceTracker(seq, hand="shadow")
         rt.apply_wrist_offset(np.asarray(row["offset"], float))
