@@ -22,6 +22,12 @@ import numpy as np
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--path", default="results/g9_ppo_distill.json")
+    ap.add_argument("--grips", default="",
+                    help="seed file this run was trained from. Must be the one "
+                         "the run actually used: labelling v2's rows from the "
+                         "first run's seed file reports the wrong class, which "
+                         "is the same mistake one level up from the collision "
+                         "that produced it.")
     a = ap.parse_args()
     d = json.loads(Path(a.path).read_text())
     per = d.get("per_reference", [])
@@ -43,7 +49,9 @@ def main():
     # So a tracking number means nothing without the class of the state it
     # started from, and the stage-2 sweep says 6 of 34 successes are burials.
     seeds = {}
-    for cand in ("results/stage2_grips_g9.json", "results/stage2_grips.json"):
+    cands = ([a.grips] if a.grips else
+             ["results/stage2_grips_g9.json", "results/stage2_grips.json"])
+    for cand in cands:
         q = Path(cand)
         if q.exists():
             for r in json.loads(q.read_text())["rows"]:

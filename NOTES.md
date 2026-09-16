@@ -4899,3 +4899,46 @@ same clip, and both track and both end buried:
 Four within-clip pairs now exist (camera, mouse, hammer, flashlight) plus this
 same-class pair, and across all of them the pattern that holds is the seed's
 CLASS, not its start count, not its subject, and not the clip.
+
+## v2 complete: perfect separation by seed class
+
+Ten references, seeds keyed on their own subject, labelled from the seed file the
+run actually used:
+
+    reference              PPO          seed     con | end pen  end con  end grip
+    bowl_drink_1               8.2 mm   BURIAL    94 |  17.50      81     29118 N
+    mug_drink_2               26.7      BURIAL     8 |  11.10       9      1574
+    knife_lift                87.7      grasp      4 |   0.00       0         0
+    flashlight_on_2          218.9      grasp      8 |   0.00       0         0
+    camera_takepicture_2   2,587.1      grasp      2 |   0.00       0         0
+    hammer_use_2          32,462.6      grasp      7 |   0.00       0         0
+    phone_call_1          42,603.0      grasp      3 |   0.00       0         0
+    gamecontroller_play_1 51,777.5      thin       5 |   0.00       0         0
+    mouse_use_1          116,129.9      grasp      4 |   0.00       0         0
+    binoculars_see_1     131,158.2      failed       |   0.00       0         0
+
+    from a BURIAL seed (2): median      17.5 mm
+    from a GRASP seed  (6): median  17,524.9 mm
+
+**A factor of one thousand between the classes, and not a single row crosses.**
+Both burial-class seeds track and end with the hand inside the object. All six
+grasp-class seeds, the thin one and the stage-2 failure end at 0.00 mm
+penetration, zero contacts and zero newtons -- the object on the floor.
+
+Eight of ten rows finish under 3 mm of penetration, which on a depth criterion
+would be the cleanest run in the repository. Zero rows track under 50 mm while
+ending un-buried.
+
+Start counts do not separate the classes: the burial rows have 27 and 4 starts,
+the grasp rows 1 to 33. The two largest training sets in the run are grasp-class
+and both drop; the smallest burial set is four frames and it tracks.
+
+So, for GRAB on a Shadow right hand at 160k control steps per reference:
+**whether a tracking policy works is determined by whether its initial hand pose
+is inside the object.** Nothing else measured here predicts it -- not the number
+of start frames, not the subject, not the clip, not the object, and not the
+training budget (a separate 845k-step run on a valid grasp also dropped from
+every start).
+
+And the corollary that matters for everything upstream: every tracking number
+this repository has ever reported was produced from a buried initial condition.

@@ -13,6 +13,105 @@
    "end_contacts": 0,
    "grasp_frames": 33,
    "transitions": 891
+  },
+  {
+   "obj": "phone",
+   "seq": "phone_call_1",
+   "subject": "s1",
+   "ppo_mm": 42603.03473996152,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 1,
+   "transitions": 120
+  },
+  {
+   "obj": "mouse",
+   "seq": "mouse_use_1",
+   "subject": "s1",
+   "ppo_mm": 116129.92446531377,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 32,
+   "transitions": 1176
+  },
+  {
+   "obj": "knife",
+   "seq": "knife_lift",
+   "subject": "s1",
+   "ppo_mm": 87.65951234648011,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 1,
+   "transitions": 25
+  },
+  {
+   "obj": "gamecontroller",
+   "seq": "gamecontroller_play_1",
+   "subject": "s1",
+   "ppo_mm": 51777.547901607155,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 3,
+   "transitions": 276
+  },
+  {
+   "obj": "hammer",
+   "seq": "hammer_use_2",
+   "subject": "s1",
+   "ppo_mm": 32462.623353366682,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 11,
+   "transitions": 684
+  },
+  {
+   "obj": "flashlight",
+   "seq": "flashlight_on_2",
+   "subject": "s1",
+   "ppo_mm": 218.8810710406238,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 4,
+   "transitions": 131
+  },
+  {
+   "obj": "mug",
+   "seq": "mug_drink_2",
+   "subject": "s1",
+   "ppo_mm": 26.729136915706995,
+   "end_pen_mm": 11.098749057475583,
+   "end_grip_n": 1574.179109522846,
+   "end_contacts": 9,
+   "grasp_frames": 4,
+   "transitions": 144
+  },
+  {
+   "obj": "bowl",
+   "seq": "bowl_drink_1",
+   "subject": "s1",
+   "ppo_mm": 8.223805563245975,
+   "end_pen_mm": 17.50050311870358,
+   "end_grip_n": 29118.18397741201,
+   "end_contacts": 81,
+   "grasp_frames": 27,
+   "transitions": 711
+  },
+  {
+   "obj": "binoculars",
+   "seq": "binoculars_see_1",
+   "subject": "s1",
+   "ppo_mm": 131158.18115805893,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 1,
+   "transitions": 145
   }
  ],
  "held_out": []
