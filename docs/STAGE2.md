@@ -1286,7 +1286,22 @@ samples penetration, held fraction and grip on the tenth. Micro-benchmark
 on the buried gamecontroller state (45 contacts, 12 bodies, 2000 calls × 5
 alternating reps, under load): loop 285 µs per env-step, loop with force
 390 µs, **numpy 66 µs**, numpy with force 168 µs. The full PPO A/B/C on the
-same seeds is re-run at the next quiet window; under 1 % to land.
+same seeds, re-taken on a quiet machine (load 1.23 at start):
+
+| seed | 3216767 | 6c55f9b at defaults | 6c55f9b always-on |
+|---|---:|---:|---:|
+| gamecontroller (45 contacts / 12 bodies) | 6.700 s/iter | 6.857 (×1.024) | 6.999 (×1.045) |
+| bowl (40 contacts / 6 bodies) | 13.880 s/iter | 14.317 (×1.032) | 14.460 (×1.042) |
+
+Always-on fell from +6–9 % to +4.2–4.5 %. The defaults column reads
++2.4–3.2 % — above the 1 % bar as printed — but overstates a real run: the
+bench times 3 iterations and the summary runs on every tenth and the last,
+so 2 of the 3 timed iterations are measured (67 %) against 7 of 60 (12 %)
+in a real run; the observed numbers are consistent with that (2/3 × 4.5 %
+≈ 3 %) and project to ~0.5 % at a real cadence. A projection is not a
+measurement, so the branch does not land on it: re-taken with 10 timed
+iterations (20 % measured) at the next quiet window, and it lands only if
+that measured number is under 1 %.
 
 **v2 caveat, before its rows are quoted:** the run's own `order:` and
 `distillation mixture:` lines label seeds by contact count only — its
