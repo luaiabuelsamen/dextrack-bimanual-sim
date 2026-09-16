@@ -164,6 +164,43 @@ So the open question is probably one, not two: **how should the wrist be posed
 relative to the object, given it cannot be the human's wrist pose?** Orientation
 is the part nothing has touched.
 
+### And such poses exist — orientation is the missing degree of freedom
+
+The one constructive result. Sweeping wrist rotation (rx, ry, rz over ±40°,
+7 values each) crossed with an advance along the palm axis (−20, 0, +20 mm) —
+1029 poses per reference, fitting scene, frame 0:
+
+| reference | start (arm / gap) | best found | arm<1 mm **and** gap<15 mm |
+|---|---|---|---:|
+| `mug_drink_1` | 0.48 mm / 42.9 mm | 0.00 mm / 23.1 mm | 0/1029 |
+| `binoculars_see_1` | 2.47 mm / 44.2 mm | 0.00 mm / **−11.6 mm** | **47**/1029 |
+| `flashlight_on_2` | 1.39 mm / 23.5 mm | 0.00 mm / **3.1 mm** | **21**/1029 |
+
+Two of three reach **zero** arm penetration with the fingertips touching, at
+rotations of 12–40°. A negative gap means the tip is inside the surface
+envelope, i.e. in contact. These are the poses the pipeline has never found, and
+they sit within 40° of where the fit was already putting the wrist.
+
+The advance matters but is not sufficient alone: +20 mm was best in all three,
+yet translation *by itself* advances 0.0 mm. It only becomes available once
+rotation stops the arm being the leading contact.
+
+`mug_drink_1` is the holdout at 0/1029, though its best still improves the gap
+42.9 → 23.1 mm with the arm fully clear. A mug is the vessel geometry already
+known to be the hardest class.
+
+**Caveats.** Static check at frame 0 in the fitting scene, not a trajectory and
+not physics. The 15 mm threshold was chosen because `establish_grip` moves a tip
+30–40 mm, so anything under it is reachable — it is not a claim about grasp
+quality. A coarse 7³ grid, so the counts are existence evidence rather than a
+distribution. And it says nothing about whether the resulting grasp is stable,
+only that it is geometrically available.
+
+**What it suggests.** The fit solves fingertip positions and wrist *position*,
+with `W_PEN_ARM` constraining where the arm may be. Wrist *orientation* is
+inherited from the human and never searched — and it is what decides whether the
+arm or the fingers reach the object first.
+
 ## C. Vessel wrist target — open, untouched
 
 Eleven of 40 sequences retain a median arm-side problem, and they cluster on
