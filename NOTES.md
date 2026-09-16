@@ -5011,3 +5011,35 @@ that each does what it was built to do, and none of it matters, because every
 one of them is downstream of an initial condition that either buries the hand or
 drops the object. Fixing stage 4 would improve nothing. The variable is upstream
 of all of them.
+
+### Five harness failures, one failure: watching the wrapper, not the worker
+
+Tonight produced five, across two sessions, and they are the same bug:
+
+1. `pkill -f <pattern>` matched my own shell's command line and killed it. Three
+   times.
+2. A peer's watcher used `pgrep -f g9_ppo_distill.py` as its exit test, and the
+   watcher's own command line contained that string, so it waited on itself
+   forever and never fired.
+3. A peer's result watcher read `d.get("rows")` where the file's key is
+   `per_reference`, so it counted zero before and after the row it was waiting
+   for.
+4. My chained job fired EARLY: it waited on the pid of a previous chain, and
+   when I killed that chain to reorder the queue, the wait returned immediately
+   and launched a 12-thread PPO run alongside a job that was already using the
+   machine.
+5. My chained job would have fired LATE: the peer's re-bench waited on my
+   wrapper script's pid, and the wrapper does not exit when the interesting work
+   finishes -- it goes on to the next job in the chain. Caught before it
+   mattered only because I noticed the sweep starting.
+
+Four of the five are one mistake: **the process being watched was not the process
+doing the work.** A pattern can match the watcher; a wrapper outlives its
+children; a chain's pid is not its current job's pid. The fix is to record the
+WORKER's pid at launch and watch that, or better, to have the worker touch a
+sentinel file when it is genuinely done and watch the file. A file cannot match
+itself, cannot outlive the work, and says what it means.
+
+The remaining one, the wrong dict key, is the same family as the `obj`/`object`
+crash and the seq-name collision: an instrument that reads a name and gets
+silence rather than an error.
