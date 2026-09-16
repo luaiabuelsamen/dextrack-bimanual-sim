@@ -372,6 +372,42 @@ are different failures, and averaging them makes the distribution unreadable.
 
 ---
 
+## Look at the pose before trusting the number
+
+`experiments/tracking/inspect_pose.py` renders a configuration from two angles
+with its contact summary underneath. **Use it before believing any contact
+metric.**
+
+This was learned expensively. A pose reported as *0.54 mm penetration, 1 body in
+contact, one-sidedness 1.000* reads like a near-miss grasp, and several hours of
+sweeps were spent treating it as one. Rendered, it is a hand sitting **beside**
+the cup with its fingers closing on empty air. The same picture showed that the
+baseline — the configuration everyone had been calling broken — is a *correct*
+cylindrical wrap: fingers curled round the outside, thumb opposing, 10 bodies
+engaged at one-sidedness 0.055. Its only defect is that the cup passes through
+the palm.
+
+That reframed two conclusions at once:
+
+- **Opening the fingers cannot fix it.** Backing them off 0.00 → 0.25 rad leaves
+  penetration flat at 11.65 → 11.38 mm, because the buried part is the palm and
+  the wrist, which finger joints do not move. It also destroys the wrap — at
+  0.10 rad the fingers straighten out of their curl and tracking collapses from
+  23.1 mm to 103343 mm.
+- **The hand is not mis-posed, it is too big.** A Shadow palm cannot wrap this
+  cup without intersecting it. Every variant that tracks — nine combinations of
+  retraction and closure — sits at 11.65–16.52 mm penetration and 4.6–8.0 kN.
+
+```python
+from experiments.tracking.inspect_pose import look, contacts, sheet
+rt.reset_at(0)
+sheet([look(rt.sim, "baseline")], "out/x.jpg")   # contact summary auto-captioned
+```
+
+`contacts()` returns max penetration, number of distinct hand bodies, and
+one-sidedness (|mean contact normal|: near 0 is opposed contacts on different
+sides — a wrap; 1.0 is all one direction, or nothing touching).
+
 ## Instrumentation
 
 `make render-tracking` captures and renders the four reference rollouts. Each
