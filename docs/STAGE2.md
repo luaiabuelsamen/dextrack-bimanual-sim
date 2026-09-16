@@ -63,13 +63,37 @@ night of two sessions measuring each other's claims:
   search could not.
 
   ![stamp_lift at reset (buried, 878 N), mid-reference (1.55 mm, 6.8 N) and end (0.31 mm, 3.4 N, five-finger pinch on the knob)](../figures/stamp_lift_carry.jpg)
-- **So the next real experiment is upstream of all four learning stages:**
-  whether stage 2 can produce a grasp that survives contact *along the
-  reference*, not only at rest — `wrap_score` is the only validated
-  discriminator for that, and it has never been used as a search objective.
-  Not the reward, not the distillation, not the base. The reward-term branch
-  (`rl-penetration-cost`) is drafted and benchmarked for whoever wants a
-  policy that is paid to hold; it is not the fix for this.
+- **The reframe** (`12205c5`, from rendering the three grasp seeds that
+  carried to the end): **all three start buried and relax under motion.**
+  `stamp_lift` 14.23 mm / 878 N at reset → 0.31 mm / 3.6 N at the end (46×
+  in depth, 244× in force); `hammer_lift` 18.9 mm / 7320 N → 4.8 mm / 343 N;
+  `banana_eat_1` 22.8 mm / 1225 N → 4.2 mm / 284 N. It is the contact
+  solver resolving an over-constrained pose into a stable contact set in the
+  first frames of motion, and what is left is a real grasp. The two grasp
+  seeds that failed did not fail by being too buried: `knife_lift` makes
+  **zero contacts at reset** — its stage-2 grasp does not touch the object
+  in the tracking scene, and its twice-"unexplained" 87.7 mm is an object
+  falling beside a hand that never held it (retracted as unexplained here);
+  `phone_call_1` is buried at 11.5 mm but engaged at only 78 N, an order of
+  magnitude below the carriers, and gone by the first quarter. So the three
+  independent searches that concluded *no pose both contacts the object and
+  stays out of it* were looking for the wrong object: the property is
+  dynamic, not static. You do not need a pose that touches without
+  penetrating; you need one that **penetrates enough to relax into contact
+  once the hand moves**, and the relaxation produces the grasp. A static
+  hold test with a penetration gate rejects every one of these three,
+  including the only held, un-buried end state in the repository.
+- **So the next real experiment is upstream of all four learning stages,
+  and it is now well-posed:** make the stage-2 search objective **the end
+  state of a short carry** — not a static hold with a penetration gate. The
+  candidate discriminator, measurable at reset and clean on n = 5, is
+  tracking-scene grip force (carriers 878 / 1225 / 7320 N; failures 0 / 78
+  N) — not `wrap_score`, not ε, not depth, none of which separates them; it
+  is being tested on the other 25 seeds. Carriers are n = 3 and the
+  discriminator is a candidate until then. Not the reward, not the
+  distillation, not the base. The reward-term branch (landed at `423dac9`,
+  off by default) is for whoever wants a policy paid to hold; it is not
+  the fix for this.
 
 Earlier status (2026-09-15), kept for the subproblem table:
 
@@ -78,11 +102,12 @@ Earlier status (2026-09-15), kept for the subproblem table:
 | **A. Arm-side placement** — forearm/wrist/palm inside the object | **fixed** | `W_PEN_ARM=60` → `binoculars_see_1` 175 m → **106 mm**; arm-side penetration 0.00 mm median over 40 sequences |
 | **B + C. The wrist pose** — the arm reaches the object before the fingers do | **open, and now one question** | on `mug_drink_1` the arm penetrates at 0.48 mm while the tips are 42.9 mm out; for vessels the palm is 33 mm inside with **zero** finger contact |
 
-**What stage 2 has to produce, stated precisely:** a configuration with **many
-contacts, on opposing sides, at bounded penetration** — a wrap. That is what
-separates the configurations that carry from the ones that do not (10 and 3
-engaged bodies at one-sidedness 0.055/0.191, against 1 body at ≈1.0), and
-nothing in the pipeline currently searches for it.
+**What stage 2 has to produce — as stated on 2026-09-15, superseded above:**
+a configuration with many contacts, on opposing sides, at bounded
+penetration — a wrap. That described the *end state* correctly and the
+*search target* wrongly: the carry sweep showed the end state is reached by
+relaxation under motion from a pose that starts well inside the object, so
+the search should score the end of a short carry, not a static wrap.
 
 **The hard finding, and the reason this is not a tuning problem:** across 3019
 sampled wrist poses under a 2 mm penetration gate, **not one made contact at
