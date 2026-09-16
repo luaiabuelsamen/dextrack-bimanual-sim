@@ -96,12 +96,15 @@ class RLConfig:
     #: [0, w_hold]. Default 0, as above.
     w_hold: float = 0.0
     hold_ref: float = 1.0        # object weights of normal force for the full bonus
-    #: Iterations on which grip force is measured for the log and the verbose
-    #: line printed (every log_every-th, and the last). Penetration depth,
-    #: contact count, body count and position error come free from the
-    #: contact list and are always on; the force needs `mj_contactForce` per
-    #: contact per env per step -- ~58k calls an iteration on a buried hand --
-    #: so it runs only when a term prices it or the iteration is logged.
+    #: Iterations on which the contact set is measured for the log and the
+    #: verbose line printed (every log_every-th, and the last). Measured on a
+    #: quiet machine, reading the contact list for every env on every step
+    #: cost 5-8% of an iteration against 3216767 even with the force read
+    #: gated off, so at defaults the whole summary runs only on logged
+    #: iterations and the step is otherwise the old step: the log's
+    #: penetration, held fraction and grip are SAMPLED every log_every-th
+    #: iteration at defaults, and continuous whenever a term prices them.
+    #: Position error is always on (it is already computed for the reward).
     log_every: int = 10
     seed: int = 0
 
@@ -115,35 +118,68 @@ class ContactSummary:
     grip: float       #: total hand-object normal force, N, as track.total_grip (nan if not measured)
 
 
-def contact_summary(sc, force: bool = True) -> ContactSummary:
-    """One pass over `sc.data.contact` for what the reward and the log need.
+@dataclass
+class ContactMasks:
+    """Which geom ids are the object's and the hand's, as boolean arrays over
+    geom id, plus the geom->body map. Built once per scene, not per step."""
+    is_obj: np.ndarray
+    is_hand: np.ndarray
+    geom_bodyid: np.ndarray
 
-    `sc.penetration()` and `track.total_grip(sc)` compute two of these; this
-    walks the contact list once because it runs for every environment on every
-    control step. Same identification as both: a contact counts when one geom
-    is the object's and the other is the hand's.
 
-    `force=False` skips `mj_contactForce` and reports grip as nan. Depth,
-    count and bodies are read off the contact list; the force is a solver
-    call per contact, and this repo has paid "reward identical, training 15%
-    slower" for a per-step Python loop like that before.
+def contact_masks(sc) -> ContactMasks:
+    m = sc.model
+    is_obj = np.zeros(m.ngeom, bool)
+    is_obj[list(sc.obj_gids)] = True
+    is_hand = np.zeros(m.ngeom, bool)
+    is_hand[list(sc.hand_gids)] = True
+    return ContactMasks(is_obj, is_hand, np.asarray(m.geom_bodyid))
+
+
+def contact_summary(sc, force: bool = True, masks: ContactMasks | None = None
+                    ) -> ContactSummary:
+    """The hand-object contact set of `sc.data`, read as arrays.
+
+    `sc.penetration()` and `track.total_grip(sc)` compute two of these with a
+    Python loop over `d.contact[i]`; this runs for every environment on every
+    measured control step, and the loop itself -- dist, geoms, body per
+    contact -- cost 5-8% of a PPO iteration on a buried hand (bench_rl_step).
+    So the contact list is read as numpy: `d.contact.geom` (ncon, 2) and
+    `d.contact.dist`, masked by precomputed boolean arrays over geom id. Same
+    identification as both: a contact counts when one geom is the object's
+    and the other is the hand's; the body is the HAND geom's, as
+    `track.wrap_score` counts them.
+
+    Only the force read loops, and only over the selected contacts:
+    `mj_contactForce` is a solver call per contact. `force=False` skips it and
+    reports grip as nan.
     """
     m, d = sc.model, sc.data
-    objs, hands = set(sc.obj_gids), set(sc.hand_gids)
-    f = np.zeros(6)
-    pen, n, grip, bodies = 0.0, 0, 0.0 if force else float("nan"), set()
-    for i in range(d.ncon):
-        c = d.contact[i]
-        g1, g2 = int(c.geom1), int(c.geom2)
-        if not ({g1, g2} & objs and {g1, g2} & hands):
-            continue
-        n += 1
-        pen = max(pen, -float(c.dist))
-        bodies.add(int(m.geom_bodyid[g1 if g1 in hands else g2]))
-        if force:
-            mujoco.mj_contactForce(m, d, i, f)
+    mk = contact_masks(sc) if masks is None else masks
+    n = int(d.ncon)
+    grip = 0.0 if force else float("nan")
+    if n == 0:
+        return ContactSummary(pen=0.0, n=0, bodies=0, grip=grip)
+    con = d.contact
+    if hasattr(con, "geom"):
+        g = np.asarray(con.geom)[:n]
+        g1, g2 = g[:, 0], g[:, 1]
+    else:                                   # older bindings: two arrays
+        g1, g2 = np.asarray(con.geom1)[:n], np.asarray(con.geom2)[:n]
+    h1 = mk.is_hand[g1]
+    sel = (mk.is_obj[g1] & mk.is_hand[g2]) | (h1 & mk.is_obj[g2])
+    idx = np.flatnonzero(sel)
+    if len(idx) == 0:
+        return ContactSummary(pen=0.0, n=0, bodies=0, grip=grip)
+    pen = max(0.0, float(-np.asarray(con.dist)[:n][idx].min()))
+    hg = np.where(h1[idx], g1[idx], g2[idx])
+    bodies = int(len(np.unique(mk.geom_bodyid[hg])))
+    if force:
+        f = np.zeros(6)
+        for i in idx:
+            mujoco.mj_contactForce(m, d, int(i), f)
             grip += abs(float(f[0]))       # normal component, contact frame
-    return ContactSummary(pen=pen, n=n, bodies=len(bodies), grip=grip)
+    return ContactSummary(pen=pen, n=int(len(idx)), bodies=bodies, grip=grip)
 
 
 def object_weight(rt) -> float:
@@ -180,18 +216,20 @@ class Pool:
         self._orig = rt.sim.data
         self._grip = [np.zeros(rt.sim.model.nu) for _ in range(n_envs)]
         self.weight = object_weight(rt)
-        #: per-environment contact state after the latest `step`, kept as
-        #: attributes rather than widening step's return so callers are
-        #: unchanged: deepest penetration (m), hand-object contacts, distinct
-        #: hand bodies, total normal force (N; nan unless a term prices it or
-        #: `step(..., measure_grip=True)`), object position error (m), and
-        #: the two shaping terms as they entered the reward (0 while their
-        #: weights are 0).
+        self._masks = contact_masks(rt.sim)
+        #: per-environment state after the latest `step`, kept as attributes
+        #: rather than widening step's return so callers are unchanged:
+        #: object position error (m, always), and the contact set -- deepest
+        #: penetration (m), hand-object contacts, distinct hand bodies, total
+        #: normal force (N) -- which is nan unless a term prices it or
+        #: `step(..., measure=True)`; `measured` says which. The two shaping
+        #: terms are as they entered the reward (0 while their weights are 0).
         self.pe = np.zeros(n_envs)
-        self.pen = np.zeros(n_envs)
-        self.ncon = np.zeros(n_envs, int)
-        self.nbody = np.zeros(n_envs, int)
-        self.grip = np.zeros(n_envs)
+        self.pen = np.full(n_envs, np.nan)
+        self.ncon = np.full(n_envs, np.nan)
+        self.nbody = np.full(n_envs, np.nan)
+        self.grip = np.full(n_envs, np.nan)
+        self.measured = False
         self.r_pen = np.zeros(n_envs)
         self.r_hold = np.zeros(n_envs)
         from concurrent.futures import ThreadPoolExecutor
@@ -219,14 +257,18 @@ class Pool:
     def reset_all(self, rng):
         return np.stack([self.reset(i, rng) for i in range(self.n)])
 
-    def step(self, actions, cfg: RLConfig, measure_grip: bool = False):
+    def step(self, actions, cfg: RLConfig, measure: bool = False):
         """Apply one control step in every environment.
 
-        `measure_grip` forces the per-contact force read (see RLConfig.log_every);
-        it is on regardless whenever `w_force` or `w_hold` prices the force.
+        `measure` reads the contact set for the log (see RLConfig.log_every);
+        it is read regardless whenever a term prices it, and the force part
+        of it only when `w_force`/`w_hold` do or `measure` asks. Otherwise
+        this is the step as it was at 3216767.
         """
         rt = self.rt
-        need_force = bool(cfg.w_force or cfg.w_hold or measure_grip)
+        need = bool(cfg.w_pen or cfg.w_force or cfg.w_hold or measure)
+        need_force = bool(cfg.w_force or cfg.w_hold or measure)
+        self.measured = need
         obs = np.empty((self.n, rt.n_obs))
         rew = np.empty(self.n)
         done = np.zeros(self.n, bool)
@@ -263,14 +305,16 @@ class Pool:
                  - cfg.w_lin * pe
                  + cfg.w_rot * np.exp(-re / cfg.s_rot)
                  + cfg.alive)
-            # Contact state of THIS environment: `_use(i)` above made
-            # `rt.sim.data` the i-th MjData, which is what the summary reads.
-            # Always measured, so the log reports burying whatever the weights.
-            cs = contact_summary(rt.sim, force=need_force)
             self.pe[i] = pe
-            self.pen[i], self.ncon[i] = cs.pen, cs.n
-            self.nbody[i], self.grip[i] = cs.bodies, cs.grip
             self.r_pen[i] = self.r_hold[i] = 0.0
+            if not need:
+                self.pen[i] = self.ncon[i] = self.nbody[i] = self.grip[i] = np.nan
+            else:
+                # Contact state of THIS environment: `_use(i)` above made
+                # `rt.sim.data` the i-th MjData, which is what the summary reads.
+                cs = contact_summary(rt.sim, force=need_force, masks=self._masks)
+                self.pen[i], self.ncon[i] = cs.pen, cs.n
+                self.nbody[i], self.grip[i] = cs.bodies, cs.grip
             if cfg.w_pen or cfg.w_force:
                 # Hinges in units of their allowance; the sum is capped at
                 # pen_max so that, per step, penetration can never cost more
@@ -335,8 +379,10 @@ class TrainLog:
     #: and `err_mm` TOGETHER: penetration falling while held fraction falls
     #: with it means the policy bought clean numbers by dropping the object,
     #: and held fraction high while the error grows is a hand riding a
-    #: falling object down while touching it. `grip_n` is nan on iterations
-    #: where the force was not measured (RLConfig.log_every).
+    #: falling object down while touching it. At defaults the contact set is
+    #: SAMPLED: `pen_mm`, `frac_held` and `grip_n` are nan except on every
+    #: log_every-th iteration and the last (RLConfig.log_every); they are
+    #: continuous whenever a term prices them. `err_mm` is always on.
     pen_mm: list = field(default_factory=list)      # mean deepest penetration
     frac_held: list = field(default_factory=list)   # >= 1 hand-object contact
     grip_n: list = field(default_factory=list)      # mean total normal force
@@ -384,9 +430,10 @@ def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
                     LP[t] = d.log_prob(a).sum(-1).numpy()
                     V[t] = net.v(x).squeeze(-1).numpy()
                 O[t], A[t] = obs, a.numpy()
-                obs, rew, done = pool.step(A[t], cfg, measure_grip=logged)
+                obs, rew, done = pool.step(A[t], cfg, measure=logged)
                 R[t], D[t] = rew, done
-                PEN[t], HELD[t], GRIP[t] = pool.pen, pool.ncon > 0, pool.grip
+                PEN[t], GRIP[t] = pool.pen, pool.grip
+                HELD[t] = (pool.ncon > 0) if pool.measured else np.nan
                 RP[t], RH[t], PE[t] = pool.r_pen, pool.r_hold, pool.pe
                 for i in np.nonzero(done)[0]:
                     obs[i] = pool.reset(int(i), rng)
@@ -431,7 +478,7 @@ def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
             log.err_mm.append(float(PE.mean() * 1000))
             log.pen_mm.append(float(PEN.mean() * 1000))
             log.frac_held.append(float(HELD.mean()))
-            log.grip_n.append(float(GRIP.mean()))     # nan unless measured
+            log.grip_n.append(float(GRIP.mean()))     # these three: nan unless measured
             log.r_pen.append(float(RP.mean()))
             log.r_hold.append(float(RH.mean()))
             if verbose and logged:

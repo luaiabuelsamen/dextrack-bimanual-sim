@@ -62,8 +62,12 @@ def load_base_rl():
     return mod
 
 
-def run(pool_cls, rt, cfg, n_steps=4, seed=0, random_actions=True, prep=None):
-    """A seeded step sequence; returns rewards, dones, obs and per-step stats."""
+def run(pool_cls, rt, cfg, n_steps=4, seed=0, random_actions=True, prep=None,
+        measure=False):
+    """A seeded step sequence; returns rewards, dones, obs and per-step stats.
+
+    `measure` asks the branch's step to read the contact set (the base
+    commit's step has no such argument, so it is passed only when set)."""
     rng = np.random.default_rng(seed)
     pool = pool_cls(rt, N_ENVS, [0])
     try:
@@ -74,7 +78,7 @@ def run(pool_cls, rt, cfg, n_steps=4, seed=0, random_actions=True, prep=None):
                 prep(pool, t)
             a = (rng.normal(size=(N_ENVS, rt.n_action)) if random_actions
                  else np.zeros((N_ENVS, rt.n_action)))
-            o, r, d = pool.step(a, cfg)
+            o, r, d = pool.step(a, cfg, **({"measure": True} if measure else {}))
             R.append(r.copy()), D.append(d.copy()), O.append(o.copy())
             S.append({k: getattr(pool, k).copy() for k in
                       ("pen", "ncon", "nbody", "grip", "r_pen", "r_hold")}
@@ -101,6 +105,10 @@ def test_defaults_match_base_commit_bit_for_bit(rt):
     assert np.array_equal(R0, R_a)                # bit-for-bit, no tolerance
     assert np.array_equal(D0, D_a)
     assert np.array_equal(O0, O_a)
+    # measuring the contact set for the log changes nothing either
+    R_m, D_m, O_m, S_m = run(rl.Pool, rt, cfg, measure=True)
+    assert np.array_equal(R0, R_m) and np.array_equal(O0, O_m)
+    assert np.all(np.isfinite(stat(S_m, "pen")))
 
 
 # -- (b) the log reads each environment's own MjData -------------------------
@@ -111,7 +119,8 @@ def test_stats_are_finite_and_read_from_the_right_data(rt):
         pool.reset_all(rng)
         a = np.zeros((N_ENVS, rt.n_action))
         a[1, :3] = 1.0                        # env 1's palm moves, env 0's does not
-        pool.step(a, rl.RLConfig(), measure_grip=True)
+        pool.step(a, rl.RLConfig(), measure=True)
+        assert pool.measured
         assert np.all(np.isfinite(pool.pen)) and np.all(pool.pen >= 0)
         assert np.all(pool.ncon >= 0) and np.all(pool.grip >= 0)
         assert np.all(np.isfinite(pool.pe)) and np.all(pool.pe >= 0)
@@ -121,16 +130,25 @@ def test_stats_are_finite_and_read_from_the_right_data(rt):
             assert rt.sim.data is pool.datas[i]
             cs = rl.contact_summary(rt.sim)
             assert (cs.pen, cs.n) == (pool.pen[i], pool.ncon[i])
-            assert (cs.pen, cs.n) == rt.sim.penetration()       # the scene's own
+            assert (cs.pen, cs.n) == rt.sim.penetration()       # the scene's own loop
             grip_n, ncon = track.total_grip(rt.sim)
             assert cs.grip == pytest.approx(grip_n) and cs.n == ncon
+            assert cs.bodies == track.wrap_score(rt.sim)[1] == pool.nbody[i]
+            assert cs == rl.contact_summary(rt.sim, masks=pool._masks)
             assert pool.pe[i] == rt.error(0)[0]
-        # at defaults, and not asked for, the force is not read: nan, while
-        # depth, count and bodies are still on
+        # at defaults, and not asked for, the contact set is not read at all:
+        # nan across the board, position error still on
         pool.step(a, rl.RLConfig())
-        assert np.all(np.isnan(pool.grip))
-        assert np.all(np.isfinite(pool.pen)) and np.all(pool.ncon > 0)
-        assert np.all(pool.nbody > 0)
+        assert not pool.measured
+        for v in (pool.pen, pool.ncon, pool.nbody, pool.grip):
+            assert np.all(np.isnan(v))
+        assert np.all(np.isfinite(pool.pe))
+        # a term that prices penetration reads depth, count and bodies but
+        # not the force; one that prices the force reads everything
+        pool.step(a, rl.RLConfig(w_pen=0.1))
+        assert pool.measured and np.all(np.isfinite(pool.pen)) and np.all(np.isnan(pool.grip))
+        pool.step(a, rl.RLConfig(w_hold=0.1))
+        assert np.all(np.isfinite(pool.grip))
     finally:
         pool.restore()
         pool.close()
@@ -151,7 +169,8 @@ def bury(pool, t):
 
 def test_penetration_lowers_the_reward_by_the_hinge(rt):
     cfg0, cfg1 = rl.RLConfig(), rl.RLConfig(w_pen=0.5)
-    R0, _, _, S0 = run(rl.Pool, rt, cfg0, n_steps=2, random_actions=False, prep=bury)
+    R0, _, _, S0 = run(rl.Pool, rt, cfg0, n_steps=2, random_actions=False, prep=bury,
+                       measure=True)
     R1, _, _, S1 = run(rl.Pool, rt, cfg1, n_steps=2, random_actions=False, prep=bury)
     pen = stat(S1, "pen")
     assert np.array_equal(pen, stat(S0, "pen")), "the cost changed the physics"
@@ -183,7 +202,8 @@ def far(pool, t):
 
 def test_hold_bonus_pays_for_a_multi_body_contact_set_only(rt):
     cfg0, cfgh = rl.RLConfig(), rl.RLConfig(w_hold=0.7)
-    R0, _, _, S0 = run(rl.Pool, rt, cfg0, n_steps=2, random_actions=False, prep=far)
+    R0, _, _, S0 = run(rl.Pool, rt, cfg0, n_steps=2, random_actions=False, prep=far,
+                       measure=True)
     Rh, _, _, Sh = run(rl.Pool, rt, cfgh, n_steps=2, random_actions=False, prep=far)
     nbody, grip = stat(Sh, "nbody"), stat(Sh, "grip")
     assert nbody[0, 0] >= 2 and grip[0, 0] > 0, "env 0 is not in a multi-body contact"
@@ -225,18 +245,22 @@ def test_train_logs_penetration_and_heldness(rt, capsys):
     pytest.importorskip("torch")
     cfg = rl.RLConfig(n_envs=N_ENVS, horizon=4, iters=3, epochs=1, minibatch=8)
     _net, log = rl.train(rt, cfg, starts=[0], verbose=True)
-    for k in ("pen_mm", "frac_held", "err_mm", "r_pen", "r_hold"):
+    for k in ("err_mm", "r_pen", "r_hold"):
         v = getattr(log, k)
         assert len(v) == 3 and np.all(np.isfinite(v)) and np.all(np.asarray(v) >= 0)
     assert np.all(np.asarray(log.r_pen) == 0) and np.all(np.asarray(log.r_hold) == 0)
-    # grip is measured on logged iterations only (0 and the last, log_every=10)
-    assert len(log.grip_n) == 3
-    assert np.isfinite(log.grip_n[0]) and np.isfinite(log.grip_n[2])
-    assert np.isnan(log.grip_n[1])
+    # at defaults the contact set is SAMPLED: logged iterations only (0 and
+    # the last with log_every=10), nan in between
+    for k in ("pen_mm", "frac_held", "grip_n"):
+        v = getattr(log, k)
+        assert len(v) == 3
+        assert np.isfinite(v[0]) and np.isfinite(v[2]) and v[0] >= 0
+        assert np.isnan(v[1])
     out = capsys.readouterr().out
     assert "pen" in out and "held" in out and "grip" in out and "err" in out
     assert out.count("iter") == 2
     # a term that prices the force turns the measurement on everywhere
     _net, log = rl.train(rt, rl.RLConfig(n_envs=N_ENVS, horizon=4, iters=3, epochs=1,
                                          minibatch=8, w_hold=0.5), starts=[0], verbose=False)
-    assert np.all(np.isfinite(log.grip_n))
+    for k in ("pen_mm", "frac_held", "grip_n"):
+        assert np.all(np.isfinite(getattr(log, k)))

@@ -21,6 +21,17 @@ machine is doing land on all three equally, same seed, median s/iter each.
     PYTHONPATH=src python experiments/infra/bench_rl_step.py --iters 3 --reps 3
 
 Do not read the numbers while another run holds the cores.
+
+Measured on a quiet machine, the first version (force gated, contact list
+still walked in Python every step) came out x1.053 (gamecontroller) and
+x1.079 (bowl) of 3216767; always-on x1.060 / x1.086. So the loop itself was
+the cost, not mj_contactForce, and the summary is now numpy over
+`d.contact.geom` / `d.contact.dist` and only run on measured steps.
+`--summary-only` times that function alone on the buried seed state -- the
+per-contact Python loop it replaced against the array version, with and
+without the force read -- so the change is measurable without a PPO run:
+
+    PYTHONPATH=src python experiments/infra/bench_rl_step.py --summary-only
 """
 from __future__ import annotations
 
@@ -34,6 +45,7 @@ import time
 from pathlib import Path
 
 import numpy as np
+import mujoco
 
 from oppdef import paths
 from oppdef.human import grab, track, rl
@@ -70,8 +82,56 @@ def build(ref: str, hand: str, grips_path: Path):
     return rt, gf, row
 
 
+def summary_loop(sc, force=True):
+    """The per-contact Python loop `rl.contact_summary` replaced (b14c384),
+    kept here verbatim as the micro-benchmark's baseline and cross-check."""
+    m, d = sc.model, sc.data
+    objs, hands = set(sc.obj_gids), set(sc.hand_gids)
+    f = np.zeros(6)
+    pen, n, grip, bodies = 0.0, 0, 0.0 if force else float("nan"), set()
+    for i in range(d.ncon):
+        c = d.contact[i]
+        g1, g2 = int(c.geom1), int(c.geom2)
+        if not ({g1, g2} & objs and {g1, g2} & hands):
+            continue
+        n += 1
+        pen = max(pen, -float(c.dist))
+        bodies.add(int(m.geom_bodyid[g1 if g1 in hands else g2]))
+        if force:
+            mujoco.mj_contactForce(m, d, i, f)
+            grip += abs(float(f[0]))
+    return rl.ContactSummary(pen=pen, n=n, bodies=len(bodies), grip=grip)
+
+
+def bench_summary(rt, cs, reps: int, envs: int, horizon: int):
+    """Time the summary alone on the current (buried) state of rt.sim."""
+    masks = rl.contact_masks(rt.sim)
+    cases = [
+        ("loop, no force", lambda: summary_loop(rt.sim, force=False)),
+        ("loop, force", lambda: summary_loop(rt.sim, force=True)),
+        ("numpy, no force", lambda: rl.contact_summary(rt.sim, force=False, masks=masks)),
+        ("numpy, force", lambda: rl.contact_summary(rt.sim, force=True, masks=masks)),
+    ]
+    a, b = summary_loop(rt.sim), rl.contact_summary(rt.sim, masks=masks)
+    assert (a.pen, a.n, a.bodies) == (b.pen, b.n, b.bodies) and abs(a.grip - b.grip) < 1e-6, (a, b)
+    print(f"summary on {cs.n} hand-object contacts of {rt.sim.data.ncon} "
+          f"({cs.bodies} bodies), {reps} calls each, alternating:", flush=True)
+    us = {name: [] for name, _f in cases}
+    for _rep in range(5):
+        for name, fn in cases:
+            t0 = time.perf_counter()
+            for _ in range(reps):
+                fn()
+            us[name].append((time.perf_counter() - t0) / reps * 1e6)
+    ref = statistics.median(us[cases[0][0]])
+    for name, _f in cases:
+        med = statistics.median(us[name])
+        per_iter = med * 1e-6 * envs * horizon
+        print(f"  {name:16s} {med:8.1f} us/call   x{med / ref:.3f}   "
+              f"= {per_iter:6.3f} s/iter at {envs} envs x {horizon}", flush=True)
+
+
 def main(a):
-    base = load_rl_at(a.rev)
     t0 = time.time()
     rt, gf, row = build(a.ref, a.hand, Path(a.grips))
     rt.reset_at(int(gf[0]))
@@ -80,6 +140,11 @@ def main(a):
           f"now {cs.n} contacts on {cs.bodies} bodies, {cs.pen * 1000:.2f} mm, "
           f"{cs.grip:.0f} N  ({time.time() - t0:.0f}s to build)", flush=True)
     span = int(rt.T - gf[0])
+    if a.summary_only:
+        bench_summary(rt, cs, a.calls, a.envs,
+                      a.horizon or min(224, max(64, span + 8)))
+        return
+    base = load_rl_at(a.rev)
     horizon = a.horizon or min(224, max(64, span + 8))
 
     def cfg_for(mod, **kw):
@@ -130,4 +195,8 @@ if __name__ == "__main__":
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--hand", default="shadow")
     p.add_argument("--grips", default=str(paths.RESULTS / "stage2_grips_g9.json"))
+    p.add_argument("--summary-only", action="store_true",
+                   help="time contact_summary alone on the seed state; no PPO")
+    p.add_argument("--calls", type=int, default=2000,
+                   help="--summary-only: calls per timing")
     main(p.parse_args())
