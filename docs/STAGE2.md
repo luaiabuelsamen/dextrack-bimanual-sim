@@ -835,7 +835,12 @@ turn a shared working tree into a version-skew hazard for any process longer
 than the interval between commits; save before you evaluate. And the watcher
 set to fire on the run's exit was bound to the launch wrapper's pid, not the
 worker's, because `pgrep | head -1` returned the wrapper — it would never have
-fired. Verify the pid is the process you think it is.
+fired. Verify the pid is the process you think it is. And the g9 readout
+built to read the *partial* results file early crashed on its first partial
+file, on an `obj`/`object` key mismatch between writer and reader — the same
+shape as the wrong-pid watcher: **two harnesses tonight failed on exactly the
+event they were built to catch.** A harness is untested until it has fired
+once on real data; fire it on the first row, not the last.
 Measured rate **18.8 s/iteration, ~2.3 h total** (an earlier figure of
 103 s/iteration in this entry divided elapsed time by *logged lines*, which
 print every 10 iterations; it was wrong). The original checkpoint took
@@ -848,6 +853,50 @@ follow.
 
 The 5.36 mm reading noted above was rerun under its exact original sequence and
 does not reproduce; five processes agree on 6.10 mm.
+
+### First grasp-class rows: the thin seed re-buries, the grasp seed lets go
+
+The g9 run's first two rows, the ones the ordering was designed to reach
+early (`results/g9_ppo_distill.json`, `per_reference`):
+
+| reference | seed class (force) | PPO tracking | end penetration | end contacts | end grip |
+|---|---|---:|---:|---:|---:|
+| `flashlight_on_2` | **thin** (0.6 N) | 112.9 mm | **4.86 mm** | 3 | **207 N** |
+| `hammer_use_2` | **grasp** (20.7 N, eq 0.04×) | 80,250 mm | 0.00 mm | **0** | **0 N** |
+
+`hammer_use_2` is the one reference in the set that is a grasp by force as
+well as geometry — 4 contacts, 20.7 N, equilibrium residual 0.04×, the best
+seed stage 2 produced. Under a policy trained on it, **the object is on the
+floor**: 80 m of accumulated error, zero contacts, zero force. The thin seed
+went the other way: the policy drove 0.6 N to 207 N and 4.86 mm inside to hold
+on. Beside the mug 2×2 above, that is one statement in three rows:
+
+- burial-seeded references **track** (mug, 22–23 mm, ending 1330× weight);
+- grasp-seeded references **drop**;
+- thin-seeded references **re-bury** to hold.
+
+At this level of control, what tracks is penetration. The policy either has
+burial handed to it, manufactures it, or fails. Nothing in the reward asks for
+a grasp, and a policy cannot invent one from a 20 N contact set it was given.
+
+**Read the hammer row's end state carefully**, because it is the trap a
+penetration criterion sets: 0.00 mm, 0 contacts, 0 N is the *cleanest* row in
+the run on penetration alone, and it is the object on the floor. Any quality
+measure for this pipeline that reports penetration must report held-ness
+beside it, or hammer becomes its best result. The g9 readout requires tracking
+under 50 mm *and* ending un-buried *and* in contact, and prints *no row here
+is a tracking result* — which is what it prints.
+
+**What this changes about the fix.** A penetration cost in the PPO reward
+(drafted, `rl-penetration-cost`) addresses flashlight's re-burial — the least
+important of the three rows — and taken alone it would make hammer's behaviour
+*optimal*: letting go is the zero-penetration solution. The missing reward
+term prices **losing** the object — a held-ness or contact-persistence term,
+bounded at one object weight of grip so it cannot pay for burial — and the
+penalty is only safe to turn on beside it. Both are drafted at weight 0 with
+their per-iteration means logged next to `alive`; neither is a result until a
+retrain on hammer's seed ends held, un-buried, and under 50 mm. Knife, phone
+and `mug_drink_2` are the replicates, then the burial-seeded rows from row 7.
 
 ## Look at the pose before trusting the number
 
