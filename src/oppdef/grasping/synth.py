@@ -33,8 +33,8 @@ from dataclasses import dataclass, field
 import numpy as np
 import mujoco
 
-from oppdef.metrics.epsilon import grasp_metrics, object_contacts
-from oppdef.hold import DIRECTIONS
+from oppdef.grasping.epsilon import grasp_metrics, object_contacts
+from oppdef.grasping.hold import DIRECTIONS
 
 
 @dataclass

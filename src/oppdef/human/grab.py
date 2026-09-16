@@ -168,7 +168,7 @@ class GrabSequence:
 
     def reference(self, side: str = "rhand"):
         """The object half, as the `track.Reference` the controller already takes."""
-        from oppdef.track import Reference
+        from oppdef.track_core import Reference
         return Reference(pos=self.obj_pos, quat=self.obj_quat, dt=self.dt,
                          name=self.name, source="grab")
 

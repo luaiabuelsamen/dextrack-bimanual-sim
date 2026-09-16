@@ -6,7 +6,7 @@ are the first thing that must keep passing: everything downstream reads epsilon.
 import numpy as np
 import pytest
 
-from oppdef.metrics.epsilon import epsilon_from_wrenches, wrench_set
+from oppdef.grasping.epsilon import epsilon_from_wrenches, wrench_set
 
 LAM = 0.05
 COM = np.zeros(3)

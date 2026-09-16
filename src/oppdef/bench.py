@@ -11,10 +11,10 @@ from __future__ import annotations
 import numpy as np
 import mujoco
 
-from oppdef.synth import GraspScene
+from oppdef.grasping.synth import GraspScene
 from oppdef.data import SyntheticSource
 from oppdef.hands.tips import tip_offset, tip_points
-from oppdef.retarget import (retargeter_for, transform_ref, tip_graph, KEYPOINT)
+from oppdef.grasping.retarget_pose import (retargeter_for, transform_ref, tip_graph, KEYPOINT)
 
 
 def keypoint_pose(hand_key, width):

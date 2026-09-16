@@ -31,7 +31,7 @@ import numpy as np
 import mujoco
 from scipy.optimize import minimize
 
-from oppdef.metrics.epsilon import epsilon_from_wrenches, wrench_set
+from oppdef.grasping.epsilon import epsilon_from_wrenches, wrench_set
 
 KEYPOINT, EPSILON, BLEND = "keypoint", "epsilon", "blend"
 

@@ -27,7 +27,7 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-from oppdef.hold import DIRECTIONS
+from oppdef.grasping.hold import DIRECTIONS
 from oppdef.hands.axis import provenance
 from oppdef.bench import Cell, keypoint_pose
 

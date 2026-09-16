@@ -46,7 +46,7 @@ def build_hold_scene(hand_key, obj_half, obj_pos, mass=0.05,
     """Hand fixed in space, a free box at `obj_pos`, position actuators on the
     hand's joints. Returns (model, joint_ids in the retargeter's order)."""
     from oppdef.embodiment import make
-    from oppdef.retarget import retargeter_for
+    from oppdef.grasping.retarget_pose import retargeter_for
 
     rt = retargeter_for(hand_key, free_base=False)
     emb = make(hand=hand_key, free_base=False)

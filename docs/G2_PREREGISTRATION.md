@@ -1,7 +1,7 @@
 # G2 pre-registration — does a demonstration specify the *task*?
 
 Written and committed **before** the experiment was implemented or run. The
-task machinery (`src/oppdef/task.py`) was built and calibrated first, on G1's
+task machinery (`src/oppdef/grasping/task.py`) was built and calibrated first, on G1's
 saved grasps; that pilot is declared below. No G2 arm has been run.
 
 ## Why

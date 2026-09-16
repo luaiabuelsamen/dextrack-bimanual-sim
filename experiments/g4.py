@@ -15,9 +15,9 @@ import time
 import numpy as np
 import mujoco
 
-from oppdef.synth import GraspScene
+from oppdef.grasping.synth import GraspScene
 from oppdef.hands.axis import provenance
-from oppdef.task import run_task
+from oppdef.grasping.task import run_task
 from experiments.g3 import task_spec
 
 R = 5

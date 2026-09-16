@@ -1,6 +1,6 @@
 """Retarget a GRAB sequence onto a robot hand, frame by frame.
 
-Single-pose retargeting (`oppdef.retarget`) answers "what joint angles make
+Single-pose retargeting (`oppdef.grasping.retarget_pose`) answers "what joint angles make
 this hand look like that grasp".  A tracking reference needs something else: a
 CONTINUOUS trajectory whose contacts land on the object in the same places the
 human's did, because that -- not the hand's silhouette -- is what determines
@@ -29,7 +29,7 @@ from scipy.spatial import cKDTree
 
 from oppdef.human import grab as grab_mod
 from oppdef.hands.tips import tip_offset
-from oppdef.retarget import correspond, retargeter_for
+from oppdef.grasping.retarget_pose import correspond, retargeter_for
 
 #: MANO tips come out thumb-first; this repository orders tips fingers-then-
 #: thumb, and `correspond` relies on that to pair thumb with thumb. Getting
@@ -78,6 +78,21 @@ W_CONTACT = 1.0
 W_FREE = 0.25
 W_WRIST = 0.15
 W_SMOOTH = 0.05
+#: Penetration weight for ARM-SIDE bodies -- forearm, wrist, palm, and the
+#: knuckles. These have no business touching the object at all, and they are
+#: what makes the retarget infeasible: scanned over 20 sequences and 2866
+#: frames, only 23 frames are under 1 mm of penetration, and the sequences that
+#: NEVER reach a clean frame are precisely those whose deepest body is a forearm
+#: (binoculars, 17.15 mm on all 155 frames), a palm (flashlight_on_2, 12.82 mm
+#: on all 144) or a proximal link. Sequences whose worst offender is a distal
+#: link do reach clean frames. A Shadow forearm is not shaped like a human's, so
+#: placing the wrist where the human's wrist was puts the arm inside the object.
+#:
+#: Weighted far above the finger term because it is a feasibility constraint
+#: rather than a preference: no grasp is acceptable with the forearm inside the
+#: object, whereas a fingertip 2 mm in is the grasp.
+W_PEN_ARM = 60.0
+
 W_PEN = 1.0             # with fingertips targeted at their DERIVED points and
                         # allowed 2 mm, a light penalty is enough; heavier ones
                         # fight the contact targets without reducing penetration
@@ -132,6 +147,17 @@ class _Solver:
         self.obj = set(sc.obj_gids)
         self.hand = set(sc.hand_gids)
         self.tips_g = set(sc.tip_gids)
+        # Arm-side geoms: everything on the hand that is NOT strictly below a
+        # knuckle, i.e. forearm, wrist, palm and the knuckles themselves.
+        m = sc.model
+        finger_roots = set()
+        for b in sc.tip_bids:
+            x = int(b)
+            while x > 0 and x != sc.wrist_bid:
+                finger_roots.add(x)
+                x = int(m.body_parentid[x])
+        self.arm_g = {g for g in sc.hand_gids
+                      if int(m.geom_bodyid[g]) not in finger_roots}
         self._jp = np.zeros((3, sc.model.nv))
         self._jr = np.zeros((3, sc.model.nv))
         # A fingertip is the far end of the distal link, not that link's body
@@ -197,16 +223,18 @@ class _Solver:
             # fit bury them 12 mm in, and the constraint solver answered with
             # 4469 N of contact force on a 0.2 kg object -- which makes every
             # number downstream of it meaningless.
+            arm = hand_g in self.arm_g
             allow = TIP_ALLOW if hand_g in self.tips_g else PEN_MARGIN
             depth = -float(c.dist) - allow
             if depth <= 0:
                 continue
+            w_this = W_PEN_ARM if arm else self.w_pen
             # contact frame row 0 is the normal, pointing geom1 -> geom2
             n = np.array(c.frame[:3]) * sign
             bid = int(self.m.geom_bodyid[hand_g])
             J = self._jac_point(np.array(c.pos), bid)
-            rows.append(self.w_pen * (-(n @ J))[None, :])
-            res.append(self.w_pen * np.array([depth]))
+            rows.append(w_this * (-(n @ J))[None, :])
+            res.append(w_this * np.array([depth]))
         return rows, res
 
     def solve(self, q0, targets, weights, wrist_target, q_prev,

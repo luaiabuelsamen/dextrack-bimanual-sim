@@ -585,24 +585,37 @@ same fit reaches 6.7 mm.
 ## Layout
 
 ```
-src/oppdef/
-  hands/      tips.py (fingertip derivation) · model.py (shared kinematics)
-              axis.py (the opposition metric) · specs.py (closure synthesis)
-              f5d6.py (URDF repairs: tip frames, mimic couplings, torque limits)
-  synth.py    grasp synthesis by closing in simulation
-  task.py     object trajectories, required wrenches, the carry executor
-  hold.py     the 6-D wrench probe
-  bench.py    the shared benchmark cell
-  metrics/    Ferrari-Canny epsilon from real MuJoCo contacts
-  human/      mano.py (MANO without chumpy) · grab.py (GRAB references)
-              decompose.py (convex parts) · retarget.py (human -> robot)
-              scene.py (hand + real object) · track.py (tracking env)
-  vec.py      batched stepping (CPU / MJX / Warp) with measured parity
-experiments/  live experiments; retracted/ holds the withdrawn ones
-docs/         task definitions, pre-registrations, external reviews
-results/      live results with provenance; retracted/ holds the rest
-NOTES.md      the measurement log and every retraction
+src/oppdef/        package README: src/oppdef/README.md
+  human/           THE LIVE PIPELINE. GRAB -> retarget -> grasp -> PPO -> distil
+                   grab.py mano.py decompose.py  data in
+                   retarget.py                   human contacts -> joint traj
+                   scene.py track.py             one hand or two, in physics
+                   rl.py distill.py homotopy.py  PPO, distillation, curriculum
+                   grasp.py perception.py        grasp fitting; depth -> pose
+  grasping/        grasp quality and synthesis, shared by both bodies of work
+                   epsilon.py                    Ferrari-Canny from real contacts
+                   synth.py hold.py task.py      synthesis, wrench probe, carry
+                   retarget_pose.py              single-pose retarget (keypoint vs eps)
+  hands/           tips.py (fingertip derivation, load-bearing) · model.py
+                   axis.py (the opposition metric) · specs.py · f5d6.py
+  envs/            simulation environments; bimanual.py provides _add_base_dof
+  learning/        bc.py is imported by human/distill.py
+  track_core.py    reference-agnostic tracking core (not the GRAB tracker)
+  embodiment.py paths.py objects.py   hand/object abstractions, asset paths
+  bench.py policy.py sensing.py data.py vec.py control/ sim/ viz/
+                   earlier synthetic-grasp work; backs the supported G3 findings
+experiments/       live experiments; retracted/ holds the withdrawn ones
+docs/              task definitions, pre-registrations, external reviews
+results/ figures/  live results with provenance; retracted/ holds the rest
+attic/             superseded scripts, two kept as retraction evidence
+NOTES.md           the measurement log and every retraction
 ```
+
+`human/` imports from `grasping/`, `hands/`, `envs/`, `learning/`,
+`embodiment.py` and `paths.py`, so none of those are removable legacy.
+[`src/oppdef/README.md`](src/oppdef/README.md) says what each module is for and
+which are load-bearing. The package is still named `oppdef` after the retracted
+claim; renaming it is mechanical and deferred.
 
 ## Reproduce
 

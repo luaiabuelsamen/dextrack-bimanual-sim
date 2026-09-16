@@ -24,7 +24,7 @@ import mujoco
 
 from oppdef.bench import Cell, keypoint_pose
 from oppdef.hands.axis import provenance
-from oppdef.task import (carry, object_path, required_wrenches, run_task,
+from oppdef.grasping.task import (carry, object_path, required_wrenches, run_task,
                          grasp_wrench_capacity)
 
 POSE, GENERIC, DEMO = "pose_squeeze", "task_generic", "task_demo"

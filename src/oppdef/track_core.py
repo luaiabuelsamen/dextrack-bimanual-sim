@@ -24,8 +24,8 @@ from dataclasses import dataclass, field
 import numpy as np
 import mujoco
 
-from oppdef.synth import GraspScene
-from oppdef.task import GRAVITY
+from oppdef.grasping.synth import GraspScene
+from oppdef.grasping.task import GRAVITY
 
 
 @dataclass
@@ -48,7 +48,7 @@ class Reference:
 
 def reference_from_traj(traj, p0=None, q0=None):
     """Lift a `task.Trajectory` into a Reference (object poses over time)."""
-    from oppdef.task import object_path
+    from oppdef.grasping.task import object_path
     p0 = np.zeros(3) if p0 is None else np.asarray(p0, float)
     q0 = np.array([1.0, 0, 0, 0]) if q0 is None else np.asarray(q0, float)
     P, Q = object_path(traj, p0, q0)

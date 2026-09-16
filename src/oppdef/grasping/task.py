@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 import numpy as np
 import mujoco
 
-from oppdef.metrics.epsilon import (wrench_set, object_contacts, task_margin,
+from oppdef.grasping.epsilon import (wrench_set, object_contacts, task_margin,
                                     epsilon_from_wrenches)
 
 GRAVITY = np.array([0.0, 0.0, -9.81])

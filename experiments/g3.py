@@ -18,10 +18,10 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-from oppdef.synth import GraspScene
+from oppdef.grasping.synth import GraspScene
 from oppdef.hands.axis import provenance
-from oppdef.hold import DIRECTIONS
-from oppdef.task import (carry, object_path, required_wrenches, run_task,
+from oppdef.grasping.hold import DIRECTIONS
+from oppdef.grasping.task import (carry, object_path, required_wrenches, run_task,
                          grasp_wrench_capacity)
 
 SHAPES = ("box", "cylinder", "sphere", "capsule")

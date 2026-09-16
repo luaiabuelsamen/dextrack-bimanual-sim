@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 import mujoco
 
-from oppdef.retarget import (correspond, tip_graph, align_reference, box_surface,
+from oppdef.grasping.retarget_pose import (correspond, tip_graph, align_reference, box_surface,
                              geometric_epsilon, transform_ref, retargeter_for,
                              grasp_centre)
 from oppdef.data import SyntheticSource

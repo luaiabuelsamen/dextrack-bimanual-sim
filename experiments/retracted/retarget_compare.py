@@ -43,7 +43,7 @@ import time
 import numpy as np
 import mujoco
 
-from oppdef.retarget import (retargeter_for, transform_ref, geometric_epsilon,
+from oppdef.grasping.retarget_pose import (retargeter_for, transform_ref, geometric_epsilon,
                              squeeze, KEYPOINT, EPSILON, BLEND)
 from oppdef.data import SyntheticSource
 

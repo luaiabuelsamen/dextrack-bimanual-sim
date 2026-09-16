@@ -15,7 +15,7 @@ import numpy as np
 import mujoco
 
 from oppdef.bench import Cell
-from oppdef.hold import DIRECTIONS
+from oppdef.grasping.hold import DIRECTIONS
 
 W, H = 460, 345   # README-sized; keeps the GIFs to ~1 MB
 

@@ -33,7 +33,7 @@ import numpy as np
 import mujoco
 
 from oppdef.bench import Cell, keypoint_pose, reference_graph
-from oppdef.hold import DIRECTIONS
+from oppdef.grasping.hold import DIRECTIONS
 from oppdef.hands.axis import provenance
 
 POSE, WRENCH = "pose", "wrench"

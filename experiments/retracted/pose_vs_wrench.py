@@ -5,7 +5,7 @@ The geometric version of this comparison was retracted: its poses had fingers
 physical harness, where a pose that cannot be realised simply does not score.
 
     pose      the finger angles come from matching the human's fingertip
-              geometry (keypoint retargeting, `oppdef.retarget`). The hand's
+              geometry (keypoint retargeting, `oppdef.grasping.retarget_pose`). The hand's
               PLACEMENT is then searched, so the condition is given every
               chance -- only the finger angles are dictated by the human.
 
@@ -35,13 +35,13 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-from oppdef.synth import GraspScene
+from oppdef.grasping.synth import GraspScene
 from oppdef.data import SyntheticSource
 
 
 def keypoint_pose(hand_key, width):
     """Finger angles that best match the human's inter-fingertip geometry."""
-    from oppdef.retarget import retargeter_for, transform_ref, KEYPOINT
+    from oppdef.grasping.retarget_pose import retargeter_for, transform_ref, KEYPOINT
     rt = retargeter_for(hand_key, free_base=False)
     ref = list(SyntheticSource(widths=(width,), n_per=1))[0]
     V, obj, half, sc, _demo, _wrist = transform_ref(rt, ref, width=width)

@@ -71,7 +71,7 @@ Prepared 2026-09-12 from a repository review and a follow-up comparison of the t
 
 **Stack recommendation.** Keep CPU MuJoCo as the reference, NumPy/SciPy for analysis, and PyTorch for the current learning experiments. Retain direct MuJoCo Warp as the first GPU scaling candidate. Make additional MJX-JAX work conditional on a specific need. Evaluate PufferLib only if profiling identifies a training/runtime bottleneck that justifies its integration cost. Physics fidelity, environment batching, and policy training are separate decisions.
 
-**Scope and evidence.** The reviewed commit was `ac865234e05a623ee37b5f3fb3331d5fbcc0cd46`, with an active dirty working tree. Uncommitted work included `src/oppdef/synth.py`, `experiments/deficit_repair.py`, four `results/deficit_*.json` files, and a modification to `results/bimanual_expert.json`. Four synthesis processes were writing results during the review. Treat those files as unfinished experiments, and re-check source locations and observations against the current checkout before acting. This document records review findings and recommendations; it does not replace the measurement and retraction history in [NOTES.md](../NOTES.md).
+**Scope and evidence.** The reviewed commit was `ac865234e05a623ee37b5f3fb3331d5fbcc0cd46`, with an active dirty working tree. Uncommitted work included `src/oppdef/grasping/synth.py`, `experiments/deficit_repair.py`, four `results/deficit_*.json` files, and a modification to `results/bimanual_expert.json`. Four synthesis processes were writing results during the review. Treat those files as unfinished experiments, and re-check source locations and observations against the current checkout before acting. This document records review findings and recommendations; it does not replace the measurement and retraction history in [NOTES.md](../NOTES.md).
 
 The review inspected code, plans, recent commits, saved results, installed package metadata, and primary external sources. It also ran the non-GPU test suite and two focused CPU diagnostics. No GPU benchmark or PufferLib installation was performed for this handoff. The initial review changed no project files; this follow-up creates the handoff document.
 
@@ -100,11 +100,11 @@ The six main research local minima are:
 
 2. **Replacing keypoint error with another overextended proxy.**
 
-   Ferrari–Canny epsilon measures worst-direction resistance in a normalized six-dimensional force-and-torque space under a particular contact-force model. Holding against gravity is a narrower requirement. The saved LEAP 6 cm cell has `eps=0` and `held=True`; the 11 cm cell also holds despite a reconstructed `delta` of approximately 1.83. See [hand_axis.json](../results/hand_axis.json) and [grasp_metrics](../src/oppdef/metrics/epsilon.py).
+   Ferrari–Canny epsilon measures worst-direction resistance in a normalized six-dimensional force-and-torque space under a particular contact-force model. Holding against gravity is a narrower requirement. The saved LEAP 6 cm cell has `eps=0` and `held=True`; the 11 cm cell also holds despite a reconstructed `delta` of approximately 1.83. See [hand_axis.json](../results/hand_axis.json) and [grasp_metrics](../src/oppdef/grasping/epsilon.py).
 
    These examples do not invalidate epsilon as a geometric grasp descriptor. They undermine treating `delta=1` as an already established universal boundary for these physical outcomes. Multiplying epsilon by the measured sum of normal forces also does not model the complete set of forces that the actuators can redistribute across contacts.
 
-   The new hold validation applies fourteen translational force directions and checks translation and remaining contact. It does not apply pure torques or gate on orientation retention. Therefore its minimum force is not a direct experimental measurement of the full six-dimensional epsilon ball. See [hold.py](../src/oppdef/hold.py) and `GraspScene.hold_of` in [synth.py](../src/oppdef/synth.py).
+   The new hold validation applies fourteen translational force directions and checks translation and remaining contact. It does not apply pure torques or gate on orientation retention. Therefore its minimum force is not a direct experimental measurement of the full six-dimensional epsilon ball. See [hold.py](../src/oppdef/grasping/hold.py) and `GraspScene.hold_of` in [synth.py](../src/oppdef/grasping/synth.py).
 
    Prefer task-specific wrench feasibility or margin under stated actuation and friction assumptions. Include gravity-only, torque-sensitive, and environment-supported cases where appropriate. Validate predictions on held-out physical outcomes rather than using the optimized score as its own validation. Task wrench coverage and limitations of contact-only force models have substantial prior art; [Grasp planning to maximize task coverage](https://rpal.cse.usf.edu/publications/ijrr2015b.pdf) is a relevant starting point.
 
@@ -429,7 +429,7 @@ their partial contents are not a completed result.
 
 - **Task B's tilt is discarded.** `experiments/g3.py:29` puts its Y rotation in
   `traj.cmd[:, 4]`, but `object_path` and `base_command` in
-  `src/oppdef/task.py:89` and `:110` use only column 3, the X rotation. A direct
+  `src/oppdef/grasping/task.py:89` and `:110` use only column 3, the X rotation. A direct
   diagnostic on this checkout produces requested Y rotation **1.0472 rad**,
   emitted base rotation **0 rad**, object-path rotation **0 rad**, and required
   torque **0**. Task B currently exercises a faster translation, not the
@@ -444,7 +444,7 @@ their partial contents are not a completed result.
   statement that the margin contains no information is not established by this
   analysis.
 - **The scored outcome is position retention, with no orientation criterion.**
-  `src/oppdef/task.py:173` measures object position in the palm frame. The success
+  `src/oppdef/grasping/task.py:173` measures object position in the palm frame. The success
   check at `:234`–`:250` tests that displacement and total carried distance; it
   never checks object orientation or completion of the tilt. Retention is a
   useful diagnostic, but the manipulation endpoint also needs the intended

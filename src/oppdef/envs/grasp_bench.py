@@ -34,7 +34,7 @@ import mujoco
 from oppdef.paths import (MENAGERIE, VEGA_URDF,  # noqa: E402
                           compile_urdf, menagerie_xml)
 
-from oppdef.metrics.epsilon import grasp_metrics, object_contacts    # noqa: E402
+from oppdef.grasping.epsilon import grasp_metrics, object_contacts    # noqa: E402
 
 # flex, and a closure direction per joint. Everything else is derived.
 HANDS = {

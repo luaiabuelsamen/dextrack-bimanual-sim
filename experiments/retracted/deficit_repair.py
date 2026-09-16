@@ -28,7 +28,7 @@ from pathlib import Path
 
 import numpy as np
 
-from oppdef.synth import GraspScene
+from oppdef.grasping.synth import GraspScene
 
 
 def cem(scene, n_hands, iters=6, pop=24, elite=6, seed=0, verbose=False):
