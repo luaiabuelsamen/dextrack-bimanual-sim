@@ -99,6 +99,19 @@ night of two sessions measuring each other's claims:
   and un-buried is n = 1 (`stamp_lift`; the other thirteen carriers end
   4–17 mm inside). Burial-to-grasp relaxation is common; relaxation all the
   way to a clean grasp has been observed once.
+
+  ![The three grasp-class carriers at reset, 25 % and end: stamp relaxes from 14.23 mm / 878 N to a five-finger pinch on the knob at 0.31 mm / 4 N; hammer and banana relax by an order of magnitude and stop 4–5 mm inside](../figures/burial_relaxation.png)
+
+  The figure (`fbc2437`) is what the table cannot carry: at reset the
+  fingers are visibly driven through the stamp's base; by the end the hand
+  pinches its knob with the body hanging below. Hammer and banana show the
+  same mechanism stopping short, which is what makes stamp legible as the
+  exception rather than the rule. Its first version was misleading twice —
+  a free camera that filled banana's frame with the object's face, and an
+  end frame captured *before* the final step, reporting stamp at 2 contacts
+  where the carry ended on 5 — the seventh instrument tonight reporting on
+  a moment adjacent to the one asked about, caught because the numbers
+  disagreed with a probe already run.
 - **So the next real experiment is upstream of all four learning stages,
   and it is now well-posed:** the honest open question is no longer "why
   is the neighbourhood empty" — it is not, there are fourteen worked
