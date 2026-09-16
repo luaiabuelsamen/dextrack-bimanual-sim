@@ -52,6 +52,16 @@
    "end_contacts": 15,
    "grasp_frames": 27,
    "transitions": 711
+  },
+  {
+   "obj": "mouse",
+   "seq": "mouse_use_1",
+   "ppo_mm": 291168.20064055076,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 2,
+   "transitions": 337
   }
  ],
  "held_out": []

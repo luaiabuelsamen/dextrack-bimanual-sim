@@ -27,6 +27,14 @@ def main():
     ap.add_argument("--steps", type=int, default=160_000)
     ap.add_argument("--envs", type=int, default=12)
     ap.add_argument("--stride", type=int, default=5)
+    ap.add_argument("--max-starts", type=int, default=0,
+                    help="cap the start set at this many, evenly spaced. The "
+                         "other arm of the control: instead of giving the "
+                         "grasp-seeded reference more data, give the "
+                         "burial-seeded one less. Degrading the good case is "
+                         "the cleaner test, because rescuing the bad one can "
+                         "fail for reasons that have nothing to do with sample "
+                         "size.")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--grips", default="results/stage2_grips_g9.json")
     ap.add_argument("--out", default="results/stage3_padded.json")
@@ -40,7 +48,12 @@ def main():
 
     accepted = rt.grasp_frames()
     padded = np.arange(0, rt.T, a.stride)
-    print(f"{a.seq}: {len(accepted)} accepted starts, {len(padded)} padded "
+    if a.max_starts and len(padded) > a.max_starts:
+        # evenly spaced, so the capped set still spans the reference rather
+        # than crowding into its first frames
+        idx = np.linspace(0, len(padded) - 1, a.max_starts).round().astype(int)
+        padded = padded[np.unique(idx)]
+    print(f"{a.seq}: {len(accepted)} accepted starts, {len(padded)} used "
           f"(T={rt.T}); seed {row['n_contact']} contacts at {row['grip_n']:.1f} N",
           flush=True)
 
@@ -58,6 +71,7 @@ def main():
     out = {
         "seq": a.seq, "object": row["object"], "steps": a.steps,
         "accepted_starts": int(len(accepted)), "padded_starts": int(len(padded)),
+        "max_starts": int(a.max_starts),
         "seed_contacts": int(row["n_contact"]), "seed_grip_n": float(row["grip_n"]),
         "ppo_mm": float(errs.mean() * 1000),
         "end_pen_mm": float(pen_mm * 1000), "end_contacts": int(ncon),
