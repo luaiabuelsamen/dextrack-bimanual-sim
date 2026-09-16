@@ -5266,3 +5266,50 @@ something that works.
 Recorded against my own claim from an hour ago, which was based on five
 references and read cleanly on them: reset grip force separates carriers from
 failures. It does not.
+
+## The carry-scored search: one clean end state becomes nineteen
+
+`experiments/tracking/stage2_carry.py` replaces the static hold with the end
+of an open-loop carry along the reference, scored on its last five frames:
+held, worst penetration, distinct links, one-sidedness. Greedy wrist
+hill-climb from the stage-2 seed, 24 x 3, 15 mm / 0.35 rad. Clean = held,
+under 3 mm, at least two links, one-sidedness under 0.8.
+
+    of 40 references                     static   carry    carry   carry   union
+                                          hold    25 fr   full s0  full s1
+    end the scored carry held               15      28       26      29
+    clean, search's own reading              1      14       15      21      24
+    clean when rebuilt and re-carried        -      10       14      21
+    clean under >= 4/8 perturbations         -       -       10      16      19
+    clean under 8/8                          -       -        2       4       5
+
+Three corrections, each caught by the next instrument down the line:
+
+- The 25-frame window overfits. 14 clean by the search, 10 carry their whole
+  reference, but for 9 of those the remainder WAS the window. Of the 5 whose
+  reference continues, 1 carried and 4 dropped or slipped. Scored on the whole
+  remainder now.
+- The hill-climb is seed-dependent: 15 vs 21 clean on two seeds, and four of
+  the "ungraspable primitives" (doorknob, elephant, flute, pyramidlarge) are
+  clean under one seed and never touch under the other. Quote the union.
+- hand_inspect_1 was clean in-process and dropped at frame 22 rebuilt from
+  the stored offset -- same offset, round-off-different trajectory. So every
+  pose is re-carried under 8 perturbations of 0.5 mm / 0.6 deg
+  (`carry_robust.py`). spheresmall 0/8, elephant 1/8: seams, not grasps.
+
+Every clean pose rendered (`figures/carry_full*/`): all start buried, all end
+out of the object and holding it. Two pass the gate and are not grasps: the
+small cube resting in cupped fingers, the seed-0 mug hanging by two links
+through its handle. `figures/carry_robust_five.jpg` is the five that survive
+all 8 perturbations.
+
+Instrument errors, mine, recorded: `reset_pen_mm` in the carry JSON was read
+one control frame AFTER reset (renamed `frame1_*`); `stage3_carry.feedforward`
+first ran `rollout()` without `reset_at()` and reported a 2423 mm feedforward
+from a state training had left behind (fixed; it now reads 36.8 mm, matching
+the renderer's independent carry to the decimal).
+
+Open: the poses' quality beyond this gate (end-of-carry error 7-85 mm, mostly
+rotation slip); the count under more seeds; what keeps alarmclock, apple, bowl
+and bunny buried under every accepted offset when twenty others relax.
+

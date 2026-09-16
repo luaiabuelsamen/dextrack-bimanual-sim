@@ -5,6 +5,122 @@ robot joint trajectory. It is the blocker for everything downstream: stages 3–
 were all reporting numbers measured on poses that intersect the object, and
 those numbers are withdrawn.
 
+## The carry-scored search (2026-09-16, afternoon)
+
+The objective was swapped, as the morning's status proposed: stage 2 now
+scores a wrist offset by **the end of an open-loop carry**, not a static
+hold. `experiments/tracking/stage2_carry.py` carries the retargeted hand
+along its reference from the middle of the hold window with no controller,
+reads the last five frames — object still in hand, worst penetration, how
+many distinct links touch it, how one-sided the contact normals are — and
+hill-climbs the wrist offset from the stage-2 seed on that score. A clean
+end state is *held, under 3 mm, on at least two links, one-sidedness under
+0.8*. One carry costs a quarter of a second, so the search is cheap: 73
+carries per reference, 30 minutes for all 40.
+
+**What it found, in the order the instruments were checked:**
+
+| count of references (of 40) | static-hold seeds | 25-frame carry | whole-reference carry, seed 0 | seed 1 | union of the two seeds |
+|---|---:|---:|---:|---:|---:|
+| end the scored carry held | 15 | 28 | 26 | 29 | — |
+| end it **clean** (search's own reading) | 1 | 14 | 15 | 21 | 24 |
+| …and carry the whole reference when rebuilt from the stored offset | — | 10 | 14 | 21 | — |
+| …and stay clean under ≥ 4 of 8 wrist perturbations (0.5 mm / 0.6°) | — | — | 10 | 16 | **19** |
+| …under all 8 | — | — | 2 | 4 | **5** |
+
+1. **The 25-frame window overfits.** Fourteen clean by the search's reading,
+   ten still held at the end of the reference — but for nine of those ten the
+   remainder *was* the window. Of the five whose reference ran on past it,
+   one carried (`cubemedium`) and four did not: airplane and duck ended the
+   window on one or two links and fell; the mug fell during the drink tilt;
+   the knife stayed in hand and rotated 108 mm off pose
+   (`results/stage2_carry.json`, `figures/carry/`). So the score is now the
+   whole remaining reference (`--frames 1000`, 10–100 frames, still under a
+   minute per reference).
+2. **The search is seed-dependent.** The same hill-climb from the same seeds
+   finds 15 clean end states with one random seed and 21 with another, and
+   the sets differ: doorknob, elephant, flute and the large pyramid — four of
+   the references the morning called "featureless convex primitives the
+   search cannot grasp" — are clean under seed 1 and never touch the object
+   under seed 0. A 15 mm / 20° Gaussian from a seed that makes no contact
+   reaches contact by luck. The count to quote is therefore the union over
+   restarts, and a real search should run several.
+3. **Some clean poses are seams in the contact model, not grasps.**
+   `hand_inspect_1` scored clean over all 50 frames inside the search
+   process and dropped at frame 22 when the same stored offset was rebuilt
+   and rolled by a second script. The two trajectories differ by the
+   round-off of adding and subtracting the rejected perturbations. A hold
+   that depends on the last bits of the wrist pose is not a grasp, so
+   `experiments/tracking/carry_robust.py` re-carries every accepted pose
+   under eight perturbations of half a millimetre and half a degree — well
+   inside the retarget's own error. The small sphere survives none of eight,
+   the elephant and the seed-1 mug one of eight; nineteen references have a
+   pose that survives at least half, five survive all eight
+   (`results/stage2_carry_robust*.json`). Where a pose is *held* under every
+   perturbation but not *clean*, it is almost always the 3 mm penetration
+   gate on a single tail frame (airplane, fryingpan, mug): held is robust,
+   the millimetre is not.
+4. **Every one was looked at.** `render_carry.py` rolls each clean pose from
+   its stored offset to the end of its reference and renders reset, scored
+   end and reference end from two viewpoints, object translucent, any link
+   deeper than 2 mm painted red (`figures/carry_full/`,
+   `figures/carry_full_seed1/`). The mechanism is the one the morning
+   inferred from three examples, now seen on twenty: **at reset every one is
+   a burial** — 9–32 mm inside, 50–13,600 N, red palm or fingers — and by
+   the end of the reference the hand is out of the object and holding it:
+   the hammer by its handle on seven links, the camera and airplane in a
+   full wrap, the cube, pyramid, flashlight, sphere and doorknob in a
+   thumb–finger pinch, the scissors by a finger through the loop. Two are
+   not grasps although they pass the gate: the small cube rests in the
+   cupped fingers of an upturned hand, and the seed-0 mug hangs by two links
+   through its handle. The five that survive all eight perturbations:
+
+   ![Five carry-scored poses at reset (buried, red links) and at the end of the reference (out of the object, held): camera, cube, doorknob, flashlight, pyramid](../figures/carry_robust_five.jpg)
+
+5. **The failures are one class, still.** The twelve references no seed
+   touches — the large cube, the three cylinders, the small and medium
+   pyramids and spheres, phone, piggybank, game controller — start from a
+   stage-2 seed with zero contacts, and a local search from a hand beside
+   the object finds nothing. The alarm clock, apple, bowl and bunny start
+   buried and *stay* buried under every accepted offset (4–10 mm at
+   150–4300 N): the search reduces their penetration and cannot get them
+   out. Those four are where a different objective or a different
+   simulator would be tested first.
+
+**Instrument notes, recorded because each one moved a number.** The tail is
+averaged over five frames because a single end frame is noisy — the same
+stamp carry read 5 contacts after frame 26 and 2 after frame 25. The
+per-row `frame1_*` fields are read one control frame *after* reset, not at
+it (the reset numbers are in `stage2_survives.json`); they were first
+written as `reset_*` and renamed. `stage3_carry.feedforward` must call
+`reset_at` — `rollout()` does not, and the first smoke test reported a
+2423 mm feedforward from a state left over by training. And the hold count
+above is not the hold rate the README headline was measured on: that was a
+static hold at one frame, this is a carry over the reference, and the two
+agree on nothing but the reference names.
+
+**Stage 3 on these seeds** is running as this is written
+(`experiments/tracking/stage3_carry.py`: PPO from the carry start frame,
+never from `grasp_frames()`, 160k steps in 12 environments, policy against
+feedforward on the identical start with the live end state). The 3000-step
+smoke test on the hammer matched its feedforward — 34 mm against 37 mm,
+both ending 0.5 mm out on 5–7 links — which is the first stage-3 row in
+this repository whose feedforward *and* policy end held and un-buried. The
+result on the five robust seeds is recorded in NOTES.md when it lands.
+
+**What this settles and what it does not.** Settled: the property is
+dynamic and searchable — scoring the end of the carry turns one clean end
+state into nineteen, on the same seeds, in the same neighbourhood, with
+nothing else changed. Not settled: whether the poses are *good* grasps by
+any standard other than this one (the tracking errors at the end of the
+carry are 7–85 mm, mostly rotation slip); whether the count holds under a
+third and fourth search seed (two is the minimum that shows the variance
+and does not bound it); and what distinguishes the four that stay buried
+from the twenty that relax, which is the same open question as this
+morning with a smaller denominator.
+
+---
+
 Status as of 2026-09-16, 06:20 — the state of the six stages after one
 night of two sessions measuring each other's claims:
 
