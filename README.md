@@ -169,7 +169,36 @@ candidate has 0.00 mm penetration, a balanced wrench, and *no contacts at all*.
 Direct placement offers burial or thin air, and reweighting cannot find a middle
 that is not there.
 
-**The fix is not a new grasp representation.** It is to stop *placing* the hand
+**The defect is in the retarget, not the grasp stage.** Scanning every frame of
+the retargeted trajectory across 20 GRAB sequences — object at its reference
+pose, no closure applied — **23 of 2866 frames are under 1 mm of penetration**.
+Thirteen of the twenty never reach a collision-free frame at all.
+
+| reference | min | median | frames < 1 mm | deepest body |
+|---|---:|---:|---:|---|
+| `binoculars_see_1` | 17.15 mm | 25.12 mm | 0/155 | **forearm** |
+| `flashlight_on_2` | 12.82 mm | 13.66 mm | 0/144 | **palm** |
+| `cup_drink_2` | 11.73 mm | 12.28 mm | 0/117 | ffproximal |
+| `mug_drink_1` | 6.81 mm | 10.82 mm | 0/116 | ffproximal |
+| `camera_takepicture_1` | 0.00 mm | 14.09 mm | 13/143 | forearm |
+| `gamecontroller_play_1` | 0.00 mm | 5.46 mm | 1/192 | ffdistal |
+
+The split is structural. Sequences that never come clean are dominated by a
+large **non-finger** body — forearm, palm, proximal links — while those that do
+reach clean frames are dominated by distal links. On `binoculars_see_1` the
+forearm is the deepest penetrating body on all 155 frames: the Shadow forearm
+occupies the space the binoculars are in for the entire clip.
+
+That is what a retarget with no non-penetration constraint produces. Matching
+the human's fingertip *positions* is a kinematic proxy, and for this hand on
+these objects the position-matching optimum is inside the object continuously.
+No closure routine, opening schedule or wrist retraction downstream repairs it —
+each was tried and measured, and retracting along contact normals actively
+diverges, because a hand wrapped around an object cannot be translated out of
+it (measured normal alignment 0.325 on the mug, where 0 is fully opposed).
+
+**Closing under physics helps the six sequences whose wrist already lands
+outside the object.** It is to stop *placing* the hand
 and start *closing* it — backing the fingers off along the derived flexion
 direction, then closing under simulation to a force target:
 
@@ -360,7 +389,7 @@ measurement, not on the previous stage having compiled:
 | stage | what it does | state |
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
-| 2. retarget | human contact points → robot joint trajectory | **broken, fix in progress** — placing the pose interpenetrated gives either burial (11.08 mm, 4411 N) or no contact (`phone_call_1`); closing under physics instead gives 10.5 N on `gamecontroller_play_1` |
+| 2. retarget | human contact points → robot joint trajectory | **broken at the objective** — no non-penetration constraint, so 23/2866 scanned frames are under 1 mm and 13 of 20 sequences never come clean; the forearm alone is buried on all 155 frames of `binoculars_see_1` |
 | 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **not physical** — 29.35 mm is achieved on 13.8 mm of penetration at 1530 N; `gamecontroller`'s 27.2 mm withdrawn; see [above](#physics-rollouts--four-failures) |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
 | 5. distillation | one neural tracking controller across references | **incomplete** — reported held-out position error is 158–456 mm; that error alone does not verify continued grasp retention |

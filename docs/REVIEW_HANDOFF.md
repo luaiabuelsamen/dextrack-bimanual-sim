@@ -835,3 +835,71 @@ near-balanced wrench and under 2 mm penetration; all three have fewer than three
 contacts. Zero of 41 configurations both touch the object and stay out of it.
 Direct placement offers burial or thin air, which is why the fix is to close the
 hand under simulation rather than to reweight a penalty.
+
+### The defect is in the retarget's objective, not in grasp formation
+
+Scanned every frame of the retargeted trajectory across 20 s1 sequences, object
+placed at its reference pose for that frame, no closure applied. **23 of 2866
+frames are under 1 mm of penetration.** Thirteen of the twenty never reach a
+collision-free frame at all.
+
+| reference | frames | min | median | < 1 mm | deepest body |
+|---|---:|---:|---:|---:|---|
+| `mouse_use_1` | 217 | 3.01 | 5.43 | 0 | rfdistal |
+| `phone_call_1` | 200 | 2.08 | 5.94 | 0 | mfdistal |
+| `gamecontroller_play_1` | 192 | 0.00 | 5.46 | 1 | ffdistal |
+| `camera_takepicture_2` | 161 | 1.07 | 8.05 | 0 | ffdistal |
+| `binoculars_see_1` | 155 | 17.15 | 25.12 | 0 | **forearm** |
+| `hammer_use_2` | 154 | 2.08 | 4.10 | 0 | thdistal |
+| `knife_lift` | 145 | 1.13 | 9.65 | 0 | mfdistal |
+| `flashlight_on_2` | 144 | 12.82 | 13.66 | 0 | **palm** |
+| `camera_takepicture_1` | 143 | 0.00 | 14.09 | 13 | forearm |
+| `bowl_drink_1` | 131 | 8.87 | 10.51 | 0 | lfmiddle |
+| `mug_drink_2` | 131 | 2.94 | 11.47 | 0 | thproximal |
+| `cup_lift` | 128 | 9.40 | 11.04 | 0 | ffproximal |
+| `wineglass_toast_1` | 126 | 3.36 | 5.38 | 0 | lfdistal |
+| `scissors_use_2` | 120 | 8.36 | 9.38 | 0 | **palm** |
+| `cup_drink_2` | 117 | 11.73 | 12.28 | 0 | ffproximal |
+| `mug_drink_1` | 116 | 6.81 | 10.82 | 0 | ffproximal |
+
+(Four further sequences — `camera_takepicture_3_Retake`, `toothpaste_squeeze_1`,
+`cubelarge_inspect_1`, `flashlight_on_1` — reach 1–3 clean frames each.)
+
+Per-sequence minimum penetration: min 0.00, median 2.51, max 17.15 mm. Seven of
+twenty have a best frame still deeper than 5 mm.
+
+The split is structural rather than random. Sequences that never come clean are
+dominated by a large non-finger body as the worst offender — forearm on
+binoculars and camera_1, palm on flashlight_on_2 and scissors, proximal links on
+the cups and mug — while those reaching clean frames are dominated by distal
+links. `flashlight_on_2` is the clearest single case: 144 frames, palm inside
+the object throughout, never below 12.82 mm.
+
+**What was ruled out, by measurement.** Opening the fingers does not clear the
+object at any amount: on mug 10.13 mm becomes 10.64 / 9.91 / 11.35 / 11.36 mm at
+0.3 / 0.8 / 1.5 / 3.0 rad, and the palm stays at 6.02–6.06 mm regardless of
+finger state. Retracting the wrist along the deepest contact normal diverges —
+eleven iterations take binoculars to a 186 mm offset with penetration rising from
+17.15 to 62.44 mm — because the hand is wrapped and its contact normals oppose
+one another (measured alignment 0.325 on mug, 0.705 on binoculars, where 0 is
+fully opposed). A wrapped contact set cannot be escaped by translation.
+
+**Conclusion.** The retarget matches the human's fingertip positions with no
+non-penetration constraint, and for the Shadow hand on these objects that
+optimum lies inside the object continuously. This is a morphology mismatch
+expressed as an objective defect, not a grasp-formation failure, and it explains
+the `w_pen` plateau directly: reweighting took `mug_drink_2` from 11.08 to
+8.29 mm and then stopped at weights 12 and 30 because the search is fighting a
+constraint its parameterisation cannot satisfy. A factor of two is what trading
+against an infeasible target buys; the remaining 8 mm is the mismatch.
+
+Closing under physics (`reset_grasp`) is a real improvement for the
+subpopulation whose wrist already lands outside the object — six of twenty —
+which is why `gamecontroller_play_1` went from 4411 N to 10.5 N. It has nothing
+to work with on the other thirteen.
+
+The suggested scoping, for whoever takes the retarget: a non-penetration
+constraint on the arm-side bodies (wrist, palm, forearm) may be worth more than
+one on the fingers and is cheaper, being rigid-body placement rather than
+whole-hand IK. If it converts a useful fraction of the thirteen into the six,
+the existing closure routine handles the remainder.
