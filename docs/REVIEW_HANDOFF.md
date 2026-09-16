@@ -963,6 +963,34 @@ cannot be repaired by closing, because there is nothing to close onto; they
 should be excluded from tracking numbers until the approach into a concave
 object is addressed, rather than reported as poor tracking.
 
+**The vessel cluster is geometric, not weight-limited.** Sweeping `W_PEN_ARM`
+on `mug_drink_2`:
+
+| w_arm | arm median | arm max | finger median |
+|---:|---:|---:|---:|
+| 60 | 33.65 mm | 34.73 mm | 0.00 mm |
+| 150 | 32.92 mm | 37.49 mm | 0.00 mm |
+| 400 | 32.85 mm | 34.55 mm | 0.00 mm |
+| 1000 | 33.30 mm | 37.43 mm | 0.00 mm |
+
+A 16.7× increase in the weight moves median arm-side penetration by 0.35 mm.
+It is flat, and finger penetration is exactly zero at every setting. This is the
+same shape as the `w_pen` plateau and means the same thing: the optimiser is
+being asked for a pose that does not exist in the space it searches, so raising
+the price of violating the constraint changes nothing. On `binoculars_see_1` the
+constraint had somewhere to go and went there; on a mug it has nowhere to go.
+
+The 33 mm arm / 0.00 mm finger signature identifies the failure: the whole hand
+is inside the vessel, not grazing its rim. Placing the wrist where a human's
+wrist was, for a cup held in a human hand, puts a Shadow hand's bulk in the
+volume the cup occupies. No weight on a penetration term relocates a wrist that
+has been told to be somewhere specific — the wrist *target* is what is wrong for
+this geometry, which is different work from the finger half.
+
+This is not evidence against the constraint. It converts the references where an
+arm-side fix exists and is flat where none does, rather than silently degrading
+what it cannot help.
+
 Caveat: 40 of the 291 inventory rows, selected by `rhand_hold_len`, so biased
 toward long holds.
 
