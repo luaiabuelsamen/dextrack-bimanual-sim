@@ -190,6 +190,7 @@ def capture(name, cache, seed):
                     mean_equilibrium_residual_x_weight=float(np.mean(residuals)),
                     penetration_mm=pens, contact_force_N=forces,
                     equilibrium_residual_x_weight=residuals,
+                    live_diagnostics=True,
                     position_error_mm=(errors[:, 0] * 1000).tolist(),
                     orientation_error_deg=np.rad2deg(errors[:, 1]).tolist(),
                     object_contacts=contacts)
@@ -276,8 +277,19 @@ def render(name, cache, out):
                   if int(m.geom_bodyid[g]) != obj_bid and m.geom_rgba[g, 3] > 0}
     width, height = 640, 480
     frames = []
-    diag = {"penetration_mm": [], "contact_force_N": [],
-            "object_contacts": [], "equilibrium_residual_x_weight": []}
+    # REPLAYED diagnostics. Every frame below is a fresh placement -- qpos
+    # written, mj_forward, no velocity, no warm-started constraint state -- so
+    # what contact_diagnostics reads here is the state's geometry (penetration,
+    # contact count) and the force a placement needs to resolve it, NOT the
+    # force the rollout carried. The equilibrium residual of a placement is a
+    # legitimate number -- it is what a reset state reads -- but it is hundreds
+    # of x by construction and it is NOT the live residual: a replayed column
+    # once wore the live name and put a 300-600 N "net force on the hand" into
+    # STAGE2 that the live value (0.4x) refuted. So it is kept, under a name
+    # that says what it is. Live values, when capture() recorded them, stay
+    # under their plain names and are never overwritten here.
+    diag = {"penetration_mm_replay": [], "contact_force_N_replay": [],
+            "object_contacts_replay": [], "placement_residual_x_weight_replay": []}
     pos, ref = z["object_pos"], z["ref_pos"]
     mode_label = "PER-CLIP PPO" if meta["mode"] == "ppo" else "BIMANUAL / GRASP SEARCH"
     title_font, body_font, small_font = font(20, True), font(14), font(12)
@@ -315,11 +327,11 @@ def render(name, cache, out):
             draw.text((20, 12), DEMOS[name][2], font=title_font, fill="#f2f4f8")
             draw.text((20, 40), mode_label + "   |   MUJOCO PHYSICS", font=small_font, fill="#98adbf")
             draw.rectangle((0, height - 97, width, height), fill="#101722")
-            pen, force, ncon, residual = contact_diagnostics(m, d, obj_gids, obj_bid)
-            diag["penetration_mm"].append(pen)
-            diag["contact_force_N"].append(force)
-            diag["object_contacts"].append(ncon)
-            diag["equilibrium_residual_x_weight"].append(residual)
+            pen, force, ncon, placement_residual = contact_diagnostics(m, d, obj_gids, obj_bid)
+            diag["penetration_mm_replay"].append(pen)
+            diag["contact_force_N_replay"].append(force)
+            diag["object_contacts_replay"].append(ncon)
+            diag["placement_residual_x_weight_replay"].append(placement_residual)
             e = meta["position_error_mm"][k]
             draw.text((20, height - 86), f"Position error  {e:5.1f} mm", font=body_font, fill="#f2f4f8")
             draw.text((247, height - 86), f"Angle error {meta['orientation_error_deg'][k]:.1f}°",
@@ -332,7 +344,7 @@ def render(name, cache, out):
             bad = pen > 2.0 or force > 40 * weight
             draw.text((20, height - 62), f"Penetration {pen:5.2f} mm", font=body_font,
                       fill="#ff6b6b" if pen > 2.0 else "#7ddc8a")
-            draw.text((205, height - 62), f"Grip {force:7.1f} N ({force / weight:4.0f}x weight)",
+            draw.text((205, height - 62), f"Grip {force:7.1f} N ({force / weight:4.0f}x weight) replayed",
                       font=body_font, fill="#ff6b6b" if force > 40 * weight else "#7ddc8a")
             draw.text((width - 152, height - 62), f"{ncon:3d} contacts", font=body_font,
                       fill="#ff6b6b" if bad else "#98adbf")
@@ -365,13 +377,27 @@ def render(name, cache, out):
     for i, k in enumerate(picks):
         sheet.paste(frames[k], ((i % 2) * width, (i // 2) * height))
     sheet.save(cache / "preview.jpg", quality=90)
+    # Replayed columns never overwrite live ones, and a stale live residual
+    # from an earlier replay is removed rather than left to be read again.
+    for stale in ("equilibrium_residual_x_weight", "mean_equilibrium_residual_x_weight"):
+        if stale in meta and "live_diagnostics" not in meta:
+            meta.pop(stale)
+    for stale in ("penetration_mm", "contact_force_N", "object_contacts",
+                  "max_penetration_mm", "mean_penetration_mm",
+                  "mean_contact_force_N", "max_contact_force_N"):
+        if stale in meta and "live_diagnostics" not in meta:
+            meta.pop(stale)
     meta.update({k: v for k, v in diag.items()},
-                max_penetration_mm=float(max(diag["penetration_mm"])),
-                mean_penetration_mm=float(np.mean(diag["penetration_mm"])),
-                mean_contact_force_N=float(np.mean(diag["contact_force_N"])),
-                max_contact_force_N=float(max(diag["contact_force_N"])),
-                mean_equilibrium_residual_x_weight=float(
-                    np.mean(diag["equilibrium_residual_x_weight"])))
+                max_penetration_mm_replay=float(max(diag["penetration_mm_replay"])),
+                mean_penetration_mm_replay=float(np.mean(diag["penetration_mm_replay"])),
+                mean_contact_force_N_replay=float(np.mean(diag["contact_force_N_replay"])),
+                max_contact_force_N_replay=float(max(diag["contact_force_N_replay"])),
+                diagnostics_note=("*_replay columns are read from a fresh placement of each saved "
+                                  "state (qpos + mj_forward): geometry is exact, force is the "
+                                  "placement's resolving force, and placement_residual is the "
+                                  "equilibrium residual OF A FRESH PLACEMENT (hundreds of x by "
+                                  "construction; the live residual of a tracking rollout is ~0.4x). "
+                                  "Live per-frame values exist only if capture() wrote them."))
     meta.update(gif=str(out), gif_sha256=digest(out), gif_frames=len(frames),
                 gif_duration_ms=sum(durations), renderer_sha256=digest(__file__),
                 camera="Follows the reference object position",

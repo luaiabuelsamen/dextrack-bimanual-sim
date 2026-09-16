@@ -130,14 +130,19 @@ link buried deeper than 2 mm turns **red**.
 |---|---|
 | ![Left hand buried in the binoculars while the right hand grips nothing](figures/physics_binoculars.gif) | ![A camera inverted between two Shadow hands](figures/physics_camera.gif) |
 
-| Clip | Position error | Orientation error | Max penetration | Mean grip | vs object weight |
+| Clip | Position error | Orientation error | Max penetration | Mean placement force (replayed) | vs object weight |
 |---|---:|---:|---:|---:|---:|
 | [Mug](figures/physics_mug.json) | 29.4 mm | 44.8° | 13.8 mm | 1562 N | 796× |
 | [Bowl](figures/physics_bowl.json) | 18.0 mm | 45.9° | 9.8 mm | 2325 N | 1185× |
 | [Binoculars](figures/physics_binoculars.json) | 32.6 mm | 20.0° | 10.9 mm | 7553 N | 3850× |
 | [Camera](figures/physics_camera.json) | 34.4 mm | 138.4° | 11.4 mm | 5353 N | 2729× |
 
-The object weighs **1.96 N**. The position-error column is what this project
+The object weighs **1.96 N**. The force column is read by *replaying* each
+saved state (`qpos` + `mj_forward`) — the force a fresh placement needs to
+resolve the penetration, not the grip the rollout carried live (the live
+end-of-rollout grip on the mug is 2832 N; same verdict, different quantity).
+Penetration is geometric and identical either way. Live columns follow when
+the four are re-captured. The position-error column is what this project
 used to report; watch the red links and the two columns after it for why that
 column meant nothing. `make render-tracking` reproduces the set, and every
 figure is saved per frame in the manifests beside the GIFs.

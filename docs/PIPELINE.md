@@ -36,7 +36,7 @@ measurement, not on the previous stage having compiled:
 |---|---|---|
 | 1. human reference | GRAB clip → object pose over time, both MANO hands | **done** — hand closes to 0.1–0.6 mm of the object and holds |
 | 2. retarget | human contact points → robot joint trajectory | **moves most references from dropped to held; figure pending** — the 0.275 → 0.850 hold rate does not reproduce across code versions (`dca903b`, version skew during the sweep); a fraction of holds are burials; see [STAGE2.md](STAGE2.md) |
-| 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **not physical, blocked on stage 2** — 29.35 mm is achieved on 13.8 mm of penetration at 1562 N; `gamecontroller`'s 27.2 mm withdrawn. Every checkpoint is invalid once the initial condition changes |
+| 3. per-reference tracking | **PPO** per clip (plus MPPI + homotopy) | **not physical, blocked on stage 2** — 29.35 mm is achieved on 13.8 mm of penetration (1562 N placement force on replay, 2832 N live at rollout end); `gamecontroller`'s 27.2 mm withdrawn. Every checkpoint is invalid once the initial condition changes |
 | 4. homotopy curriculum | solve an easier reference, deform it into the hard one | **built** — walks λ 0.35 → 1.0 holding throughout |
 | 5. distillation | one neural tracking controller across references | **incomplete** — reported held-out position error is 158–456 mm; that error alone does not verify continued grasp retention |
 | 6. bimanual | joint retargeting + wrist-offset search | **fails under physics** — and 2 of 3 clips are effectively one-handed; see [docs/STAGE2.md](STAGE2.md) |
