@@ -455,6 +455,67 @@ are different failures, and averaging them makes the distribution unreadable.
 
 ---
 
+## Frame 0 is the approach, not the grasp — and what the RL half actually rides on
+
+`reset_at`'s own docstring: *the window begins where the hand first comes within
+5 mm, which is the moment contact starts, not the moment the grasp is formed.*
+The mug capture uses `start = 5` for that reason. Every `reset_at(0)`
+measurement in this document was taken on the approach transient. Rendered, at
+frame 0 the deepest bodies are `forearm, palm, wrist` — the arm sweeping
+through the object before the hand arrives.
+
+The state at the documented start and at mid-window, feedforward rollout:
+
+| reference | k | penetration | bodies | one-sided | force | ×W | residual | tracking |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `mug_drink_1` | 0 | 69.93 mm | 3 | 0.094 | 35987 N | 18342× | 8.25× | 153 mm |
+| | **5** | **6.10 mm** | 7 | 0.283 | **119 N** | **61×** | — | 89408 mm |
+| | 58 | 6.61 mm | 6 | 0.527 | 204 N | 104× | 2.95× | **32.7 mm** |
+| `binoculars_see_1` | 0 | 56.77 mm | 3 | 0.191 | 90889 N | 46324× | 15.40× | 187 mm |
+| | **5** | **6.42 mm** | 8 | 0.727 | **37 N** | **19×** | 11.47× | 161401 mm |
+| | 77 | 6.03 mm | 5 | 0.486 | 24 N | 12× | 9.60× | 43457 mm |
+| `flashlight_on_2` | 0 | 17.33 mm | 3 | 0.218 | 769 N | 392× | 4.33× | 134 mm |
+| | **5** | **4.70 mm** | 4 | 0.963 | **27 N** | **14×** | 8.66× | 136177 mm |
+| | 72 | 15.41 mm | 10 | 0.134 | 2373 N | 1209× | 10.21× | 59.7 mm |
+
+At frame 5 the arm is clear (deepest bodies are finger links), penetration is
+4.7–6.4 mm and force is 14–53× weight. **`W_PEN_ARM` is working.** Those are
+the most physically plausible grasps the pipeline has produced — and every one
+flies to 89–161 m under feedforward. Rendered, the mug at frame 5 is a correct
+**handle pinch**, thumb and index through the loop. Its one-sidedness of 0.571
+is not a defect: a handle grip is one-sided about the mug's centre of mass and
+carries a lever arm feedforward cannot hold. That is precisely what a per-clip
+policy is for.
+
+### What the PPO checkpoint tracks on
+
+| harness | initial condition at frame 5 | PPO tracking |
+|---|---|---:|
+| exact capture path: `synthesize_grasp("hold")` → `rl.evaluate` | **20.58 mm / 16 bodies / 13579 N** | **23.2 mm**, 111/111 |
+| pristine: raw `W_PEN_ARM` fit, nothing before `evaluate` | 6.10 mm / 7 bodies / 119 N | **83984 mm**, 1/111 |
+
+Two conclusions, one of which corrects an earlier expectation in this document:
+
+- **The checkpoint survived `W_PEN_ARM`** — 23.2 mm at HEAD against 29.35 in the
+  morning manifest, on a *different* hold-scored offset (36.8 mm vs 21.7 mm).
+  The prediction that any change to the initial condition invalidates the
+  policy does not hold. It survived because hold-scored synthesis takes the
+  6 mm / 119 N raw grasp and re-buries it to 20.58 mm / 13.6 kN wherever the fit
+  starts, and *that* is the state the policy was trained on.
+- **It cannot hold the plausible grasp.** From 6 mm / 119 N the same policy
+  flies. So *tracking comes from penetration* is true of PPO as well as
+  feedforward. RL is blocked on retargeting — not because the checkpoint breaks
+  when the fit moves, but because it breaks when the hand is un-buried.
+
+**One unreproduced reading.** The mug's frame-5 raw fit read 5.36 mm / 5
+bodies / 105 N in one script and **6.10 mm / 7 bodies / 119 N** in four
+independent processes since. The fit is deterministic across processes
+(identical `tr.q` hash in two separate runs), a deliberate contamination test
+(fresh → `reset_at(0)` → `rollout` → re-read) returns 6.10 at every step with the
+model untouched, so neither nondeterminism nor state leakage explains the 5.36.
+Its cause was not found. The table uses 6.10 / 7 / 119 N; the PPO result below
+was measured on that pristine harness and does not depend on which is right.
+
 ## Look at the pose before trusting the number
 
 `experiments/tracking/inspect_pose.py` renders a configuration from two angles
