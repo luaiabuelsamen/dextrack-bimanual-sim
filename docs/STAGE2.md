@@ -1044,6 +1044,7 @@ read as they land, end states live (`results/g9_ppo_distill_v2.json`):
 |---|---|---:|---:|---:|---:|---:|---:|
 | `camera_takepicture_2` | grasp — 2 contacts, 6.0 N, eq 0.01 | **33** | 891 | 2587 mm | 0.00 mm | **0** | **0 N** |
 | `phone_call_1` | grasp — 3 contacts, 7.5 N, eq 0.10 | **1** | 120 | 42,603 mm | 0.00 mm | 0 | 0 N |
+| `mouse_use_1` | grasp — 4 contacts, 3.6 N, eq 0.10 | **32** | **1176** | 116,130 mm | 0.00 mm | **0** | **0 N** |
 
 **Camera drops — and it is a within-reference control, not a fresh row.**
 The seq-name collision means the same s1 camera clip has now been trained
@@ -1069,7 +1070,11 @@ keep hold of the object.
 
 Phone (row 2) drops too, but on **one start frame and 120 transitions** —
 the same footing as the old run's knife row, and it carries the same weight:
-consistent with camera, not independent evidence.
+consistent with camera, not independent evidence. Mouse (row 3) is
+independent evidence: 32 start frames and 1176 transitions — the
+best-supported policy trained tonight on either run — from a 4-contact,
+3.6 N seed at equilibrium 0.10, and it drops: 116 m, no contact at the end.
+Two well-supported grasp-class rows, two drops.
 
 **Decided before the remaining rows land:** camera is the only clip with
 both arms; the other five grasp-class references have no burial
