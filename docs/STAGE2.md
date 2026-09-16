@@ -518,8 +518,7 @@ was measured on that pristine harness and does not depend on which is right.
 
 ### Why synthesis re-buries, and the run that tests the alternative
 
-**Corroboration from the other session (reported, uncommitted as of this
-entry).** A 40-reference sweep — retarget → CEM wrist search scored by drop
+**Corroboration from the other session (`2e4c951`).** A 40-reference sweep — retarget → CEM wrist search scored by drop
 distance → hold — with an equilibrium-residual column added:
 
 | reference | drop | contacts | residual |
@@ -536,24 +535,51 @@ contacts at 1.90× weight, which is the re-burial. `apple_eat_1` at 0.03× on 9
 contacts is a real equilibrium. **Drop-scored synthesis cannot tell a grasp
 from burial**, because burial is a perfectly good way to stop an object moving
 and the score asks for nothing else. That is the mechanism behind the 6 mm →
-20.58 mm re-burial above, seen from the other side. The fix being implemented
-is to score synthesis by equilibrium residual. First A/B (w_eq 0 → 0.05, same
-seed): `airplane_fly_1` grip **385 N → 6.9 N** on a 1.96 N object — the result;
-`bowl_drink_1` 35.5 kN → 11.4 kN — a 3× reduction that is still burial. An
-improvement, not a fix. **Caveat on the mechanism:** the 1.90× above was read
-before settling; every settled winner, the 11.4 kN bowl included, reads
-**0.00×**, because a settled burial's forces cancel. So the residual is not
-separating settled candidates — whatever is doing the selecting during the
-search is not yet identified, and the rationale should not be quoted until it
-is.
+20.58 mm re-burial above, seen from the other side.
 
-Two further items from that session, also uncommitted at this writing: frame 0
-is the approach on the **bimanual** path too — a reported 312 *km* tracking
-error on `gamecontroller_play_1` was an integrator artifact from a diverged
-sim, fixed by starting from the first self-holding frame and truncating on
-loss (6.6 mm drop, 131 mm tracking) — and the first controlled two-hand
-comparison, left hand parked rather than deleted so the model is identical:
-**131.0 mm two-handed against 647.7 mm solo.**
+**The mechanism, confirmed** (`2e4c951`): the residual discriminates
+**placement**, not steady state. The saved sweep's `equilibrium` column is the
+placement reading — bowl 1.900, apple 0.034, spread 0.013–5.1 across 40
+winners, correlated +0.33 with grip and +0.35 with contacts — and that is
+where it separates the buried rows from the clean ones. After the hold test
+settles a candidate, forces cancel and every winner reads 0.00. So a search
+that scores at placement has a gradient; one that scores after settling has
+none. Shipped as a synthesis term at `w_eq = 0.0` after measurement: it helps
+in 4 of 6 paired runs (`airplane_fly_1` grip **385 N → 6.9 N** on a 1.96 N
+object), hurts in one, never gets the bowl below ~10 kN, and worsens drop in
+all six. An improvement in the right direction, not the term. `equilibrium` is
+recorded on every `GraspFit` regardless — reading it is how the burial was
+caught.
+
+**Stage 2 now has a number** (`2e4c951`). Forty references, one per object:
+hold rate **0.275** from the raw retarget → **0.850** after a CEM wrist search
+scored by a physical hold test, 95% CI [0.725, 0.950] clustered by object. What
+the 34 successes *are* matters more than the headline:
+
+| | count | signature |
+|---|---:|---|
+| **grasps** | 20 | ≤ 12 contacts, median 8, median drop 6.6 mm |
+| **burials** | 6 | > 30 contacts — bowl at 94 contacts and 35.5 kN |
+| indeterminate | 8 | between |
+| **free fall** | 6 | 0–1 contacts, equilibrium 0.99–1.00 |
+
+A stage reporting hold rate alone would have said 85% and been wrong about a
+sixth of it. The six failures are **one geometric class**: `cubelarge`,
+`cubesmall`, `pyramidlarge`, `spherelarge`, `spheremedium`, `flashlight` —
+every one a featureless convex primitive, every one `inspect` intent, nothing
+to hook. A sphere needs opposed normals, which is exactly what a position
+objective cannot ask for. The failure class and the missing term are the same
+finding from two directions.
+
+Two further items from that session, landed in `2e4c951`: frame 0 is the
+approach on the **bimanual** path too — a reported 312 *km* tracking error on
+`gamecontroller_play_1` was an integrator artifact from a diverged sim, fixed
+by `BimanualTracker.grasp_frames` (start from the first self-holding frame) and
+truncating the rollout once the object is lost (6.6 mm drop, held; a failure
+now reports "131 mm over 8% of the clip" instead of a distance to the moon) —
+and the first controlled two-hand comparison, left hand *parked* rather than
+deleted so the model is identical: **131.0 mm over 8% two-handed against
+647.7 mm over 1% solo.**
 
 **On the middle-phalanx term, one more correction.** The retraction above stands
 on its data: a joint-centre measurement cannot refute a per-finger surface
@@ -565,8 +591,8 @@ now ships off at `W_MID = 0.0`. The line the session drew from that is the one
 this document converges on: **every knob in the retarget objective is a
 position, and a position objective has no term that says hold the object.**
 Equilibrium residual is the first candidate for such a term — with the caveat
-that it only speaks at placement (see the instrumentation note below): whether
-it separates candidates *during* a search that settles them is being checked.
+that it only speaks at placement (see the instrumentation note below): it
+separates candidates only at placement, not after settling (`2e4c951`).
 
 **The run.** PPO trained from the raw `W_PEN_ARM` fit on `mug_drink_1`, no
 hold-scored synthesis, `Pool.reset` a plain `reset_at` so every environment
