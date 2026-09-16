@@ -3755,3 +3755,50 @@ entirely, so widening the rotation search from 0.08 to 0.45 rad took
 binoculars_see_1 from 2.47 mm of arm penetration to 15.52 mm and scored it an
 improvement. Five wiring errors today, each found by a measurement that did not
 match what the code was supposed to do.
+
+## 2026-09-15 — stopping. Sixth wiring error, and that is now the limiting factor.
+
+I tried the objective change that `wrap_score` motivates: surface-CONTACT targets
+for the middle phalanges, so the fit asks links other than the five fingertips to
+reach the object. It produced byte-identical results at W_MID_CONTACT 0.0 and
+0.7 on all three references -- penetration, force, engaged bodies, one-sidedness
+and drop all unchanged -- which means it was inert, not that it failed. Reverted
+rather than committed, because unverified code that appears to do nothing is
+worse than no code.
+
+That is the sixth wiring error today. The others:
+
+    the search branch gated on `objective == "track"`, so "wrap" silently fell
+      through to the hold-based path and the validated score was never called
+    the "oppose" score omitted arm penetration, so widening the rotation search
+      scored a 2.47 -> 15.52 mm regression as an improvement
+    `palm_pose` zeroes qpos, so using it to sync the mocap commanded the hand to
+      the origin
+    the approach search computed its termination condition and never tested it
+    `track_score` printed with a "mm" suffix beside a real millimetre error,
+      which cost an hour chasing a 2000x discrepancy that did not exist
+
+Every one was caught by a measurement disagreeing with what the code was supposed
+to do, none by reading the code. The rate is now roughly one per attempt, which
+means further attempts tonight add noise rather than results. The next step --
+rewriting the retarget's objective around wrap_score -- is well-posed and
+deserves better than a seventh.
+
+What stands, and what the next session starts from:
+
+    arm-side feasibility constraint   arm penetration 0.00 mm median in 29/40
+                                      sequences; binoculars_see_1 from
+                                      unreachable at all 155 frames to 106 mm
+    wrap_score                        the only grasp-quality term that separates
+                                      the human's contact set from the robot's;
+                                      penetration gated, not weighted
+    advance_to_contact                correct, cheap, and the tool that measured
+                                      the 1:1 translation trade
+    the diagnosis                     in this pipeline tracking came FROM
+                                      penetration; every downstream number was
+                                      measuring the contact solver
+    the method                        any proposed grasp term must separate the
+                                      human's contact set from the robot's
+                                      before it enters an objective. That test
+                                      kills epsilon and fingertip spread in
+                                      minutes.
