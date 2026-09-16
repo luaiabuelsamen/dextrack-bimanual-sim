@@ -99,9 +99,22 @@ def load_rl_at(rev: str):
 
 def build(ref: str, hand: str, grips_path: Path):
     """The tracker as g9_ppo_distill.per_reference builds and seeds it."""
-    grips = {x["seq"]: x for x in json.loads(grips_path.read_text())["rows"]}
-    row = grips[ref]
-    seq = grab.load(f"{row['subject']}/{ref}.npz", verts=True, stride=8)
+    # Keyed on subject/seq: GRAB has 80 sequence names that exist under more
+    # than one subject, and a bare-name dict silently keeps one of them (it
+    # voided a training run on 2026-09-16; tests/test_seed_keys.py guards it).
+    # A bare --ref is accepted only when exactly one subject has it.
+    rows = json.loads(grips_path.read_text())["rows"]
+    grips = {f"{x['subject']}/{x['seq']}": x for x in rows}
+    if ref in grips:
+        key = ref
+    else:
+        hits = [k for k in grips if k.split("/", 1)[1] == ref]
+        if len(hits) != 1:
+            raise SystemExit(f"--ref {ref!r} is {'ambiguous' if hits else 'absent'} in "
+                             f"{grips_path}: {hits or sorted(grips)[:8]} -- give subject/seq")
+        key = hits[0]
+    row = grips[key]
+    seq = grab.load(f"{row['subject']}/{row['seq']}.npz", verts=True, stride=8)
     rt = track.ReferenceTracker(seq, hand=hand)
     rt.apply_wrist_offset(np.asarray(row["offset"], float))
     gf = rt.grasp_frames()
@@ -249,7 +262,7 @@ def measured_iters(cfg) -> tuple[int, int]:
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("--ref", default="bowl_drink_1",
-                   help="reference; needs a row in --grips")
+                   help="reference as subject/seq (a bare name only if unambiguous); needs a row in --grips")
     p.add_argument("--rev", default="3216767", help="baseline commit of rl.py")
     p.add_argument("--iters", type=int, default=10,
                    help="PPO iterations per run; the last is not timed")
