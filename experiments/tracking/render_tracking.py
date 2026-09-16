@@ -240,10 +240,14 @@ def render(name, cache, out):
     m = mujoco.MjModel.from_binary_path(str(cache / "scene.mjb"))
     d = mujoco.MjData(m)
     # Display-only materials: physics was captured before these edits.
+    # The object is TRANSLUCENT on purpose. Opaque, a hand buried 13 mm inside
+    # it looks exactly like a hand touching it, which is how a gallery of
+    # contact artifacts got published with a caption that said otherwise.
+    # Through it, the fingers inside the mug are simply visible.
     for g in range(m.ngeom):
         body = mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_BODY, int(m.geom_bodyid[g])) or ""
         if body.startswith("obj_"):
-            m.geom_rgba[g] = [0.98, 0.64, 0.24, 1.0]
+            m.geom_rgba[g] = [0.98, 0.64, 0.24, 0.42]
         elif "forearm" in body:
             m.geom_rgba[g, 3] = 0.0
         elif body.startswith("l_") and m.geom_rgba[g, 3] > 0:
@@ -264,6 +268,9 @@ def render(name, cache, out):
     cam.distance, cam.azimuth, cam.elevation = 0.62, 135.0, -22.0
     if name == "mug":
         cam.distance = 0.44
+    obj_set = set(obj_gids)
+    hand_reset = {g: m.geom_rgba[g].copy() for g in range(m.ngeom)
+                  if int(m.geom_bodyid[g]) != obj_bid and m.geom_rgba[g, 3] > 0}
     width, height = 640, 480
     frames = []
     diag = {"penetration_mm": [], "contact_force_N": [],
@@ -276,6 +283,20 @@ def render(name, cache, out):
             d.qpos[:] = state
             d.ctrl[:] = z["ctrl"][k]
             mujoco.mj_forward(m, d)
+            # Paint the hand links that are INSIDE the object, before the scene
+            # is built so it affects THIS frame. Attribution beats assertion:
+            # "ffproximal is 13 mm in" is a claim a reader can check against the
+            # picture, where "penetration 13.00 mm" is one they cannot.
+            buried = set()
+            for i in range(d.ncon):
+                g1, g2 = int(d.contact[i].geom1), int(d.contact[i].geom2)
+                in1, in2 = g1 in obj_set, g2 in obj_set
+                if in1 == in2 or -float(d.contact[i].dist) <= 0.002:
+                    continue
+                buried.add(int(m.geom_bodyid[g2 if in1 else g1]))
+            for g, rgba in hand_reset.items():
+                m.geom_rgba[g] = ([0.95, 0.30, 0.30, 1.0]
+                                  if int(m.geom_bodyid[g]) in buried else rgba)
             cam.lookat[:] = ref[k]
             renderer.update_scene(d, camera=cam)
             # Local portions of reference/actual paths remain in view as the

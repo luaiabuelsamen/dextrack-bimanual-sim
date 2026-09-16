@@ -909,10 +909,10 @@
   "max_contact_force_N": 3707.8756499327606,
   "mean_equilibrium_residual_x_weight": 188.20828708718687,
   "gif": "figures/physics_bowl.gif",
-  "gif_sha256": "d14bd01a3a4622a5c3d11b9f2e9af0ab70bba6dd4b5e20ae836978cb67836444",
+  "gif_sha256": "b1bc533f6c048efb628fe6ce19d480435a3126142f961398e933b24acb90a188",
   "gif_frames": 131,
   "gif_duration_ms": 8730,
-  "renderer_sha256": "1758a44623a95fbd21630dda287416e8352ae8c398b93a005881dd86ffcf6851",
+  "renderer_sha256": "2b5493c78d986c244acec42dbef22ff1ad5af7476dc3cbe6a16495e1c766b984",
   "camera": "Follows the reference object position",
   "presentation": "Display-only hand/object recolouring; forearms hidden; cyan reference path, amber measured object path"
 }
