@@ -709,6 +709,83 @@ the original never had to find anything because the burial held. Whether the
 policy *tracks* from the raw fit is the 2×2 at the end of the run, reported
 with end-of-rollout penetration and grip so that a policy which has learned
 to bury the hand itself cannot pass as a success.
+
+### The result: the policies are interchangeable; the initial condition is everything
+
+Training finished at 439 iterations, 80.6 min: alive 0.839, reward 0.473
+(original 0.984 / 0.876). Checkpoint saved *before* evaluation — which paid for
+itself, because the in-process evaluation crashed on version skew (below) and
+the 2×2 was rerun in a fresh process.
+
+**Each policy from each initial condition at frame 5, with the state at the end
+of the rollout:**
+
+| | raw fit (6 mm / 119 N) | buried (20.6 mm / 13.6 kN) |
+|---|---|---|
+| **OLD** — trained buried | 83972 mm, 1/111 · ends **dropped**, 0 contacts | **23.0 mm**, 111/111 · ends **10.83 mm inside, 12 bodies, 2610 N (1330×)** |
+| **NEW** — trained raw | 53080 mm, 16/111 · ends **dropped**, 0 contacts | **22.2 mm**, 111/111 · ends **10.83 mm inside, 12 bodies, 2613 N (1332×)** |
+
+![OLD and NEW policy, each from the raw and the buried initial condition, four frames per rollout](../figures/ppo_2x2_mug_drink_1.jpg)
+
+Eighty minutes of training on the physically valid grasp produced a policy
+indistinguishable from the buried one in both conditions. **The policy class
+does not matter; whether the hand starts inside the object is the entire
+story.** And both "successes" end at 10.83 mm / 1330× weight: the tracking
+success *is* the burial, first frame to last — rendered, the fingers are
+visibly inside the mug wall in every panel of the buried column. A policy
+trained on a real grasp, evaluated on a burial, tracks the burial. Nothing in
+the reward forbids it.
+
+**Per start frame, on the raw fit** (23 starts, both policies): neither holds
+from any of them. End-of-rollout penetration 0.00 and grip 0.0 on every row —
+not buried, *dropped*, mean errors in metres. NEW's held-fraction 0.136 against
+OLD's 0.091; the one fully held start is 115, with a frame left. On the two
+starts `grasp_frames()` accepted (15, 20): 0.42 and 0.11. On the 21 it
+rejected: 0.124. So the gate was right that the raw fit is unholdable — and the
+hypothesis recorded above, that it rejects frames a policy can hold, is
+**refuted**. The gate was costing sample size for a different reason, found by
+the other session (`d517a85`, `98997dc`): stage 2's entire output is the
+wrist-pose offset, and stage 3 was discarding it. Applying it takes
+`phone_call_1` 0 → 1, `banana_eat_1` 0 → 2, `alarmclock_lift` 0 → 8 graspable
+frames; carrying the finger angles as well makes it *worse* (`binoculars_lift`
+8 → 2), the third independent measurement that grip transfer is useless-to-
+harmful. This run trained on the retarget with **no** wrist offset — the
+configuration stage 3 was wrongly starting from. On the mug, that offset *is*
+the burial. Remove it and nothing holds; keep it and you are tracking a burial.
+The mug is in the six-burial class, not the twenty-grasp class.
+
+**Two corrections to this section's own earlier entries.** *"Alive 0.839"* is
+`1 − mean(done)` over control steps, where `done` fires when position error
+exceeds `cfg.drop_m` = **0.15 m** or the clip ends, and the environment is
+reset on drop. It is a per-step survival fraction under a threshold three times
+looser than the 50 mm evaluation criterion — a training signal, not tracking —
+and it coexists with 14% of frames held at evaluation. The "different regimes"
+comparison drawn from it above (0.984 vs 0.770) was built by both sessions
+without either reading the definition. And *"the un-buried grasp is learnable"*
+was true of that signal and false of the thing that matters.
+
+**What this decides.** RL is not blocked on retraining; it is blocked on stage 2
+producing a **non-burial** wrist offset for this object class. Stage 2's own
+sweep says it does so for 20 of 34 successes and not for the mug or bowl. The
+right next training run is on a grasp-class seed — and it is not yet done: the
+distillation run seeds from stage 2's offset, only 5 of its 16 picks had a seed
+at all, stage 2 is being recomputed for exactly those, and the first row back
+(`mouse_use_1`, equilibrium 2.62×) is the mixed class. Its analysis now reports
+tracking **split by seed class**, with burial-seeded rows labelled *read these
+as tracking the contact solver*. If grasp-seeded references track, that is the
+first tracking number in this repository that is not measuring penetration. No
+raw-fit analogues on other objects were run; they would reproduce this table.
+
+**Measurement notes from this run**, for the list above. The in-process 2×2
+crashed with `'HoldResult' object has no attribute 'eq_place'`: `grasp.py` and
+`track.py` were edited three times during the 80-minute run, `synthesize_grasp`
+imports `grasp` lazily inside the method, and the first call at the end-phase
+pulled the new module against the old class already in memory. Lazy imports
+turn a shared working tree into a version-skew hazard for any process longer
+than the interval between commits; save before you evaluate. And the watcher
+set to fire on the run's exit was bound to the launch wrapper's pid, not the
+worker's, because `pgrep | head -1` returned the wrapper — it would never have
+fired. Verify the pid is the process you think it is.
 Measured rate **18.8 s/iteration, ~2.3 h total** (an earlier figure of
 103 s/iteration in this entry divided elapsed time by *logged lines*, which
 print every 10 iterations; it was wrong). The original checkpoint took

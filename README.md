@@ -69,7 +69,7 @@ this was measured on a burial and is withdrawn.
 |---|---|---|
 | arm inside the object | **fixed** | `W_PEN_ARM`: `binoculars_see_1` 175 m → 106 mm |
 | the search rewards burial | **diagnosed, not fixed** | drop-scored synthesis cannot tell a grasp from a burial; the equilibrium residual describes it but does not steer it |
-| a policy trained on a real grasp | **running** | PPO from the un-buried fit; alive plateaued 0.80–0.82 from iter 140 (0.822 at 200, original 0.979); whether it *tracks* is the 2×2 result, pending |
+| a policy trained on a real grasp | **measured — no** | PPO from the un-buried fit drops the mug from every start; from the buried start it tracks at 22.2 mm and ends 10.8 mm inside at 1330× weight, same as the original. The initial condition is everything; the policy is not. See [docs/STAGE2.md](docs/STAGE2.md) |
 
 **→ [docs/STAGE2.md](docs/STAGE2.md)** is the full diagnosis and where to pick
 up. RL retraining is blocked behind all three.
@@ -310,6 +310,14 @@ not run on this machine** — `gpusolverDnCreate` fails, so no MJX number should
 be quoted from it.
 
 ## How this repository is meant to be read
+
+**In this pipeline a large effect is a bug in the measurement until it survives
+being measured a second way.** Both agents that worked it on 2026-09-15
+derived that rule independently and paid for it separately — a 103 s/iteration
+that was elapsed time divided by log lines, a "3486 mm, the scenes disagree
+completely" that was an open hand sent by mistake, a 312 km tracking error that
+was an integrator artifact. Every number in the documents below survived a
+second measurement or is marked as not having had one.
 
 Experiments that can decide something are **pre-registered** — hypotheses,
 analysis and decision rule committed before the code exists. Results carry
