@@ -4146,3 +4146,42 @@ The lesson is the cheap one. I had the file open in the same session where I
 found that frame 0 is the approach and that the gate was dropping references,
 and I still asserted the stage worked because a summary said so. One `cat` of
 the results file would have caught it.
+
+## The 0.850 hold rate does not reproduce across code versions
+
+Two stage-2 sweeps share five references. Three of the five disagree:
+
+    reference              sweep A                     sweep B
+    apple_eat_1            raw   0.2 mm -> 5.2, n= 9   raw 727.3 mm -> 4.5, n=18
+    cubelarge_inspect_1    raw 4569   mm -> FAILED      raw 4569.8 mm -> 7.1, n= 3
+    phone_call_1           raw 4940   mm -> 8.7, n= 3   raw 4940.6 mm -> 15.3, n= 6
+
+`cubelarge_inspect_1` is one of the six failures the 0.850 headline is computed
+against, and in the second sweep it holds at 7.1 mm on 3 contacts. The raw
+column is the UNSEARCHED retarget pose, with no CEM involved, so this is not
+search noise.
+
+The hold test itself is deterministic. Same reference, same pose, three fresh
+environments and three reuses of one, in a single process:
+
+    apple_eat_1           drop 5.17 mm, 9 contacts, 874.9 N, eq 1.108   x6
+    cubelarge_inspect_1   drop 3080.60 mm, 0 contacts, 0.0 N            x6
+
+Identical to the last digit every time, and both differ from BOTH sweeps. So the
+simulator is reproducible and the two sweeps were running different code. Sweep
+A ran for thirty minutes while I was editing `src/`, which is the version-skew
+hazard recorded above -- except that there it cost a peer a crash, which is
+loud, and here it silently changed a headline number.
+
+What this means for the 0.850, stated plainly: the rate is real in the sense
+that the search does move most references from dropped to held, but the exact
+figure and the exact membership of the six-failure class belong to a code state
+that no longer exists, and the featureless-convex-primitive story is weakened by
+cubelarge holding on a rerun. It needs one clean sweep at a frozen HEAD before
+it is quoted anywhere. The 20-of-34-are-grasps breakdown carries the same
+caveat.
+
+I verified the middle-phalanx change was behaviour-neutral by comparing the new
+code's default against the new code at `w_mid=0`, which is not a test of
+anything -- both were the same build. The comparison that mattered was against
+the previous commit and I did not make it.
