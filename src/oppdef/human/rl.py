@@ -15,6 +15,7 @@ each and the policy is evaluated on the whole batch at once.
 """
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -388,6 +389,7 @@ class TrainLog:
     grip_n: list = field(default_factory=list)      # mean total normal force
     r_pen: list = field(default_factory=list)       # mean penetration cost paid
     r_hold: list = field(default_factory=list)      # mean hold bonus earned
+    t_iter: list = field(default_factory=list)      # wall-clock seconds per iteration
 
 
 def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
@@ -408,6 +410,7 @@ def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
     obs = pool.reset_all(rng)
     try:
         for it in range(cfg.iters):
+            t_it = time.perf_counter()
             O = np.empty((cfg.horizon, cfg.n_envs, rt.n_obs), np.float32)
             A = np.empty((cfg.horizon, cfg.n_envs, rt.n_action), np.float32)
             LP = np.empty((cfg.horizon, cfg.n_envs), np.float32)
@@ -481,6 +484,7 @@ def train(rt, cfg: RLConfig | None = None, starts=None, verbose=True):
             log.grip_n.append(float(GRIP.mean()))     # these three: nan unless measured
             log.r_pen.append(float(RP.mean()))
             log.r_hold.append(float(RH.mean()))
+            log.t_iter.append(time.perf_counter() - t_it)
             if verbose and logged:
                 print(f"    iter {it:3d}  reward {R.mean():6.3f}  "
                       f"alive {1 - D.mean():.3f}  err {PE.mean() * 1000:6.1f} mm  "

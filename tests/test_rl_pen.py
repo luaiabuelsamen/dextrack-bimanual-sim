@@ -256,6 +256,7 @@ def test_train_logs_penetration_and_heldness(rt, capsys):
         assert len(v) == 3
         assert np.isfinite(v[0]) and np.isfinite(v[2]) and v[0] >= 0
         assert np.isnan(v[1])
+    assert len(log.t_iter) == 3 and all(t > 0 for t in log.t_iter)
     out = capsys.readouterr().out
     assert "pen" in out and "held" in out and "grip" in out and "err" in out
     assert out.count("iter") == 2
