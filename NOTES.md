@@ -4687,3 +4687,44 @@ precisely the cell every version of the seed-class question has lacked. If all
 six grasp-seeded policies drop the object, that is the cleanest statement of the
 problem this project has produced. If any tracks and ends un-buried, it is the
 first such row in the repository.
+
+### Deferred: g9's internal seed label is contact-count only
+
+`g9_ppo_distill._seed_kind` classifies on `n_contact > 30` alone, while
+`g9_analysis.kind` is force-aware (burial above 30 contacts OR 200x object
+weight, thin below one object weight). They disagree: v2's order line calls
+`mug_drink_2` a grasp on 8 contacts where the analysis calls it a burial at
+3251 N, 1657x weight.
+
+The disagreement affects only the training ORDER and the printed mixture line,
+not any measurement -- the analysis is the authority for every reported label.
+Left unfixed because v2 is running and src/ and the experiment modules it loaded
+must not move under it, which is the version-skew rule the 0.850 taught.
+
+Fix after v2: give `_seed_kind` the same force-aware thresholds, or better, have
+both call one shared classifier so they cannot drift again. Two implementations
+of one definition is how the contact-count label survived long enough to
+mislabel mug_drink_2 in the first place.
+
+### The reward-branch benchmark: the gate does not save it
+
+Measured by a peer session on a quiet machine, medians over three alternating
+reps, 12 envs:
+
+    gamecontroller (45 contacts, 15.4 kN)   6.743 s/iter baseline
+                                            7.098 gated     (x1.053)
+                                            7.148 always-on (x1.060)
+    bowl (40 contacts, 11.9 kN)            13.914 baseline
+                                           15.013 gated     (x1.079)
+                                           15.107 always-on (x1.086)
+
+Spread within a variant is under 0.06 s, so the 5-8% is real. Gating the
+`mj_contactForce` call buys 0.7%; the rest is the Python loop over `d.contact`
+reading dist, geoms and body ids for every contact, every environment, every
+control step.
+
+So the branch does not land as written, and the review call to measure before
+landing was the right one: at defaults the reward would have been provably
+unchanged while training ran 5-8% slower, which is the regression nobody looks
+for. The fix is to vectorise the summary over the contact arrays with numpy and
+gate the whole thing, not just the force call.
