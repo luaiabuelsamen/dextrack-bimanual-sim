@@ -4450,3 +4450,46 @@ reward's silence about grasping, and sample scale.
 
 Three retractions deep on one question in two hours, between two sessions, and
 the thing that settled it each time was a measurement rather than an argument.
+
+## Row 6 breaks "burial tracks": it is start count that differs
+
+Six stage-3 rows, ordered by tracking error:
+
+    reference          PPO         seed class   end pen  end con  end grip  starts
+    mug_drink_2           5.7 mm   BURIAL        13.18     15      4834 N     27
+    knife_lift           87.7      grasp          0.00      0         0        1
+    flashlight_on_2     112.9      thin           4.86      3       207        2
+    hammer_use_2      80250.1      grasp          0.00      0         0        4
+    phone_call_1     195633.5      grasp          0.00      0         0        9
+    mouse_use_1      291168.2      BURIAL         0.00      0         0        2
+
+`mouse_use_1` is the row that matters. Its seed is 19 contacts at 4335 N --
+2210x the object's weight, so BURIAL class by force, though contact count alone
+would have called it mixed. It drops harder than anything else in the run.
+
+So two burial-class rows point in opposite directions, and what differs between
+them is the number of start frames: 27 against 2. The burial-seeded median is
+now 145,587 mm, which is not a story about burial at all.
+
+**"Burial-seeded tracks, grasp-seeded drops" does not survive row 6.** The
+honest six-row statement is narrower: exactly one row of six both tracks well
+and ends still holding the object, and that row is simultaneously the most
+buried seed and the best supported by a factor of three. Everything else either
+lets go or re-buries a thin contact set. Which of those two properties does the
+work is exactly what this run cannot say, and mouse is the proof -- it has the
+burial and not the data, and it fails.
+
+Note also that error alone misleads here: knife at 87.7 mm and flashlight at
+112.9 mm look far better than hammer's 80 m, and knife ends with zero contacts
+just as hammer does. Reading the error column without the end state would rank a
+dropped object above a held one.
+
+That promotes the 2x2 from tidy-up to the load-bearing experiment:
+
+                            few starts             many starts
+    hammer (grasp seed)     80,250 mm (4) done     queued, all candidates
+    mug_drink_2 (burial)    queued, capped to 4    5.7 mm (27) done
+
+Capping the burial row to four starts is the cleaner half -- rescuing hammer can
+fail for reasons unrelated to sample size, whereas removing data from the one
+row that works tests one thing only.
