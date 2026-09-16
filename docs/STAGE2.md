@@ -878,8 +878,19 @@ the night was out: the watcher armed for hammer's row counted
 rows before and after the row landed; and the launcher that was to start the
 benchmark when g9 exited tested `pgrep -f g9_ppo_distill.py` — its own
 command line contained that string, so it found itself forever (the row
-watchers used the same test and only worked because rows landed). Four
-harnesses, one lesson, and `pgrep -f` must exclude the caller.
+watchers used the same test and only worked because rows landed). A sixth
+at the end of the night: the chain that gated the reward-branch push on the
+fast suite read `tail`'s exit code, not pytest's, and pushed over one
+failing test — the seed-key guard, flagging a bare-`seq` dict in the merged
+benchmark script (fixed six minutes later, `7d49f9c`). Six harnesses, one
+lesson: an instrument reporting on something other than what it was asked
+about. `pgrep -f` must exclude the caller; a push gate must read the test's
+status (`set -o pipefail`, or capture it directly), not the last process in
+a pipe; a cross-session handoff is a sentinel file, not a pid. And the
+argument for the guard test in one sentence: the same bug three times
+tonight, its cost falling by three orders of magnitude — a night of
+mislabelled rows, a correct headline withdrawn, six minutes — once
+something mechanical was watching for it.
 Measured rate **18.8 s/iteration, ~2.3 h total** (an earlier figure of
 103 s/iteration in this entry divided elapsed time by *logged lines*, which
 print every 10 iterations; it was wrong). The original checkpoint took
