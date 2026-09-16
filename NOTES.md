@@ -5151,3 +5151,41 @@ does not penetrate, and `stamp_lift` is a counterexample that the stage-2 search
 found on its own. Whatever makes it work is the thing to characterise next, and
 it is a property of the GRASP -- there is no controller in this measurement to
 credit.
+
+### wrap_score does not predict the carry, and epsilon partly does
+
+Six grasps, measured at their stage-2 pose, against whether they carried the
+reference open-loop:
+
+    reference          carried  endpen | wrap   links  sided     eps  ncon  gripN
+    stamp_lift            100%    0.31 | 1.160     2   0.560  0.0000     3     2.2
+    hammer_lift           100%    4.77 | 0.541     5   0.541  0.0564     8    23.7
+    banana_eat_1          100%    4.19 | 0.404     6   0.404  0.1682     6    16.0
+    phone_call_1            4%    0.00 | 0.713     3   0.313  0.0000     3     5.8
+    knife_lift             20%    0.00 | 1.600     2   1.000  0.0000     5     1.9
+    binoculars_lift         3%    0.00 | 1.197     3   0.797  0.0000    10     5.4
+    bowl_drink_1 (burial) 100%   17.57 | 2.000     6   1.000  0.3873    70 27195.7
+
+**`wrap_score` does not separate them.** `phone_call_1` scores 0.713 and carries
+4%; `stamp_lift` scores 1.160 and carries 100%. Its components do not separate
+them either -- the carriers have 2, 5 and 6 engaged links against the failures'
+3, 2 and 3. So my recommendation that wrap_score is "the only validated
+discriminator we have" for the upstream question was wrong, and I had already
+passed it to a peer session, which put it in STAGE2. What wrap_score is
+validated for remains what it was validated on: separating the human's contact
+set from the robot's. It does not predict whether a grasp survives motion.
+
+**Ferrari-Canny epsilon does better than it has any right to,** given this
+project retracted it. It is non-zero on two of the three carriers (0.0564 and
+0.1682) and exactly zero on all three failures. The earlier finding that epsilon
+"reads 0.00000 everywhere" was measured on configurations that were burials or
+near-non-contacting; on genuinely valid grasps it is not zero. That is not a
+rehabilitation -- `stamp_lift` carries 100% at epsilon 0.0000, which is a direct
+counterexample, and bowl's 0.3873 is a burial scoring higher than anything real.
+But the pattern is worth one more measurement rather than dismissal.
+
+At n=6 nothing here is a finding. What it establishes is that the metric I would
+have reached for does not work, which is worth knowing before building a search
+on it -- and that whatever distinguishes `stamp_lift` (3 contacts, 2.2 N on a
+light object, 0.31 mm of penetration) is not captured by any quantity this
+project currently computes.
