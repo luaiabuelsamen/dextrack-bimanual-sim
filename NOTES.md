@@ -4084,3 +4084,29 @@ and remains unexplained at the mechanism level.
 Four wrong guesses before the right one, each of which sounded obvious while I
 was writing it. The one that worked was the only one I had not thought to check
 because it was the part I assumed was already being carried.
+
+### Lazy imports make a shared working tree a version-skew hazard
+
+A peer session's 80-minute training run crashed in its end phase with
+
+    AttributeError: 'HoldResult' object has no attribute 'eq_place'
+      grasp.py:157  eq = float(res.eq_place)
+
+and nothing was wrong at HEAD. `eq_place` was added to `HoldResult` in track.py
+at 22:24; that process had loaded track.py at 22:04. It survived anyway, because
+`synthesize_grasp` does `from oppdef.human import grasp as G` LAZILY inside the
+method -- so the first call to it, at 23:26, imported the NEW grasp.py against
+the OLD HoldResult already resident in memory. New reader, old class.
+
+Two agents editing one working tree while long jobs run makes this routine
+rather than exotic. A module imported at the top is pinned at process start and
+the process is at least self-consistent; a module imported inside a method is
+whatever is on disk the first time that line runs, which may be an hour of
+commits later. The failure surfaces at the end of a long run, which is the worst
+possible time, and it looks like a bug in the code rather than in the clock.
+
+Mitigations, in order of value: save before you evaluate, so a crash in an end
+phase cannot cost the training; write results incrementally; and do not edit
+`src/` while someone's job is running. The peer's run survived on the first of
+those. Mine survived on timing alone -- every src/ edit happened before launch,
+which was luck rather than discipline.
