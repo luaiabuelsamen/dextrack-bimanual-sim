@@ -1543,6 +1543,7 @@ class BimanualTracker:
         from oppdef.human.retarget import retarget_sequence, retarget_bimanual
 
         self.seq = seq
+        self._park = {"r": np.zeros(3), "l": np.zeros(3)}
         if window is None:
             from experiments.tracking.grab_inventory import contact_mask, longest_run, _tree
             tr_ = _tree(seq, {})
@@ -1674,6 +1675,22 @@ class BimanualTracker:
         qf = self.tr[sd].q[int(np.clip(k, 0, self.T - 1))]
         return np.array([qf[i] for i in self.jmap[sd]])
 
+    def park(self, sd, offset=(0.0, 0.0, -0.6)):
+        """Move side `sd` far from the object, for the one-handed control.
+
+        Stage 6's claim is that some manipulations need a second hand for
+        reasons of wrench geometry rather than payload, and that is only visible
+        as a gap between two conditions on the SAME reference. Deleting the hand
+        from the scene would change the model and therefore the contact solver's
+        problem; parking it leaves every other thing identical and simply puts
+        it out of reach. It is applied in the object frame, so it survives the
+        object moving along the reference.
+        """
+        self._park[sd] = np.asarray(offset, float)
+
+    def unpark(self):
+        self._park = {"r": np.zeros(3), "l": np.zeros(3)}
+
     def place(self, sd, k):
         m, d = self.sim.model, self.sim.data
         fq = self.sim.free_q[sd]
@@ -1686,6 +1703,7 @@ class BimanualTracker:
         mujoco.mju_mat2Quat(q0, d.xmat[self.sim.palm_bid[sd]].copy())
         pi, qi = _inv(p0, q0)
         bp, bq = _mul(self.P[sd][k], self.Q[sd][k], pi, qi)
+        bp = bp + self._park[sd]
         d.qpos[fq:fq + 3] = bp
         d.qpos[fq + 3:fq + 7] = bq
         d.mocap_pos[m.body_mocapid[self.sim.mocap_bid[sd]]] = bp
@@ -1713,6 +1731,7 @@ class BimanualTracker:
         pi, qi = _inv(p0, q0)
         k = int(np.clip(k, 0, self.T - 1))
         bp, bq = _mul(self.P[sd][k], self.Q[sd][k], pi, qi)
+        bp = bp + self._park[sd]
         d.mocap_pos[m.body_mocapid[self.sim.mocap_bid[sd]]] = bp
         d.mocap_quat[m.body_mocapid[self.sim.mocap_bid[sd]]] = bq
 
@@ -1777,6 +1796,8 @@ class BimanualTracker:
         m, d = self.sim.model, self.sim.data
         mujoco.mj_resetData(m, d)
         self.offset = {"r": np.zeros(3), "l": np.zeros(3)}
+        if not hasattr(self, "_park"):
+            self._park = {"r": np.zeros(3), "l": np.zeros(3)}
         for sd in ("r", "l"):
             self.place(sd, k)
         d.qpos[self.obj_q:self.obj_q + 3] = self.ref_pos[k]
@@ -1881,6 +1902,30 @@ class BimanualTracker:
         for _ in range(int(seconds / m.opt.timestep)):
             mujoco.mj_step(m, d)
         return float(np.linalg.norm(self.obj_pose()[0] - p0))
+
+    def grasp_frames(self, seconds=0.4, stride=5, tol=0.03):
+        """Which frames the two hands hold on their own. The bimanual analogue
+        of the one-handed `grasp_frames`, and needed for the same reason.
+
+        Frame 0 is the APPROACH, not the grasp: the window opens where the
+        hands first come within 5 mm of the object, which is where contact
+        starts rather than where the grip is formed. Started there the arm is
+        still sweeping through -- on `gamecontroller_play_1` a rollout from
+        frame 0 dropped the object 3.2 m and drove MuJoCo to NaN in QACC --
+        and that reads as "two-handed tracking failed" when nothing has been
+        tracked yet. Credit to the peer session that pinned this down on the
+        one-handed path.
+        """
+        ok = []
+        for k in range(0, self.T, stride):
+            self.reset_at(k)
+            p0 = self.obj_pose()[0].copy()
+            for _ in range(int(seconds / self.sim.model.opt.timestep)):
+                mujoco.mj_step(self.sim.model, self.sim.data)
+            p = self.obj_pose()[0]
+            if np.all(np.isfinite(p)) and np.linalg.norm(p - p0) < tol:
+                ok.append(k)
+        return np.array(ok)
 
     def track_score(self, steps=60, start=0):
         """Search objective. **Unitless, not millimetres.**
@@ -2020,10 +2065,21 @@ class BimanualTracker:
         self.P[sd], self.Q[sd], self.vals[sd] = feedforward_se3(
             self.fit[sd], self.tr[sd].q, self.ref_pos, self.ref_quat)
 
-    def rollout(self, start=0, steps=None):
+    def rollout(self, start=0, steps=None, lost=0.30):
+        """Roll the two-handed feedforward out, stopping once the object is lost.
+
+        Stopping matters for honesty, not just for time. Integrated past a
+        dropped object the rollout diverges -- measured, `gamecontroller_play_1`
+        reported a mean error of 312 KILOMETRES and MuJoCo warned of NaN in
+        QACC -- and a mean over those frames is not a tracking error, it is an
+        artifact of the integrator. Truncated at `lost`, the mean describes the
+        part of the reference that was actually tracked and `steps` says how far
+        that got, which are the two numbers a failure should report.
+        """
         m, d = self.sim.model, self.sim.data
         steps = self.T - start if steps is None else steps
         pe = np.empty(steps)
+        ran = steps
         for i in range(steps):
             k = start + i
             for sd in ("r", "l"):
@@ -2032,8 +2088,12 @@ class BimanualTracker:
             for _ in range(self.ctrl_every):
                 mujoco.mj_step(m, d)
             pe[i] = float(np.linalg.norm(self.obj_pose()[0] - self.ref_pos[k]))
-        return Rollout(pos_err=pe, rot_err=np.zeros(steps),
-                       dropped=bool(pe[-1] > 0.10), steps=steps)
+            if not np.isfinite(pe[i]) or pe[i] > lost:
+                ran = i + 1
+                break
+        pe = pe[:ran]
+        return Rollout(pos_err=pe, rot_err=np.zeros(ran),
+                       dropped=bool(ran < steps or pe[-1] > 0.10), steps=ran)
 
 
 def mppi_bimanual(bt, horizon=4, samples=24, sigma_pos=0.004, sigma_rot=0.03,

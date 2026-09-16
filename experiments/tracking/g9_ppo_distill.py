@@ -29,7 +29,8 @@ import mujoco
 from oppdef.human import grab, track, rl, distill
 
 
-def per_reference(row, hand="shadow", steps=200_000, seed=0, verbose=False):
+def per_reference(row, hand="shadow", steps=200_000, seed=0, verbose=False,
+                  n_envs=16):
     """Train one PPO policy and return it with its environment."""
     seq = grab.load(f"{row['subject']}/{row['seq']}.npz", verts=True, stride=8)
     rt = track.ReferenceTracker(seq, hand=hand)
@@ -43,7 +44,7 @@ def per_reference(row, hand="shadow", steps=200_000, seed=0, verbose=False):
     # 160-step policy scored 29.4 mm, tracking every frame. Matching the horizon
     # to the task was worth more than a reshaped reward or ten times the steps.
     span = int(rt.T - gf[0])
-    cfg = rl.RLConfig(n_envs=16, horizon=min(224, max(64, span + 8)), seed=seed)
+    cfg = rl.RLConfig(n_envs=n_envs, horizon=min(224, max(64, span + 8)), seed=seed)
     cfg.iters = max(24, steps // (cfg.n_envs * cfg.horizon))
     net, _log = rl.train(rt, cfg, starts=gf, verbose=verbose)
     return rt, net, gf
@@ -85,7 +86,8 @@ def main(a):
     store, envs = [], []
     for i, r in enumerate(picked):
         t0 = time.time()
-        rt, net, gf = per_reference(r, steps=a.steps, seed=a.seed)
+        rt, net, gf = per_reference(r, steps=a.steps, seed=a.seed,
+                                    hand=a.hand, n_envs=a.envs)
         if rt is None:
             print(f"[{i+1}/{len(picked)}] {r['seq']}: no graspable frame", flush=True)
             continue
@@ -115,6 +117,7 @@ def main(a):
     model = bc_train(O, A, seed=a.seed, epochs=a.epochs)
 
     print("\nheld-out objects, distilled policy vs that reference's own PPO:")
+    held = []
     for (rt, obj), s in zip(envs, store):
         if obj not in test:
             continue
@@ -123,10 +126,26 @@ def main(a):
         rt.reset_at(k0)
         ff = rt.rollout(start=k0, steps=rt.T - k0)
         pe = distill.policy_rollout(rt, model, start=k0)
+        held.append({"seq": s["seq"], "object": obj,
+                     "feedforward_mm": float(min(ff.pos_err.mean()*1000, 9e5)),
+                     "ppo_mm": float(s["ppo_mm"]),
+                     "distilled_mm": float(min(pe.mean()*1000, 9e5))})
         print(f"  {s['seq'][:24]:24s} {obj:12s} feedforward "
-              f"{min(ff.pos_err.mean()*1000, 9e5):8.1f} mm   "
+              f"{held[-1]['feedforward_mm']:8.1f} mm   "
               f"its own PPO {s['ppo_mm']:8.1f} mm   "
-              f"DISTILLED {min(pe.mean()*1000, 9e5):8.1f} mm", flush=True)
+              f"DISTILLED {held[-1]['distilled_mm']:8.1f} mm", flush=True)
+
+    # Persisted, because a stage that only prints cannot be audited later and
+    # every number in this pipeline has had to be re-derived at least once.
+    Path(a.out).write_text(json.dumps({
+        "hand": a.hand, "steps": a.steps, "seed": a.seed,
+        "held_out_objects": sorted(test),
+        "per_reference": [{"seq": s["seq"], "object": s["obj"],
+                           "ppo_mm": s["ppo_mm"],
+                           "transitions": int(len(s["O"]))} for s in store],
+        "held_out": held,
+    }, indent=1))
+    print(f"\nwrote {a.out}", flush=True)
 
 
 if __name__ == "__main__":
@@ -135,4 +154,7 @@ if __name__ == "__main__":
     ap.add_argument("--steps", type=int, default=160_000)
     ap.add_argument("--epochs", type=int, default=250)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--hand", default="shadow")
+    ap.add_argument("--envs", type=int, default=16)
+    ap.add_argument("--out", default="results/g9_ppo_distill.json")
     main(ap.parse_args())

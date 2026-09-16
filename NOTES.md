@@ -3886,3 +3886,61 @@ needs FORCE content -- a wrench the contact set can resist -- not another point.
 Shipped defaulted off (`W_MID = 0.0`), the same discipline `W_JOINT` is held to:
 defaults reproduce the previous fit bit for bit, verified, and the machinery is
 there for the force-based objective to use. 44 tests pass.
+
+## Stage 2 has a number: 0.275 -> 0.850, and 20 of the 34 are real grasps
+
+Forty references, one per object, right hand, Shadow. Retarget -> CEM wrist
+search scored by a physical hold test -> hold. Hold rate:
+
+    raw retarget       11/40   0.275
+    after the search   34/40   0.850   95% CI [0.725, 0.950]
+
+clustered by object, 4000 resamples. The retarget is a prior on where to search
+and not a grasp, which is what G5 said; this is that decision rule measured at
+scale rather than on a subsample.
+
+What the 34 are, by contact count at the accepted grasp:
+
+    <= 12 contacts (a grasp)   20/34      median 8 contacts, median drop 6.6 mm
+    13-30                       8/34
+    > 30 (burial)               6/34      bowl 94 contacts at 35.5 kN
+
+So 59% of the successes are grasps, 18% are burials that the hold test cannot
+distinguish from grasps, and the rest are in between. That ratio is the honest
+headline, not the 0.850 -- and it is only visible because the contact count and
+grip force are recorded next to the drop distance. A stage reporting hold rate
+alone would have called this 85% and been wrong about a sixth of it.
+
+**The six failures are one geometric class.** cubelarge, cubesmall,
+pyramidlarge, spherelarge, spheremedium, flashlight -- every one a featureless
+convex primitive, every one `inspect` intent, and all at 0-1 contacts with an
+equilibrium residual of 0.99-1.00, i.e. free fall. Nothing to hook. A mug has a
+handle and a rim, a bowl has a lip, a bunny has ears; a sphere has a tangent
+plane everywhere and needs a real precision grasp with opposed normals, which
+is exactly what a position-space objective cannot ask for. The failure class and
+the missing objective term are the same finding from two directions.
+
+### Frame 0 is the approach, not the grasp -- on the bimanual path too
+
+Credit to the peer session for pinning this on the one-handed path. It was
+costing stage 6 everything: from frame 0, `gamecontroller_play_1` dropped the
+object 3.2 m, drove MuJoCo to NaN in QACC, and reported a mean tracking error of
+312 KILOMETRES. From the first frame that holds on its own: drop 6.6 mm, held,
+131 mm. Added `BimanualTracker.grasp_frames`.
+
+That 312 km deserves its own line. It was an integrator artifact being reported
+as a measurement -- a mean over frames that came after the object was already
+lost. `BimanualTracker.rollout` now stops once the object passes 30 cm from the
+reference and reports how far it got, so a failure says "131 mm over 8% of the
+clip" instead of a number that looks like a tracking error and is not one.
+
+### First honest bimanual number
+
+Same reference, same grasp search, the left hand PARKED rather than deleted so
+the model and therefore the contact solver's problem are identical:
+
+    gamecontroller_play_1   two-handed  131.0 mm over 8% of the clip
+                            one-handed  647.7 mm over 1%
+
+That is the project's claim as a measured gap rather than an assertion, on one
+reference so far.
