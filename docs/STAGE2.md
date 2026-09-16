@@ -301,9 +301,44 @@ touch. Nothing measured so far produces that, and no scoring function tried —
 distance, held-ness, tracking error, penetration depth, equilibrium residual,
 ε, one-sidedness — distinguishes a wrap from a touch.
 
+### What separates carrying from touching: opposition, measured on real contact
+
+Comparing configurations that carry against ones that do not, same object, same
+reference:
+
+| reference | variant | tracking | contacts | **bodies** | **one-sided** | force |
+|---|---|---:|---:|---:|---:|---:|
+| `cup_lift` | baseline | **23.1 mm** | 43 | **10** | **0.055** | 4642 N |
+| | oriented | 116743 mm | 1 | **1** | **1.000** | 1.0 N |
+| `binoculars_see_1` | baseline | 106.2 mm | 84 | **3** | **0.191** | 90888 N |
+| | oriented | 170032 mm | 6 | **1** | **0.932** | 4.2 N |
+
+The configurations that carry engage **10 and 3 distinct hand bodies** at
+one-sidedness **0.055 and 0.191** — contacts distributed on opposing sides. The
+ones that fail engage **one body** at one-sidedness ≈1.0: a single fingertip
+pressing from a single direction. That is wrap versus touch, and
+`one_sidedness` in `human/track.py` measures it correctly.
+
+**This corrects an earlier conclusion recorded here.** One-sidedness was
+reported above as harmful because adding it to the orientation score drove
+`cup_lift` from 1.0 N to 490.5 N. Both observations are true and the distinction
+matters: it is a **valid discriminator** between configurations that already
+have contact, and an **unusable gradient** from free space, where it returns its
+1.0 default and the search reaches contact by burying. Gate it on penetration
+and it is the right quantity; use it unguarded as an objective and it rewards
+the defect.
+
+So the target is not "plausible contact force" and not "opposition" alone. It is
+**many contacts, on opposing sides, at bounded penetration** — which is a wrap.
+Nothing in the pipeline currently searches for that: `W_PEN_ARM` bounds
+penetration, the distance score reaches the surface, and neither asks how many
+links engage or from which directions.
+
 **Caveats.** Frame-0 delta applied as a constant offset across the trajectory.
-Three references. The rollout is feedforward with no PPO correction, so these
-are not comparable to per-clip PPO numbers.
+Two references in this comparison, three in the rollout. The rollout is
+feedforward with no PPO correction, so these are not comparable to per-clip PPO
+numbers. The carrying configurations here are themselves unphysical — 4642 N and
+90888 N — so this identifies what distinguishes them, not a target to copy.
 
 ## C. Vessel wrist target — open, untouched
 
