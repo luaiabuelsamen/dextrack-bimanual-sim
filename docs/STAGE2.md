@@ -867,6 +867,7 @@ early (`results/g9_ppo_distill.json`, `per_reference`):
 | `phone_call_1` | grasp, thin end (2.8 N) | **9** | **985** | 195,634 mm | 0.00 mm | **0** | **0 N** |
 | `mug_drink_2` | **near-burial** (528 N, 9 contacts) | 27 | 711 | **5.7 mm** | **13.18 mm** | 15 | **4834 N (2466×)** |
 | `mouse_use_1` | **burial** by force (19 contacts, **4335 N**, 2210×) | **2** | 337 | 291,168 mm | 0.00 mm | 0 | 0 N |
+| `camera_takepicture_2` | **burial** (32 contacts, 5800 N, 2956×) | 28 | 836 | **34.6 mm** | **9.32 mm** | 8 | 509 N (260×) |
 
 `hammer_use_2` is the one reference in the set that is a grasp by force as
 well as geometry — 4 contacts, 20.7 N, equilibrium residual 0.04×, the best
@@ -993,8 +994,21 @@ works tests one thing. If mug still tracks at four starts, the sample is
 ruled out and seed class stands. If it drops, start count is the effect and
 the seed-class sentence on the README comes off.
 
-**Pre-registered before rows 7–9 ran**, start counts computed the way g9
-computes them (stage-2 offset, `grasp_frames` at stride 5): `camera` 10 of
+**Camera (row 7) tracks at 34.6 mm and ends buried** — 9.32 mm inside on 8
+contacts at 509 N — as predicted below. It ends *shallower* than its seed
+(5800 N → 509 N): burial that tracks does not always deepen. But its row
+reports **28 start frames, not the 10 pre-registered**, so it is as
+well-supported as `mug_drink_2` and does not discriminate. The
+pre-registered counts are therefore **not on the same footing as the g9
+field** — 28 is impossible at the probe's footing (T = 79 at stride 5 gives
+16 candidates) — and the "between 4 and 27" reading is withdrawn until the
+difference is explained; the `grasp_frames` field on each row is what
+describes that row. Nothing in `track.py` was committed after g9 launched
+(23:39), so this is not committed version skew; being measured.
+
+**Pre-registered before rows 7–9 ran**, start counts computed with the
+stage-2 offset and `grasp_frames` at its default stride 5 — *not* what the
+rows report, see above: `camera` 10 of
 16 candidates (seed 5800 N, 2956×), `gamecontroller` 8 of 13 (14,042 N,
 7157×), `bowl` 27 of 27 (35,522 N, 18,105×); `binoculars` 1 of 31 and
 unseeded — read nothing from it. Bowl is a `mug_drink_2` replicate and does
