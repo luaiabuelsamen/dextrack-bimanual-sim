@@ -4408,3 +4408,45 @@ the hand in, but a reader will assume reset unless told.
 
 And the caveat that is really the finding: all four rollouts are burial-class.
 There is no clean-grasp tracking rollout in this repository to contrast against.
+
+### Un-refuted: the forces DO cancel, and the rigid base is ruled out
+
+The refutation above is itself retracted, by measurement, and the original
+prediction stands. Live net force on the buried hand during tracking is **0.4x
+object weight at the median**, p90 2.8x -- not the 300-600 N the previous entry
+recorded.
+
+That 300-600 N was a replay artifact. `render_tracking`'s `--render-only` path
+does `d.qpos[:] = state; mj_forward` for every frame -- a fresh placement with
+no velocity and no warm-started constraints -- and then `meta.update(diag)`
+overwrites the live diagnostics that capture had recorded. A fresh placement
+reads hundreds of times weight by construction, which is exactly the
+placement-versus-settled distinction already in this file; the manifests'
+per-frame residual column is a replay value wearing a live label. Credit to the
+peer session for finding it in their own number.
+
+**The weld sweep then rules the rigid base out cleanly.** OLD mug policy from
+frame 5, weld time constant raised on the built model, with the no-contact
+following-error control at each setting:
+
+    tc     control follow    buried tracking   end state              base off target
+    0.01   0.41 / 1.11 mm    23.2 mm 111/111   10.83 mm, 12 bodies    0.44 mm (= control)
+    0.03   8.9 / 29 mm       29.5 mm 111/111   10.80 mm, 12 bodies    9.56 mm (= control)
+    0.10   54 / 159 mm       252 mm            10.82 mm, 12 bodies    58 mm   (= control)
+    0.30   238 / 443 mm      642 mm            10.81 mm, 12 bodies    246 mm  (= control)
+
+At every stiffness the base's displacement equals its contact-free following
+error, so contact displaces the base by nothing. At twenty times the compliance
+burial tracks the same and ends identically -- 10.80 mm against 10.83 mm on
+twelve bodies. The tc 0.10 and 0.30 cells are uninterpretable for burial because
+the following error swamps the signal, which is what the control was added to
+detect.
+
+So the burial is a GEOMETRIC EQUILIBRIUM: the contact set is self-cancelling and
+holds itself in place without the base resisting anything. It is not a stiffness
+question at either stage, and the DexTrack-style free-floating base would not
+fix it. What remains on the table is unchanged: the retarget objective, the
+reward's silence about grasping, and sample scale.
+
+Three retractions deep on one question in two hours, between two sessions, and
+the thing that settled it each time was a measurement rather than an argument.
