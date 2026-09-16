@@ -3544,3 +3544,49 @@ allow. Three distinct problems, not one:
 
 `advance_to_contact` is kept. It is correct, it is cheap, and it is the tool
 that measured the 1:1 trade -- which is the result that matters here.
+
+## 2026-09-15 — CORRECTION: the fingers DO reach. The poses are valid and still not grasps.
+
+Two of my conclusions tonight were artifacts of measuring at frame 0 of the
+hold window, which is a 20x outlier.
+
+**Frame 0 is not representative.** Median fingertip gap to the object surface,
+over the whole window, in the fitting scene:
+
+    reference          frame 0   median   min    frames under 10 mm
+    binoculars_see_1    62.3 mm   2.2 mm  1.2 mm      153 / 155
+    flashlight_on_2     50.1 mm   4.3 mm  1.1 mm      141 / 144
+    mug_drink_1         58.1 mm   3.7 mm  2.0 mm      115 / 116
+
+So "the fingertips are 50-62 mm away after the arm constraint" is wrong, and the
+"finger reach" problem I named as stage 2's second piece does not exist. The fit
+puts the fingers within a few millimetres on 98% of frames. Every recent
+measurement I took used `reset_at(0)` or `reset_grasp(0)`, which starts at the
+one unrepresentative frame. Same error class as reading G5's H2 from one
+sequence, and as printing an objective with a millimetre suffix: measuring at an
+unrepresentative point and generalising from it. Third time today.
+
+**And the corrected measurement is worse news, not better.** Starting from a
+representative frame:
+
+    reference         start   arm pen    force   residual   tracking
+    binoculars_see_1      0   2.47 mm   2472 N    15.4x       106 mm
+    binoculars_see_1     67   0.00 mm    5.5 N     1.4x     54818 mm
+    flashlight_on_2      10   0.00 mm   18.6 N     6.6x    128922 mm
+    flashlight_on_2      10   0.00 mm    0.0 N     1.0x     21146 mm  (closed)
+    mug_drink_1          57   0.00 mm  108.6 N     8.6x     24300 mm
+
+At a good start frame the configuration is **physically valid** -- zero
+penetration, forces of 5-109 N rather than thousands -- and it **drops the
+object**. The frame-0 configurations that appeared to track at 106-147 mm were
+doing it on 386-2472 N of manufactured contact.
+
+That is the finding, stated more sharply than anything earlier today: the
+retarget produces poses that are geometrically correct, physically valid, and
+not grasps. A fingertip 2 mm from a surface exerts no force. Penetration was
+never the disease -- it was the only thing making the contact sets look like
+grasps, and removing it reveals that nothing underneath was holding the object.
+
+So stage 2 does not have three problems. It has one: the pipeline has no step
+that produces GRIP. `reset_grasp` is meant to be that step and reaches only
+0-13 N against a target of 8 N, which is the number to chase next.
