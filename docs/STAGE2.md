@@ -83,17 +83,32 @@ night of two sessions measuring each other's claims:
   once the hand moves**, and the relaxation produces the grasp. A static
   hold test with a penetration gate rejects every one of these three,
   including the only held, un-buried end state in the repository.
+- **On all 30 carried seeds** (`731dc60`): 14 carry the object through
+  the whole reference open-loop, 16 do not. The grip-force discriminator
+  that was clean on n = 5 **does not survive** — 77 % on 30, a carrier at
+  223 N and a failure at 21,178 N — and is retracted rather than hedged;
+  contact count is marginally best at 80 %, and none of the four reset
+  quantities (depth 70 %, contacts 80 %, grip 77 %, equilibrium 73 %) is a
+  discriminator. What survives is the *direction*, and it reverses the
+  premise of the whole pipeline: **the references that carry start MORE
+  buried** — median 17.7 mm on 42 contacts, against 11.8 mm on 12 for the
+  ones that drop — and **penetration depth is the least informative of the
+  four**. The quantity this project spent its life minimising is the worst
+  predictor in the table. The n to caveat has moved: the relaxation
+  mechanism is n = 14, on firm ground; the end state that is *both* held
+  and un-buried is n = 1 (`stamp_lift`; the other thirteen carriers end
+  4–17 mm inside). Burial-to-grasp relaxation is common; relaxation all the
+  way to a clean grasp has been observed once.
 - **So the next real experiment is upstream of all four learning stages,
-  and it is now well-posed:** make the stage-2 search objective **the end
-  state of a short carry** — not a static hold with a penetration gate. The
-  candidate discriminator, measurable at reset and clean on n = 5, is
-  tracking-scene grip force (carriers 878 / 1225 / 7320 N; failures 0 / 78
-  N) — not `wrap_score`, not ε, not depth, none of which separates them; it
-  is being tested on the other 25 seeds. Carriers are n = 3 and the
-  discriminator is a candidate until then. Not the reward, not the
-  distillation, not the base. The reward-term branch (landed at `423dac9`,
-  off by default) is for whoever wants a policy paid to hold; it is not
-  the fix for this.
+  and it is now well-posed:** the honest open question is no longer "why
+  is the neighbourhood empty" — it is not, there are fourteen worked
+  examples of a pose that carries an object through its reference with no
+  controller — but **"which buried poses relax well, and what makes one
+  relax all the way."** The stage-2 objective should score **the end state
+  of a short carry**, not a static hold with a penetration gate. Not the
+  reward, not the distillation, not the base. The reward-term branch
+  (landed at `423dac9`, off by default) is for whoever wants a policy paid
+  to hold; it is not the fix for this.
 
 Earlier status (2026-09-15), kept for the subproblem table:
 
