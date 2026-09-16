@@ -866,7 +866,7 @@ early (`results/g9_ppo_distill.json`, `per_reference`):
 | `knife_lift` | grasp, thin end (2.1 N) | **1** | **25** | 87.7 mm | 0.00 mm | 0 | 0 N |
 | `phone_call_1` | grasp, thin end (2.8 N) | **9** | **985** | 195,634 mm | 0.00 mm | **0** | **0 N** |
 | `mug_drink_2` | **near-burial** (528 N, 9 contacts) | 27 | 711 | **5.7 mm** | **13.18 mm** | 15 | **4834 N (2466×)** |
-| `mouse_use_1` | mixed (19 contacts, eq 2.62×) | 2 | 337 | 291,168 mm | 0.00 mm | 0 | 0 N |
+| `mouse_use_1` | **burial** by force (19 contacts, **4335 N**, 2210×) | **2** | 337 | 291,168 mm | 0.00 mm | 0 | 0 N |
 
 `hammer_use_2` is the one reference in the set that is a grasp by force as
 well as geometry — 4 contacts, 20.7 N, equilibrium residual 0.04×, the best
@@ -957,9 +957,43 @@ any of the first three.
 
 **Sample size, stated plainly:** one grasp-by-force reference and one
 well-supported thin-end reference, both drop; one thin reference re-buries;
-one near-burial reference tracks at 5.7 mm and ends deeper; one mixed
-reference (`mouse_use_1`, row 6, 2 start frames) drops; one uninformative
-row. Rows 7–9 are the burial-seeded set. The burial column
+one near-burial reference tracks at 5.7 mm and ends deeper; one
+uninformative row; and **one burial-class reference drops**.
+
+**Row 6 is a counter-example, not a confirmation.** `mouse_use_1` reads as
+*mixed* by contact count (19) and as **burial** by force — 4335 N at the
+seed, 2210× the object's weight, far past the 200× threshold; the same catch
+that reclassified `mug_drink_2`. It drops: 291 m, 0 contacts, 0 N, on 2
+start frames. So the two burial-class rows point in opposite directions:
+
+| | seed | starts | PPO | end |
+|---|---|---:|---:|---|
+| `mug_drink_2` | 528 N | **27** | **5.7 mm** | 13.18 mm in, 15 contacts, 4834 N |
+| `mouse_use_1` | 4335 N | **2** | 291,168 mm | 0.00 mm, 0 contacts, 0 N |
+
+Same class, opposite outcome, and the variable that differs is the start
+count. "Burial-seeded tracks and grasp-seeded drops" **does not survive row
+6.** The honest six-row statement is narrower: exactly one row of six both
+tracks and ends holding the object, and it is simultaneously the most-buried
+seed *and* the best-supported by a factor of three; every other row lets go
+or re-buries a thin contact set. Which property does the work cannot be
+said, and mouse is the row that proves it — burial without the data, and it
+fails.
+
+That makes the queued 2×2 load-bearing rather than a tidy-up:
+
+| | few starts | many starts |
+|---|---|---|
+| `hammer_use_2` (grasp seed) | 80,250 mm (4) — measured | queued: all candidate starts |
+| `mug_drink_2` (burial seed) | queued: capped to 4 evenly spaced | 5.7 mm (27) — measured |
+
+Capping mug to four starts is the cleaner half: rescuing hammer can fail for
+reasons unrelated to sample size, but removing data from the one row that
+works tests one thing. If mug still tracks at four starts, the sample is
+ruled out and seed class stands. If it drops, start count is the effect and
+the seed-class sentence on the README comes off. Rows 7–9 are burial-seeded
+*and* well-supported, so they do not discriminate unless one of them has a
+low start count. The burial column
 rests on `mug_drink_1` from a separate session; the burial-seeded g9 rows are
 7–9 and have not run. `knife_lift` (2.1 N) and `phone_call_1` (2.8 N) come
 next, and both sit at the thin end of the grasp class, so they will most
