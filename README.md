@@ -56,16 +56,20 @@ extend to two hands, then test under depth perception.
 | Instrumentation | every rollout GIF carries penetration, grip force and contact count on its face, with a per-frame JSON manifest and a replay check |
 | Stages 1, 4, 7 | human reference, homotopy curriculum, depth→pose evaluation of a frozen tracker |
 
-**Stage 2 is broken and everything downstream inherited it.** The retarget
-matched fingertip positions with no non-penetration constraint, so every
-reported tracking number was measured on a hand *inside* the object. Those
-numbers are withdrawn. The defect is now located, decomposed and half fixed:
+**Stage 2 — the retarget — now has a number, and it is honest about what the
+number hides.** Hold rate **0.275 → 0.850** across 40 objects after a wrist
+search scored by a physical hold test, 95% CI [0.725, 0.950]. But of the 34
+"holds", **20 are grasps** (≤ 12 contacts, median drop 6.6 mm) and **6 are
+burials** — the hand inside the object, up to 94 contacts and 35.5 kN. The 6
+failures are one geometric class: featureless convex primitives, where a
+position objective has nothing to hook. Every tracking number reported before
+this was measured on a burial and is withdrawn.
 
 | | state | |
 |---|---|---|
-| **A** arm-side placement | **fixed** | `binoculars_see_1` 175 m → **106 mm** |
-| **B** finger reach | open | hand now feasible but 50–62 mm out of reach |
-| **C** vessel wrist target | open | hand placed *through* cups and mugs |
+| arm inside the object | **fixed** | `W_PEN_ARM`: `binoculars_see_1` 175 m → 106 mm |
+| the search rewards burial | **diagnosed, not fixed** | drop-scored synthesis cannot tell a grasp from a burial; the equilibrium residual describes it but does not steer it |
+| a policy trained on a real grasp | **running** | PPO from the un-buried fit, alive 0.77 → 0.82 by iter 160; 2×2 result pending |
 
 **→ [docs/STAGE2.md](docs/STAGE2.md)** is the full diagnosis and where to pick
 up. RL retraining is blocked behind all three.
@@ -228,7 +232,7 @@ survive is **aperture**, where f5d6 is an outlier by 2.4×.
 
 Seven stages from a GRAB clip to a tracked object: human reference → retarget →
 per-reference PPO → homotopy curriculum → distillation → two hands → depth
-perception. **Stage 2 is broken and everything downstream inherited it.**
+perception. **Stage 2 now has a measured hold rate — and a burial caveat; see [above](#b--human-motion--robot-tracking--live-blocked-at-stage-2).**
 
 **→ [docs/PIPELINE.md](docs/PIPELINE.md)** — every stage, what it measures, what
 it established, and what was withdrawn, including the GRAB reconstruction
