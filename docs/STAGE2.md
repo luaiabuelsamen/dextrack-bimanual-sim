@@ -233,8 +233,44 @@ opposition or force-closure term is for. `grasp_epsilon` and `one_sidedness`
 exist in `human/track.py` for this; combining them with the orientation search
 is the obvious next step and has not been tried.
 
+### Targeting light contact, not exact touching: 1–2× object weight
+
+Changing the score's target from *touching* (`gap = 0`) to **1 mm of contact**
+(`|gap + 1 mm|`), and allowing a 30 mm advance:
+
+| reference | penetration | force | ×weight | contacts | residual |
+|---|---:|---:|---:|---:|---:|
+| `binoculars_see_1` | 4.19 mm | **4.2 N** | **2×** | 6 | 1.59× |
+| `flashlight_on_2` | 6.46 mm | **1.8 N** | **1×** | 1 | 1.77× |
+| `cup_lift` | 0.54 mm | **1.0 N** | **1×** | 1 | 0.94× |
+
+All three make contact at forces of **1–2× object weight**. `binoculars_see_1`
+was 46324× that morning, and 7× under the touching target. The two that were in
+freefall now hold contact.
+
+A gap target of exactly zero lands just outside contact in physics; a millimetre
+of intended overlap lands just inside. That is the whole difference between
+freefall and a grip.
+
+**An opposition term does not help, and hurts.** Adding `w_opp · one_sidedness`
+to the score changes nothing on two references and wrecks the third:
+
+| `cup_lift` | penetration | force | ×weight | residual |
+|---|---:|---:|---:|---:|
+| `w_opp` = 0 | 0.54 mm | 1.0 N | 1× | 0.94× |
+| `w_opp` = 0.02 | 12.71 mm | 490.5 N | **250×** | **34.37×** |
+
+`one_sidedness` returns 1.0 where no contacts exist, so it drives the search
+toward contact — and the search obtains contact by burying. This is the same
+corruption as ε: an opposition measure computed on a manufactured contact set
+rewards manufacturing one. Any such term needs a penetration gate before it can
+be used as an objective.
+
 **Caveats.** Frame-0 delta applied as a constant offset to the whole trajectory,
-measured at reset only — no rollout, no tracking number. Three references.
+measured at reset only — **no rollout and no tracking number**. Residuals of
+0.94–1.77× are near or above freefall (1.0×), so none of these is an equilibrium
+and none is a demonstrated grasp; they are configurations with plausible contact
+forces. Three references.
 
 ## C. Vessel wrist target — open, untouched
 
