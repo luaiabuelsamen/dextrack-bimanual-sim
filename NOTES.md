@@ -4763,3 +4763,35 @@ from a light contact set here, it is not how to keep hold of the object.
 Five more grasp-seeded rows follow. If they agree, the statement is that in this
 pipeline a policy can track only what it is handed buried, and that a valid
 grasp is not something it can learn to keep.
+
+### Two within-clip pairs now, and they disagree about burial
+
+`mouse_use_1` has also been trained twice on the same s1 clip:
+
+    wrist offset                 starts   tracking      end state
+    s2, burial (19 con, 4335 N)      2   291,168 mm    0.00 / 0 / 0
+    s1, grasp  ( 4 con,   3.6 N)    32   116,130 mm    0.00 / 0 / 0
+
+Both arms drop. Set beside camera's pair --
+
+    camera, s2 burial (32 con, 5800 N)   28      34.6 mm   9.32 mm inside
+    camera, s1 grasp  ( 2 con,  6.0 N)   33    2,587.0 mm  0.00 / 0 / 0
+
+-- the two pairs agree that the grasp arm drops and disagree about the burial
+arm: camera's burial tracks at 34.6 mm, mouse's drops at 291 m. So burial is
+NOT sufficient for tracking. Mouse's burial arm had 2 start frames against
+camera's 28, so sample size is the obvious candidate for the difference, and
+that is the one direction in which the confound survives -- burial with data
+tracks, burial without data does not.
+
+What the grasp side now has is the strongest evidence in either run:
+`mouse_use_1` at 32 start frames and 1176 transitions is the **best-supported
+policy trained tonight**, from a 4-contact 3.6 N seed at equilibrium 0.10, and
+it drops the object 116 metres. Camera at 33 frames does the same. Two
+independent references, the two largest training sets of the night, both clean
+grasps, both let go.
+
+So the asymmetry is now stated precisely: a policy given more data and a valid
+grasp still drops the object, while a policy given burial sometimes tracks and
+sometimes does not. Sample size does not rescue the grasp arm. It may well be
+what separates the two burial arms, which is a smaller and different question.
