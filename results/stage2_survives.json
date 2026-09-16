@@ -16,7 +16,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 8,
-   "seed_grip_n": 385.27714238568166
+   "seed_grip_n": 385.27714238568166,
+   "reset_pen_mm": 13.768009961872256,
+   "reset_contacts": 31,
+   "reset_grip_n": 3177.2616235514824,
+   "reset_eq": 14.209669833361966
   },
   {
    "seq": "alarmclock_lift",
@@ -33,7 +37,11 @@
    "end_contacts": 63,
    "end_grip_n": 10694.320094065062,
    "seed_contacts": 50,
-   "seed_grip_n": 6636.045541628506
+   "seed_grip_n": 6636.045541628506,
+   "reset_pen_mm": 22.492027295068688,
+   "reset_contacts": 136,
+   "reset_grip_n": 36382.280383895995,
+   "reset_eq": 1.308555647594181
   },
   {
    "seq": "apple_eat_1",
@@ -50,7 +58,11 @@
    "end_contacts": 12,
    "end_grip_n": 856.0205767090551,
    "seed_contacts": 9,
-   "seed_grip_n": 875.0074344223992
+   "seed_grip_n": 875.0074344223992,
+   "reset_pen_mm": 7.098348222745074,
+   "reset_contacts": 13,
+   "reset_grip_n": 979.1156265780018,
+   "reset_eq": 9.053611825424685
   },
   {
    "seq": "banana_eat_1",
@@ -67,7 +79,11 @@
    "end_contacts": 7,
    "end_grip_n": 284.3666521103761,
    "seed_contacts": 5,
-   "seed_grip_n": 41.227770368579975
+   "seed_grip_n": 41.227770368579975,
+   "reset_pen_mm": 22.745434750936965,
+   "reset_contacts": 15,
+   "reset_grip_n": 1225.4277363501897,
+   "reset_eq": 6.4215263911877765
   },
   {
    "seq": "binoculars_lift",
@@ -84,7 +100,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 10,
-   "seed_grip_n": 8.018338502727756
+   "seed_grip_n": 8.018338502727756,
+   "reset_pen_mm": 12.072755484601998,
+   "reset_contacts": 25,
+   "reset_grip_n": 9773.01807073515,
+   "reset_eq": 13.661416610539593
   },
   {
    "seq": "bowl_drink_1",
@@ -101,7 +121,11 @@
    "end_contacts": 47,
    "end_grip_n": 14899.868480675437,
    "seed_contacts": 94,
-   "seed_grip_n": 35521.49801854556
+   "seed_grip_n": 35521.49801854556,
+   "reset_pen_mm": 18.542646432234527,
+   "reset_contacts": 40,
+   "reset_grip_n": 11926.294838241374,
+   "reset_eq": 3.8172449614932087
   },
   {
    "seq": "camera_browse_1",
@@ -118,7 +142,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 28,
-   "seed_grip_n": 8997.152222109451
+   "seed_grip_n": 8997.152222109451,
+   "reset_pen_mm": 21.67197749077148,
+   "reset_contacts": 36,
+   "reset_grip_n": 9268.887648166135,
+   "reset_eq": 5.965315419580287
   },
   {
    "seq": "cubemedium_inspect_1",
@@ -135,7 +163,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 2,
-   "seed_grip_n": 5.984983071119423
+   "seed_grip_n": 5.984983071119423,
+   "reset_pen_mm": 16.785967794158644,
+   "reset_contacts": 9,
+   "reset_grip_n": 167.86221958911935,
+   "reset_eq": 17.73676792798043
   },
   {
    "seq": "cup_drink_1",
@@ -152,7 +184,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 45,
-   "seed_grip_n": 2176.7588522455003
+   "seed_grip_n": 2176.7588522455003,
+   "reset_pen_mm": 7.997680729313125,
+   "reset_contacts": 12,
+   "reset_grip_n": 773.8255324408107,
+   "reset_eq": 5.645750467881618
   },
   {
    "seq": "cylinderlarge_inspect_1",
@@ -183,7 +219,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 5,
-   "seed_grip_n": 2.0653415845066894
+   "seed_grip_n": 2.0653415845066894,
+   "reset_pen_mm": 14.623861634777843,
+   "reset_contacts": 12,
+   "reset_grip_n": 59.92616613608481,
+   "reset_eq": 9.05821730878891
   },
   {
    "seq": "doorknob_use_1",
@@ -200,7 +240,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 4,
-   "seed_grip_n": 3.4321129516999305
+   "seed_grip_n": 3.4321129516999305,
+   "reset_pen_mm": 10.877279599415273,
+   "reset_contacts": 24,
+   "reset_grip_n": 643.3424191533838,
+   "reset_eq": 7.447542380929072
   },
   {
    "seq": "duck_inspect_1",
@@ -217,7 +261,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 2,
-   "seed_grip_n": 1.8358141459895427
+   "seed_grip_n": 1.8358141459895427,
+   "reset_pen_mm": 9.778010767564638,
+   "reset_contacts": 7,
+   "reset_grip_n": 30.785483008551218,
+   "reset_eq": 5.341383036483711
   },
   {
    "seq": "elephant_inspect_1",
@@ -241,7 +289,11 @@
    "end_contacts": 13,
    "end_grip_n": 176.4842666534081,
    "seed_contacts": 22,
-   "seed_grip_n": 298.2447513961612
+   "seed_grip_n": 298.2447513961612,
+   "reset_pen_mm": 9.384365226432752,
+   "reset_contacts": 13,
+   "reset_grip_n": 223.27187098056476,
+   "reset_eq": 3.590012795339793
   },
   {
    "seq": "flute_lift",
@@ -258,7 +310,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 6,
-   "seed_grip_n": 4.389970628524901
+   "seed_grip_n": 4.389970628524901,
+   "reset_pen_mm": 9.137134310362999,
+   "reset_contacts": 2,
+   "reset_grip_n": 5.568010421857947,
+   "reset_eq": 2.159859720916868
   },
   {
    "seq": "fryingpan_cook_1",
@@ -275,7 +331,11 @@
    "end_contacts": 7,
    "end_grip_n": 580.9208091524692,
    "seed_contacts": 13,
-   "seed_grip_n": 1438.2728747767603
+   "seed_grip_n": 1438.2728747767603,
+   "reset_pen_mm": 12.987616902495782,
+   "reset_contacts": 23,
+   "reset_grip_n": 2579.1693112658595,
+   "reset_eq": 7.602196849591421
   },
   {
    "seq": "gamecontroller_lift",
@@ -292,7 +352,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 24,
-   "seed_grip_n": 2651.6644452267456
+   "seed_grip_n": 2651.6644452267456,
+   "reset_pen_mm": 4.226995173519148,
+   "reset_contacts": 3,
+   "reset_grip_n": 89.58653077187938,
+   "reset_eq": 3.3199426336217295
   },
   {
    "seq": "hammer_lift",
@@ -309,7 +373,11 @@
    "end_contacts": 6,
    "end_grip_n": 343.1015984377834,
    "seed_contacts": 6,
-   "seed_grip_n": 26.693989292697665
+   "seed_grip_n": 26.693989292697665,
+   "reset_pen_mm": 18.90914579115111,
+   "reset_contacts": 22,
+   "reset_grip_n": 7319.959746042176,
+   "reset_eq": 7.6250831637562
   },
   {
    "seq": "hand_inspect_1",
@@ -326,7 +394,11 @@
    "end_contacts": 90,
    "end_grip_n": 18621.514906622317,
    "seed_contacts": 53,
-   "seed_grip_n": 7880.377325770924
+   "seed_grip_n": 7880.377325770924,
+   "reset_pen_mm": 22.62270273008457,
+   "reset_contacts": 149,
+   "reset_grip_n": 43546.150542316456,
+   "reset_eq": 2.0926630286081145
   },
   {
    "seq": "headphones_lift",
@@ -343,7 +415,11 @@
    "end_contacts": 34,
    "end_grip_n": 4433.826535002277,
    "seed_contacts": 36,
-   "seed_grip_n": 6847.567282507435
+   "seed_grip_n": 6847.567282507435,
+   "reset_pen_mm": 18.793497920958423,
+   "reset_contacts": 49,
+   "reset_grip_n": 7459.298708824033,
+   "reset_eq": 4.5691013293683564
   },
   {
    "seq": "knife_lift",
@@ -360,7 +436,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 4,
-   "seed_grip_n": 2.1247532459430425
+   "seed_grip_n": 2.1247532459430425,
+   "reset_pen_mm": 0.0,
+   "reset_contacts": 0,
+   "reset_grip_n": 0.0,
+   "reset_eq": 1.0
   },
   {
    "seq": "lightbulb_pass_1",
@@ -377,7 +457,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 6,
-   "seed_grip_n": 13.17002282979113
+   "seed_grip_n": 13.17002282979113,
+   "reset_pen_mm": 30.297438220732175,
+   "reset_contacts": 31,
+   "reset_grip_n": 4834.284578772748,
+   "reset_eq": 3.304704207606697
   },
   {
    "seq": "mouse_lift",
@@ -394,7 +478,11 @@
    "end_contacts": 12,
    "end_grip_n": 2099.1824323007477,
    "seed_contacts": 27,
-   "seed_grip_n": 2846.2900767744627
+   "seed_grip_n": 2846.2900767744627,
+   "reset_pen_mm": 13.515623007317803,
+   "reset_contacts": 47,
+   "reset_grip_n": 7453.4210701210595,
+   "reset_eq": 4.53563337230685
   },
   {
    "seq": "mug_drink_1",
@@ -411,7 +499,11 @@
    "end_contacts": 14,
    "end_grip_n": 3774.323892288245,
    "seed_contacts": 15,
-   "seed_grip_n": 1280.2443234836444
+   "seed_grip_n": 1280.2443234836444,
+   "reset_pen_mm": 30.404902691105665,
+   "reset_contacts": 45,
+   "reset_grip_n": 14388.452320456674,
+   "reset_eq": 3.8048242763494415
   },
   {
    "seq": "phone_call_1",
@@ -428,7 +520,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 3,
-   "seed_grip_n": 7.520291695397457
+   "seed_grip_n": 7.520291695397457,
+   "reset_pen_mm": 11.520224981884098,
+   "reset_contacts": 11,
+   "reset_grip_n": 78.50630884062574,
+   "reset_eq": 9.05578214743384
   },
   {
    "seq": "piggybank_lift",
@@ -445,7 +541,11 @@
    "end_contacts": 13,
    "end_grip_n": 7824.2451608250285,
    "seed_contacts": 0,
-   "seed_grip_n": 0.0
+   "seed_grip_n": 0.0,
+   "reset_pen_mm": 26.958011773949806,
+   "reset_contacts": 29,
+   "reset_grip_n": 21178.205650013108,
+   "reset_eq": 9.848193665463233
   },
   {
    "seq": "pyramidmedium_inspect_1",
@@ -469,7 +569,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 5,
-   "seed_grip_n": 2.7386508434898387
+   "seed_grip_n": 2.7386508434898387,
+   "reset_pen_mm": 7.91787437407695,
+   "reset_contacts": 1,
+   "reset_grip_n": 18.777896576097685,
+   "reset_eq": 12.404331259988789
   },
   {
    "seq": "scissors_offhand_1",
@@ -486,7 +590,11 @@
    "end_contacts": 25,
    "end_grip_n": 315.8513477915661,
    "seed_contacts": 57,
-   "seed_grip_n": 1910.475152996332
+   "seed_grip_n": 1910.475152996332,
+   "reset_pen_mm": 15.459793857966037,
+   "reset_contacts": 45,
+   "reset_grip_n": 2039.8974668567528,
+   "reset_eq": 3.688934690560591
   },
   {
    "seq": "spheresmall_inspect_1",
@@ -503,7 +611,11 @@
    "end_contacts": 0,
    "end_grip_n": 0.0,
    "seed_contacts": 10,
-   "seed_grip_n": 4.755393557272328
+   "seed_grip_n": 4.755393557272328,
+   "reset_pen_mm": 21.39534865516698,
+   "reset_contacts": 17,
+   "reset_grip_n": 1254.8942155761736,
+   "reset_eq": 5.5558574806804355
   },
   {
    "seq": "stamp_lift",
@@ -520,7 +632,11 @@
    "end_contacts": 5,
    "end_grip_n": 3.561200349114408,
    "seed_contacts": 4,
-   "seed_grip_n": 16.222802385279135
+   "seed_grip_n": 16.222802385279135,
+   "reset_pen_mm": 14.230904817360896,
+   "reset_contacts": 10,
+   "reset_grip_n": 877.9441753279735,
+   "reset_eq": 5.242177651787478
   },
   {
    "seq": "stanfordbunny_inspect_1",
@@ -537,7 +653,11 @@
    "end_contacts": 9,
    "end_grip_n": 2721.3194590718977,
    "seed_contacts": 19,
-   "seed_grip_n": 5100.981370480546
+   "seed_grip_n": 5100.981370480546,
+   "reset_pen_mm": 16.8092340250078,
+   "reset_contacts": 72,
+   "reset_grip_n": 20892.377358212063,
+   "reset_eq": 4.974279342932723
   }
  ]
 }

@@ -21,6 +21,7 @@ import argparse, json, sys, time
 from pathlib import Path
 
 import numpy as np
+import mujoco
 
 from oppdef.human import grab, track as T
 
@@ -51,6 +52,17 @@ def one(row, lost=0.10):
                 "no_grasp_frame": True}
     k0 = int(gf[0])
     rt.reset_at(k0)
+    # RESET state, before any motion. The carriers all start buried and relax
+    # under motion -- stamp_lift falls 46x in depth and 244x in force between
+    # here and the end -- so the initial contact set is the precondition for the
+    # carry rather than a defect in it, and its grip force is the candidate
+    # discriminator this sweep exists to test.
+    mujoco.mj_forward(rt.sim.model, rt.sim.data)
+    r_pen, _ = rt.sim.penetration()
+    r_grip, r_ncon = T.total_grip(rt.sim)
+    # Equilibrium alongside the other three, so "grip force separates and depth
+    # does not" is shown on the same rows rather than asserted across them.
+    r_eq = T.equilibrium_residual(rt.sim, rt.sim.obj_bid)
     ro = rt.rollout(start=k0, steps=rt.T - k0)
 
     # how far along the reference the object was still being carried
@@ -68,6 +80,8 @@ def one(row, lost=0.10):
         "end_pen_mm": float(pen_mm * 1000), "end_contacts": int(ncon),
         "end_grip_n": float(grip_n),
         "seed_contacts": int(row["n_contact"]), "seed_grip_n": float(row["grip_n"]),
+        "reset_pen_mm": float(r_pen * 1000), "reset_contacts": int(r_ncon),
+        "reset_grip_n": float(r_grip), "reset_eq": float(r_eq),
     }
 
 
@@ -96,6 +110,7 @@ def main():
                   f"no graspable frame", flush=True)
         else:
             print(f"[{i+1}/{len(rows)}] {rec['seq']:24s} {rec['kind']:7s} "
+                  f"reset {rec['reset_pen_mm']:5.1f}mm/{rec['reset_grip_n']:7.0f}N  "
                   f"carried {rec['carried_frames']:3d}/{rec['span']:3d} frames "
                   f"({rec['carried_frac']*100:3.0f}%)  mean {rec['mean_mm']:8.1f} mm  "
                   f"ends {rec['end_pen_mm']:5.2f} mm, {rec['end_contacts']:3d} con, "
@@ -106,6 +121,25 @@ def main():
     if done:
         print(f"\ncarried to the end of the reference: "
               f"{sum(r['carried_frac'] > 0.95 for r in done)}/{len(done)}")
+        car = [r for r in done if r["carried_frac"] > 0.95]
+        fail = [r for r in done if r["carried_frac"] <= 0.95]
+        if car and fail:
+            print("\n  at RESET, carried to the end vs not:")
+            for lab, key, fmt in (("pen mm", "reset_pen_mm", "8.2f"),
+                                  ("contacts", "reset_contacts", "8.0f"),
+                                  ("grip N", "reset_grip_n", "8.0f"),
+                                  ("equilib", "reset_eq", "8.2f")):
+                c = [r[key] for r in car]; f = [r[key] for r in fail]
+                print(f"    {lab:9s} carried median {np.median(c):{fmt}}  "
+                      f"[{min(c):{fmt}}, {max(c):{fmt}}]   "
+                      f"not median {np.median(f):{fmt}}  "
+                      f"[{min(f):{fmt}}, {max(f):{fmt}}]")
+            print(f"\n  reset grip N -- carried to the end: median "
+                  f"{np.median([r['reset_grip_n'] for r in car]):8.0f}  "
+                  f"min {min(r['reset_grip_n'] for r in car):8.0f}")
+            print(f"                  did not:            median "
+                  f"{np.median([r['reset_grip_n'] for r in fail]):8.0f}  "
+                  f"max {max(r['reset_grip_n'] for r in fail):8.0f}")
         for k in ("grasp", "mixed", "thin", "burial"):
             sel = [r for r in done if r["kind"] == k]
             if sel:

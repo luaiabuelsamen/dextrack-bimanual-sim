@@ -5229,3 +5229,40 @@ force in the tracking scene. Carriers 878, 1225 and 7320 N; failures 0 and 78 N.
 That is not wrap_score, not epsilon, and not penetration depth -- all of which
 this project has measured extensively -- and it is the one quantity that
 separates these five. It wants testing on the other 25.
+
+## The reset-state discriminator, on all 30: direction confirmed, separation is not
+
+Fourteen of thirty carried their reference to the end. At reset, before any
+motion, carried against not:
+
+    quantity          carried (n=14)          did not (n=16)        best single
+                      median [min, max]       median [min, max]      threshold
+    penetration mm     17.68 [ 7.10,  30.40]   11.80 [ 0.00,  30.30]     70%
+    contacts             42  [   10,    149]      12  [    0,     36]     80%
+    grip N             7387  [  223, 43546]      406  [    0, 21178]      77%
+    equilibrium         4.55 [ 1.31,   9.05]     6.71 [ 1.00,  17.74]     73%
+
+**My n=5 grip-force candidate does not survive n=30.** It separates at 77%,
+which is six misclassified references out of thirty, and its ranges overlap
+heavily -- a carrier at 223 N and a failure at 21,178 N. Contact count is
+marginally the best at 80% and is not clean either. Nothing here is a
+discriminator; all four are weak signals.
+
+What does survive is the DIRECTION, and it is the opposite of what this project
+assumed for months. **The references that carry start MORE buried** -- 17.7 mm
+against 11.8 mm at the median, on 42 contacts against 12. Penetration depth is
+the WORST of the four at telling carriers from failures, which is the sharpest
+possible statement that depth is not the variable: the quantity this pipeline
+has spent its whole life minimising is the least informative thing measured
+here.
+
+So the reframe stands and the discriminator does not. Burial at reset is the
+precondition for the carry, the relaxation under motion produces the grasp, and
+no single quantity measured at reset predicts which poses will relax well. That
+last part is the open question, and it is a better one than "why is the
+neighbourhood empty" -- it is not empty, and we now have fourteen examples of
+something that works.
+
+Recorded against my own claim from an hour ago, which was based on five
+references and read cleanly on them: reset grip force separates carriers from
+failures. It does not.
