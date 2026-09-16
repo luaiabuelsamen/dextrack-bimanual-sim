@@ -4493,3 +4493,36 @@ That promotes the 2x2 from tidy-up to the load-bearing experiment:
 Capping the burial row to four starts is the cleaner half -- rescuing hammer can
 fail for reasons unrelated to sample size, whereas removing data from the one
 row that works tests one thing only.
+
+### Pre-registered: what rows 7-9 should show
+
+Start-frame counts computed in advance by a peer session, the way g9 computes
+them (stage-2 offset applied, `grasp_frames` at stride 5):
+
+    camera_takepicture_2    T=79   10 of 16   seed 32 con,  5,800 N ( 2956x)
+    gamecontroller_play_1   T=62    8 of 13   seed 57 con, 14,042 N ( 7157x)
+    bowl_drink_1            T=131  27 of 27   seed 94 con, 35,522 N (18105x)
+    binoculars_see_1        T=155   1 of 31   unseeded, stage 2 FAILED -- read nothing
+
+The 30 I quoted earlier for gamecontroller was a different configuration: it came
+from a probe that called `rt.synthesize_grasp()`, this stage's own search, not
+the stage-2 wrist offset that g9 applies. Both numbers are right for what they
+measured; g9's own `grasp_frames` field settles which applies to the row.
+
+bowl at 27 is a `mug_drink_2` replicate and does not discriminate. camera at 10
+and gamecontroller at 8 sit between hammer's 4 and mug's 27, so they are the
+informative rows.
+
+**My prediction, recorded before they run.** Both camera and gamecontroller
+track well and end buried, on 8-10 starts. That would weaken start count as the
+explanation, because mouse failed on 2 and these would succeed on 8, putting the
+threshold somewhere between 2 and 8 rather than near 27 -- and it would leave
+seed depth as the better predictor, since these two seeds are 2956x and 7157x
+object weight against mouse's 2210x and mug's 269x.
+
+If instead either drops, start count gains and the 2x2 becomes the only thing
+that can settle it.
+
+Stating it in advance because on this question I have now been wrong about the
+mechanism four times and right once, and a prediction written after the fact is
+worth nothing.
