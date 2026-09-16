@@ -122,6 +122,27 @@ was wrong.
 
 ## Physics rollouts
 
+### Carry-scored seeds — the ones that hold (2026-09-16)
+
+Same instrumentation as the failures below: object translucent, any link
+deeper than 2 mm red, every frame's penetration, contacts, grip and error
+on its face, read live. Left column is the retargeted trajectory with **no
+controller**; right is the PPO policy trained from that start. Both begin
+buried and relax out of the object under motion; the policy tracks closer
+and ends in the same grasp. Per-frame manifests sit beside each GIF.
+
+| Flashlight — 18.1 → 5.6 mm | Camera — 9.7 → 5.2 mm |
+|---|---|
+| ![Shadow hand starts with red links inside a translucent flashlight and ends pinching it on three links; the PPO column tracks the same grasp at a third of the error](figures/carry_flashlight_lift.gif) | ![Shadow hand starts buried in a translucent camera and ends wrapping it on five links; the PPO column tracks the same grasp closer](figures/carry_camera_browse_1.gif) |
+
+The other three of the five robust seeds: [cube](figures/carry_cubemedium_inspect_1.gif),
+[doorknob](figures/carry_doorknob_use_1.gif), [pyramid](figures/carry_pyramidlarge_inspect_1.gif).
+`experiments/tracking/render_carry_gif.py` regenerates them from the stored
+offsets and checkpoints.
+
+### The four failures this project was measured on
+
+
 The first time this pipeline was stepped as real physics rather than kinematic
 playback. **All four fail**, and the GIFs are built to show *why* rather than
 assert it: the object is translucent, so the hand inside it is visible, and any
