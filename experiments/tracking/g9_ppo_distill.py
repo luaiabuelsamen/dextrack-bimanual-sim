@@ -114,11 +114,25 @@ def main(a):
             continue
         O, A = harvest(rt, net, gf)
         errs, _ = rl.evaluate(rt, net, start=int(gf[0]))
+        # END-OF-ROLLOUT STATE, not just the error. A peer session measured two
+        # policies -- one trained on a buried grasp, one on a physically valid
+        # one -- ending a "successful" 111-frame track at 10.83 mm inside the
+        # mug on 12 bodies at 1330x the object's weight, indistinguishable to
+        # the millimetre. Nothing in the reward forbids burying the hand, and a
+        # policy trained on a real grasp buries just as happily. So a tracking
+        # number without the state it ends in cannot be read at all.
+        pen_mm, _npen = rt.sim.penetration()
+        grip_n, ncon = track.total_grip(rt.sim)
         store.append({"obj": r["object"], "seq": r["seq"], "O": O, "A": A,
-                      "ppo_mm": float(errs.mean() * 1000)})
+                      "ppo_mm": float(errs.mean() * 1000),
+                      "end_pen_mm": float(pen_mm * 1000),
+                      "end_grip_n": float(grip_n),
+                      "end_contacts": int(ncon),
+                      "grasp_frames": int(len(gf))})
         envs.append((rt, r["object"]))
         print(f"[{i+1}/{len(picked)}] {r['seq']:26s} {r['object']:12s} "
-              f"PPO {errs.mean()*1000:7.1f} mm  {len(O)} transitions  "
+              f"PPO {errs.mean()*1000:7.1f} mm  ends {pen_mm*1000:5.2f} mm in, "
+              f"{ncon:3d} contacts, {grip_n:8.0f} N  "
               f"{len(gf)} grasp frames ({time.time()-t0:.0f}s)", flush=True)
         # Written after EVERY reference. Stage 3 is a measured result on its
         # own, and a multi-hour run that reaches the distillation gate with too
@@ -126,9 +140,10 @@ def main(a):
         # which is exactly what happened on the first run of this file.
         Path(a.out).write_text(json.dumps({
             "hand": a.hand, "steps": a.steps, "seed": a.seed,
-            "per_reference": [{"seq": x["seq"], "object": x["obj"],
-                               "ppo_mm": x["ppo_mm"],
-                               "transitions": int(len(x["O"]))} for x in store],
+            "per_reference": [{k: v for k, v in x.items()
+                               if k not in ("O", "A")}
+                              | {"transitions": int(len(x["O"]))}
+                              for x in store],
             "held_out": [],
         }, indent=1))
 
@@ -173,9 +188,8 @@ def main(a):
     Path(a.out).write_text(json.dumps({
         "hand": a.hand, "steps": a.steps, "seed": a.seed,
         "held_out_objects": sorted(test),
-        "per_reference": [{"seq": s["seq"], "object": s["obj"],
-                           "ppo_mm": s["ppo_mm"],
-                           "transitions": int(len(s["O"]))} for s in store],
+        "per_reference": [{k: v for k, v in x.items() if k not in ("O", "A")}
+                          | {"transitions": int(len(x["O"]))} for x in store],
         "held_out": held,
     }, indent=1))
     print(f"\nwrote {a.out}", flush=True)

@@ -53,12 +53,15 @@ def main():
     print(f"STAGE 3 -- per-reference PPO, {len(per)} references trained")
     if per:
         mm = np.array([x["ppo_mm"] for x in per])
-        print(f"  {'reference':26s} {'object':14s} {'PPO':>9}  {'seed':>6} "
-              f"{'con':>4} {'grip N':>9}")
+        print(f"  {'reference':24s} {'object':12s} {'PPO':>8}  {'seed':>6} "
+              f"{'con':>4} | {'end pen':>8} {'end con':>7} {'end grip':>9}")
         for x in sorted(per, key=lambda y: y["ppo_mm"]):
             k, nc, gn = kind(x["seq"])
-            print(f"  {x['seq'][:26]:26s} {x['object']:14s} {x['ppo_mm']:9.1f}"
-                  f"  {k:>6} {nc:4.0f} {gn:9.0f}")
+            print(f"  {x['seq'][:24]:24s} {x['object'][:12]:12s} "
+                  f"{x['ppo_mm']:8.1f}  {k:>6} {nc:4.0f} | "
+                  f"{x.get('end_pen_mm', float('nan')):8.2f} "
+                  f"{x.get('end_contacts', -1):7d} "
+                  f"{x.get('end_grip_n', float('nan')):9.0f}")
         print(f"  median {np.median(mm):.1f} mm   under 50 mm: "
               f"{int((mm < 50).sum())}/{len(mm)}")
         gr = np.array([x["ppo_mm"] for x in per if kind(x["seq"])[0] == "grasp"])
@@ -68,6 +71,27 @@ def main():
         if len(bu):
             print(f"  from a BURIAL seed ({len(bu)}): median {np.median(bu):8.1f} mm"
                   f"   <- read these as tracking the contact solver")
+
+        # The end state decides whether ANY of these is a tracking result. A
+        # peer session measured two policies ending a "successful" 111-frame
+        # track at 10.83 mm inside on 12 bodies at 1330x weight -- one trained
+        # on a burial, one on a valid grasp, identical to the millimetre.
+        ep = np.array([x.get("end_pen_mm", np.nan) for x in per], float)
+        ok = np.isfinite(ep)
+        if ok.any():
+            clean = (ep[ok] <= 3.0)
+            print(f"\n  END OF ROLLOUT: {int(clean.sum())}/{int(ok.sum())} finish "
+                  f"under 3 mm of penetration; median {np.nanmedian(ep):.2f} mm")
+            good = [x for x in per
+                    if np.isfinite(x.get("end_pen_mm", np.nan))
+                    and x["end_pen_mm"] <= 3.0 and x["ppo_mm"] < 50]
+            print(f"  tracking under 50 mm AND ending un-buried: "
+                  f"{len(good)}/{len(per)}"
+                  + ("  <- the only rows that are tracking results"
+                     if good else "  <- no row here is a tracking result"))
+            for x in good:
+                print(f"      {x['seq'][:24]:24s} {x['ppo_mm']:7.1f} mm at "
+                      f"{x['end_pen_mm']:.2f} mm, {x.get('end_grip_n',0):.0f} N")
     if not held:
         print("\nSTAGES 4-5 -- not reached: distillation needs >= 3 references "
               "so an object can be held out.")
