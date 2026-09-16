@@ -3716,3 +3716,42 @@ is a property of how many links engage and from which directions -- not of where
 the fingertips happen to sit. Both their measurement and mine point at the same
 conclusion from opposite sides: fingertip geometry is the wrong level of
 description for this problem.
+
+## 2026-09-15 — the wrap search is correct and finds nothing. The neighbourhood is empty.
+
+`wrap_score` wired into the grasp search, wide rotation (0.35 rad), penetration
+gated at 3 mm:
+
+    reference          stage     pen       force   bodies  one-sided
+    binoculars_see_1   before   2.47 mm   2472 N      1      0.708
+    binoculars_see_1   wrap     2.47 mm   2472 N      1      0.708
+    flashlight_on_2    before   1.39 mm    386 N      1      0.999
+    flashlight_on_2    wrap     1.39 mm    386 N      1      0.999
+    cup_lift           before  11.65 mm   4368 N      8      1.000
+    cup_lift           wrap    11.65 mm   4370 N      8      1.000
+
+Nothing moves, and that is the gate working rather than failing. Every sampled
+candidate exceeds the 3 mm penetration allowance, so every one scores worst-case
+and none is strictly better than the baseline, so the search keeps what it had.
+
+This is the third independent route to the same conclusion: a peer's 283-candidate
+sweep found zero poses that both contact the object and stay out of it; my w_pen
+sweep bought 1.35 mm of penetration at 148.7 mm of tracking; and now a
+human-validated wrap metric, correctly gated, finds no better pose anywhere in
+the retarget's neighbourhood.
+
+**So the fix cannot be a search around the retarget's output.** Every such search
+-- translation, rotation, wrist offsets, opposition, wrap -- is looking in a
+neighbourhood that contains no valid grasp. The retarget's OBJECTIVE has to
+change so that its output lands somewhere else, and `wrap_score` is now the term
+to change it toward: many links, opposing, at bounded penetration, validated
+against the human demonstration rather than assumed.
+
+Two wiring errors of mine on the way here, both recorded because they each cost a
+full measurement cycle: the search branch was gated on `objective == "track"`, so
+"wrap" silently fell through to the old hold-based path and the validated score
+was never called; and before that, the "oppose" score omitted arm penetration
+entirely, so widening the rotation search from 0.08 to 0.45 rad took
+binoculars_see_1 from 2.47 mm of arm penetration to 15.52 mm and scored it an
+improvement. Five wiring errors today, each found by a measurement that did not
+match what the code was supposed to do.

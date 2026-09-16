@@ -804,7 +804,7 @@ class ReferenceTracker:
                 self.grasp_frames())
             return keep
 
-        if objective == "track":
+        if objective in ("track", "oppose", "wrap"):
             # Search the wrist offset directly against tracking, the way the
             # two-handed stage does. Scored on holding, the search cannot see
             # that a grasp survives gravity and not the motion.
@@ -1974,8 +1974,20 @@ class BimanualTracker:
             return (one_sidedness(self.sim) - 4.0 * eps
                     + 40.0 * max(0.0, armp - 0.001))
 
+        def _wrap():
+            """Wrap-first: many links, opposing, at bounded penetration.
+
+            The only score validated against the human demonstration -- the
+            control that killed fingertip spread (human 0.836 vs robot 0.830)
+            and Ferrari-Canny (0.00000 either way). Penetration is gated inside
+            wrap_score rather than traded off, because every opposition-like
+            measure rewards burial when it is not.
+            """
+            self.reset_at(k)
+            return wrap_score(self.sim)[0]
+
         score = ({"track": lambda: self.track_score(nsteps, k),
-                  "oppose": _oppose}.get(objective)
+                  "oppose": _oppose, "wrap": _wrap}.get(objective)
                  or (lambda: self.hold_test(k)))
         best = score()
         applied = {"r": np.zeros(6), "l": np.zeros(6)}
