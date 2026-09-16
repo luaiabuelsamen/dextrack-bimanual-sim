@@ -859,11 +859,11 @@ does not reproduce; five processes agree on 6.10 mm.
 The g9 run's first two rows, the ones the ordering was designed to reach
 early (`results/g9_ppo_distill.json`, `per_reference`):
 
-| reference | seed class (force) | PPO tracking | end penetration | end contacts | end grip |
-|---|---|---:|---:|---:|---:|
-| `flashlight_on_2` | **thin** (0.6 N) | 112.9 mm | **4.86 mm** | 3 | **207 N** |
-| `hammer_use_2` | **grasp** (20.7 N, eq 0.04×) | 80,250 mm | 0.00 mm | **0** | **0 N** |
-| `knife_lift` | grasp, thin end (2.1 N) | 87.7 mm | 0.00 mm | **0** | **0 N** |
+| reference | seed class (force) | start frames | transitions | PPO tracking | end penetration | end contacts | end grip |
+|---|---|---:|---:|---:|---:|---:|---:|
+| `flashlight_on_2` | **thin** (0.6 N) | 2 | 148 | 112.9 mm | **4.86 mm** | 3 | **207 N** |
+| `hammer_use_2` | **grasp** (20.7 N, eq 0.04×) | 4 | 566 | 80,250 mm | 0.00 mm | **0** | **0 N** |
+| `knife_lift` | grasp, thin end (2.1 N) | **1** | **25** | 87.7 mm | 0.00 mm | 0 | 0 N |
 
 `hammer_use_2` is the one reference in the set that is a grasp by force as
 well as geometry — 4 contacts, 20.7 N, equilibrium residual 0.04×, the best
@@ -898,14 +898,28 @@ penalty is only safe to turn on beside it. Both are drafted at weight 0 with
 their per-iteration means logged next to `alive`; neither is a result until a
 retrain on hammer's seed ends held, un-buried, and under 50 mm.
 
-`knife_lift` (row 3, 2.1 N — the thin end of the grasp class) also ends with
-no contact and no force. Its 87.7 mm mean error, against hammer's 80 m, says
-the knife did not go far when it was let go, not that it was held; the end
-state is the same. So of two thin-end seeds, one re-buried and one let go:
-the thin class is not a class with one behaviour, and the prediction that
-knife would replicate flashlight was wrong.
+**Read nothing from the knife row, in either direction.** It trained from
+**one** start frame and harvested **25 transitions** — a rounding error of a
+training set against hammer's 566. Its end state matches hammer's (0.00 mm,
+0 contacts, 0 N), and its 87.7 mm mean error is *unexplained*: the rollout is
+~25 control steps, ~13 s of simulated time, and an object released at the
+start would be hundreds of metres down like hammer. Held until late, resting
+on something, or a reference that barely moves — not measured, so the row
+carries no weight. The prediction that knife would replicate flashlight is
+retracted; flashlight remains the only thin-end row with enough data to read.
 
-**Sample size, stated plainly:** one grasp-by-force reference; two thin-end. The burial column
+**The binding constraint three rows in is the sample, not the seed class.**
+`grasp_frames` comes back in single digits — 2, 4, 1 — so every policy here
+is trained on a handful of start states, and stages 4–5 will pool exactly
+this. The burial-seeded rows (7–9) had 20–30 graspable frames each
+(`gamecontroller_play_1`: 30), so when they arrive they will also be the
+**best-trained policies in the set** — a confound running in the same
+direction as the burial effect. Written down before those rows land and look
+convincing. `phone_call_1` (7 frames) is the first row with more support than
+any of the first three.
+
+**Sample size, stated plainly:** one grasp-by-force reference; one readable
+thin-end reference. The burial column
 rests on `mug_drink_1` from a separate session; the burial-seeded g9 rows are
 7–9 and have not run. `knife_lift` (2.1 N) and `phone_call_1` (2.8 N) come
 next, and both sit at the thin end of the grasp class, so they will most
