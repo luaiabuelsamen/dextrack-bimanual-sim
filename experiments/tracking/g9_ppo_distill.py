@@ -43,8 +43,9 @@ def per_reference(row, hand="shadow", steps=200_000, seed=0, verbose=False,
     # angles or the servo press as well buys nothing and can cost frames
     # (binoculars_lift 8 with the wrist alone, 2 with the grip too).
     used = "own search"
-    if grips and row["seq"] in grips:
-        rt.apply_wrist_offset(np.asarray(grips[row["seq"]]["offset"], float))
+    key = f"{row['subject']}/{row['seq']}"
+    if grips and key in grips:
+        rt.apply_wrist_offset(np.asarray(grips[key]["offset"], float))
         used = "stage 2 offset"
     else:
         rt.synthesize_grasp()
@@ -91,7 +92,11 @@ def harvest(rt, net, gf, per_start=200, max_starts=6):
 def main(a):
     inv = json.loads(Path("results/grab_inventory.json").read_text())["rows"]
     gp = Path(a.grips)
-    grips = ({x["seq"]: x for x in json.loads(gp.read_text())["rows"]}
+    # SUBJECT/SEQ, never the bare name: 80 GRAB sequence names exist under more
+    # than one subject, and a bare-name lookup applied s2's wrist offset to s1's
+    # clip on 7 of 10 references before this was caught.
+    grips = ({f"{x['subject']}/{x['seq']}": x
+              for x in json.loads(gp.read_text())["rows"]}
              if gp.exists() else {})
     print(f"{len(grips)} stage-2 grasps available as wrist seeds", flush=True)
     rows = [r for r in inv if "error" not in r and r["rhand_hold_len"] >= 25]
@@ -116,14 +121,17 @@ def main(a):
     _rank = {"grasp": 0, "mixed": 1, "burial": 2, "unseeded": 3}
 
     def _cls(nm):
-        row = grips.get(nm)
+        row = grips.get(nm)               # nm is already subject/seq
         if row is None or not row.get("held"):
             return "unseeded", 10_000
         n = row["n_contact"]
         return ("burial" if n > 30 else "grasp" if n <= 12 else "mixed"), n
 
-    picked.sort(key=lambda r: (_rank[_cls(r["seq"])[0]], _cls(r["seq"])[1]))
-    print("order: " + ", ".join(f"{r['seq']}({_cls(r['seq'])[0]})"
+    def _key(r):
+        return f"{r['subject']}/{r['seq']}"
+
+    picked.sort(key=lambda r: (_rank[_cls(_key(r))[0]], _cls(_key(r))[1]))
+    print("order: " + ", ".join(f"{_key(r)}({_cls(_key(r))[0]})"
                                 for r in picked), flush=True)
 
     store, envs = [], []
@@ -145,7 +153,8 @@ def main(a):
         # number without the state it ends in cannot be read at all.
         pen_mm, _npen = rt.sim.penetration()
         grip_n, ncon = track.total_grip(rt.sim)
-        store.append({"obj": r["object"], "seq": r["seq"], "O": O, "A": A,
+        store.append({"obj": r["object"], "seq": r["seq"],
+                      "subject": r["subject"], "O": O, "A": A,
                       "ppo_mm": float(errs.mean() * 1000),
                       "end_pen_mm": float(pen_mm * 1000),
                       "end_grip_n": float(grip_n),
@@ -180,14 +189,14 @@ def main(a):
     # made a blocking condition -- that would usually leave stage 4 with
     # nothing at all -- but reported, so the result is read as what it is.
     def _seed_kind(n):
-        r = (grips or {}).get(n)
+        r = (grips or {}).get(n)          # n is already subject/seq
         if r is None or not r.get("held"):
             return "unseeded"
         return ("burial" if r["n_contact"] > 30
                 else "grasp" if r["n_contact"] <= 12 else "mixed")
     comp = {}
     for x in store:
-        k = _seed_kind(x["seq"])
+        k = _seed_kind(f"{x['subject']}/{x['seq']}")
         comp[k] = comp.get(k, 0) + 1
         x["seed_kind"] = k
     print(f"\ndistillation mixture: "

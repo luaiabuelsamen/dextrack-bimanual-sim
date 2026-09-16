@@ -130,9 +130,11 @@ if __name__ == "__main__":
         q = Path(cand)
         if q.exists():
             for r in json.loads(q.read_text())["rows"]:
+                # SUBJECT-qualified only. 80 GRAB sequence names exist under
+                # more than one subject, and a bare-name fallback here would
+                # hand a clip another recording's grasp.
                 grips.setdefault(f"{r['subject']}/{r['seq']}.npz", r)
-                grips.setdefault(r["seq"], r)
-    print(f"{len(grips)//2} stage-2 grasps available as wrist seeds")
+    print(f"{len(grips)} stage-2 grasps available as wrist seeds")
     rows = []
     for nm in a.seqs.split(","):
         r = run(nm, alpha=a.alpha, grips=grips)

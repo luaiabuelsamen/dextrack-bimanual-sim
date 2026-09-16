@@ -47,7 +47,7 @@ def main():
         q = Path(cand)
         if q.exists():
             for r in json.loads(q.read_text())["rows"]:
-                seeds.setdefault(r["seq"], r)
+                seeds.setdefault(f"{r['subject']}/{r['seq']}", r)
 
     # Classify on contact count AND grip force. Contact count alone calls
     # mug_drink_2 a grasp on 9 contacts while it grips at 528 N -- 264x the
@@ -58,7 +58,7 @@ def main():
     W = 0.2 * 9.81          # the object mass this pipeline standardises on
 
     def kind(n):
-        r = seeds.get(n)
+        r = seeds.get(n)     # n must be subject/seq; a bare name is ambiguous
         if r is None or not r.get("held"):
             return "?", float("nan"), float("nan")
         nc, gn = r["n_contact"], r["grip_n"]
@@ -78,7 +78,7 @@ def main():
         print(f"  {'reference':24s} {'object':12s} {'PPO':>8}  {'seed':>6} "
               f"{'con':>4} | {'end pen':>8} {'end con':>7} {'end grip':>9}")
         for x in sorted(per, key=lambda y: y["ppo_mm"]):
-            k, nc, gn = kind(x["seq"])
+            k, nc, gn = kind(f"{x.get('subject','?')}/{x['seq']}")
             print(f"  {x['seq'][:24]:24s} {x['object'][:12]:12s} "
                   f"{x['ppo_mm']:8.1f}  {k:>6} {nc:4.0f} | "
                   f"{x.get('end_pen_mm', float('nan')):8.2f} "
@@ -87,12 +87,12 @@ def main():
         print(f"  median {np.median(mm):.1f} mm   under 50 mm: "
               f"{int((mm < 50).sum())}/{len(mm)}")
         for lab in ("thin",):
-            sel = [x for x in per if kind(x["seq"])[0] == lab]
+            sel = [x for x in per if kind(f"{x.get('subject','?')}/{x['seq']}")[0] == lab]
             if sel:
                 print(f"  from a THIN seed   ({len(sel)}): gripping less than the "
                       f"object weighs -- little for a policy to hold")
-        gr = np.array([x["ppo_mm"] for x in per if kind(x["seq"])[0] == "grasp"])
-        bu = np.array([x["ppo_mm"] for x in per if kind(x["seq"])[0] == "BURIAL"])
+        gr = np.array([x["ppo_mm"] for x in per if kind(f"{x.get('subject','?')}/{x['seq']}")[0] == "grasp"])
+        bu = np.array([x["ppo_mm"] for x in per if kind(f"{x.get('subject','?')}/{x['seq']}")[0] == "BURIAL"])
         if len(gr):
             print(f"  from a GRASP seed  ({len(gr)}): median {np.median(gr):8.1f} mm")
         if len(bu):

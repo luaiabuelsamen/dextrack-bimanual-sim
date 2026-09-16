@@ -75,10 +75,32 @@ def main():
 
     rows = json.load(open("results/grab_inventory.json"))["rows"]
     if a.seqs:
+        # Keyed by SUBJECT/SEQ. GRAB has 80 sequence names that exist under more
+        # than one subject -- camera_takepicture_2 holds for 161 frames under s1
+        # and 76 under s2 -- so a bare-name dict silently keeps one of them, and
+        # a downstream stage that looks a seed up by name gets a grasp belonging
+        # to a different recording. That happened: 7 of 10 references in the
+        # first seeded stage-3 run were trained with another subject's wrist
+        # offset, and it was invisible until two sessions computed the same
+        # start count on different clips and disagreed.
         want = [x.strip() for x in a.seqs.split(",") if x.strip()]
-        by = {r["seq"]: r for r in rows}
-        order = [by[w] for w in want if w in by]
-        missing = [w for w in want if w not in by]
+        by = {f"{r['subject']}/{r['seq']}": r for r in rows}
+        by_bare = {}
+        for r in rows:
+            by_bare.setdefault(r["seq"], []).append(r)
+        order, missing = [], []
+        for w in want:
+            if w in by:
+                order.append(by[w])
+            elif w in by_bare and len(by_bare[w]) == 1:
+                order.append(by_bare[w][0])
+            elif w in by_bare:
+                raise SystemExit(
+                    f"{w!r} exists under {len(by_bare[w])} subjects "
+                    f"({', '.join(r['subject'] for r in by_bare[w])}); "
+                    f"name it as SUBJECT/SEQ")
+            else:
+                missing.append(w)
         if missing:
             print(f"  not in inventory: {missing}", file=sys.stderr, flush=True)
         return _run(a, order)
