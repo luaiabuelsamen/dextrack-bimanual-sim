@@ -588,6 +588,21 @@ already held and spent 400 iterations polishing it. The raw-fit run at 0.77 is
 a different regime from its first sample, not an early transient. Compare
 `alive` first — the reward scales may differ — and do not call it before
 iteration 100, since the original also dipped before it rose.
+
+**Iteration 100, read as agreed:**
+
+| iter | 0 | 20 | 40 | 60 | 80 | 100 |
+|---|---:|---:|---:|---:|---:|---:|
+| alive | 0.770 | 0.773 | 0.772 | 0.772 | 0.791 | **0.797** |
+| reward | 0.225 | 0.245 | 0.248 | 0.256 | 0.299 | **0.335** |
+
+Alive +2.7 points and reward +49% over 100 iterations, noisy but rising. The
+original at the same point: alive 0.986, reward 0.771 (+13% from its start).
+So the un-buried grasp is **learnable** — the policy is improving from a low
+floor, which is the opposite of "nothing to learn from" — and it sits 19
+points below the buried run on the only axis that is comparable. Whether it
+climbs far enough to *track* is the 2×2 at the end of the run. Rate settled
+at 14.5 s/iteration, matching the original's 14.2.
 Measured rate **18.8 s/iteration, ~2.3 h total** (an earlier figure of
 103 s/iteration in this entry divided elapsed time by *logged lines*, which
 print every 10 iterations; it was wrong). The original checkpoint took
