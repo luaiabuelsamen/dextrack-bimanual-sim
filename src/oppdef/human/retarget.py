@@ -73,6 +73,103 @@ MANO_CHAINS = ((1, 2, 3), (4, 5, 6), (10, 11, 12), (7, 8, 9), (13, 14, 15))
 #: reproduce the wrap and the retarget slid off the handle onto the body.
 W_JOINT = 0.0
 
+#: Weight on a middle-phalanx CONTACT target. Distinct from `W_JOINT` above,
+#: and the distinction is the whole point. `W_JOINT` asks the robot's middle
+#: joint to be WHERE THE HUMAN'S BONE WAS, and that measurably costs hold rate
+#: (0.318 -> 0.200) because a Shadow phalanx is not a human one: the human's
+#: joint position is the wrong place for the robot's joint even when the
+#: contact is right. This term instead asks the robot's middle phalanx to TOUCH
+#: THE OBJECT where the human's middle phalanx touched it -- a contact target,
+#: which is morphology-independent in the way a joint-position target is not.
+#:
+#: It fires only on fingers whose own human middle joint is inside
+#: `CONTACT_TOL` of the surface, which is not a rare case. Measured, gaps in mm,
+#: against the 15 mm tolerance:
+#:
+#:      reference          TIP gaps                   MID gaps            fires
+#:      binoculars_see_1   3.1  7.8  6.5 10.8  0.9    5.8 10.3 18.4 24.5 16.1  2/5
+#:      flashlight_on_2   10.3 15.4 12.8 23.3 27.9    7.8  2.9  5.4 24.0 13.1  4/5
+#:      cup_lift           6.8 21.8 11.6 18.8  5.5    4.8  7.7  6.3  5.3  0.5  5/5
+#:      mug_drink_1       12.8 13.1 13.6 16.4  1.1    7.6  8.2  9.8 26.0 27.7  3/5
+#:
+#: On `cup_lift` every middle phalanx is CLOSER to the object than the
+#: fingertips are -- 0.5-7.7 mm against 5.5-21.8 mm. The human holds that cup
+#: with the middles of its fingers, and a tips-only objective has no way to ask
+#: for that. This is the term that makes the fit optimise the right links.
+W_MID = 0.0
+
+#: **Default 0, and like `W_JOINT` above that is a result rather than a
+#: default.** At 0.6 the term does mechanically what it was designed to do --
+#: binoculars engages 4 -> 5 distinct links, mug 5 -> 6, and the mug's contact
+#: one-sidedness improves 0.669 -> 0.390 -- but it pays for every bit of that
+#: in penetration, which is the one currency `wrap_score` refuses:
+#:
+#:      reference          w_mid  links  sided  worst pen mm
+#:      binoculars_see_1    0.0     4    0.380     3.19
+#:      binoculars_see_1    0.6     5    0.423     5.86
+#:      flashlight_on_2     0.0     6    0.474     9.04
+#:      flashlight_on_2     0.6     6    0.512    13.03
+#:      mug_drink_1         0.0     5    0.669     5.02
+#:      mug_drink_1         0.6     6    0.390     8.21
+#:
+#: Arm penetration stays at 0.00 throughout, so `W_PEN_ARM` is holding and the
+#: extra burial is entirely finger-side. Split by link, the middle phalanx
+#: itself stays inside the 3 mm allowance (0.0-2.2 mm); the depth lands on the
+#: TIP (binoculars 3.2 -> 5.9, mug 5.0 -> 8.2) and the PROXIMAL link
+#: (flashlight 1.0 -> 12.5). That is an over-constraint, not a weight to tune:
+#: the fit still pins the fingertip to a surface vertex at `W_CONTACT` while
+#: this term pins the middle phalanx too, and a Shadow finger's link lengths
+#: cannot reach both points on the object's curvature the way the human's did.
+#: `MID_FREES_TIP` below tests the obvious remedy and does not rescue it.
+
+#: On a finger where the human contacts with BOTH tip and middle phalanx, drop
+#: the fingertip from a surface target to a free one. See `w_mid` above: a
+#: human finger reaches both contacts by wrapping around the object's
+#: curvature, and a robot finger whose links are a different length cannot, so
+#: demanding both is infeasible and the solver pays for it in penetration.
+#:
+#: It RELOCATES the burial rather than removing it. Worst penetration by link,
+#: at w_mid=0.6, without and with the release:
+#:
+#:      reference            tip   mid  prox        tip   mid  prox
+#:      binoculars_see_1    5.86  0.00  0.00  ->   6.47  4.32  0.00
+#:      flashlight_on_2     5.02  1.74 12.54  ->   4.20  5.59  6.80
+#:      mug_drink_1         8.21  2.19  0.00  ->   3.99  5.95  0.00
+#:
+#: The tip comes out (mug 8.2 -> 4.0, below even the w_mid=0 baseline of 5.0)
+#: and the middle phalanx goes in. Worst-link depth improves past baseline only
+#: on flashlight (8.1 -> 6.8); mug is neutral and binoculars is worse. Total
+#: burial is roughly conserved, which is the finding: the middle phalanx cannot
+#: reach this surface without burying SOMETHING.
+#:
+#: Nor is the wrist anchor to blame -- the obvious next suspect, since a Shadow
+#: hand is bigger than the human hand that produced the demonstration and might
+#: simply be unable to reach a second contact from the human's wrist. Sweeping
+#: `w_wrist` down refutes it: the hand drifts off the object instead of
+#: wrapping it, at w_mid=0.6,
+#:
+#:      reference          w_wrist  links  sided  pen mm
+#:      binoculars_see_1     0.15      5   0.538    6.47
+#:      binoculars_see_1     0.00      1   0.711    1.61
+#:      mug_drink_1          0.15      6   0.380    6.06
+#:      mug_drink_1          0.00      1   0.487    5.80
+#:
+#: One link at high one-sidedness and low penetration is a hand touching the
+#: object with a fingertip, not holding it.
+#:
+#: Taken together these three sweeps say the same thing from three directions:
+#: tighten the middle target and links are bought with burial, release the tip
+#: and the burial moves, release the wrist and the contact degenerates. Every
+#: knob in this objective is a position, and a position objective has no term
+#: that says HOLD THE OBJECT -- it can only say put these points there, which
+#: one buried finger or one grazing fingertip both satisfy. That is this
+#: project's founding claim reaching the retarget: the next term to add needs
+#: force content (closure, a wrench the contact set can resist), not another
+#: point target. It is also the fourth independent route to the same empty
+#: neighbourhood, after a peer's 283-candidate sweep, the w_pen sweep, and the
+#: wrap search.
+MID_FREES_TIP = True
+
 CONTACT_TOL = 0.015     # a human tip within 15 mm of the surface was reaching for it
 W_CONTACT = 1.0
 W_FREE = 0.25
@@ -131,7 +228,8 @@ class _Solver:
     """
 
     def __init__(self, sc, tips, wrist_bid, lo, hi, w_smooth=W_SMOOTH,
-                 w_pen=W_PEN, tip_offsets=None, base_qpos=None):
+                 w_pen=W_PEN, tip_offsets=None, base_qpos=None,
+                 w_wrist=W_WRIST):
         self.sc = sc
         self.m, self.d = sc.model, sc.data
         self.tips = list(tips)
@@ -139,7 +237,7 @@ class _Solver:
         self.lo, self.hi = lo, hi
         self.dofs = np.array([sc.model.jnt_dofadr[j] for j in sc.jids], dtype=int)
         self.n = len(sc.jids)
-        self.w_smooth, self.w_pen = w_smooth, w_pen
+        self.w_smooth, self.w_pen, self.w_wrist = w_smooth, w_pen, w_wrist
         #: When two hands share a scene, zeroing all of qpos to pose one of
         #: them also teleports the other to its zero configuration -- so the
         #: obstacle the solver is meant to avoid is not where it will be.
@@ -176,6 +274,19 @@ class _Solver:
                 up.append(x)
                 x = int(sc.model.body_parentid[x])
             self.chain.append(up)              # [middle, proximal]
+        # Radius of each middle phalanx, so a contact target can be offset off
+        # the surface by it. Targeting the BODY ORIGIN at the surface point
+        # would bury the link by its own radius -- the identical defect that
+        # `tip_offset` exists to prevent, and that cost this project 4469 N of
+        # contact force once already.
+        self.mid_rad = []
+        for up in self.chain:
+            r = 0.01
+            if up:
+                gs = [g for g in range(m.ngeom) if int(m.geom_bodyid[g]) == up[0]]
+                if gs:
+                    r = float(max(m.geom_size[g][0] for g in gs))
+            self.mid_rad.append(r)
 
     def _tip_world(self, i):
         b = self.tips[i]
@@ -238,13 +349,15 @@ class _Solver:
         return rows, res
 
     def solve(self, q0, targets, weights, wrist_target, q_prev,
-              iters=12, damp=1e-3, joint_targets=None, weights_scale=None):
+              iters=12, damp=1e-3, joint_targets=None, weights_scale=None,
+              joint_weights=None):
         """targets/weights are per ROBOT tip (already corresponded).
 
         `joint_targets[i]` is [middle, proximal] world positions for robot tip
         i, or None entries where the human has no counterpart.
         """
         q = np.clip(np.asarray(q0, float), self.lo, self.hi)
+        self.n_joint_rows = 0        # so a caller can assert the term FIRED
         if weights_scale is None:
             weights_scale = np.ones(len(self.tips))
         for _ in range(iters):
@@ -261,12 +374,16 @@ class _Solver:
                     tg = joint_targets[i][lvl] if joint_targets is not None else None
                     if tg is None:
                         continue
-                    w = W_JOINT * weights_scale[i]
+                    w = (W_JOINT * weights_scale[i] if joint_weights is None
+                         else float(joint_weights[i][lvl]))
+                    if w <= 0:
+                        continue
+                    self.n_joint_rows += 1
                     rows.append(w * self._jac_body(bid))
                     res.append(w * (self.d.xpos[bid] - tg))
-            if wrist_target is not None:
-                rows.append(W_WRIST * self._jac_body(self.wrist))
-                res.append(W_WRIST * (self.d.xpos[self.wrist] - wrist_target))
+            if wrist_target is not None and self.w_wrist > 0:
+                rows.append(self.w_wrist * self._jac_body(self.wrist))
+                res.append(self.w_wrist * (self.d.xpos[self.wrist] - wrist_target))
             if self.w_pen > 0:
                 pr, pe = self._pen_rows()
                 rows += pr
@@ -300,6 +417,9 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
                       contact_tol: float = CONTACT_TOL,
                       sc=None, tree=None, iters: int = 80,
                       w_pen: float = W_PEN,
+                      w_mid: float = W_MID,
+                      mid_frees_tip: bool = MID_FREES_TIP,
+                      w_wrist: float = W_WRIST,
                       w_smooth: float = W_SMOOTH,
                       base_qpos=None, q_init=None) -> RobotTrack:
     """Fit `hand` to the human hand `side` over a GRAB sequence.
@@ -330,8 +450,15 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
     human = seq.hands[side]
     if human.verts is None:
         raise ValueError("load the sequence with verts=True")
-    ov, _ = seq.obj_mesh
+    ov, of = seq.obj_mesh
     tree = tree or cKDTree(ov)
+    # Outward vertex normals, to offset a middle-phalanx contact target off the
+    # surface rather than onto it.
+    if w_mid > 0:
+        import trimesh
+        onrm = np.asarray(trimesh.Trimesh(ov, of, process=False).vertex_normals)
+    else:
+        onrm = None
 
     lo_f, hi_f = (0, seq.T) if window is None else (window[0], window[0] + window[1])
     frames = np.arange(lo_f, min(hi_f, seq.T))
@@ -348,12 +475,15 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
 
     ri, hidx = correspond(5, len(sc.tip_bids))
     solver = _Solver(sc, sc.tip_bids, sc.wrist_bid, lo, hi,
-                     w_smooth=w_smooth, w_pen=w_pen, base_qpos=base_qpos)
+                     w_smooth=w_smooth, w_pen=w_pen, base_qpos=base_qpos,
+                     w_wrist=w_wrist)
 
     Q = np.zeros((len(frames), len(sc.jids)))
     tip_err = np.zeros(len(frames))
     con_err = np.zeros(len(frames))
     n_con = np.zeros(len(frames), int)
+    n_mid = np.zeros(len(frames), int)
+    rows_fired = 0
 
     q = np.clip((sc.q_closure if q_init is None else np.asarray(q_init)[0]).copy(),
                 lo, hi)
@@ -385,15 +515,36 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
         # WRAP -- a handle grasp contacts with the middle phalanges while the
         # fingertip sits in the hole.
         jt = [None] * len(sc.tip_bids)
+        jw = np.zeros((len(sc.tip_bids), 2))
         for a, b in zip(ri, hidx):
             ch = MANO_CHAINS[a]
             mid = (human.joints[k, ch[2], :] - p) @ R
             prox = (human.joints[k, ch[1], :] - p) @ R
             jt[b] = [mid, prox]
+            jw[b] = (W_JOINT, W_JOINT)
+            if w_mid > 0:
+                # Did the HUMAN's own middle phalanx engage this object? If so,
+                # ask the robot's to touch the surface there -- offset outward
+                # by the link radius, since the target drives the body origin.
+                dm, im = tree.query(mid[None], k=1)
+                if dm[0] < contact_tol:
+                    jt[b][0] = ov[im[0]] + onrm[im[0]] * solver.mid_rad[b]
+                    jw[b, 0] = w_mid
+                    n_mid[t] += 1
+                    if mid_frees_tip and weights[b] >= W_CONTACT:
+                        # This finger contacts at BOTH tip and middle. A human
+                        # satisfies that by wrapping around curvature; a Shadow
+                        # finger has different link lengths, so pinning both to
+                        # the surface is over-constrained and least squares
+                        # puts the residual into penetration. Release the tip
+                        # to its free-space target and let the middle lead.
+                        weights[b] = W_FREE
+                        targets[b] = tips_o[a]
 
         wrist_t = (human.joints[k, 0, :] - p) @ R
         q, got = solver.solve(q, targets, weights, wrist_t, q_prev, iters=iters,
-                              joint_targets=jt)
+                              joint_targets=jt, joint_weights=jw)
+        rows_fired += solver.n_joint_rows
         q_prev = q.copy()
 
         Q[t] = q
@@ -408,7 +559,8 @@ def retarget_sequence(seq, side: str = "rhand", hand: str = "shadow",
         tip_err=tip_err, contact_err=con_err, n_contact=n_con, frames=frames,
         meta={"object": seq.obj, "intent": seq.intent, "subject": seq.subject,
               "dt": seq.dt, "contact_tol": contact_tol,
-              "w_pen": w_pen, "w_smooth": w_smooth},
+              "w_pen": w_pen, "w_smooth": w_smooth, "w_mid": w_mid,
+              "n_mid": n_mid, "mid_rows_fired": int(rows_fired)},
     )
 
 

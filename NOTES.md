@@ -3835,3 +3835,54 @@ human's own middle joint is within tolerance -- 2 to 5 of them per reference --
 and check the result with `wrap_score`, which counts exactly the engaged-link
 property this would produce. My attempt at it was inert through a wiring fault
 and is reverted; the idea is not what failed.
+
+### The middle-phalanx term, wired correctly, and what it cost
+
+The seventh wiring bug, found: `solve()` multiplied every shape target by
+`W_JOINT`, which is 0. Last session I changed where the middle target POINTS
+while it was still being multiplied by zero, so byte-identical output was the
+only possible result. The whole `joint_targets` path was dead code.
+
+Wired properly (per-level weights, target offset off the surface by the link
+radius so the body origin is not driven into it) the term fires -- 27k-35k
+Jacobian rows against 0, on 2.2-3.4 fingers per frame -- and it does what it
+was designed to do. It also does not help, and the way it fails is the useful
+part. Three sweeps, all on the ungated components because `wrap_score` itself
+saturates here (86-100% of frames are past its 3 mm gate, both arms, so it
+returns 2.0 and one-sidedness 1.0 and can see nothing):
+
+1. **Tighten the middle target.** Links 4->5 (binoculars) and 5->6 (mug),
+   mug one-sidedness 0.669 -> 0.390. Penetration 3.2->5.9, 9.0->13.0, 5.0->8.2.
+   Arm penetration stays 0.00, so W_PEN_ARM holds and the burial is finger-side.
+   By link, the middle phalanx itself stays inside the allowance (0.0-2.2 mm);
+   the depth lands on the TIP and the PROXIMAL link. Over-constraint: the fit
+   pins the fingertip to a surface vertex at full weight while this term pins
+   the middle too, and a Shadow finger cannot reach both points on the object's
+   curvature the way the human's did.
+2. **Release the tip where the middle contacts.** Burial relocates rather than
+   leaving: tip 8.2->4.0 on the mug, below even baseline, while the middle goes
+   2.2->6.0. Worst-link depth beats baseline only on flashlight. Total is
+   roughly conserved -- the middle phalanx cannot reach this surface without
+   burying something.
+3. **Release the wrist** (a Shadow hand is bigger than the human hand that
+   produced the demonstration, so a second contact might be unreachable from
+   the human's wrist -- and peer's `orient_to_clear` result pointed here).
+   Refuted: at w_wrist=0 binoculars and mug collapse from 5-6 links to ONE, at
+   one-sidedness 0.71 and 0.49. The hand drifts off the object rather than
+   wrapping it. Low penetration bought by grazing.
+
+Every knob in this objective is a position, and a position objective has no
+term that says HOLD THE OBJECT. It can only say put these points there -- and
+one buried finger satisfies that, and so does one grazing fingertip. Tighten it
+and links are bought with burial; loosen it and contact degenerates. There is
+no setting in between because nothing in the objective distinguishes the two
+failures from a grasp.
+
+That is this project's founding claim arriving at the retarget from the inside,
+and it is the fourth independent route to the same empty neighbourhood after
+peer's 283-candidate sweep, the w_pen sweep, and the wrap search. The next term
+needs FORCE content -- a wrench the contact set can resist -- not another point.
+
+Shipped defaulted off (`W_MID = 0.0`), the same discipline `W_JOINT` is held to:
+defaults reproduce the previous fit bit for bit, verified, and the machinery is
+there for the force-based objective to use. 44 tests pass.
