@@ -5,7 +5,37 @@ robot joint trajectory. It is the blocker for everything downstream: stages 3–
 were all reporting numbers measured on poses that intersect the object, and
 those numbers are withdrawn.
 
-Status as of 2026-09-15.
+Status as of 2026-09-16, 06:20 — the state of the six stages after one
+night of two sessions measuring each other's claims:
+
+- **Stage 2** is measured and reproducible: hold rate **0.275 → 0.850** on
+  40 objects, identical at frozen `HEAD` on every reference
+  (`results/stage2_grips_clean.json`). Of the 34 holds, 20 are grasps and 6
+  are burials; the 6 failures are featureless convex primitives.
+- **Stage 3** is measured twice, the second time on seeds keyed by subject:
+  the ten references separate perfectly by seed class — burial median
+  17.5 mm, grasp median 17,525 mm, no row crosses — and *nothing else
+  measured predicts the outcome*: not start frames, subject, clip, object or
+  budget. At a fixed initial condition the feedforward and the policy agree
+  to within noise: the **feedforward drops a valid grasp too**. n = 2 on the
+  burial arm.
+- **Stages 4–5** are measured on correct seeds: distillation is the best of
+  three controllers on every held-out object, and every number is a dropped
+  object. **Stage 6** has the two-handed gap and its null case; **stage 7**
+  is structurally blocked on stage 4.
+- **Ruled out tonight, by measurement:** the reward's shape as the cause
+  (the feedforward fails the same way); base stiffness (burial tracks at 20×
+  the weld compliance and contact displaces the base by nothing); sample
+  size (dead in both directions); the policy class (interchangeable).
+- **So the next real experiment is upstream of all four learning stages:**
+  whether stage 2 can produce a grasp that survives contact *along the
+  reference*, not only at rest — `wrap_score` is the only validated
+  discriminator for that, and it has never been used as a search objective.
+  Not the reward, not the distillation, not the base. The reward-term branch
+  (`rl-penetration-cost`) is drafted and benchmarked for whoever wants a
+  policy that is paid to hold; it is not the fix for this.
+
+Earlier status (2026-09-15), kept for the subproblem table:
 
 | subproblem | state | evidence |
 |---|---|---|
