@@ -863,6 +863,7 @@ early (`results/g9_ppo_distill.json`, `per_reference`):
 |---|---|---:|---:|---:|---:|
 | `flashlight_on_2` | **thin** (0.6 N) | 112.9 mm | **4.86 mm** | 3 | **207 N** |
 | `hammer_use_2` | **grasp** (20.7 N, eq 0.04×) | 80,250 mm | 0.00 mm | **0** | **0 N** |
+| `knife_lift` | grasp, thin end (2.1 N) | 87.7 mm | 0.00 mm | **0** | **0 N** |
 
 `hammer_use_2` is the one reference in the set that is a grasp by force as
 well as geometry — 4 contacts, 20.7 N, equilibrium residual 0.04×, the best
@@ -897,7 +898,14 @@ penalty is only safe to turn on beside it. Both are drafted at weight 0 with
 their per-iteration means logged next to `alive`; neither is a result until a
 retrain on hammer's seed ends held, un-buried, and under 50 mm.
 
-**Sample size, stated plainly:** one reference per condition. The burial column
+`knife_lift` (row 3, 2.1 N — the thin end of the grasp class) also ends with
+no contact and no force. Its 87.7 mm mean error, against hammer's 80 m, says
+the knife did not go far when it was let go, not that it was held; the end
+state is the same. So of two thin-end seeds, one re-buried and one let go:
+the thin class is not a class with one behaviour, and the prediction that
+knife would replicate flashlight was wrong.
+
+**Sample size, stated plainly:** one grasp-by-force reference; two thin-end. The burial column
 rests on `mug_drink_1` from a separate session; the burial-seeded g9 rows are
 7–9 and have not run. `knife_lift` (2.1 N) and `phone_call_1` (2.8 N) come
 next, and both sit at the thin end of the grasp class, so they will most
