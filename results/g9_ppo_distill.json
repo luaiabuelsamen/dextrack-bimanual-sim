@@ -22,6 +22,36 @@
    "end_contacts": 0,
    "grasp_frames": 4,
    "transitions": 566
+  },
+  {
+   "obj": "knife",
+   "seq": "knife_lift",
+   "ppo_mm": 87.65951234648011,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 1,
+   "transitions": 25
+  },
+  {
+   "obj": "phone",
+   "seq": "phone_call_1",
+   "ppo_mm": 195633.5016850883,
+   "end_pen_mm": 0.0,
+   "end_grip_n": 0.0,
+   "end_contacts": 0,
+   "grasp_frames": 9,
+   "transitions": 985
+  },
+  {
+   "obj": "mug",
+   "seq": "mug_drink_2",
+   "ppo_mm": 5.705982428015247,
+   "end_pen_mm": 13.182004383702132,
+   "end_grip_n": 4833.664593486001,
+   "end_contacts": 15,
+   "grasp_frames": 27,
+   "transitions": 711
   }
  ],
  "held_out": []
