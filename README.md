@@ -56,18 +56,22 @@ extend to two hands, then test under depth perception.
 | Instrumentation | every rollout GIF carries penetration, grip force and contact count on its face, with a per-frame JSON manifest and a replay check |
 | Stages 1, 4 | human reference, homotopy curriculum. *Stage 7 (depth → pose) is not on this list: its stored result was one clip from the approach frame, dropped in all three conditions — see [PIPELINE.md](docs/PIPELINE.md)* |
 
-**Stage 2 — the retarget — moves most references from dropped to held, and
-the figure for that is pending.** A wrist search scored by a physical hold test
-took a 40-object sweep from 0.275 to 0.850 hold rate — but that number **does
-not reproduce across code versions** (`dca903b`): two sweeps sharing five
-references disagree on three, because one ran while `src/` was being edited.
-The simulator itself reproduces to the last digit; the sweeps ran different
-code. A clean figure waits on one sweep at frozen `HEAD`. What survives the
-caveat: of the references that hold, a substantial fraction hold by **burial**
-— the hand inside the object, up to 94 contacts and 35.5 kN — and the failures
-cluster on featureless convex primitives, though one of those six now holds on
-rerun. Every tracking number reported before this was measured on a burial and
-is withdrawn.
+**Stage 2 — the retarget — moves most references from dropped to held:
+0.275 → 0.850 hold rate** on a 40-object sweep (95 % CI [0.725, 0.950],
+clustered by object), from a wrist search scored by a physical hold test. The
+figure reproduces exactly: a clean sweep at frozen `HEAD` (`b7e2e49`,
+`results/stage2_grips_clean.json`, commit recorded beside it) matches the
+original on 0 of 40 references differing — same hold flags, same drop
+distances to the nanometre. It was withdrawn for most of a night as "not
+reproducing across code versions"; the three disagreeing rows were different
+*subjects'* recordings of same-named clips compared as if they were one, the
+same key collision that voided a training run. What the 34 holds *are*
+matters more than the headline: 20 grasps (≤ 12 contacts, median 8, median
+drop 6.6 mm), 8 mixed, and **6 burials** — the hand inside the object, up to
+94 contacts and 35.5 kN. The six failures are one geometric class:
+featureless convex primitives, five of six `inspect` intent, at 0–1 contacts
+and equilibrium 0.99–1.00. Every tracking number reported before this was
+measured on a burial and is withdrawn.
 
 | | state | |
 |---|---|---|

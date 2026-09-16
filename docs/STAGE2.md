@@ -564,25 +564,27 @@ never gets the bowl below ~10 kN, worsens drop in all six. An improvement in
 the right direction, not the term. Reading `equilibrium` is how the burial was
 caught; it is not how it gets fixed.
 
-**Stage 2 had a number, and it is retracted pending a clean sweep** (`2e4c951`,
-retracted in `dca903b`). Two stage-2 sweeps sharing five references disagree
-on three — `apple_eat_1` 9 vs 18 contacts, `phone_call_1` 8.7 vs 15.3 mm,
-`cubelarge_inspect_1` FAILED vs held at 7.1 mm — because sweep A ran for thirty
-minutes while `src/` was being edited. Not simulator noise: six repeated hold
-tests on each of two references, fresh and reused environments, reproduce to
-the last digit. The sweeps ran different code. **The asymmetry is the lesson:
-version skew that crashes is the lucky case.** In this session it produced a
-loud `AttributeError`; in the other it silently changed a number that reached
-the front page and two documents here. And the verification that would have
-caught it compared the new build against itself rather than against the
-previous commit, while the commit message said "reproduces bit for bit,
-verified." The figures below are what sweep A reported; treat them as the
-shape of the result, not its value, until one sweep runs at frozen `HEAD`. The
-failure class is now five references, and `cubelarge_inspect_1` changed its
-mind. The g9 run is unaffected — it launched after every edit and `src/` has
-been frozen since.
+**Stage 2 has a number, and it reproduces exactly.** It was retracted at
+`dca903b` as "not reproducing across code versions": two sweeps sharing five
+references disagreed on three (`apple_eat_1`, `phone_call_1`,
+`cubelarge_inspect_1`), one sweep had run while `src/` was being edited, and
+an in-process determinism check had passed — so the inference "the simulator
+is reproducible, therefore the difference is the code" was valid, and its
+premise, that the two rows described the same clip, was never checked. They
+did not: the three rows were s1 against s2 recordings of same-named clips
+(`apple_eat_1` s1 5.17 mm vs s2 4.50; `cubelarge_inspect_1` s1 2508 mm vs
+s2 7.12; `phone_call_1` s1 8.71 vs s2 15.32) — different clips correctly
+giving different answers, the same key collision that voided the g9 run.
+The clean sweep at frozen `HEAD` `b7e2e49` (`results/stage2_grips_clean.json`,
+commit recorded beside it; restored at `c407fba`) is **identical to the
+original on all 40 references**: same hold flags, same drop distances to the
+nanometre, same contact counts. Version skew stays in the record as a real
+hazard — it crashed an 80-minute run's evaluation — but it did not cause
+this, and a test that checks the shape of a lookup does not protect an
+analysis that reads two files and assumes their keys mean the same thing.
+The failure class is restored intact: six references, `cubelarge` included.
 
-Forty references, one per object, as sweep A reported:
+Forty references, one per object:
 hold rate **0.275** from the raw retarget → **0.850** after a CEM wrist search
 scored by a physical hold test, 95% CI [0.725, 0.950] clustered by object. What
 the 34 successes *are* matters more than the headline:
