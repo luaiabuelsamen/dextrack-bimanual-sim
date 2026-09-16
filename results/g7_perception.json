@@ -1,31 +1,167 @@
 [
  {
   "truth": {
-   "mean_mm": 101.48170214896061,
-   "final_mm": 152.59822614240198,
-   "held_frac": 0.22413793103448276,
+   "mean_mm": 1800.813290601262,
+   "final_mm": 9252.11386726456,
+   "held_frac": 0.32608695652173914,
    "dropped": true,
    "pose_err_mm": 0.0,
-   "steps": 116
+   "steps": 46
   },
   "depth": {
-   "mean_mm": 637.2738537733877,
-   "final_mm": 8927.731007353219,
-   "held_frac": 0.017241379310344827,
+   "mean_mm": 1682.1695971873398,
+   "final_mm": 9719.309968526952,
+   "held_frac": 0.08695652173913043,
    "dropped": true,
-   "pose_err_mm": 38.36090877568972,
-   "steps": 116
+   "pose_err_mm": 55.55873735103632,
+   "steps": 46
   },
   "noise": {
-   "mean_mm": 102.47239002926845,
-   "final_mm": 128.04026842649114,
-   "held_frac": 0.10344827586206896,
+   "mean_mm": 3159.3010121860425,
+   "final_mm": 15433.062575411333,
+   "held_frac": 0.08695652173913043,
    "dropped": true,
-   "pose_err_mm": 61.81321382328014,
-   "steps": 116
+   "pose_err_mm": 86.48212342528198,
+   "steps": 46
   },
-  "seq": "mug_drink_1",
+  "seq": "hammer_use_2",
+  "object": "hammer",
+  "start": 35,
+  "n_grasp_frames": 4,
+  "seeded": true,
+  "seed_contacts": 4,
+  "seed_grip_n": 20.672858460142862
+ },
+ {
+  "truth": {
+   "mean_mm": 2746.447373464713,
+   "final_mm": 9023.623209261737,
+   "held_frac": 0.04,
+   "dropped": true,
+   "pose_err_mm": 0.0,
+   "steps": 25
+  },
+  "depth": {
+   "mean_mm": 3700.3693321521214,
+   "final_mm": 11027.254950284358,
+   "held_frac": 0.04,
+   "dropped": true,
+   "pose_err_mm": 59.65223106197282,
+   "steps": 25
+  },
+  "noise": {
+   "mean_mm": 1611.0148035578768,
+   "final_mm": 4993.658151934743,
+   "held_frac": 0.04,
+   "dropped": true,
+   "pose_err_mm": 91.34494105070472,
+   "steps": 25
+  },
+  "seq": "knife_lift",
+  "object": "knife",
+  "start": 120,
+  "n_grasp_frames": 1,
+  "seeded": true,
+  "seed_contacts": 4,
+  "seed_grip_n": 2.1247532459430425
+ },
+ {
+  "truth": {
+   "mean_mm": 21617.542549016638,
+   "final_mm": 74299.17079979503,
+   "held_frac": 0.03896103896103896,
+   "dropped": true,
+   "pose_err_mm": 0.0,
+   "steps": 77
+  },
+  "depth": {
+   "mean_mm": 18239.89936737447,
+   "final_mm": 70499.3685557518,
+   "held_frac": 0.025974025974025976,
+   "dropped": true,
+   "pose_err_mm": 63.88080391337971,
+   "steps": 77
+  },
+  "noise": {
+   "mean_mm": 40773.89235257403,
+   "final_mm": 121408.74214105189,
+   "held_frac": 0.025974025974025976,
+   "dropped": true,
+   "pose_err_mm": 101.0176385958571,
+   "steps": 77
+  },
+  "seq": "mug_drink_2",
   "object": "mug",
-  "start": 0
+  "start": 0,
+  "n_grasp_frames": 1,
+  "seeded": true,
+  "seed_contacts": 9,
+  "seed_grip_n": 528.1784522628086
+ },
+ {
+  "truth": {
+   "mean_mm": 18962.19169819871,
+   "final_mm": 61946.694705893926,
+   "held_frac": 0.03278688524590164,
+   "dropped": true,
+   "pose_err_mm": 0.0,
+   "steps": 61
+  },
+  "depth": {
+   "mean_mm": 35138.49539498555,
+   "final_mm": 79381.34261705179,
+   "held_frac": 0.01639344262295082,
+   "dropped": true,
+   "pose_err_mm": 53.253971760337265,
+   "steps": 61
+  },
+  "noise": {
+   "mean_mm": 20130.332858873007,
+   "final_mm": 64480.889597118665,
+   "held_frac": 0.01639344262295082,
+   "dropped": true,
+   "pose_err_mm": 83.84666712392549,
+   "steps": 61
+  },
+  "seq": "apple_eat_1",
+  "object": "apple",
+  "start": 5,
+  "n_grasp_frames": 6,
+  "seeded": true,
+  "seed_contacts": 18,
+  "seed_grip_n": 3368.0344501378468
+ },
+ {
+  "truth": {
+   "mean_mm": 60103.44557816066,
+   "final_mm": 200515.21974049136,
+   "held_frac": 0.09090909090909091,
+   "dropped": true,
+   "pose_err_mm": 0.0,
+   "steps": 110
+  },
+  "depth": {
+   "mean_mm": 19059.533234196144,
+   "final_mm": 71472.65197970218,
+   "held_frac": 0.06363636363636363,
+   "dropped": true,
+   "pose_err_mm": 60.49446635903862,
+   "steps": 110
+  },
+  "noise": {
+   "mean_mm": 17289.029738758567,
+   "final_mm": 29115.035540194564,
+   "held_frac": 0.03636363636363636,
+   "dropped": true,
+   "pose_err_mm": 97.95418739477024,
+   "steps": 110
+  },
+  "seq": "phone_call_1",
+  "object": "phone",
+  "start": 20,
+  "n_grasp_frames": 7,
+  "seeded": true,
+  "seed_contacts": 6,
+  "seed_grip_n": 2.773139000896564
  }
 ]

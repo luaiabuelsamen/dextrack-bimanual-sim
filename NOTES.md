@@ -4185,3 +4185,41 @@ I verified the middle-phalanx change was behaviour-neutral by comparing the new
 code's default against the new code at `w_mid=0`, which is not a test of
 anything -- both were the same build. The comparison that mattered was against
 the previous commit and I did not make it.
+
+## Stage 7 is blocked on stage 4, and the seeding proved it rather than fixing it
+
+Seeding the wrist from stage 2 did what it was supposed to: every reference now
+has graspable frames where the stored run had one clip and one failure. Five
+references, frames found: hammer 4, knife 1, mug_drink_2 1, apple 6, phone 7.
+
+The perception comparison is still meaningless, and now it is clear why.
+
+    reference        truth      depth      noise     held (truth)
+    hammer_use_2      1801 mm    1682 mm    3159 mm     0.33
+    knife_lift        2746       3700       1611        0.04
+    mug_drink_2      21618      18240      40774        0.04
+    apple_eat_1      18962      35139      20130        0.03
+    phone_call_1     60103      19060      17289        0.09
+
+Errors in METRES in every cell, and the ordering is incoherent -- `depth` beats
+`truth` on phone_call_1 by a factor of three and on hammer_use_2 slightly, which
+cannot happen if the numbers are measuring pose error, because truth has none.
+They are measuring where the object came to rest after being dropped. A stage
+whose whole design is a three-way comparison cannot be run when all three arms
+fail for a reason none of them is about.
+
+The dependency is structural rather than a bug. Stage 7 swaps the pose source
+under a FROZEN controller, and the frozen controller here is the feedforward,
+which this repository established long ago does not hold a grasp through motion
+-- that is the entire reason stages 3 and 4 exist. Measuring the perception gap
+on the feedforward asks what a broken controller does with worse information.
+
+So stage 7 should consume stage 4's DISTILLED policy, not the feedforward, and
+it cannot produce a meaningful number until that policy exists. That is a real
+ordering constraint in the pipeline that was not visible while the stage was
+running on one clip that happened to fail quietly.
+
+The stored numbers from before -- 101.5 mm truth against 637.3 depth, which
+looked like structured estimator error and was carried onto a front page -- were
+the same failure at a smaller magnitude, on a single reference started at the
+approach frame.
