@@ -1145,10 +1145,40 @@ subject, not the clip. Bowl (subject-matched, so identical to its old row
 to the digit) confirms it: 8.2 mm, ending 17.50 mm inside on 81 contacts at
 29 kN. Binoculars is unseeded and reproduces its old row too.
 
-**v2 complete, ten rows.** Six grasp-class seeds and one thin seed: seven
-policies, seven objects on the floor. Two burial-class seeds: two policies
-that track (26.7 mm, 8.2 mm) and end with the hand 11–17 mm inside the
-object. No row tracks under 50 mm and ends un-buried. Shadow right hand,
+**v2 complete, ten rows, sorted by tracking error — and the classes
+separate perfectly:**
+
+| reference | PPO | seed class | end penetration | end contacts | end grip |
+|---|---:|---|---:|---:|---:|
+| `bowl_drink_1` | **8.2 mm** | **burial** | 17.50 mm | 81 | 29,118 N |
+| `mug_drink_2` | **26.7 mm** | **burial** | 11.10 mm | 9 | 1574 N |
+| `knife_lift` | 87.7 mm | grasp | 0.00 | 0 | 0 |
+| `flashlight_on_2` | 218.9 mm | grasp | 0.00 | 0 | 0 |
+| `camera_takepicture_2` | 2587 mm | grasp | 0.00 | 0 | 0 |
+| `hammer_use_2` | 32,463 mm | grasp | 0.00 | 0 | 0 |
+| `phone_call_1` | 42,603 mm | grasp | 0.00 | 0 | 0 |
+| `gamecontroller_play_1` | 51,778 mm | thin | 0.00 | 0 | 0 |
+| `mouse_use_1` | 116,130 mm | grasp | 0.00 | 0 | 0 |
+| `binoculars_see_1` | 131,158 mm | failed | 0.00 | 0 | 0 |
+
+Burial (2): median **17.5 mm**. Grasp (6): median **17,525 mm**. A factor
+of one thousand between the class medians and not one row crosses. Both
+burial seeds track and end inside the object; everything else ends at
+0.00 mm, 0 contacts, 0 N. For GRAB on a Shadow right hand at 160k steps,
+whether a tracking policy works is determined by whether its initial hand
+pose is inside the object, and nothing else measured here predicts it — not
+start frames (burial rows at 27 and 4, grasp rows at 1 to 33, the two
+largest training sets both grasp and both dropping), not the subject, not
+the clip, not the object, not the budget. **The honest limit: n = 2 on the
+burial arm**, and those two are also the two deepest seeds in the set (94
+and 8 contacts at 35.5 kN and 3.3 kN). The grasp arm is characterised at
+n = 6; burial is observed, not characterised.
+
+And the trap in its strongest form yet, as a full-run statistic rather than
+an anecdote: **eight of ten rows finish under 3 mm of penetration, median
+0.00 mm.** On a depth criterion this is the cleanest run in the repository.
+It is the run where nearly everything dropped. No row tracks under 50 mm
+and ends un-buried. Shadow right hand,
 GRAB, 160,000 control steps per reference in 12 environments; the separate
 845k-step run on a valid `mug_drink_1` grasp (above) also dropped from
 every start.
