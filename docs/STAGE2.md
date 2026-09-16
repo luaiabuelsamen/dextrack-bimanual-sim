@@ -394,9 +394,27 @@ That reframed two conclusions at once:
   the wrist, which finger joints do not move. It also destroys the wrap — at
   0.10 rad the fingers straighten out of their curl and tracking collapses from
   23.1 mm to 103343 mm.
-- **The hand is not mis-posed, it is too big.** A Shadow palm cannot wrap this
-  cup without intersecting it. Every variant that tracks — nine combinations of
-  retraction and closure — sits at 11.65–16.52 mm penetration and 4.6–8.0 kN.
+- **For this cup, the hand is not mis-posed — it is too big.** A Shadow palm
+  cannot wrap `cup_lift` without intersecting it. Every variant that tracks —
+  nine combinations of retraction and closure — sits at 11.65–16.52 mm
+  penetration and 4.6–8.0 kN.
+
+**But that does not generalise, and the check is worth recording.** Across 16
+references, object bounding radius explains very little of the penetration:
+
+```
+corr(object radius, penetration)  = -0.252
+corr(object radius, n bodies)     = +0.415
+small objects (<105 mm) mean penetration   20.11 mm
+large objects (>=105 mm) mean penetration  17.14 mm
+```
+
+Objects of near-identical radius span 2.01–56.77 mm of penetration
+(`phone_call_1` 88.0 mm radius / 2.01 mm, `mouse_use_1` 87.8 mm / 33.47 mm), so
+"the hand is too large" is a correct description of the cup and not an
+explanation of the stage. The one real signal is that **bigger objects engage
+more hand bodies** (+0.415) — more of the hand can reach a larger surface —
+which is about how much wrap is available, not about penetration depth.
 
 ```python
 from experiments.tracking.inspect_pose import look, contacts, sheet
