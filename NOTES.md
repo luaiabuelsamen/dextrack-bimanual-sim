@@ -4585,3 +4585,28 @@ shape of the bug is the night's recurring one -- a silent key collision that
 produced plausible numbers for two hours -- and the thing that exposed it was
 two sessions computing the same quantity independently and getting different
 answers.
+
+### The one correctly-labelled tracking row is a burial at 14,850x weight
+
+`bowl_drink_1` is subject-matched (s1 seed, s1 clip), so unlike seven of the ten
+its seed label describes the reference it trained on:
+
+    seed        94 contacts, 35,522 N (18,105x object weight), equilibrium 1.90
+    tracking    8.2 mm
+    end state   17.50 mm inside, 81 contacts, 29,118 N -- 14,850x weight
+    starts      27 of 27 candidates accepted
+
+It tracks better than all but one row in the run and ends deeper inside the
+object than any of them. This is the clearest single instance of "the tracking
+number is measuring the contact solver": a hand 17.5 mm inside a mug-sized bowl,
+pressing with the weight of a small car, following the reference to 8 mm.
+
+Of the three subject-matched rows, this is the only one that carries
+information. `knife_lift` is matched but trained on ONE start frame and its
+87.7 mm is unexplained. `binoculars_see_1` is matched and failed stage 2
+outright. So the correctly-labelled evidence is: one burial seed, which tracked
+and stayed buried; one grasp seed with almost no training data, which let go.
+
+That is not enough to support the seed-class claim and it is not nothing. It is
+consistent with it, on n=1 per arm, with the grasp arm confounded by sample
+size -- which is exactly what the corrected rerun and the 2x2 exist to settle.
