@@ -455,3 +455,62 @@ def retarget_bimanual(seq, window, hand_r="shadow", hand_l="shadow_left",
                 q_init=None if sd not in tracks else tracks[sd].q, **kw)
             poses[sd] = tracks[sd].q[0]
     return tracks, sc, views
+
+
+def advance_to_contact(sc, q, max_mm=90.0, step_mm=2.0, clear_mm=0.5):
+    """Slide the hand along its approach axis until an ARM-side body would touch.
+
+    Done in the FITTING scene, which drives the hand through six hinge/slide
+    joints with no mocap body and no weld. That matters: three earlier attempts
+    at this in the simulation scene all died on keeping `qpos`, the mocap target
+    and the weld consistent, and none of that exists here -- set the joints, call
+    mj_forward, read the contacts.
+
+    Why it is needed: the arm-side feasibility constraint and the fingertip
+    targets share one wrist, so pushing the forearm out of the object pushes the
+    fingers out with it. Measured, the tips end 50-62 mm from the surface while
+    the closing routine moves them 30-40 mm. The wrist has to be PLACED, and the
+    binding constraint -- the arm touching -- is the right thing to terminate on,
+    because advancing as far as it allows is exactly what minimises the gap the
+    fingers must close.
+
+    Returns (q_advanced, distance_m).
+    """
+    m, d = sc.model, sc.data
+    names = [mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_JOINT, j) for j in sc.jids]
+    xyz = [i for i, n in enumerate(names) if n in ("x", "y", "z")]
+    if len(xyz) != 3:
+        return np.asarray(q), 0.0
+    order = {names[i]: i for i in xyz}
+    idx = [order["x"], order["y"], order["z"]]
+
+    objset = set(sc.obj_gids)
+    armset = set(sc.hand_gids) - set(sc.tip_gids)
+
+    q = np.array(q, float)
+    sc.set_q(q)
+    palm = d.xpos[sc.wrist_bid].copy()
+    # the object is static at the origin in the fitting scene
+    u = -palm
+    n = float(np.linalg.norm(u))
+    if n < 1e-6:
+        return q, 0.0
+    u /= n
+
+    base = q[idx].copy()
+    step = step_mm / 1000.0
+    best = 0.0
+    for i in range(1, int(max_mm / step_mm) + 1):
+        q[idx] = base + u * (i * step)
+        sc.set_q(q)
+        pen = 0.0
+        for c in range(d.ncon):
+            pair = {int(d.contact[c].geom1), int(d.contact[c].geom2)}
+            if pair & objset and pair & armset:
+                pen = max(pen, -float(d.contact[c].dist))
+        if pen > clear_mm / 1000.0:
+            break
+        best = i * step
+    q[idx] = base + u * best
+    sc.set_q(q)
+    return q, best

@@ -3498,3 +3498,49 @@ through a mocap body welded to a free joint, so ANY routine that repositions the
 wrist has to update `qpos`, the mocap target, and call `mj_forward`, in that
 order, and must not call `palm_pose()` to read the current palm because that
 helper zeroes qpos by design. Two of my three attempts died on exactly that.
+
+## 2026-09-15 — translating the wrist cannot close the finger gap: the trade is 1:1
+
+The approach line search now works. Doing it in the FITTING scene -- six
+hinge/slide joints, no mocap body, no weld -- avoids the state-synchronisation
+bug that killed three attempts in the simulation scene. `set_q`, `mj_forward`,
+read the contacts.
+
+Its answer is that the search is not the missing piece:
+
+    reference          arm allowance   advance   arm pen   tip gap   contacts
+    binoculars_see_1        0.5 mm      0.0 mm    2.47 mm   62.3 mm      6
+    binoculars_see_1       10.0 mm      8.0 mm    9.77 mm   57.4 mm      7
+    mug_drink_1             0.5 mm      0.0 mm    0.48 mm   58.1 mm      5
+    mug_drink_1            10.0 mm      8.0 mm    8.25 mm   51.6 mm      7
+    flashlight_on_2         0.5 mm      0.0 mm    1.39 mm   50.1 mm      3
+    flashlight_on_2        10.0 mm      8.0 mm    8.54 mm   43.5 mm      3
+
+At a 0.5 mm clearance the hand cannot advance AT ALL -- the arm is already at
+its contact limit while the fingertips are 50-62 mm away. Paying 10 mm of arm
+penetration buys 4.9-6.6 mm of finger gap. **The trade is about 1:1**, so
+closing a 60 mm gap by translation would cost 60 mm of arm inside the object,
+which is worse than where the day started.
+
+So the fingertips are not far from the object because the hand is in the wrong
+PLACE. They are far because of the hand's POSE -- the wrist's orientation and
+the finger configuration that the fit produced once the arm term started
+pushing. No amount of sliding fixes that, and this rules the translation fix out
+rather than leaving it as an untried option.
+
+What that leaves for stage 2, stated as precisely as tonight's measurements
+allow. Three distinct problems, not one:
+
+1. arm-side feasibility -- SOLVED. Arm-side penetration is 0.00 mm at the median
+   in 29 of 40 sequences; binoculars_see_1 went from unreachable at all 155
+   frames to tracking at 106 mm.
+2. finger reach -- OPEN, and not a placement problem. The wrist ORIENTATION and
+   the finger configuration have to be re-solved together under the arm
+   constraint, rather than the fit being run and the hand then moved.
+3. the vessel cluster -- OPEN and separate. Four mug variants plus a cup sit at
+   33-39 mm arm penetration with exactly ZERO finger contact, and a peer sweep
+   of w_arm from 60 to 1000 moves it 0.35 mm. The whole hand is inside the
+   vessel; the wrist TARGET is wrong for concave objects, not the penalty.
+
+`advance_to_contact` is kept. It is correct, it is cheap, and it is the tool
+that measured the 1:1 trade -- which is the result that matters here.
