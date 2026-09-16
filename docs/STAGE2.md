@@ -1068,10 +1068,15 @@ fix aimed at the wrong half of the cost: the concern was the force
 computation, the cost was reading depth and geoms per contact in Python, and
 gating alone would have shipped the 5 % while looking like it had fixed the
 problem. A fix that targets the wrong half of a cost can be worse than no
-fix, because it retires the concern. Being fixed on the branch by
-vectorising the summary over the contact arrays and computing it only when
-a term is on or the iteration is logged; re-benchmarked on the same seeds
-at the next quiet window before anything lands (under 1 % to land).
+fix, because it retires the concern. Fixed on the branch at `6c55f9b`: the
+summary is vectorised over the contact arrays (masks built once per pool)
+and computed only when a term is on or the iteration is logged, so at
+defaults the step is the old step on nine iterations of ten and the log
+samples penetration, held fraction and grip on the tenth. Micro-benchmark
+on the buried gamecontroller state (45 contacts, 12 bodies, 2000 calls × 5
+alternating reps, under load): loop 285 µs per env-step, loop with force
+390 µs, **numpy 66 µs**, numpy with force 168 µs. The full PPO A/B/C on the
+same seeds is re-run at the next quiet window; under 1 % to land.
 
 **v2 caveat, before its rows are quoted:** the run's own `order:` and
 `distillation mixture:` lines label seeds by contact count only — its
