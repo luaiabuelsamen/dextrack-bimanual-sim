@@ -87,6 +87,7 @@ to its seeds (`experiments/tracking/stage2_carry.py`, `stage3_carry.py`).
 
 | you want to | read |
 |---|---|
+| know the goal, the guardrails and what is solvable | [docs/BRIEF.md](docs/BRIEF.md) |
 | continue the live work | [docs/STAGE2.md](docs/STAGE2.md) |
 | know what a number means before quoting it | [NOTES.md](NOTES.md) — authoritative |
 | find your way around the code | [src/oppdef/README.md](src/oppdef/README.md) |
