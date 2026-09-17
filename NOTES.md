@@ -5452,3 +5452,18 @@ with the object 10 m away); the CPU-pipeline contact dump hung the pod and
 needed a container restart. What resolved it: proving the root-state writes
 reach PhysX by parking the object 10 m up, then lifting it 3 mm.
 
+### The generalist on 43 clips, fixed init
+
+held to the end 17/43, mean err <10 cm 19/43, their counter 0/43. Held
+clips: pen mean median 1.68 mm (0.24-3.23), frames >2 mm median 36 %
+(5-74), >5 mm median 2 %, grip median-of-medians 11x. Rendered apple (held,
+red palm + two fingers at 2-3.5 mm) and mug (never grasped, nudged, lost).
+`results/dextrack_audit/generalist/`.
+
+Penetration-aware fine-tune, first try (cube ckpt, 75 epochs, 1024 envs,
+w_pen 100/m + force term): training-time depth fell 0.85 -> 0.68 mm, but the
+evaluated rollout got WORSE on penetration (1.76 -> 2.59 mm mean, 33 % ->
+59 % >2 mm) while position (0.44 -> 0.38 cm) and rotation (97 -> 54 deg)
+improved. Single env, single rollout; the all-env readout exists now. A
+pen-only, w 300, 150-epoch variant is running.
+

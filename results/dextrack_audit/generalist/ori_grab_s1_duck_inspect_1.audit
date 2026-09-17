@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/audit_dextrack.py", line 184, in <module>
+    main()
+  File "/workspace/audit_dextrack.py", line 120, in main
+    rows = np.load(a.log, allow_pickle=True)
+  File "/workspace/dextrack-venv/lib/python3.8/site-packages/numpy/lib/npyio.py", line 405, in load
+    fid = stack.enter_context(open(os_fspath(file), "rb"))
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/gen/ori_grab_s1_duck_inspect_1.npy'

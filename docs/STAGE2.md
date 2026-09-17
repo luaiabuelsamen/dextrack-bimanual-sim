@@ -313,6 +313,25 @@ released, which may differ from the ones behind Table 1. Everything is
 under `results/dextrack_audit/`: per-frame logs, audits, launch command,
 and the diff.
 
+**D1 at scale: their generalist on 43 clips (2026-09-17, evening).** The
+released `grab_trajs_tracking_ckpt.pth`, their generalist over the GRAB
+training split, run with the same hook and the two initialization fixes on
+43 clips drawn across subjects s1, s2 and s10 and one per object
+(`results/dextrack_audit/generalist/`, summary in `summary.json`). Their own
+success counter reads 0 on every clip. By the object alone: **17 of 43 hold
+the object to the end of the clip** (final error under 10 cm), 19 track
+under 10 cm mean error. Over the 17 that hold: penetration mean, median
+across clips, **1.68 mm** (0.24 to 3.23), frames over 2 mm median **36 %**
+(5 to 74), frames over 5 mm median 2 %, grip on touching links median of
+medians 11× weight. The picture, rendered from the logged poses under our
+camera: the apple is held by a palm and two fingers 2 to 3.5 mm inside it on
+three quarters of its frames ([gif](../figures/dextrack_gen_apple.gif)); the
+mug is never grasped, nudged, and lost ([gif](../figures/dextrack_gen_mug.gif)).
+So the released generalist, initialized so that it can run at all, holds
+about 40 % of these clips by the object criterion, and does so at 1 to 3 mm
+of interpenetration on a third to three quarters of frames. Not our burial;
+not zero either; and invisible to their metric.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with

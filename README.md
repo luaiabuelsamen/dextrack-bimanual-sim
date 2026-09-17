@@ -172,6 +172,10 @@ described in [docs/STAGE2.md](docs/STAGE2.md).
 |---|---|
 | ![DexTrack Allegro hand holding a translucent small cube, links turning red where they sink past 2 mm](figures/dextrack_cubesmall.gif) | ![DexTrack Allegro hand holding a translucent duck, the index finger red at 6 mm inside](figures/dextrack_duck.gif) |
 
+| Generalist, apple: held, 74 % of frames over 2 mm | Generalist, mug: never grasped, lost |
+|---|---|
+| ![DexTrack generalist holding a translucent apple with the palm and two fingers red](figures/dextrack_gen_apple.gif) | ![DexTrack generalist nudging a translucent mug that rolls away](figures/dextrack_gen_mug.gif) |
+
 ### The four failures this project was measured on
 
 
