@@ -60,7 +60,7 @@ def one(row, a):
                               for d in range(-a.jitter, a.jitter + 1)}))
     ff = summary(*feedforward(rt, k0))
     cfg = rl.RLConfig(n_envs=a.envs, horizon=min(224, max(64, span + 8)),
-                      seed=a.seed)
+                      seed=a.seed, w_rot=a.w_rot, w_rot_lin=a.w_rot_lin)
     cfg.iters = max(24, a.steps // (cfg.n_envs * cfg.horizon))
     t0 = time.time()
     net, _log = rl.train(rt, cfg, starts=starts, verbose=a.verbose)
@@ -91,6 +91,10 @@ def main():
     ap.add_argument("--jitter", type=int, default=2,
                     help="also start episodes this many frames either side")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--w-rot", type=float, default=0.35)
+    ap.add_argument("--w-rot-lin", type=float, default=0.0)
+    ap.add_argument("--min-robust", type=int, default=0,
+                    help="keep rows whose robust_clean is at least this")
     ap.add_argument("--verbose", action="store_true")
     a = ap.parse_args()
 
@@ -99,7 +103,8 @@ def main():
         want = set(x.strip() for x in a.seqs.split(","))
         rows = [r for r in rows if r["seq"] in want]
     else:
-        rows = [r for r in rows if r.get("end", {}).get("clean")]
+        rows = [r for r in rows if r.get("end", {}).get("clean")
+                and r.get("robust_clean", 8) >= a.min_robust]
     print(f"{len(rows)} carry-scored seeds; {a.steps} steps x {a.envs} envs each",
           flush=True)
     out = []
@@ -120,7 +125,8 @@ def main():
               f"{rec['train_s']/60:.0f} min", flush=True)
         Path(a.out).write_text(json.dumps(
             {"seeds": a.seeds, "steps": a.steps, "envs": a.envs,
-             "jitter": a.jitter, "seed": a.seed, "rows": out}, indent=1))
+             "jitter": a.jitter, "seed": a.seed, "w_rot": a.w_rot,
+             "w_rot_lin": a.w_rot_lin, "rows": out}, indent=1))
 
 
 if __name__ == "__main__":

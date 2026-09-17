@@ -53,6 +53,12 @@ class RLConfig:
     w_lin: float = 2.0           # per metre, never saturates
     s_rot: float = 0.35          # radians
     w_rot: float = 0.35
+    #: Linear rotation term, per radian, never saturating. exp(-re/0.35) is
+    #: 0.04 at 67 degrees, so a policy whose object swings past a radian gets
+    #: no rotation gradient at all -- which is where every carry seed sat
+    #: (20-95 degrees) while translation was already under 6 cm. DexTrack's
+    #: rotation reward is linear. Off by default; stage3_carry.py sets it.
+    w_rot_lin: float = 0.0
     alive: float = 0.10
     drop_m: float = 0.15
     #: Penetration. Everything above prices where the object IS; nothing
@@ -305,6 +311,7 @@ class Pool:
                  + cfg.w_wide * np.exp(-pe / cfg.s_wide)
                  - cfg.w_lin * pe
                  + cfg.w_rot * np.exp(-re / cfg.s_rot)
+                 - cfg.w_rot_lin * re
                  + cfg.alive)
             self.pe[i] = pe
             self.r_pen[i] = self.r_hold[i] = 0.0

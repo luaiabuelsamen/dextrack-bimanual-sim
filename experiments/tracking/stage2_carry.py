@@ -48,6 +48,7 @@ CLEAN_SIDED = 0.8
 #: under 3 mm, held, and squeezing like a vice. 40x is the threshold the
 #: README's physics renderer has used since the first gallery.
 CLEAN_GRIP_X = 40.0
+W_ROT = 0.06              # score per radian of mean rotation error
 TAIL = 5
 
 
@@ -81,13 +82,13 @@ def carry(rt, k0, n, record=False):
     sided, grip -- every quantity read LIVE after the frame's last step."""
     m, d = rt.sim.model, rt.sim.data
     rt.reset_at(k0)
-    cols = np.empty((n, 6))
+    cols = np.empty((n, 7))
     for i in range(n):
         rt.apply(k0 + i, None)
         for _ in range(rt.ctrl_every):
             mujoco.mj_step(m, d)
-        pe, _ = rt.error(k0 + i)
-        cols[i] = (pe,) + contact_state(rt.sim)
+        pe, re = rt.error(k0 + i)
+        cols[i] = (pe,) + contact_state(rt.sim) + (re,)
     return cols
 
 
@@ -95,9 +96,9 @@ def score_of(cols, tail=TAIL):
     """Lower is better. Units are metres for the error and penetration terms,
     so 10 mm of penetration beyond the allowance costs what 70 mm of tracking
     error does, and losing the object costs more than either."""
-    err, pen, ncon, nb, sided, grip = cols.T
+    err, pen, ncon, nb, sided, grip, rot = cols.T
     t = cols[-tail:]
-    err_t, pen_t, ncon_t, nb_t, sided_t, grip_t = t.T
+    err_t, pen_t, ncon_t, nb_t, sided_t, grip_t, _rot_t = t.T
     held = bool(err_t.mean() < LOST_M)
     lost_frac = float(np.mean(err > LOST_M))
     pen_tail = float(pen_t.max())            # the worst frame of the tail
@@ -114,12 +115,25 @@ def score_of(cols, tail=TAIL):
          # scored 5 and the hill-climb accepted the first pose that let go,
          # then could never re-enter contact: alarm clock, apple and bowl all
          # "dropped" under a score that was meant to relax them.
-         + min(0.3, 0.002 * max(0.0, grip_x - CLEAN_GRIP_X)))
+         + min(0.3, 0.002 * max(0.0, grip_x - CLEAN_GRIP_X))
+         # Rotation. Without this term the search accepted light pinches
+         # that let the object swing 20-95 degrees while translation stayed
+         # under 6 cm -- fine on our end-state rule, a fail on DexTrack's
+         # (mean rotation under 20 / 40 degrees). One radian of mean rotation
+         # error costs what 60 mm of translation does.
+         + W_ROT * float(np.minimum(rot, np.pi).mean()))
     clean = bool(held and pen_tail < CLEAN_PEN_M
                  and nb_tail >= CLEAN_BODIES and sided_tail < CLEAN_SIDED
                  and grip_x < CLEAN_GRIP_X)
+    rot_mean = float(rot.mean())
     return s, {
         "held": held, "clean": clean,
+        "rot_deg": float(np.degrees(rot_mean)),
+        # DexTrack's object half: mean translation <= 10 cm and mean rotation
+        # <= 20 deg (strict) / 40 deg (loose); the hand-pose half is not
+        # evaluated here (see dextrack_metric.py)
+        "dextrack_obj_strict": bool(err.mean() <= 0.10 and rot_mean <= np.radians(20)),
+        "dextrack_obj_loose": bool(err.mean() <= 0.10 and rot_mean <= np.radians(40)),
         "relaxed": bool(held and pen_tail < CLEAN_PEN_M),
         "mean_mm": float(err.mean() * 1000),
         "tail_mm": float(err_t.mean() * 1000),
@@ -179,7 +193,7 @@ def one(row, a, log):
     # file without re-running it
     cols = carry(rt, k0, n)
     rec["trace"] = {k: np.round(v, 5).tolist() for k, v in zip(
-        ("err_m", "pen_m", "ncon", "nbodies", "sided", "grip_n"), cols.T)}
+        ("err_m", "pen_m", "ncon", "nbodies", "sided", "grip_n", "rot_rad"), cols.T)}
     return rec
 
 
@@ -224,7 +238,7 @@ def main():
               f"{s['tail_bodies']:3.1f} b, held={int(s['held'])})  ->  "
               f"{rec['score']:7.3f} ({e['tail_pen_mm']:5.2f} mm, "
               f"{e['tail_bodies']:3.1f} b, sided {e['tail_sided']:.2f}, "
-              f"{e['tail_grip_n']:6.0f} N, err {e['tail_mm']:6.1f} mm)  {flag:7s} "
+              f"{e['tail_grip_n']:6.0f} N, err {e['tail_mm']:6.1f} mm, rot {e['rot_deg']:5.1f} deg)  {flag:7s} "
               f"({time.time()-t0:.0f}s)", flush=True)
         Path(a.out).write_text(json.dumps(
             {"grips": a.grips, "frames": a.frames, "samples": a.samples,
@@ -234,7 +248,7 @@ def main():
     def count(key, which):
         return sum(bool(r[which][key]) for r in out)
     print(f"\n{len(out)} references")
-    for key in ("held", "relaxed", "clean"):
+    for key in ("held", "relaxed", "clean", "dextrack_obj_strict", "dextrack_obj_loose"):
         print(f"  {key:8s} seed {count(key, 'seed'):2d}  ->  "
               f"carry-scored {count(key, 'end'):2d}")
     cl = [r["seq"] for r in out if r["end"]["clean"]]
