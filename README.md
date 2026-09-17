@@ -160,6 +160,18 @@ the per-frame live values and a replay check against the evaluator.
 `python experiments/tracking/render_tracking.py carry_flashlight carryppo_flashlight …`
 regenerates them from the stored offsets and checkpoints.
 
+### DexTrack's released policy, under our camera
+
+Their Allegro hand and object rebuilt in MuJoCo from the poses logged in
+Isaac Gym, with the same instruments: red links are inside the object by
+more than 2 mm, the banner line carries that frame's penetration, links,
+grip and error from the audit. Released checkpoints, initialization fixed as
+described in [docs/STAGE2.md](docs/STAGE2.md).
+
+| Small cube, 0.44 cm mean error | Duck, 0.26 cm mean error |
+|---|---|
+| ![DexTrack Allegro hand holding a translucent small cube, links turning red where they sink past 2 mm](figures/dextrack_cubesmall.gif) | ![DexTrack Allegro hand holding a translucent duck, the index finger red at 6 mm inside](figures/dextrack_duck.gif) |
+
 ### The four failures this project was measured on
 
 
