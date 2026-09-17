@@ -5384,3 +5384,25 @@ Also: `pkill -f carry_softcontact.py` from a shell whose command line held the
 pattern killed the shell and silently skipped a patch; the memory note about
 pgrep matching itself applies to pkill. Verified state before relaunching.
 
+## 2026-09-17: D2, rotation in the score and the reward
+
+    of 40                       before (20 FF)   D2 FF (18)   D2 PPO (18)   target
+    DexTrack strict                   2              2            6
+    DexTrack loose                    8             11           13          22
+    ours clean                       17             17           16          16
+
+Rotation fell on 16/18 policies (banana 38->11 deg, eyeglasses 34->16, flute
+23->17); strict 2->6; robust-under-all-8 seeds 5->9. Loose target missed and
+unreachable from 18 robust seeds: 13/18 of the seeds that exist pass loose.
+The remaining 22 references are the 12 non-contacting seeds, the 4 buried,
+and 6 marginal. The gap to DexTrack's 55 % is seed coverage, not tracking.
+Two policies lost a grasp their feedforward kept (binoculars 212 mm,
+cubesmall 35 mm): two-link pinches at 2 and 63 N; recorded, not excluded.
+Rotation left over (knife 41, duck 44, bunny 43, binoculars 68 deg) is the
+object turning in a fingertip pinch; the reward did not fix it.
+
+Decision the numbers make: the next lever is seeds for the 22, not a better
+tracker for the 18. Restarts (union still growing at 4), and for the 12
+non-contacting references a search that starts from contact rather than
+from the retarget.
+

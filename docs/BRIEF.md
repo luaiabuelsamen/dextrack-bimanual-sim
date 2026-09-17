@@ -92,6 +92,14 @@ Concretely, three deliverables and nothing else:
   theirs. The four buried references and the twelve non-contacting ones are
   one paragraph each saying why they are out of scope.
 
+## Status after D2 (2026-09-17)
+
+D2 ran: strict 2 → 6, loose 8 → 13, ours 16 of 40 (target met), loose
+target 22 not met and not reachable from 18 robust seeds. See
+`STAGE2.md`. The next lever is seed coverage for the 22 references without
+a robust seed, not the tracker. D1 (the audit) is unchanged and still needs
+an x86 machine.
+
 ## Guardrails
 
 1. **Render before believing.** No count enters a document until every pose

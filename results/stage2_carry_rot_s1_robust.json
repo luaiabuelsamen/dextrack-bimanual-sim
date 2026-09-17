@@ -1,0 +1,1296 @@
+{
+ "carry": "results/stage2_carry_rot_s1.json",
+ "k": 8,
+ "sigma_pos": 0.0005,
+ "sigma_rot": 0.01,
+ "seed": 0,
+ "rows": [
+  {
+   "seq": "banana_eat_1",
+   "subject": "s1",
+   "object": "banana",
+   "start": 9,
+   "span": 10,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 25.99021054578654,
+    "tail_pen_mm": 0.3581443843963805,
+    "tail_bodies": 3.0
+   },
+   "k": 8,
+   "n_held": 8,
+   "n_clean": 8,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 27.989593607424286,
+     "tail_pen_mm": 0.3426145006944992,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.428808131612256,
+     "tail_grip_n": 4.02296025208075
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 13.508470404561898,
+     "tail_pen_mm": 0.3493480547349408,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.4373186567001559,
+     "tail_grip_n": 3.835413647191674
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 24.826579263834546,
+     "tail_pen_mm": 0.37506934413239373,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.2593216956218751,
+     "tail_grip_n": 3.6742880919986134
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 26.15397078351396,
+     "tail_pen_mm": 0.3651664271529505,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.5065752616106322,
+     "tail_grip_n": 3.4719955654602215
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 14.082759163405006,
+     "tail_pen_mm": 0.33769501359179244,
+     "tail_bodies": 3.8,
+     "tail_sided": 0.4502419945308301,
+     "tail_grip_n": 3.693565271045751
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 24.74229417792732,
+     "tail_pen_mm": 0.36241121345534366,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.4054651215590327,
+     "tail_grip_n": 4.5047017614610265
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 25.739988129760444,
+     "tail_pen_mm": 0.3527360290056583,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.37785313894382755,
+     "tail_grip_n": 4.428499170352867
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 24.57401271601738,
+     "tail_pen_mm": 0.3533679053715957,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.4115421498569779,
+     "tail_grip_n": 3.7681004473067743
+    }
+   ]
+  },
+  {
+   "seq": "camera_browse_1",
+   "subject": "s1",
+   "object": "camera",
+   "start": 32,
+   "span": 32,
+   "rebuilt": {
+    "held": false,
+    "clean": false,
+    "mean_mm": 180.5699062886287,
+    "tail_pen_mm": 0.0,
+    "tail_bodies": 0.0
+   },
+   "k": 8,
+   "n_held": 0,
+   "n_clean": 0,
+   "trials": [
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 107.25370234616268,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 405.6566568907287,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 252.34437496257627,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 757.9112997211255,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 253.44305684299823,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 345.4466299471092,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 188.33595297625246,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 175.32190399239488,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    }
+   ]
+  },
+  {
+   "seq": "cubemedium_inspect_1",
+   "subject": "s1",
+   "object": "cubemedium",
+   "start": 42,
+   "span": 42,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 21.99981064306959,
+    "tail_pen_mm": 0.4538791370143186,
+    "tail_bodies": 2.0
+   },
+   "k": 8,
+   "n_held": 8,
+   "n_clean": 8,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 20.0972634219451,
+     "tail_pen_mm": 0.4467718095415161,
+     "tail_bodies": 2.0,
+     "tail_sided": 1.5516805343594606e-14,
+     "tail_grip_n": 8.410960052482968
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 19.001870826450254,
+     "tail_pen_mm": 0.46364141197354114,
+     "tail_bodies": 2.2,
+     "tail_sided": 0.32353056853373313,
+     "tail_grip_n": 8.70621073545008
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 21.323278128766205,
+     "tail_pen_mm": 0.4485606301397653,
+     "tail_bodies": 2.0,
+     "tail_sided": 1.220897287685585e-14,
+     "tail_grip_n": 8.055593253276587
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 23.343329783722645,
+     "tail_pen_mm": 0.4449854812482585,
+     "tail_bodies": 2.0,
+     "tail_sided": 1.0053605261308627e-14,
+     "tail_grip_n": 7.53155776467638
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 20.73427194938196,
+     "tail_pen_mm": 0.4530674479125418,
+     "tail_bodies": 2.2,
+     "tail_sided": 0.18666661914728458,
+     "tail_grip_n": 7.580357967092574
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 18.58815951649088,
+     "tail_pen_mm": 0.4579896663098746,
+     "tail_bodies": 2.2,
+     "tail_sided": 0.11999995297087876,
+     "tail_grip_n": 8.235286913167824
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 22.748010968187387,
+     "tail_pen_mm": 0.4514875269063583,
+     "tail_bodies": 2.2,
+     "tail_sided": 0.18666661950146218,
+     "tail_grip_n": 7.176664085301399
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 21.61531826703737,
+     "tail_pen_mm": 0.4497076317196141,
+     "tail_bodies": 2.4,
+     "tail_sided": 0.3066665720079797,
+     "tail_grip_n": 8.212427244230035
+    }
+   ]
+  },
+  {
+   "seq": "doorknob_use_1",
+   "subject": "s1",
+   "object": "doorknob",
+   "start": 32,
+   "span": 33,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 29.42148395959789,
+    "tail_pen_mm": 0.380093484816916,
+    "tail_bodies": 3.2
+   },
+   "k": 8,
+   "n_held": 8,
+   "n_clean": 8,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 28.654451544700688,
+     "tail_pen_mm": 0.37489932748791815,
+     "tail_bodies": 2.8,
+     "tail_sided": 0.47951952621169236,
+     "tail_grip_n": 3.0526511309066584
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 32.309214956473255,
+     "tail_pen_mm": 0.37931055576233424,
+     "tail_bodies": 3.2,
+     "tail_sided": 0.43557985502258045,
+     "tail_grip_n": 3.059602614096751
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 33.13622413058239,
+     "tail_pen_mm": 0.36940686395439115,
+     "tail_bodies": 2.8,
+     "tail_sided": 0.44244542095888884,
+     "tail_grip_n": 2.7139725163118893
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 31.175033011361418,
+     "tail_pen_mm": 0.38057351959186886,
+     "tail_bodies": 3.2,
+     "tail_sided": 0.43394135868536116,
+     "tail_grip_n": 3.072924024965939
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 28.894677384940525,
+     "tail_pen_mm": 0.3755556507034293,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.4816770611402717,
+     "tail_grip_n": 3.1023223514933744
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 29.727897907800816,
+     "tail_pen_mm": 0.37988428286888787,
+     "tail_bodies": 3.2,
+     "tail_sided": 0.4344392915034391,
+     "tail_grip_n": 3.1858360990817234
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 28.81320746501697,
+     "tail_pen_mm": 0.37435192376834525,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.49779422981531524,
+     "tail_grip_n": 3.0865413617385102
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 31.23278640711532,
+     "tail_pen_mm": 0.3771774795877064,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.46985063592887244,
+     "tail_grip_n": 2.7908229165328926
+    }
+   ]
+  },
+  {
+   "seq": "eyeglasses_clean_1",
+   "subject": "s1",
+   "object": "eyeglasses",
+   "start": 25,
+   "span": 26,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 9.304117978110982,
+    "tail_pen_mm": 1.891809321419714,
+    "tail_bodies": 5.0
+   },
+   "k": 8,
+   "n_held": 8,
+   "n_clean": 5,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 7.084569976610689,
+     "tail_pen_mm": 1.9008672128064465,
+     "tail_bodies": 5.0,
+     "tail_sided": 0.0955395346578205,
+     "tail_grip_n": 21.478746945786348
+    },
+    {
+     "held": true,
+     "clean": false,
+     "relaxed": true,
+     "mean_mm": 26.227255595680226,
+     "tail_pen_mm": 0.43219427899791896,
+     "tail_bodies": 1.4,
+     "tail_sided": 0.6863163113864765,
+     "tail_grip_n": 1.0235743158050326
+    },
+    {
+     "held": true,
+     "clean": false,
+     "relaxed": true,
+     "mean_mm": 26.68160428222803,
+     "tail_pen_mm": 0.4266227552943778,
+     "tail_bodies": 1.6,
+     "tail_sided": 0.6985112737052953,
+     "tail_grip_n": 1.0339698733713274
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 11.128530418123932,
+     "tail_pen_mm": 1.8925210213755994,
+     "tail_bodies": 5.0,
+     "tail_sided": 0.09649275227256508,
+     "tail_grip_n": 21.634393713154623
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 10.002022954218361,
+     "tail_pen_mm": 1.6570374317994114,
+     "tail_bodies": 5.0,
+     "tail_sided": 0.1928400456427248,
+     "tail_grip_n": 14.892266601971121
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 7.7439093389830695,
+     "tail_pen_mm": 0.6882285634063692,
+     "tail_bodies": 4.4,
+     "tail_sided": 0.26657040713627733,
+     "tail_grip_n": 8.59832275763446
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 13.807588986676226,
+     "tail_pen_mm": 0.6610262843099769,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.29238563604980516,
+     "tail_grip_n": 8.4630419128035
+    },
+    {
+     "held": true,
+     "clean": false,
+     "relaxed": true,
+     "mean_mm": 21.695525285321217,
+     "tail_pen_mm": 0.41402013102560703,
+     "tail_bodies": 1.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.700563646975416
+    }
+   ]
+  },
+  {
+   "seq": "flashlight_lift",
+   "subject": "s1",
+   "object": "flashlight",
+   "start": 14,
+   "span": 15,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 17.116347347237834,
+    "tail_pen_mm": 0.7801127845719947,
+    "tail_bodies": 4.0
+   },
+   "k": 8,
+   "n_held": 8,
+   "n_clean": 6,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 23.546768688075446,
+     "tail_pen_mm": 0.8048726042889941,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.17759903250966033,
+     "tail_grip_n": 20.724904279802704
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 16.4763932294345,
+     "tail_pen_mm": 0.7440819442355161,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.22762363387564974,
+     "tail_grip_n": 20.33357659498092
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 17.845025731579483,
+     "tail_pen_mm": 0.8183919976079227,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.3020976622182713,
+     "tail_grip_n": 21.40018502021075
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 16.15910714675972,
+     "tail_pen_mm": 0.5693976069263661,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.1844792967261756,
+     "tail_grip_n": 17.980748072982976
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 16.250987666133454,
+     "tail_pen_mm": 0.9256315838114364,
+     "tail_bodies": 3.8,
+     "tail_sided": 0.17981265962127224,
+     "tail_grip_n": 24.213348587609733
+    },
+    {
+     "held": true,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 33.116939861590474,
+     "tail_pen_mm": 9.477345263892671,
+     "tail_bodies": 2.4,
+     "tail_sided": 0.3647831016073572,
+     "tail_grip_n": 253.4293146113286
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 18.60331480603234,
+     "tail_pen_mm": 0.8300960718514585,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.2856210054847376,
+     "tail_grip_n": 22.723066976713085
+    },
+    {
+     "held": true,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 29.878321563775174,
+     "tail_pen_mm": 9.903661607353966,
+     "tail_bodies": 2.6,
+     "tail_sided": 0.2143193033419831,
+     "tail_grip_n": 377.5987640092734
+    }
+   ]
+  },
+  {
+   "seq": "flute_lift",
+   "subject": "s1",
+   "object": "flute",
+   "start": 13,
+   "span": 14,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 20.73997352733637,
+    "tail_pen_mm": 0.8691392282597563,
+    "tail_bodies": 5.0
+   },
+   "k": 8,
+   "n_held": 8,
+   "n_clean": 7,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 22.053215255052,
+     "tail_pen_mm": 0.8208629623329654,
+     "tail_bodies": 4.8,
+     "tail_sided": 0.6676982900881515,
+     "tail_grip_n": 18.128310658488385
+    },
+    {
+     "held": true,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 33.87093777760268,
+     "tail_pen_mm": 9.063557953557751,
+     "tail_bodies": 3.2,
+     "tail_sided": 0.35065359291844433,
+     "tail_grip_n": 709.0440732010143
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 32.12986270914016,
+     "tail_pen_mm": 0.8285985460781322,
+     "tail_bodies": 4.8,
+     "tail_sided": 0.21792124629546858,
+     "tail_grip_n": 16.239275299561918
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 21.506227018914046,
+     "tail_pen_mm": 0.8297058872617832,
+     "tail_bodies": 5.0,
+     "tail_sided": 0.4136513237459892,
+     "tail_grip_n": 16.521515438240243
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 22.83657166897435,
+     "tail_pen_mm": 0.872581993069629,
+     "tail_bodies": 5.0,
+     "tail_sided": 0.44834005271402255,
+     "tail_grip_n": 17.033725810700307
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 45.311718753206726,
+     "tail_pen_mm": 1.3897893526881846,
+     "tail_bodies": 5.8,
+     "tail_sided": 0.2645527098054013,
+     "tail_grip_n": 26.3753774564888
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 25.461703386757126,
+     "tail_pen_mm": 0.855874027483149,
+     "tail_bodies": 5.0,
+     "tail_sided": 0.5376774405037044,
+     "tail_grip_n": 18.758650619446723
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 26.010282107094337,
+     "tail_pen_mm": 0.8370916861026919,
+     "tail_bodies": 4.6,
+     "tail_sided": 0.44333241905635495,
+     "tail_grip_n": 17.24950591240523
+    }
+   ]
+  },
+  {
+   "seq": "fryingpan_cook_1",
+   "subject": "s1",
+   "object": "fryingpan",
+   "start": 13,
+   "span": 13,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 28.054758860826325,
+    "tail_pen_mm": 0.8206809314010829,
+    "tail_bodies": 3.0
+   },
+   "k": 8,
+   "n_held": 5,
+   "n_clean": 5,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 22.092213161749882,
+     "tail_pen_mm": 0.9179788395417317,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.15733463993377117,
+     "tail_grip_n": 47.79915977568467
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 22.862555636772356,
+     "tail_pen_mm": 0.9522193606728087,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.1148637807380293,
+     "tail_grip_n": 48.076156398863716
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 1330.07846478943,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 149.81334155056317,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 23.90704175710023,
+     "tail_pen_mm": 0.856270259978009,
+     "tail_bodies": 3.2,
+     "tail_sided": 0.37423986236880735,
+     "tail_grip_n": 49.37389642166971
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 1171.5333048325506,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 30.84518701364571,
+     "tail_pen_mm": 0.8055299779059939,
+     "tail_bodies": 2.6,
+     "tail_sided": 0.41863202509338426,
+     "tail_grip_n": 30.40278225081706
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 23.82458775673572,
+     "tail_pen_mm": 0.7939668137701286,
+     "tail_bodies": 3.6,
+     "tail_sided": 0.18490192351987364,
+     "tail_grip_n": 48.804468249124156
+    }
+   ]
+  },
+  {
+   "seq": "hammer_lift",
+   "subject": "s2",
+   "object": "hammer",
+   "start": 14,
+   "span": 15,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 34.827427440843856,
+    "tail_pen_mm": 0.3306826020864004,
+    "tail_bodies": 4.2
+   },
+   "k": 8,
+   "n_held": 8,
+   "n_clean": 8,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 32.732884467169974,
+     "tail_pen_mm": 0.33980208584910304,
+     "tail_bodies": 4.8,
+     "tail_sided": 0.30809745060656424,
+     "tail_grip_n": 3.945114734919488
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 37.94652987655898,
+     "tail_pen_mm": 0.36959694765316065,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.39288278281459854,
+     "tail_grip_n": 6.199054223842953
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 36.277406315449035,
+     "tail_pen_mm": 0.3567495178502198,
+     "tail_bodies": 6.8,
+     "tail_sided": 0.14640667013215683,
+     "tail_grip_n": 4.906557679962414
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 34.9207407849276,
+     "tail_pen_mm": 0.3555550600497282,
+     "tail_bodies": 5.0,
+     "tail_sided": 0.2245405667530886,
+     "tail_grip_n": 4.644068471659137
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 37.90388247285994,
+     "tail_pen_mm": 1.1651063715470895,
+     "tail_bodies": 2.8,
+     "tail_sided": 0.45583357458020435,
+     "tail_grip_n": 3.9254857083457635
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 36.356231713133845,
+     "tail_pen_mm": 0.3488128633599052,
+     "tail_bodies": 5.2,
+     "tail_sided": 0.2551626332943867,
+     "tail_grip_n": 4.231097955482023
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 38.470729898262086,
+     "tail_pen_mm": 0.878703389405533,
+     "tail_bodies": 4.6,
+     "tail_sided": 0.22548795792031018,
+     "tail_grip_n": 3.2487170698486807
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 35.210242655943865,
+     "tail_pen_mm": 0.3082384118961931,
+     "tail_bodies": 3.2,
+     "tail_sided": 0.5019880038209796,
+     "tail_grip_n": 2.619637008059027
+    }
+   ]
+  },
+  {
+   "seq": "headphones_lift",
+   "subject": "s2",
+   "object": "headphones",
+   "start": 12,
+   "span": 13,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 59.075977797069825,
+    "tail_pen_mm": 0.7540715767069255,
+    "tail_bodies": 7.0
+   },
+   "k": 8,
+   "n_held": 7,
+   "n_clean": 4,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 40.30266503568966,
+     "tail_pen_mm": 0.8655386777057482,
+     "tail_bodies": 2.6,
+     "tail_sided": 0.6665265678520331,
+     "tail_grip_n": 3.977142983305055
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 35.09798648365188,
+     "tail_pen_mm": 0.204503976964317,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.44828111244671537,
+     "tail_grip_n": 2.327251711275398
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 91.83487396051159,
+     "tail_pen_mm": 0.03376665570702915,
+     "tail_bodies": 0.4,
+     "tail_sided": 0.9555133572443928,
+     "tail_grip_n": 0.4507365498916995
+    },
+    {
+     "held": true,
+     "clean": false,
+     "relaxed": true,
+     "mean_mm": 62.684531536201405,
+     "tail_pen_mm": 0.0752243946088124,
+     "tail_bodies": 0.6,
+     "tail_sided": 0.9533679889265162,
+     "tail_grip_n": 0.8213255394551198
+    },
+    {
+     "held": true,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 38.68860918760779,
+     "tail_pen_mm": 11.95036441161252,
+     "tail_bodies": 6.0,
+     "tail_sided": 0.22199561335040113,
+     "tail_grip_n": 2338.5011366021804
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 36.547281926918245,
+     "tail_pen_mm": 2.4729312528214904,
+     "tail_bodies": 3.4,
+     "tail_sided": 0.5974352668332228,
+     "tail_grip_n": 29.02975353111476
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 57.83184961077413,
+     "tail_pen_mm": 0.7066732643384606,
+     "tail_bodies": 4.8,
+     "tail_sided": 0.4419151967512285,
+     "tail_grip_n": 24.304992429804635
+    },
+    {
+     "held": true,
+     "clean": false,
+     "relaxed": true,
+     "mean_mm": 35.153855620510086,
+     "tail_pen_mm": 1.8536505151812925,
+     "tail_bodies": 1.6,
+     "tail_sided": 0.6493955462462724,
+     "tail_grip_n": 8.122779507255835
+    }
+   ]
+  },
+  {
+   "seq": "pyramidlarge_inspect_1",
+   "subject": "s1",
+   "object": "pyramidlarge",
+   "start": 30,
+   "span": 30,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 34.75108031568555,
+    "tail_pen_mm": 0.35448578792772567,
+    "tail_bodies": 4.0
+   },
+   "k": 8,
+   "n_held": 8,
+   "n_clean": 8,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 33.47090297838277,
+     "tail_pen_mm": 0.35780946749394266,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.29371767829996404,
+     "tail_grip_n": 5.427607110273058
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 34.09222199128479,
+     "tail_pen_mm": 0.35755751679048986,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.2982242439010979,
+     "tail_grip_n": 5.415922251067994
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 31.501103967767826,
+     "tail_pen_mm": 0.3715567937191062,
+     "tail_bodies": 5.0,
+     "tail_sided": 0.42631122775905794,
+     "tail_grip_n": 5.351243909443783
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 33.26527826309244,
+     "tail_pen_mm": 0.3535585827456182,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.31339039688248954,
+     "tail_grip_n": 5.377448934424211
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 35.03269705682585,
+     "tail_pen_mm": 0.35461031947821764,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.31048399053384695,
+     "tail_grip_n": 5.425564782499829
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 33.811353691609895,
+     "tail_pen_mm": 0.3637549636822248,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.3303457732025985,
+     "tail_grip_n": 5.431278072028109
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 34.06647573744637,
+     "tail_pen_mm": 0.36370376300046375,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.29279723381891454,
+     "tail_grip_n": 5.322104116404301
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 34.72880283783283,
+     "tail_pen_mm": 0.35517384525315204,
+     "tail_bodies": 4.0,
+     "tail_sided": 0.3084936155858929,
+     "tail_grip_n": 5.503977167543477
+    }
+   ]
+  },
+  {
+   "seq": "scissors_offhand_1",
+   "subject": "s1",
+   "object": "scissors",
+   "start": 28,
+   "span": 28,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 27.80917196282189,
+    "tail_pen_mm": 0.6165388150930138,
+    "tail_bodies": 6.0
+   },
+   "k": 8,
+   "n_held": 8,
+   "n_clean": 8,
+   "trials": [
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 54.370626251161056,
+     "tail_pen_mm": 0.7370056335735589,
+     "tail_bodies": 5.0,
+     "tail_sided": 0.5505922115452299,
+     "tail_grip_n": 31.146506083823823
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 39.150738784956474,
+     "tail_pen_mm": 0.4726147951920872,
+     "tail_bodies": 3.0,
+     "tail_sided": 0.26439296441342497,
+     "tail_grip_n": 10.19722438923063
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 46.335568640034396,
+     "tail_pen_mm": 0.432655043377703,
+     "tail_bodies": 6.0,
+     "tail_sided": 0.16772429646748416,
+     "tail_grip_n": 25.436700602419485
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 52.78536275516567,
+     "tail_pen_mm": 0.8033745665717816,
+     "tail_bodies": 4.8,
+     "tail_sided": 0.5456283863498846,
+     "tail_grip_n": 34.57714900417759
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 44.02955025914916,
+     "tail_pen_mm": 0.7468253627763242,
+     "tail_bodies": 2.0,
+     "tail_sided": 0.41169958843098337,
+     "tail_grip_n": 17.117009893268566
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 47.08022714777385,
+     "tail_pen_mm": 0.4187969668585749,
+     "tail_bodies": 6.0,
+     "tail_sided": 0.16341830373345712,
+     "tail_grip_n": 25.38069627401527
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 53.57564919316427,
+     "tail_pen_mm": 0.7856724201981622,
+     "tail_bodies": 4.8,
+     "tail_sided": 0.5418457523245086,
+     "tail_grip_n": 33.46602959809073
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 51.54172514559131,
+     "tail_pen_mm": 0.7577749515460391,
+     "tail_bodies": 4.8,
+     "tail_sided": 0.4776170711565161,
+     "tail_grip_n": 33.74882650285031
+    }
+   ]
+  },
+  {
+   "seq": "stamp_lift",
+   "subject": "s1",
+   "object": "stamp",
+   "start": 25,
+   "span": 26,
+   "rebuilt": {
+    "held": true,
+    "clean": true,
+    "mean_mm": 34.98552920857835,
+    "tail_pen_mm": 0.3487111708731382,
+    "tail_bodies": 3.0
+   },
+   "k": 8,
+   "n_held": 5,
+   "n_clean": 4,
+   "trials": [
+    {
+     "held": true,
+     "clean": false,
+     "relaxed": true,
+     "mean_mm": 28.697965902576577,
+     "tail_pen_mm": 0.43708005758954366,
+     "tail_bodies": 2.6,
+     "tail_sided": 0.817023724731559,
+     "tail_grip_n": 2.595959353479734
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 708.197992913904,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 30.018380637390372,
+     "tail_pen_mm": 0.457855755841367,
+     "tail_bodies": 2.8,
+     "tail_sided": 0.7979830187578199,
+     "tail_grip_n": 2.50245438791083
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 28.596855847098283,
+     "tail_pen_mm": 0.38121113347777397,
+     "tail_bodies": 2.2,
+     "tail_sided": 0.7948278386522187,
+     "tail_grip_n": 2.4108873784851093
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 598.6816740815381,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 32.24696220182867,
+     "tail_pen_mm": 0.4052215842276561,
+     "tail_bodies": 3.4,
+     "tail_sided": 0.7356282362791964,
+     "tail_grip_n": 2.6044883628506086
+    },
+    {
+     "held": true,
+     "clean": true,
+     "relaxed": true,
+     "mean_mm": 31.559025349110417,
+     "tail_pen_mm": 0.3736345822272895,
+     "tail_bodies": 2.4,
+     "tail_sided": 0.7751028115387031,
+     "tail_grip_n": 2.4675391884020192
+    },
+    {
+     "held": false,
+     "clean": false,
+     "relaxed": false,
+     "mean_mm": 587.3010450090123,
+     "tail_pen_mm": 0.0,
+     "tail_bodies": 0.0,
+     "tail_sided": 1.0,
+     "tail_grip_n": 0.0
+    }
+   ]
+  }
+ ]
+}

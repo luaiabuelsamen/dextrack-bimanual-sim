@@ -216,6 +216,36 @@ sound like "softer" are not the way to it. The four stuck references are a
 geometry problem (vessels and a wide clock the fingers cannot span) until
 someone shows otherwise.
 
+**D2, rotation into the score and the reward (2026-09-17).** The
+milestone from `BRIEF.md`: rotation error in the carry score (0.06 per
+radian of mean rotation), a linear non-saturating rotation term in the PPO
+reward (`w_rot_lin` 0.5, `w_rot` 1.0), four search seeds, every pose
+rebuilt, perturbed and validated, PPO on the 18 robust seeds, both rules
+scored on the same rollouts (`results/stage2_carry_rot_*`,
+`results/stage3_carry_rot.json`, `results/dextrack_metric_rot.json`).
+
+| of 40 references | before D2 (20 seeds, FF) | D2 feedforward (18 seeds) | D2 PPO (18 policies) | target |
+|---|---:|---:|---:|---:|
+| DexTrack strict (10 cm, 20°, hand) | 2 | 2 | **6** | |
+| DexTrack loose (10 cm, 40°, hand) | 8 | 11 | **13** | 22 |
+| ours (held, < 3 mm, ≥ 2 links, opposed, < 40×) | 17 | 17 | **16** | 16 |
+
+The rotation term moved what it was aimed at: PPO mean rotation fell on
+16 of 18 (banana 38° → 11°, eyeglasses 34° → 16°, flute 23° → 17°,
+flashlight 41° → 32°), strict passes went from 2 to 6, and the robust seed
+set became more robust (9 under all eight perturbations, up from 5). **The
+loose target was not met, and it could not have been from this seed set:
+18 references have a robust seed, so 18 is the ceiling, and 13 of those 18
+pass loose.** The 22 that cannot pass are the 12 whose stage-2 seed never
+touches the object, the 4 that stay buried, and 6 whose best pose fails
+the perturbation test. The gap to DexTrack's baseline is now seed coverage,
+not tracking. Two regressions: binoculars and the small cube hold under the
+feedforward and drop under their policy (212 and 35 mm), the first time a
+policy here has lost a grasp the feedforward kept; both are light two-link
+pinches at 2 and 63 N, and both are recorded as failures, not excluded.
+Rotation that remains (knife 41°, duck 44°, bunny 43°, binoculars 68°) is
+the object turning in a fingertip pinch, and the reward did not fix it.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with
