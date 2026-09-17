@@ -43,6 +43,11 @@ LOST_M = 0.10
 CLEAN_PEN_M = 0.003
 CLEAN_BODIES = 2
 CLEAN_SIDED = 0.8
+#: Grip cap, in multiples of the object's weight. The first version of this
+#: score had no force term and accepted a camera carry at 65-100x weight --
+#: under 3 mm, held, and squeezing like a vice. 40x is the threshold the
+#: README's physics renderer has used since the first gallery.
+CLEAN_GRIP_X = 40.0
 TAIL = 5
 
 
@@ -99,12 +104,20 @@ def score_of(cols, tail=TAIL):
     nb_tail = float(nb_t.mean())
     sided_tail = float(sided_t.mean())
     wrap = sided_tail + (1.0 - min(nb_tail, 5.0) / 5.0)
+    grip_x = float(grip_t.mean()) / W
     s = (float(np.minimum(err, 0.25).mean())
          + 0.5 * lost_frac
          + 10.0 * max(0.0, pen_tail - CLEAN_PEN_M)
-         + 0.05 * wrap)
+         + 0.05 * wrap
+         # 88x costs 0.096; capped at 0.3 so that a buried HOLD (about 0.45
+         # all in) still beats a DROP (0.75+). Uncapped, a 2500x burial seed
+         # scored 5 and the hill-climb accepted the first pose that let go,
+         # then could never re-enter contact: alarm clock, apple and bowl all
+         # "dropped" under a score that was meant to relax them.
+         + min(0.3, 0.002 * max(0.0, grip_x - CLEAN_GRIP_X)))
     clean = bool(held and pen_tail < CLEAN_PEN_M
-                 and nb_tail >= CLEAN_BODIES and sided_tail < CLEAN_SIDED)
+                 and nb_tail >= CLEAN_BODIES and sided_tail < CLEAN_SIDED
+                 and grip_x < CLEAN_GRIP_X)
     return s, {
         "held": held, "clean": clean,
         "relaxed": bool(held and pen_tail < CLEAN_PEN_M),
@@ -113,6 +126,7 @@ def score_of(cols, tail=TAIL):
         "tail_pen_mm": pen_tail * 1000,
         "tail_contacts": float(ncon_t.mean()), "tail_bodies": nb_tail,
         "tail_sided": sided_tail, "tail_grip_n": float(grip_t.mean()),
+        "tail_grip_x": grip_x,
         # read after the FIRST control frame, not at reset -- the reset state
         # is in `stage2_survives.json`; this is one frame of motion later
         "frame1_pen_mm": float(pen[0] * 1000), "frame1_grip_n": float(grip[0]),

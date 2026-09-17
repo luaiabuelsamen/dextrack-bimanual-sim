@@ -1,0 +1,3551 @@
+{
+ "stride": 2,
+ "near": 2,
+ "rows": [
+  {
+   "seq": "camera_browse_1",
+   "subject": "s1",
+   "trained_start": 32,
+   "T": 64,
+   "stride": 2,
+   "near": {
+    "ff": {
+     "n": 3,
+     "held": 3,
+     "clean": 2,
+     "median_mm": 15.133009680458867
+    },
+    "ppo": {
+     "n": 3,
+     "held": 3,
+     "clean": 2,
+     "median_mm": 5.319855328950768
+    }
+   },
+   "far": {
+    "ff": {
+     "n": 27,
+     "held": 26,
+     "clean": 23,
+     "median_mm": 15.069042548898649
+    },
+    "ppo": {
+     "n": 27,
+     "held": 26,
+     "clean": 24,
+     "median_mm": 6.704858229080551
+    }
+   },
+   "starts": [
+    {
+     "start": 0,
+     "near": false,
+     "ff": {
+      "mean_mm": 24874.003399437683,
+      "end_mm": 77229.56904052936,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 24122.67177652352,
+      "end_mm": 75649.83984263804,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 2,
+     "near": false,
+     "ff": {
+      "mean_mm": 20.92272475743573,
+      "end_mm": 10.012013284235561,
+      "end_held": true,
+      "end_pen_mm": 1.5609343496602817,
+      "end_bodies": 5,
+      "end_sided": 0.1312337911761866,
+      "end_grip_n": 185.65783243153928,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 21.220798665479357,
+      "end_mm": 6.4800224758650025,
+      "end_held": true,
+      "end_pen_mm": 1.5570630417655589,
+      "end_bodies": 5,
+      "end_sided": 0.13266916798100062,
+      "end_grip_n": 186.08827015472616,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 4,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.021839461625431,
+      "end_mm": 10.59983105546272,
+      "end_held": true,
+      "end_pen_mm": 0.4578180796986186,
+      "end_bodies": 3,
+      "end_sided": 0.28138785129870225,
+      "end_grip_n": 55.3041403349782,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.232818541208744,
+      "end_mm": 3.8233313246101965,
+      "end_held": true,
+      "end_pen_mm": 0.4781768859428697,
+      "end_bodies": 3,
+      "end_sided": 0.18651478442718597,
+      "end_grip_n": 49.864344208547784,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 6,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.357813598212953,
+      "end_mm": 9.921605598575074,
+      "end_held": true,
+      "end_pen_mm": 0.46809639086306704,
+      "end_bodies": 3,
+      "end_sided": 0.18930363153446716,
+      "end_grip_n": 50.82848423659961,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.026290837661181,
+      "end_mm": 1.979096193354827,
+      "end_held": true,
+      "end_pen_mm": 0.48107849514511003,
+      "end_bodies": 3,
+      "end_sided": 0.18708663511932538,
+      "end_grip_n": 50.40912372730368,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 8,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.501246773287818,
+      "end_mm": 9.998651668950501,
+      "end_held": true,
+      "end_pen_mm": 0.4636202448819668,
+      "end_bodies": 3,
+      "end_sided": 0.18918425653490215,
+      "end_grip_n": 50.19963893369126,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.003991122248134,
+      "end_mm": 1.866492746801522,
+      "end_held": true,
+      "end_pen_mm": 0.4813034766398619,
+      "end_bodies": 3,
+      "end_sided": 0.18580417005811914,
+      "end_grip_n": 50.813164930299344,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 10,
+     "near": false,
+     "ff": {
+      "mean_mm": 11.93733338985278,
+      "end_mm": 10.34047615779412,
+      "end_held": true,
+      "end_pen_mm": 0.45634589384461216,
+      "end_bodies": 3,
+      "end_sided": 0.27918558199482457,
+      "end_grip_n": 51.810626372092635,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.366353755317253,
+      "end_mm": 3.991391816257523,
+      "end_held": true,
+      "end_pen_mm": 0.47341859398870695,
+      "end_bodies": 3,
+      "end_sided": 0.1859132508384166,
+      "end_grip_n": 49.45099926309683,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 12,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.119779019224076,
+      "end_mm": 10.720431072717284,
+      "end_held": true,
+      "end_pen_mm": 0.461334734790758,
+      "end_bodies": 3,
+      "end_sided": 0.28141592800915194,
+      "end_grip_n": 55.74364202586927,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.303233988551673,
+      "end_mm": 3.753164388706553,
+      "end_held": true,
+      "end_pen_mm": 0.4779723061658064,
+      "end_bodies": 3,
+      "end_sided": 0.18704943484968936,
+      "end_grip_n": 49.50910833583691,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 14,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.003396504190059,
+      "end_mm": 11.795851923520857,
+      "end_held": true,
+      "end_pen_mm": 6.8778043489028144,
+      "end_bodies": 5,
+      "end_sided": 0.4077947977109407,
+      "end_grip_n": 298.4271080075443,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 7.894966235268941,
+      "end_mm": 2.694125246870821,
+      "end_held": true,
+      "end_pen_mm": 7.074774297583798,
+      "end_bodies": 4,
+      "end_sided": 0.4216872023069319,
+      "end_grip_n": 308.5092689712756,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 16,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.96317595419133,
+      "end_mm": 10.018400133242292,
+      "end_held": true,
+      "end_pen_mm": 0.46071592794389227,
+      "end_bodies": 3,
+      "end_sided": 0.1893515524522966,
+      "end_grip_n": 49.5642931403759,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.605971549087789,
+      "end_mm": 3.740341332789294,
+      "end_held": true,
+      "end_pen_mm": 0.4781373656579501,
+      "end_bodies": 3,
+      "end_sided": 0.18656862647670697,
+      "end_grip_n": 49.64747199821697,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 18,
+     "near": false,
+     "ff": {
+      "mean_mm": 10.25840794586651,
+      "end_mm": 9.036487714666698,
+      "end_held": true,
+      "end_pen_mm": 0.492798751952862,
+      "end_bodies": 4,
+      "end_sided": 0.09353590470503527,
+      "end_grip_n": 60.795908049846375,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.171850112019552,
+      "end_mm": 3.8353743667233853,
+      "end_held": true,
+      "end_pen_mm": 0.4780476423415555,
+      "end_bodies": 3,
+      "end_sided": 0.18701589629910736,
+      "end_grip_n": 49.709568852319734,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 20,
+     "near": false,
+     "ff": {
+      "mean_mm": 10.999167059971423,
+      "end_mm": 9.452362544689416,
+      "end_held": true,
+      "end_pen_mm": 0.47813313611940084,
+      "end_bodies": 3,
+      "end_sided": 0.3171753827883465,
+      "end_grip_n": 53.982596848340066,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.704858229080551,
+      "end_mm": 3.6882809561149066,
+      "end_held": true,
+      "end_pen_mm": 0.47615203173094306,
+      "end_bodies": 3,
+      "end_sided": 0.31626779166136737,
+      "end_grip_n": 50.257090936963856,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 22,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.903455871754705,
+      "end_mm": 10.007536112691245,
+      "end_held": true,
+      "end_pen_mm": 0.46653292763754706,
+      "end_bodies": 3,
+      "end_sided": 0.1893057391473735,
+      "end_grip_n": 50.71931688809725,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.026952117108485,
+      "end_mm": 3.852667691483974,
+      "end_held": true,
+      "end_pen_mm": 0.47758917921327665,
+      "end_bodies": 3,
+      "end_sided": 0.3174699985884241,
+      "end_grip_n": 50.12715590899995,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 24,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.994761934030976,
+      "end_mm": 10.394061204654164,
+      "end_held": true,
+      "end_pen_mm": 0.4636121719589167,
+      "end_bodies": 3,
+      "end_sided": 0.2777477804862523,
+      "end_grip_n": 50.83924009465919,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.619787586914661,
+      "end_mm": 3.886630689468452,
+      "end_held": true,
+      "end_pen_mm": 0.47616758809493687,
+      "end_bodies": 3,
+      "end_sided": 0.18534582989157813,
+      "end_grip_n": 49.95488098817855,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 26,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.381125959650081,
+      "end_mm": 10.541688537222836,
+      "end_held": true,
+      "end_pen_mm": 0.46887431927340384,
+      "end_bodies": 3,
+      "end_sided": 0.27739335568997436,
+      "end_grip_n": 50.523495838058864,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.427956671802704,
+      "end_mm": 3.72221354067333,
+      "end_held": true,
+      "end_pen_mm": 0.4713565663793575,
+      "end_bodies": 3,
+      "end_sided": 0.18518574748448138,
+      "end_grip_n": 49.21285635507197,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 28,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.241185634015698,
+      "end_mm": 10.34043195722318,
+      "end_held": true,
+      "end_pen_mm": 0.46550547800857295,
+      "end_bodies": 3,
+      "end_sided": 0.2767752327676074,
+      "end_grip_n": 50.69570319432123,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.802177748948481,
+      "end_mm": 4.003880623509562,
+      "end_held": true,
+      "end_pen_mm": 0.47647781898041763,
+      "end_bodies": 3,
+      "end_sided": 0.18573014125173376,
+      "end_grip_n": 49.939738963720444,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 30,
+     "near": true,
+     "ff": {
+      "mean_mm": 15.133009680458867,
+      "end_mm": 10.033913819282182,
+      "end_held": true,
+      "end_pen_mm": 0.46157410384790354,
+      "end_bodies": 3,
+      "end_sided": 0.2771263263976826,
+      "end_grip_n": 51.11499898468288,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.3743408695227854,
+      "end_mm": 4.429631332111482,
+      "end_held": true,
+      "end_pen_mm": 0.47608825491587264,
+      "end_bodies": 3,
+      "end_sided": 0.18638616217881793,
+      "end_grip_n": 49.434225050516545,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 32,
+     "near": true,
+     "ff": {
+      "mean_mm": 9.724638710414977,
+      "end_mm": 8.301942022617617,
+      "end_held": true,
+      "end_pen_mm": 1.4111469679246262,
+      "end_bodies": 5,
+      "end_sided": 0.39447576888519154,
+      "end_grip_n": 168.11896633346993,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 5.236967591658592,
+      "end_mm": 2.038718849991891,
+      "end_held": true,
+      "end_pen_mm": 1.5360832059300618,
+      "end_bodies": 5,
+      "end_sided": 0.13231266479666942,
+      "end_grip_n": 183.61574355106862,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 34,
+     "near": true,
+     "ff": {
+      "mean_mm": 15.269797466257122,
+      "end_mm": 10.023879150556665,
+      "end_held": true,
+      "end_pen_mm": 0.4632150400293699,
+      "end_bodies": 4,
+      "end_sided": 0.33034363420987317,
+      "end_grip_n": 52.61408825762178,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.319855328950768,
+      "end_mm": 2.875826248565831,
+      "end_held": true,
+      "end_pen_mm": 0.4703515729322771,
+      "end_bodies": 4,
+      "end_sided": 0.2606336239041086,
+      "end_grip_n": 49.84429519036469,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 36,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.21091671942411,
+      "end_mm": 9.882351179523662,
+      "end_held": true,
+      "end_pen_mm": 0.4685924537562464,
+      "end_bodies": 3,
+      "end_sided": 0.18978636247381409,
+      "end_grip_n": 50.815431762006675,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.843046561623979,
+      "end_mm": 2.7114002690856216,
+      "end_held": true,
+      "end_pen_mm": 0.4775213698050354,
+      "end_bodies": 3,
+      "end_sided": 0.18560970965680784,
+      "end_grip_n": 49.22874061143595,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 38,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.242470855826456,
+      "end_mm": 9.937541090667223,
+      "end_held": true,
+      "end_pen_mm": 0.46719991018643814,
+      "end_bodies": 3,
+      "end_sided": 0.19010158524165965,
+      "end_grip_n": 50.636563982299016,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.681626695149235,
+      "end_mm": 2.8671516128414325,
+      "end_held": true,
+      "end_pen_mm": 0.47709462086360616,
+      "end_bodies": 3,
+      "end_sided": 0.18596187676161013,
+      "end_grip_n": 49.056676711849484,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 40,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.069042548898649,
+      "end_mm": 9.633577883722326,
+      "end_held": true,
+      "end_pen_mm": 0.47701440386212385,
+      "end_bodies": 3,
+      "end_sided": 0.18784952001231617,
+      "end_grip_n": 52.27959494936344,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.400754892499859,
+      "end_mm": 1.4314303812873985,
+      "end_held": true,
+      "end_pen_mm": 0.47814853806129287,
+      "end_bodies": 3,
+      "end_sided": 0.18582196468370074,
+      "end_grip_n": 49.15018263958311,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 42,
+     "near": false,
+     "ff": {
+      "mean_mm": 16.84585804364821,
+      "end_mm": 10.31171516697564,
+      "end_held": true,
+      "end_pen_mm": 0.4518649036900652,
+      "end_bodies": 3,
+      "end_sided": 0.2801801311588007,
+      "end_grip_n": 52.994623953474935,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.751456371637946,
+      "end_mm": 2.9566983089009518,
+      "end_held": true,
+      "end_pen_mm": 0.4785032823842652,
+      "end_bodies": 3,
+      "end_sided": 0.18743455447263757,
+      "end_grip_n": 48.62463071614663,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 44,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.828020793595691,
+      "end_mm": 9.44499582337179,
+      "end_held": true,
+      "end_pen_mm": 0.4797319452202742,
+      "end_bodies": 3,
+      "end_sided": 0.18745499890845504,
+      "end_grip_n": 52.9477819514159,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.489616569674969,
+      "end_mm": 2.597280767966743,
+      "end_held": true,
+      "end_pen_mm": 0.47761900171850236,
+      "end_bodies": 3,
+      "end_sided": 0.18629069289533765,
+      "end_grip_n": 48.86756261497456,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 46,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.824655947916995,
+      "end_mm": 9.586702986791696,
+      "end_held": true,
+      "end_pen_mm": 0.4778470367008073,
+      "end_bodies": 3,
+      "end_sided": 0.18803537373169366,
+      "end_grip_n": 52.32460176039004,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.561179852468402,
+      "end_mm": 2.8550402682760145,
+      "end_held": true,
+      "end_pen_mm": 0.4772898645575667,
+      "end_bodies": 3,
+      "end_sided": 0.18524882157391848,
+      "end_grip_n": 49.182249589015996,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 48,
+     "near": false,
+     "ff": {
+      "mean_mm": 17.53088410529493,
+      "end_mm": 10.752288649605324,
+      "end_held": true,
+      "end_pen_mm": 0.4591940863351634,
+      "end_bodies": 3,
+      "end_sided": 0.2816208308117034,
+      "end_grip_n": 57.158607974272805,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.587498528782883,
+      "end_mm": 1.796146381305163,
+      "end_held": true,
+      "end_pen_mm": 0.453944523083699,
+      "end_bodies": 3,
+      "end_sided": 0.28013854069607924,
+      "end_grip_n": 54.725984454255766,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 50,
+     "near": false,
+     "ff": {
+      "mean_mm": 20.341275358733036,
+      "end_mm": 16.762500572814893,
+      "end_held": true,
+      "end_pen_mm": 0.5136159879948595,
+      "end_bodies": 4,
+      "end_sided": 0.060208337535158606,
+      "end_grip_n": 79.04445724604159,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 10.139075237181489,
+      "end_mm": 6.857628408623909,
+      "end_held": true,
+      "end_pen_mm": 0.5109855560843454,
+      "end_bodies": 4,
+      "end_sided": 0.0632842470079107,
+      "end_grip_n": 64.71904742819885,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 52,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.601815328948417,
+      "end_mm": 10.76025171240406,
+      "end_held": true,
+      "end_pen_mm": 0.4656061066862009,
+      "end_bodies": 3,
+      "end_sided": 0.2834295319033187,
+      "end_grip_n": 58.136410495101636,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.62562864589314,
+      "end_mm": 2.812985406009183,
+      "end_held": true,
+      "end_pen_mm": 0.4304972997448702,
+      "end_bodies": 3,
+      "end_sided": 0.2801959082240559,
+      "end_grip_n": 54.26170653995961,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 54,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.015429458019327,
+      "end_mm": 11.672932254332293,
+      "end_held": true,
+      "end_pen_mm": 0.44951069834571133,
+      "end_bodies": 3,
+      "end_sided": 0.27415093230439835,
+      "end_grip_n": 64.80332888807058,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.583816678529118,
+      "end_mm": 1.3825818142438568,
+      "end_held": true,
+      "end_pen_mm": 0.4510167784361491,
+      "end_bodies": 3,
+      "end_sided": 0.27335385940515694,
+      "end_grip_n": 59.35930629469282,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 56,
+     "near": false,
+     "ff": {
+      "mean_mm": 16.08171216237407,
+      "end_mm": 12.186205551394353,
+      "end_held": true,
+      "end_pen_mm": 0.46178680130597344,
+      "end_bodies": 3,
+      "end_sided": 0.27228118787493544,
+      "end_grip_n": 66.16903531673704,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 11.869090764550137,
+      "end_mm": 7.07218070186995,
+      "end_held": true,
+      "end_pen_mm": 0.4516337521756255,
+      "end_bodies": 3,
+      "end_sided": 0.2734431894694336,
+      "end_grip_n": 56.73346127809526,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 58,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.450257601936045,
+      "end_mm": 12.57365004301658,
+      "end_held": true,
+      "end_pen_mm": 0.4993216212105123,
+      "end_bodies": 4,
+      "end_sided": 0.30146336378891986,
+      "end_grip_n": 76.99924377308885,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 13.273957267679407,
+      "end_mm": 2.4033642654877143,
+      "end_held": true,
+      "end_pen_mm": 0.4722778871529762,
+      "end_bodies": 3,
+      "end_sided": 0.18489344824116782,
+      "end_grip_n": 62.025900834095985,
+      "end_clean": true
+     }
+    }
+   ]
+  },
+  {
+   "seq": "cubemedium_inspect_1",
+   "subject": "s1",
+   "trained_start": 42,
+   "T": 84,
+   "stride": 2,
+   "near": {
+    "ff": {
+     "n": 3,
+     "held": 3,
+     "clean": 3,
+     "median_mm": 7.690164834314452
+    },
+    "ppo": {
+     "n": 3,
+     "held": 3,
+     "clean": 3,
+     "median_mm": 3.4826735632679164
+    }
+   },
+   "far": {
+    "ff": {
+     "n": 37,
+     "held": 32,
+     "clean": 32,
+     "median_mm": 11.381552521459007
+    },
+    "ppo": {
+     "n": 37,
+     "held": 31,
+     "clean": 31,
+     "median_mm": 8.393769428421564
+    }
+   },
+   "starts": [
+    {
+     "start": 0,
+     "near": false,
+     "ff": {
+      "mean_mm": 44704.72451290495,
+      "end_mm": 137609.90292989995,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 46498.06696208997,
+      "end_mm": 141136.24427558386,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 2,
+     "near": false,
+     "ff": {
+      "mean_mm": 33554.53737130266,
+      "end_mm": 111814.91335596201,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 33901.27473933009,
+      "end_mm": 112624.01487191101,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 4,
+     "near": false,
+     "ff": {
+      "mean_mm": 34371.86323561948,
+      "end_mm": 111739.03707976999,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 34705.10723232615,
+      "end_mm": 112452.29998749116,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 6,
+     "near": false,
+     "ff": {
+      "mean_mm": 35030.92375043772,
+      "end_mm": 111312.57486199363,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 32998.34713163842,
+      "end_mm": 106919.14011388567,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 8,
+     "near": false,
+     "ff": {
+      "mean_mm": 35086.63094826514,
+      "end_mm": 109442.99593136736,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 35654.03544149731,
+      "end_mm": 110690.0268716804,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 10,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.009003939377035,
+      "end_mm": 13.754745421448195,
+      "end_held": true,
+      "end_pen_mm": 0.4220335379890358,
+      "end_bodies": 3,
+      "end_sided": 0.33333333333333975,
+      "end_grip_n": 8.250674476644576,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 19.371806180843464,
+      "end_mm": 11.934093046759793,
+      "end_held": true,
+      "end_pen_mm": 0.41437320123563354,
+      "end_bodies": 3,
+      "end_sided": 0.353553390593269,
+      "end_grip_n": 7.186570960898523,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 12,
+     "near": false,
+     "ff": {
+      "mean_mm": 10.65887776055105,
+      "end_mm": 13.755543693296953,
+      "end_held": true,
+      "end_pen_mm": 0.4097302581150981,
+      "end_bodies": 3,
+      "end_sided": 0.3333333333333265,
+      "end_grip_n": 7.325725268556113,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.50840104542399,
+      "end_mm": 9.250349659856097,
+      "end_held": true,
+      "end_pen_mm": 0.41255373324371164,
+      "end_bodies": 3,
+      "end_sided": 0.4999999999999987,
+      "end_grip_n": 7.6759924535065975,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 14,
+     "near": false,
+     "ff": {
+      "mean_mm": 10.751233874200523,
+      "end_mm": 14.445165664868956,
+      "end_held": true,
+      "end_pen_mm": 0.4127917900037771,
+      "end_bodies": 3,
+      "end_sided": 0.3333333333333263,
+      "end_grip_n": 7.7003148003469875,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.393769428421564,
+      "end_mm": 9.877983441746709,
+      "end_held": true,
+      "end_pen_mm": 0.413915237787314,
+      "end_bodies": 3,
+      "end_sided": 0.35355339059325314,
+      "end_grip_n": 7.434527441946914,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 16,
+     "near": false,
+     "ff": {
+      "mean_mm": 10.380506694604872,
+      "end_mm": 13.478310898994483,
+      "end_held": true,
+      "end_pen_mm": 0.42150513290217007,
+      "end_bodies": 3,
+      "end_sided": 0.3333333333333334,
+      "end_grip_n": 8.244167210299267,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.295458550102047,
+      "end_mm": 8.375970396178388,
+      "end_held": true,
+      "end_pen_mm": 0.41332759454450096,
+      "end_bodies": 3,
+      "end_sided": 0.33333333333333354,
+      "end_grip_n": 7.772269093316065,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 18,
+     "near": false,
+     "ff": {
+      "mean_mm": 8.828415986732612,
+      "end_mm": 12.012160296416502,
+      "end_held": true,
+      "end_pen_mm": 0.41835318838766056,
+      "end_bodies": 2,
+      "end_sided": 7.3068364937451e-15,
+      "end_grip_n": 7.9319608145442775,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.797591454264756,
+      "end_mm": 10.463637713976105,
+      "end_held": true,
+      "end_pen_mm": 0.4156085216818672,
+      "end_bodies": 2,
+      "end_sided": 7.855869890148323e-15,
+      "end_grip_n": 7.826843750791252,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 20,
+     "near": false,
+     "ff": {
+      "mean_mm": 7.705762116193632,
+      "end_mm": 9.44110335100462,
+      "end_held": true,
+      "end_pen_mm": 0.4207238329367829,
+      "end_bodies": 2,
+      "end_sided": 1.1172955165724593e-14,
+      "end_grip_n": 7.966929748940927,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 9.153125504139634,
+      "end_mm": 11.406617170695533,
+      "end_held": true,
+      "end_pen_mm": 0.41977411627516426,
+      "end_bodies": 4,
+      "end_sided": 0.44672442778809995,
+      "end_grip_n": 10.352416865972362,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 22,
+     "near": false,
+     "ff": {
+      "mean_mm": 8.09754969024372,
+      "end_mm": 7.505492610797482,
+      "end_held": true,
+      "end_pen_mm": 0.43693256048676943,
+      "end_bodies": 4,
+      "end_sided": 0.5076031821040394,
+      "end_grip_n": 10.747438111986842,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.947766361961499,
+      "end_mm": 7.105857482257447,
+      "end_held": true,
+      "end_pen_mm": 0.425114919914235,
+      "end_bodies": 2,
+      "end_sided": 1.2793551646464511e-14,
+      "end_grip_n": 8.731822689184492,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 24,
+     "near": false,
+     "ff": {
+      "mean_mm": 9.525505444194065,
+      "end_mm": 15.86382324633356,
+      "end_held": true,
+      "end_pen_mm": 0.42020582632380915,
+      "end_bodies": 2,
+      "end_sided": 1.1381038319229695e-14,
+      "end_grip_n": 8.086780324144941,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 23.35779915295257,
+      "end_mm": 182.32353814755382,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 26,
+     "near": false,
+     "ff": {
+      "mean_mm": 7.415013371907911,
+      "end_mm": 6.34609309549083,
+      "end_held": true,
+      "end_pen_mm": 0.43478594488854694,
+      "end_bodies": 3,
+      "end_sided": 0.5999996859215561,
+      "end_grip_n": 10.723374934317405,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.882171895769655,
+      "end_mm": 15.885198941685973,
+      "end_held": true,
+      "end_pen_mm": 0.4381092710821349,
+      "end_bodies": 3,
+      "end_sided": 0.612213567509587,
+      "end_grip_n": 10.582604610433737,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 28,
+     "near": false,
+     "ff": {
+      "mean_mm": 9.04873108126363,
+      "end_mm": 10.854311661146122,
+      "end_held": true,
+      "end_pen_mm": 0.4255987460981525,
+      "end_bodies": 2,
+      "end_sided": 7.572568502308328e-15,
+      "end_grip_n": 8.557950698064849,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.180193847321903,
+      "end_mm": 9.149762045276773,
+      "end_held": true,
+      "end_pen_mm": 0.4242355199236228,
+      "end_bodies": 3,
+      "end_sided": 0.49994057060285574,
+      "end_grip_n": 10.019722055265742,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 30,
+     "near": false,
+     "ff": {
+      "mean_mm": 10.181630036839515,
+      "end_mm": 13.210464886559311,
+      "end_held": true,
+      "end_pen_mm": 0.4314022553314682,
+      "end_bodies": 2,
+      "end_sided": 3.2287561375820363e-15,
+      "end_grip_n": 9.186277909626103,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.801538064742402,
+      "end_mm": 8.160936121565868,
+      "end_held": true,
+      "end_pen_mm": 0.42796610535084273,
+      "end_bodies": 2,
+      "end_sided": 9.934993821982995e-15,
+      "end_grip_n": 8.861714526382794,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 32,
+     "near": false,
+     "ff": {
+      "mean_mm": 10.698108439285713,
+      "end_mm": 8.116674762982205,
+      "end_held": true,
+      "end_pen_mm": 0.43116172009329157,
+      "end_bodies": 2,
+      "end_sided": 1.0690338383277561e-14,
+      "end_grip_n": 9.343520383795992,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.645216897576251,
+      "end_mm": 8.623523043050362,
+      "end_held": true,
+      "end_pen_mm": 0.42876420622777267,
+      "end_bodies": 3,
+      "end_sided": 0.333333333333332,
+      "end_grip_n": 11.193685568219742,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 34,
+     "near": false,
+     "ff": {
+      "mean_mm": 11.776476656406276,
+      "end_mm": 5.890444433029394,
+      "end_held": true,
+      "end_pen_mm": 0.4149824795657303,
+      "end_bodies": 2,
+      "end_sided": 0.3333333333333333,
+      "end_grip_n": 9.359081360575622,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.40012893511499,
+      "end_mm": 8.195364744838901,
+      "end_held": true,
+      "end_pen_mm": 0.4355017311889402,
+      "end_bodies": 2,
+      "end_sided": 1.0053506655612089e-14,
+      "end_grip_n": 9.602271945832042,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 36,
+     "near": false,
+     "ff": {
+      "mean_mm": 11.43335522865239,
+      "end_mm": 9.482977321348091,
+      "end_held": true,
+      "end_pen_mm": 0.41391691331231106,
+      "end_bodies": 2,
+      "end_sided": 0.3333333333333334,
+      "end_grip_n": 9.20855920310412,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 9.28842059468781,
+      "end_mm": 8.46914809838818,
+      "end_held": true,
+      "end_pen_mm": 0.4156674206866956,
+      "end_bodies": 2,
+      "end_sided": 0.3333333333333333,
+      "end_grip_n": 9.76116470586465,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 38,
+     "near": false,
+     "ff": {
+      "mean_mm": 10.480602307122082,
+      "end_mm": 13.498966813431354,
+      "end_held": true,
+      "end_pen_mm": 0.4401535424232885,
+      "end_bodies": 3,
+      "end_sided": 0.5000000000000009,
+      "end_grip_n": 11.678059767089398,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.541854422912017,
+      "end_mm": 7.458367033741597,
+      "end_held": true,
+      "end_pen_mm": 0.44485582355826164,
+      "end_bodies": 4,
+      "end_sided": 0.6402766594474083,
+      "end_grip_n": 12.721883122427261,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 40,
+     "near": true,
+     "ff": {
+      "mean_mm": 7.690164834314452,
+      "end_mm": 11.35901789413421,
+      "end_held": true,
+      "end_pen_mm": 0.4410600818926698,
+      "end_bodies": 3,
+      "end_sided": 0.5000000000000008,
+      "end_grip_n": 12.516419961234943,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 2.540496830602593,
+      "end_mm": 6.06470037477855,
+      "end_held": true,
+      "end_pen_mm": 0.44682957669988776,
+      "end_bodies": 3,
+      "end_sided": 0.5000000000000034,
+      "end_grip_n": 13.01647636310852,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 42,
+     "near": true,
+     "ff": {
+      "mean_mm": 7.103658447538445,
+      "end_mm": 6.380984378050113,
+      "end_held": true,
+      "end_pen_mm": 0.4359766458843114,
+      "end_bodies": 4,
+      "end_sided": 0.5112786791124995,
+      "end_grip_n": 13.181761840425281,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 3.4826735632679164,
+      "end_mm": 5.218590742064876,
+      "end_held": true,
+      "end_pen_mm": 0.4534440124745795,
+      "end_bodies": 4,
+      "end_sided": 0.6429910629956658,
+      "end_grip_n": 13.145655101479758,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 44,
+     "near": true,
+     "ff": {
+      "mean_mm": 7.832617969813119,
+      "end_mm": 11.924439814520264,
+      "end_held": true,
+      "end_pen_mm": 0.43938706602205185,
+      "end_bodies": 3,
+      "end_sided": 0.44721359549996215,
+      "end_grip_n": 12.494249755749442,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 4.613081689098767,
+      "end_mm": 8.572322937344607,
+      "end_held": true,
+      "end_pen_mm": 0.4491968432919821,
+      "end_bodies": 3,
+      "end_sided": 0.5000000000000033,
+      "end_grip_n": 13.505297771858949,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 46,
+     "near": false,
+     "ff": {
+      "mean_mm": 10.144358588364403,
+      "end_mm": 13.319139114745228,
+      "end_held": true,
+      "end_pen_mm": 0.4522640216031249,
+      "end_bodies": 4,
+      "end_sided": 0.64231151676289,
+      "end_grip_n": 11.965022246967397,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.688698212634201,
+      "end_mm": 8.848216870237358,
+      "end_held": true,
+      "end_pen_mm": 0.45358655005969845,
+      "end_bodies": 4,
+      "end_sided": 0.6830549801679505,
+      "end_grip_n": 12.852992730243319,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 48,
+     "near": false,
+     "ff": {
+      "mean_mm": 11.925021447236015,
+      "end_mm": 12.864657660211346,
+      "end_held": true,
+      "end_pen_mm": 0.4511139888298374,
+      "end_bodies": 3,
+      "end_sided": 0.6062886129107394,
+      "end_grip_n": 12.138156962786969,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.318249696704859,
+      "end_mm": 8.87681006086625,
+      "end_held": true,
+      "end_pen_mm": 0.45284668428218483,
+      "end_bodies": 3,
+      "end_sided": 0.3333333333333392,
+      "end_grip_n": 13.257305179263863,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 50,
+     "near": false,
+     "ff": {
+      "mean_mm": 12.359021426695266,
+      "end_mm": 13.51269875052329,
+      "end_held": true,
+      "end_pen_mm": 0.44698076752644467,
+      "end_bodies": 4,
+      "end_sided": 0.639914023091534,
+      "end_grip_n": 11.899071117357211,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.265566792994354,
+      "end_mm": 9.107125854742936,
+      "end_held": true,
+      "end_pen_mm": 0.4532744726433636,
+      "end_bodies": 3,
+      "end_sided": 0.35355339059328084,
+      "end_grip_n": 12.488682155984245,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 52,
+     "near": false,
+     "ff": {
+      "mean_mm": 12.246450474086911,
+      "end_mm": 12.895225737600585,
+      "end_held": true,
+      "end_pen_mm": 0.45710136162733545,
+      "end_bodies": 3,
+      "end_sided": 0.5999997358389646,
+      "end_grip_n": 12.135183123353539,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.297164188797716,
+      "end_mm": 9.349813027759186,
+      "end_held": true,
+      "end_pen_mm": 0.43975784326032147,
+      "end_bodies": 3,
+      "end_sided": 0.4472135954999527,
+      "end_grip_n": 12.987138953566422,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 54,
+     "near": false,
+     "ff": {
+      "mean_mm": 11.844423015661153,
+      "end_mm": 12.258644468159495,
+      "end_held": true,
+      "end_pen_mm": 0.4505887154091786,
+      "end_bodies": 3,
+      "end_sided": 0.5999997426816537,
+      "end_grip_n": 12.29250019024932,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.802951539910099,
+      "end_mm": 9.206381628488003,
+      "end_held": true,
+      "end_pen_mm": 0.4535365996505243,
+      "end_bodies": 3,
+      "end_sided": 0.4999999999999985,
+      "end_grip_n": 13.69941945544081,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 56,
+     "near": false,
+     "ff": {
+      "mean_mm": 11.381552521459007,
+      "end_mm": 13.34557654711436,
+      "end_held": true,
+      "end_pen_mm": 0.44978393943026596,
+      "end_bodies": 4,
+      "end_sided": 0.6811751942843569,
+      "end_grip_n": 12.650627315159214,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.13797303040038,
+      "end_mm": 9.08330859424323,
+      "end_held": true,
+      "end_pen_mm": 0.453341181950129,
+      "end_bodies": 3,
+      "end_sided": 0.33333333333333215,
+      "end_grip_n": 12.966430364778876,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 58,
+     "near": false,
+     "ff": {
+      "mean_mm": 11.32707764849464,
+      "end_mm": 12.425994204830918,
+      "end_held": true,
+      "end_pen_mm": 0.4533176352799875,
+      "end_bodies": 3,
+      "end_sided": 0.5999997413785909,
+      "end_grip_n": 12.265843044848967,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.373194485554073,
+      "end_mm": 8.349868332193909,
+      "end_held": true,
+      "end_pen_mm": 0.4572927298862435,
+      "end_bodies": 3,
+      "end_sided": 0.5000000000000008,
+      "end_grip_n": 14.146489677459536,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 60,
+     "near": false,
+     "ff": {
+      "mean_mm": 11.030933033403912,
+      "end_mm": 13.60343880806417,
+      "end_held": true,
+      "end_pen_mm": 0.45308986770457566,
+      "end_bodies": 3,
+      "end_sided": 0.33333333333333126,
+      "end_grip_n": 12.22184709321678,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.350543197003044,
+      "end_mm": 9.115194407151444,
+      "end_held": true,
+      "end_pen_mm": 0.43132642511167923,
+      "end_bodies": 2,
+      "end_sided": 0.3333333333333333,
+      "end_grip_n": 11.866140972237453,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 62,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.410788640272731,
+      "end_mm": 14.321175199639306,
+      "end_held": true,
+      "end_pen_mm": 0.4502986592560486,
+      "end_bodies": 2,
+      "end_sided": 4.935831846559931e-15,
+      "end_grip_n": 11.040380799513756,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 11.30261453286714,
+      "end_mm": 9.178521576534573,
+      "end_held": true,
+      "end_pen_mm": 0.44530141372593607,
+      "end_bodies": 2,
+      "end_sided": 0.3333333333333333,
+      "end_grip_n": 12.026437110922982,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 64,
+     "near": false,
+     "ff": {
+      "mean_mm": 13.061212412768734,
+      "end_mm": 13.886851970694646,
+      "end_held": true,
+      "end_pen_mm": 0.45021577710394234,
+      "end_bodies": 3,
+      "end_sided": 0.3333333333333295,
+      "end_grip_n": 11.912680847052014,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.652287078791602,
+      "end_mm": 3.39193805074023,
+      "end_held": true,
+      "end_pen_mm": 0.4597938607682701,
+      "end_bodies": 2,
+      "end_sided": 6.307420207598211e-15,
+      "end_grip_n": 11.534256201875756,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 66,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.477875740059577,
+      "end_mm": 14.542660565633508,
+      "end_held": true,
+      "end_pen_mm": 0.4514700210727706,
+      "end_bodies": 2,
+      "end_sided": 7.172400027294421e-15,
+      "end_grip_n": 10.337740491278964,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 10.811623445665989,
+      "end_mm": 9.14228371456712,
+      "end_held": true,
+      "end_pen_mm": 0.45472646711941705,
+      "end_bodies": 2,
+      "end_sided": 6.511463363383884e-15,
+      "end_grip_n": 11.506259172810177,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 68,
+     "near": false,
+     "ff": {
+      "mean_mm": 12.632575992930729,
+      "end_mm": 13.554058669076111,
+      "end_held": true,
+      "end_pen_mm": 0.4504077334491155,
+      "end_bodies": 2,
+      "end_sided": 3.5924979809775464e-15,
+      "end_grip_n": 10.912154237082955,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.515364970392559,
+      "end_mm": 8.0406760955302,
+      "end_held": true,
+      "end_pen_mm": 0.456743240575565,
+      "end_bodies": 3,
+      "end_sided": 0.5999997326193831,
+      "end_grip_n": 13.151648435637409,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 70,
+     "near": false,
+     "ff": {
+      "mean_mm": 13.27901904809013,
+      "end_mm": 14.074707679781563,
+      "end_held": true,
+      "end_pen_mm": 0.4486716672678111,
+      "end_bodies": 2,
+      "end_sided": 4.6922522443102824e-15,
+      "end_grip_n": 10.467273871692282,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 9.131137070728313,
+      "end_mm": 8.633178943411357,
+      "end_held": true,
+      "end_pen_mm": 0.45530842395695437,
+      "end_bodies": 2,
+      "end_sided": 7.500632984186213e-15,
+      "end_grip_n": 11.590365986893428,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 72,
+     "near": false,
+     "ff": {
+      "mean_mm": 14.250175917209313,
+      "end_mm": 15.335374897271093,
+      "end_held": true,
+      "end_pen_mm": 0.4500054158911456,
+      "end_bodies": 3,
+      "end_sided": 0.3333333333333346,
+      "end_grip_n": 11.33377902148348,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 10.943546624184219,
+      "end_mm": 10.171512870868085,
+      "end_held": true,
+      "end_pen_mm": 0.45528636329215627,
+      "end_bodies": 2,
+      "end_sided": 1.9773432256613708e-14,
+      "end_grip_n": 11.697373107112675,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 74,
+     "near": false,
+     "ff": {
+      "mean_mm": 10.604178771105238,
+      "end_mm": 11.92441802445932,
+      "end_held": true,
+      "end_pen_mm": 0.4538395878939531,
+      "end_bodies": 3,
+      "end_sided": 0.35355339059327906,
+      "end_grip_n": 11.697609634218344,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.654574280517253,
+      "end_mm": 10.13812866432777,
+      "end_held": true,
+      "end_pen_mm": 0.45589580727185025,
+      "end_bodies": 4,
+      "end_sided": 0.37707566900020983,
+      "end_grip_n": 12.807230484430828,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 76,
+     "near": false,
+     "ff": {
+      "mean_mm": 9.946070379801965,
+      "end_mm": 11.027151413006138,
+      "end_held": true,
+      "end_pen_mm": 0.44982581376236624,
+      "end_bodies": 3,
+      "end_sided": 0.3333333333333332,
+      "end_grip_n": 11.763692234389694,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.8696789919581525,
+      "end_mm": 8.597705981544555,
+      "end_held": true,
+      "end_pen_mm": 0.4584610588574388,
+      "end_bodies": 4,
+      "end_sided": 0.5270460773638735,
+      "end_grip_n": 13.238129001300926,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 78,
+     "near": false,
+     "ff": {
+      "mean_mm": 9.857284307170742,
+      "end_mm": 10.296942717432023,
+      "end_held": true,
+      "end_pen_mm": 0.42790834661469057,
+      "end_bodies": 3,
+      "end_sided": 0.3333333333333332,
+      "end_grip_n": 11.965938047234964,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.112056486874289,
+      "end_mm": 7.402380708493883,
+      "end_held": true,
+      "end_pen_mm": 0.4499041177280917,
+      "end_bodies": 3,
+      "end_sided": 0.353553390593267,
+      "end_grip_n": 12.407932654042835,
+      "end_clean": true
+     }
+    }
+   ]
+  },
+  {
+   "seq": "doorknob_use_1",
+   "subject": "s1",
+   "trained_start": 32,
+   "T": 65,
+   "stride": 2,
+   "near": {
+    "ff": {
+     "n": 3,
+     "held": 1,
+     "clean": 1,
+     "median_mm": 63.89114577180045
+    },
+    "ppo": {
+     "n": 3,
+     "held": 2,
+     "clean": 2,
+     "median_mm": 49.68494217696605
+    }
+   },
+   "far": {
+    "ff": {
+     "n": 27,
+     "held": 4,
+     "clean": 1,
+     "median_mm": 2090.58779233558
+    },
+    "ppo": {
+     "n": 27,
+     "held": 5,
+     "clean": 3,
+     "median_mm": 2053.2016315854967
+    }
+   },
+   "starts": [
+    {
+     "start": 0,
+     "near": false,
+     "ff": {
+      "mean_mm": 30899.717576353072,
+      "end_mm": 90569.05324684386,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 30899.717576353072,
+      "end_mm": 90569.05324684386,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 2,
+     "near": false,
+     "ff": {
+      "mean_mm": 29057.259636854687,
+      "end_mm": 85097.97160661804,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 29057.259636854687,
+      "end_mm": 85097.97160661804,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 4,
+     "near": false,
+     "ff": {
+      "mean_mm": 27272.07747538003,
+      "end_mm": 79797.9334672531,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 27272.07747538003,
+      "end_mm": 79797.9334672531,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 6,
+     "near": false,
+     "ff": {
+      "mean_mm": 25543.936024511884,
+      "end_mm": 74668.68216050707,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 25543.936024511884,
+      "end_mm": 74668.68216050707,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 8,
+     "near": false,
+     "ff": {
+      "mean_mm": 23873.099153581355,
+      "end_mm": 69710.46227335637,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 23873.099153581355,
+      "end_mm": 69710.46227335637,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 10,
+     "near": false,
+     "ff": {
+      "mean_mm": 22259.50183144187,
+      "end_mm": 64923.18161361849,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 22259.50183144187,
+      "end_mm": 64923.18161361849,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 12,
+     "near": false,
+     "ff": {
+      "mean_mm": 20703.136768111814,
+      "end_mm": 60306.80534574251,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 20703.136768111814,
+      "end_mm": 60306.80534574251,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 14,
+     "near": false,
+     "ff": {
+      "mean_mm": 19204.07331256669,
+      "end_mm": 55861.36938428496,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 19204.07331256669,
+      "end_mm": 55861.36938428496,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 16,
+     "near": false,
+     "ff": {
+      "mean_mm": 17719.92313204037,
+      "end_mm": 51486.195138727315,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 18006.027037947777,
+      "end_mm": 52062.42915172507,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 18,
+     "near": false,
+     "ff": {
+      "mean_mm": 17060.34300166319,
+      "end_mm": 48764.56933165909,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 16802.224001106413,
+      "end_mm": 48269.61685465603,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 20,
+     "near": false,
+     "ff": {
+      "mean_mm": 13628.36272673804,
+      "end_mm": 40653.337334857606,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 13612.557828368721,
+      "end_mm": 40621.27430351499,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 22,
+     "near": false,
+     "ff": {
+      "mean_mm": 12341.293681879295,
+      "end_mm": 36811.35642559535,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 12900.459265783535,
+      "end_mm": 37957.488431754304,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 24,
+     "near": false,
+     "ff": {
+      "mean_mm": 11299.779204868755,
+      "end_mm": 33627.33721886358,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 11589.47736555309,
+      "end_mm": 34219.54128517971,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 26,
+     "near": false,
+     "ff": {
+      "mean_mm": 1340.133551517487,
+      "end_mm": 7482.937760858312,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 801.8492535457707,
+      "end_mm": 5209.861534865398,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 28,
+     "near": false,
+     "ff": {
+      "mean_mm": 74.81125670411976,
+      "end_mm": 116.09084615842542,
+      "end_held": false,
+      "end_pen_mm": 0.5040574034944506,
+      "end_bodies": 4,
+      "end_sided": 0.5130338261440859,
+      "end_grip_n": 19.62031269069064,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 63.96143453835289,
+      "end_mm": 103.2833368870879,
+      "end_held": false,
+      "end_pen_mm": 0.5282710123829397,
+      "end_bodies": 4,
+      "end_sided": 0.4370209647894001,
+      "end_grip_n": 22.686669016129606,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 30,
+     "near": true,
+     "ff": {
+      "mean_mm": 79.66719482067295,
+      "end_mm": 119.44432557906173,
+      "end_held": false,
+      "end_pen_mm": 0.5231913889035851,
+      "end_bodies": 4,
+      "end_sided": 0.413300992373065,
+      "end_grip_n": 17.917194600246297,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 68.64622677904268,
+      "end_mm": 107.49376794153068,
+      "end_held": false,
+      "end_pen_mm": 0.518474061191824,
+      "end_bodies": 4,
+      "end_sided": 0.39860171580052023,
+      "end_grip_n": 18.396073776810127,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 32,
+     "near": true,
+     "ff": {
+      "mean_mm": 51.33963530557025,
+      "end_mm": 84.4254021978352,
+      "end_held": true,
+      "end_pen_mm": 0.7259606366516406,
+      "end_bodies": 9,
+      "end_sided": 0.1769978901139805,
+      "end_grip_n": 49.851671891430286,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 37.39043676939411,
+      "end_mm": 69.76889829229826,
+      "end_held": true,
+      "end_pen_mm": 0.735193737473331,
+      "end_bodies": 9,
+      "end_sided": 0.17463110834864495,
+      "end_grip_n": 49.896773396482104,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 34,
+     "near": true,
+     "ff": {
+      "mean_mm": 63.89114577180045,
+      "end_mm": 107.84360567499955,
+      "end_held": false,
+      "end_pen_mm": 0.3317523005225881,
+      "end_bodies": 5,
+      "end_sided": 0.20092693969920133,
+      "end_grip_n": 3.8574460882242607,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 49.68494217696605,
+      "end_mm": 89.7156281764463,
+      "end_held": true,
+      "end_pen_mm": 0.3738837140074821,
+      "end_bodies": 5,
+      "end_sided": 0.28420068939204934,
+      "end_grip_n": 6.566762778205601,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 36,
+     "near": false,
+     "ff": {
+      "mean_mm": 65.60715886415787,
+      "end_mm": 106.9911115594184,
+      "end_held": false,
+      "end_pen_mm": 0.3626251931820886,
+      "end_bodies": 4,
+      "end_sided": 0.1790070694546481,
+      "end_grip_n": 4.825604105746683,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 53.1897074300523,
+      "end_mm": 93.9535296487526,
+      "end_held": true,
+      "end_pen_mm": 0.3696970441752465,
+      "end_bodies": 4,
+      "end_sided": 0.16723750336521195,
+      "end_grip_n": 4.3407939646506755,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 38,
+     "near": false,
+     "ff": {
+      "mean_mm": 66.0674934760789,
+      "end_mm": 107.27178360624137,
+      "end_held": false,
+      "end_pen_mm": 0.3740824935690254,
+      "end_bodies": 4,
+      "end_sided": 0.18520706412479088,
+      "end_grip_n": 5.042472622560683,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 53.48374254643235,
+      "end_mm": 93.87743975162495,
+      "end_held": true,
+      "end_pen_mm": 0.36152243380995625,
+      "end_bodies": 5,
+      "end_sided": 0.23472848958748976,
+      "end_grip_n": 6.058721533475493,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 40,
+     "near": false,
+     "ff": {
+      "mean_mm": 53.3376974562185,
+      "end_mm": 78.88124036782548,
+      "end_held": true,
+      "end_pen_mm": 0.8160209322493399,
+      "end_bodies": 8,
+      "end_sided": 0.2086996904746724,
+      "end_grip_n": 88.70628811533275,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 39.123954336512114,
+      "end_mm": 60.84326722711222,
+      "end_held": true,
+      "end_pen_mm": 0.8398682277917026,
+      "end_bodies": 8,
+      "end_sided": 0.10012404610035483,
+      "end_grip_n": 90.92792813467949,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 42,
+     "near": false,
+     "ff": {
+      "mean_mm": 50.91729935161745,
+      "end_mm": 68.96361296212473,
+      "end_held": true,
+      "end_pen_mm": 1.136721989694807,
+      "end_bodies": 8,
+      "end_sided": 0.17942239945279914,
+      "end_grip_n": 68.3175174954992,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 36.66765342666783,
+      "end_mm": 50.69246967519623,
+      "end_held": true,
+      "end_pen_mm": 1.1401196308568442,
+      "end_bodies": 8,
+      "end_sided": 0.17989881670699576,
+      "end_grip_n": 67.0654967569363,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 44,
+     "near": false,
+     "ff": {
+      "mean_mm": 57.38873907452061,
+      "end_mm": 80.90709815249481,
+      "end_held": true,
+      "end_pen_mm": 1.2329720904941859,
+      "end_bodies": 7,
+      "end_sided": 0.28555877570977983,
+      "end_grip_n": 88.98926363644505,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 45.16071839423814,
+      "end_mm": 63.76497519662686,
+      "end_held": true,
+      "end_pen_mm": 1.2763391264592696,
+      "end_bodies": 7,
+      "end_sided": 0.30752058744182953,
+      "end_grip_n": 82.1353206879461,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 46,
+     "near": false,
+     "ff": {
+      "mean_mm": 2090.58779233558,
+      "end_mm": 6281.931409681059,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 2053.2016315854967,
+      "end_mm": 6197.13251177722,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 48,
+     "near": false,
+     "ff": {
+      "mean_mm": 1512.5695282848128,
+      "end_mm": 4638.733418271082,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 1470.626206540228,
+      "end_mm": 4541.518087078288,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 50,
+     "near": false,
+     "ff": {
+      "mean_mm": 80.03744328406205,
+      "end_mm": 107.9226677170848,
+      "end_held": false,
+      "end_pen_mm": 18.028152634290738,
+      "end_bodies": 4,
+      "end_sided": 0.4976621756793617,
+      "end_grip_n": 816.9846102759474,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 214.75498484517783,
+      "end_mm": 902.202626517001,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 52,
+     "near": false,
+     "ff": {
+      "mean_mm": 78.33916943445203,
+      "end_mm": 98.47272299841838,
+      "end_held": true,
+      "end_pen_mm": 18.031227377615682,
+      "end_bodies": 2,
+      "end_sided": 0.000264498269663413,
+      "end_grip_n": 812.8268053187085,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 84.2374480018304,
+      "end_mm": 174.04965341945174,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 54,
+     "near": false,
+     "ff": {
+      "mean_mm": 82.90995170789567,
+      "end_mm": 104.62756386715144,
+      "end_held": false,
+      "end_pen_mm": 17.283732791662757,
+      "end_bodies": 2,
+      "end_sided": 0.00026086661005859967,
+      "end_grip_n": 812.6779937455256,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 258.1329454794111,
+      "end_mm": 864.5350220491498,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 56,
+     "near": false,
+     "ff": {
+      "mean_mm": 78.03646489951517,
+      "end_mm": 105.13099790031362,
+      "end_held": false,
+      "end_pen_mm": 18.022167329817773,
+      "end_bodies": 2,
+      "end_sided": 0.00022264754317184398,
+      "end_grip_n": 812.8905148803651,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 75.79394329430248,
+      "end_mm": 107.87535985901198,
+      "end_held": false,
+      "end_pen_mm": 18.24297141942757,
+      "end_bodies": 2,
+      "end_sided": 0.00022001404230728572,
+      "end_grip_n": 812.8689095665344,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 58,
+     "near": false,
+     "ff": {
+      "mean_mm": 326.57027144198605,
+      "end_mm": 855.7297888795088,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 320.1298764930164,
+      "end_mm": 832.8432510714712,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    }
+   ]
+  },
+  {
+   "seq": "flashlight_lift",
+   "subject": "s1",
+   "trained_start": 14,
+   "T": 29,
+   "stride": 2,
+   "near": {
+    "ff": {
+     "n": 3,
+     "held": 3,
+     "clean": 3,
+     "median_mm": 16.918108447511944
+    },
+    "ppo": {
+     "n": 3,
+     "held": 3,
+     "clean": 3,
+     "median_mm": 5.459495463600961
+    }
+   },
+   "far": {
+    "ff": {
+     "n": 9,
+     "held": 9,
+     "clean": 9,
+     "median_mm": 17.835568114113112
+    },
+    "ppo": {
+     "n": 9,
+     "held": 9,
+     "clean": 9,
+     "median_mm": 7.3524617887267345
+    }
+   },
+   "starts": [
+    {
+     "start": 0,
+     "near": false,
+     "ff": {
+      "mean_mm": 31.441636254824143,
+      "end_mm": 41.13033993356822,
+      "end_held": true,
+      "end_pen_mm": 0.47353906931123646,
+      "end_bodies": 3,
+      "end_sided": 0.35102849187700574,
+      "end_grip_n": 7.390981755107804,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 22.426351960146224,
+      "end_mm": 34.96357954560129,
+      "end_held": true,
+      "end_pen_mm": 0.42922451405463424,
+      "end_bodies": 3,
+      "end_sided": 0.37534858151851075,
+      "end_grip_n": 5.489872294839092,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 2,
+     "near": false,
+     "ff": {
+      "mean_mm": 19.785774094199493,
+      "end_mm": 25.029176679102083,
+      "end_held": true,
+      "end_pen_mm": 0.4516095726422144,
+      "end_bodies": 3,
+      "end_sided": 0.12364646933161486,
+      "end_grip_n": 10.63608576979664,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 9.6959345105967,
+      "end_mm": 12.811046067315345,
+      "end_held": true,
+      "end_pen_mm": 0.4734982143862647,
+      "end_bodies": 3,
+      "end_sided": 0.12864524616767561,
+      "end_grip_n": 11.474999937198103,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 4,
+     "near": false,
+     "ff": {
+      "mean_mm": 18.43342660533888,
+      "end_mm": 22.760762474906283,
+      "end_held": true,
+      "end_pen_mm": 0.4527039906359459,
+      "end_bodies": 3,
+      "end_sided": 0.1229273485035755,
+      "end_grip_n": 10.919529819954903,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 8.742363073563364,
+      "end_mm": 11.751301279508494,
+      "end_held": true,
+      "end_pen_mm": 0.473573059406927,
+      "end_bodies": 3,
+      "end_sided": 0.12833770134031897,
+      "end_grip_n": 11.868231330708651,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 6,
+     "near": false,
+     "ff": {
+      "mean_mm": 17.835568114113112,
+      "end_mm": 21.28763670170361,
+      "end_held": true,
+      "end_pen_mm": 0.4643356227796945,
+      "end_bodies": 3,
+      "end_sided": 0.35103098041839514,
+      "end_grip_n": 8.090873915561431,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.3524617887267345,
+      "end_mm": 9.408585962372605,
+      "end_held": true,
+      "end_pen_mm": 0.4816812519488588,
+      "end_bodies": 3,
+      "end_sided": 0.5026222295158647,
+      "end_grip_n": 10.604063233157069,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 8,
+     "near": false,
+     "ff": {
+      "mean_mm": 18.403714681677997,
+      "end_mm": 19.695433719209024,
+      "end_held": true,
+      "end_pen_mm": 0.46537154838932093,
+      "end_bodies": 3,
+      "end_sided": 0.10859051490668459,
+      "end_grip_n": 15.009865556310368,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 7.551898085652077,
+      "end_mm": 8.025524320028007,
+      "end_held": true,
+      "end_pen_mm": 0.5745732289457667,
+      "end_bodies": 4,
+      "end_sided": 0.4545932989195061,
+      "end_grip_n": 15.424339358933365,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 10,
+     "near": false,
+     "ff": {
+      "mean_mm": 16.54544981223931,
+      "end_mm": 17.448386220341273,
+      "end_held": true,
+      "end_pen_mm": 0.6136610476702659,
+      "end_bodies": 3,
+      "end_sided": 0.07768891537559704,
+      "end_grip_n": 18.815731879701268,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.693069215418792,
+      "end_mm": 5.788404907502415,
+      "end_held": true,
+      "end_pen_mm": 0.605995459980224,
+      "end_bodies": 4,
+      "end_sided": 0.4402402000808402,
+      "end_grip_n": 15.677460509423012,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 12,
+     "near": true,
+     "ff": {
+      "mean_mm": 16.37078694095778,
+      "end_mm": 16.887368060107438,
+      "end_held": true,
+      "end_pen_mm": 0.6746883977133897,
+      "end_bodies": 4,
+      "end_sided": 0.453452411721873,
+      "end_grip_n": 19.933391514394106,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.459495463600961,
+      "end_mm": 5.473453570236988,
+      "end_held": true,
+      "end_pen_mm": 0.5237451317426675,
+      "end_bodies": 4,
+      "end_sided": 0.45230329461429425,
+      "end_grip_n": 21.58581928019938,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 14,
+     "near": true,
+     "ff": {
+      "mean_mm": 18.091552682302858,
+      "end_mm": 16.647141484785173,
+      "end_held": true,
+      "end_pen_mm": 0.5505049444910243,
+      "end_bodies": 3,
+      "end_sided": 0.30146404810096855,
+      "end_grip_n": 12.898430283781721,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.613244900619376,
+      "end_mm": 4.020344056539743,
+      "end_held": true,
+      "end_pen_mm": 0.5521484938650946,
+      "end_bodies": 3,
+      "end_sided": 0.2987307162194482,
+      "end_grip_n": 12.345241158494677,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 16,
+     "near": true,
+     "ff": {
+      "mean_mm": 16.918108447511944,
+      "end_mm": 14.975623777472126,
+      "end_held": true,
+      "end_pen_mm": 0.6422156613451032,
+      "end_bodies": 3,
+      "end_sided": 0.3028589897758707,
+      "end_grip_n": 13.126322006058018,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.057756076768324,
+      "end_mm": 2.298760499399125,
+      "end_held": true,
+      "end_pen_mm": 0.6591255119074112,
+      "end_bodies": 3,
+      "end_sided": 0.30625524669652,
+      "end_grip_n": 13.546278340638652,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 18,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.268452781597114,
+      "end_mm": 11.91596563033353,
+      "end_held": true,
+      "end_pen_mm": 0.7698503585386924,
+      "end_bodies": 3,
+      "end_sided": 0.299630043573773,
+      "end_grip_n": 15.777641643248206,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.405911316435115,
+      "end_mm": 3.6250562287457093,
+      "end_held": true,
+      "end_pen_mm": 0.7617709079981169,
+      "end_bodies": 3,
+      "end_sided": 0.3088936840207121,
+      "end_grip_n": 15.71832388606232,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 20,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.590861361139112,
+      "end_mm": 11.596636281594733,
+      "end_held": true,
+      "end_pen_mm": 0.8554577029842627,
+      "end_bodies": 3,
+      "end_sided": 0.2984837066343588,
+      "end_grip_n": 17.84563608677513,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 5.921077015594336,
+      "end_mm": 4.732696641865157,
+      "end_held": true,
+      "end_pen_mm": 0.7570479437065379,
+      "end_bodies": 3,
+      "end_sided": 0.31026405230545323,
+      "end_grip_n": 16.870906628053017,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 22,
+     "near": false,
+     "ff": {
+      "mean_mm": 15.024776658378624,
+      "end_mm": 11.31733377631608,
+      "end_held": true,
+      "end_pen_mm": 0.813969253420647,
+      "end_bodies": 3,
+      "end_sided": 0.2979393660462886,
+      "end_grip_n": 18.802112979289664,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 6.0593139987845195,
+      "end_mm": 7.104165604765054,
+      "end_held": true,
+      "end_pen_mm": 0.8612426752421278,
+      "end_bodies": 3,
+      "end_sided": 0.31169241597070424,
+      "end_grip_n": 17.825076874746777,
+      "end_clean": true
+     }
+    }
+   ]
+  },
+  {
+   "seq": "pyramidlarge_inspect_1",
+   "subject": "s1",
+   "trained_start": 30,
+   "T": 60,
+   "stride": 2,
+   "near": {
+    "ff": {
+     "n": 3,
+     "held": 3,
+     "clean": 3,
+     "median_mm": 35.52347727842568
+    },
+    "ppo": {
+     "n": 3,
+     "held": 3,
+     "clean": 3,
+     "median_mm": 16.6753245015114
+    }
+   },
+   "far": {
+    "ff": {
+     "n": 25,
+     "held": 3,
+     "clean": 3,
+     "median_mm": 7556.0111695133955
+    },
+    "ppo": {
+     "n": 25,
+     "held": 3,
+     "clean": 3,
+     "median_mm": 8392.22738785628
+    }
+   },
+   "starts": [
+    {
+     "start": 0,
+     "near": false,
+     "ff": {
+      "mean_mm": 22250.673103397887,
+      "end_mm": 68497.87597026504,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 25171.825660644423,
+      "end_mm": 74459.04810708703,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 2,
+     "near": false,
+     "ff": {
+      "mean_mm": 23727.60741262329,
+      "end_mm": 69884.10336124316,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 23449.17953488618,
+      "end_mm": 69361.51048356298,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 4,
+     "near": false,
+     "ff": {
+      "mean_mm": 22495.146024445527,
+      "end_mm": 65836.3273425444,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 20632.990891544985,
+      "end_mm": 62129.813187721134,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 6,
+     "near": false,
+     "ff": {
+      "mean_mm": 21354.824542567152,
+      "end_mm": 62005.92262831101,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 15822.15680762863,
+      "end_mm": 50527.19029538857,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 8,
+     "near": false,
+     "ff": {
+      "mean_mm": 18254.183821934923,
+      "end_mm": 54290.36771644066,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 17331.70288352459,
+      "end_mm": 52435.19506154365,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 10,
+     "near": false,
+     "ff": {
+      "mean_mm": 15752.093414746867,
+      "end_mm": 47808.565351955825,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 15014.99272463145,
+      "end_mm": 46319.82188081702,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 12,
+     "near": false,
+     "ff": {
+      "mean_mm": 16479.48601087863,
+      "end_mm": 48001.4986460939,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 16136.97885241827,
+      "end_mm": 47332.70382676687,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 14,
+     "near": false,
+     "ff": {
+      "mean_mm": 15348.985559687468,
+      "end_mm": 44510.692111326505,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 14919.315272838037,
+      "end_mm": 43675.21326591964,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 16,
+     "near": false,
+     "ff": {
+      "mean_mm": 14152.432191670014,
+      "end_mm": 40931.48003194482,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 13780.574240659376,
+      "end_mm": 40206.71522791294,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 18,
+     "near": false,
+     "ff": {
+      "mean_mm": 12904.215961876409,
+      "end_mm": 37317.76616421382,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 12551.919043372922,
+      "end_mm": 36601.19358761135,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 20,
+     "near": false,
+     "ff": {
+      "mean_mm": 10934.230082101682,
+      "end_mm": 32278.58186681479,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 10371.805119838424,
+      "end_mm": 31195.092015259957,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 22,
+     "near": false,
+     "ff": {
+      "mean_mm": 9810.832801539396,
+      "end_mm": 29049.7988228088,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 9584.652738449322,
+      "end_mm": 28604.582051769685,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 24,
+     "near": false,
+     "ff": {
+      "mean_mm": 7556.0111695133955,
+      "end_mm": 23454.83270828278,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 8392.22738785628,
+      "end_mm": 25189.733807628676,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 26,
+     "near": false,
+     "ff": {
+      "mean_mm": 35.38058631251856,
+      "end_mm": 40.09328860263438,
+      "end_held": true,
+      "end_pen_mm": 0.35659011603385615,
+      "end_bodies": 4,
+      "end_sided": 0.3183194740314792,
+      "end_grip_n": 5.711725297184717,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 17.495799023222254,
+      "end_mm": 23.053529184014582,
+      "end_held": true,
+      "end_pen_mm": 0.3805970853252713,
+      "end_bodies": 4,
+      "end_sided": 0.19428356440413905,
+      "end_grip_n": 6.201792655653648,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 28,
+     "near": true,
+     "ff": {
+      "mean_mm": 35.52347727842568,
+      "end_mm": 40.41265101492468,
+      "end_held": true,
+      "end_pen_mm": 0.35762163012927073,
+      "end_bodies": 4,
+      "end_sided": 0.19451738240630312,
+      "end_grip_n": 5.7008833864539135,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 15.708110757471854,
+      "end_mm": 21.89888389978994,
+      "end_held": true,
+      "end_pen_mm": 0.34860714145677296,
+      "end_bodies": 4,
+      "end_sided": 0.3144813266974837,
+      "end_grip_n": 5.9454461982873195,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 30,
+     "near": true,
+     "ff": {
+      "mean_mm": 34.75108031568555,
+      "end_mm": 39.61637551363321,
+      "end_held": true,
+      "end_pen_mm": 0.35448578792772567,
+      "end_bodies": 4,
+      "end_sided": 0.32114804285568593,
+      "end_grip_n": 5.765554321515628,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 16.6753245015114,
+      "end_mm": 22.1355045995965,
+      "end_held": true,
+      "end_pen_mm": 0.3522129852266546,
+      "end_bodies": 4,
+      "end_sided": 0.2716421716231751,
+      "end_grip_n": 6.351462650478787,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 32,
+     "near": true,
+     "ff": {
+      "mean_mm": 36.65300772471927,
+      "end_mm": 40.04848679169356,
+      "end_held": true,
+      "end_pen_mm": 0.35601284598613286,
+      "end_bodies": 4,
+      "end_sided": 0.3209380385345402,
+      "end_grip_n": 5.819326250410057,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 16.854465844235754,
+      "end_mm": 21.939981192703307,
+      "end_held": true,
+      "end_pen_mm": 0.3520397682936816,
+      "end_bodies": 4,
+      "end_sided": 0.27337352928157677,
+      "end_grip_n": 6.246097904962554,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 34,
+     "near": false,
+     "ff": {
+      "mean_mm": 38.30838705370438,
+      "end_mm": 40.605705158214185,
+      "end_held": true,
+      "end_pen_mm": 0.37083496724251297,
+      "end_bodies": 4,
+      "end_sided": 0.3118950720334976,
+      "end_grip_n": 5.637748101477241,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 20.29670172602856,
+      "end_mm": 23.22074410771288,
+      "end_held": true,
+      "end_pen_mm": 0.3845056475089897,
+      "end_bodies": 4,
+      "end_sided": 0.1949038228470135,
+      "end_grip_n": 6.330354258804949,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 36,
+     "near": false,
+     "ff": {
+      "mean_mm": 40.84711984626754,
+      "end_mm": 41.96988411487532,
+      "end_held": true,
+      "end_pen_mm": 0.3807416915458673,
+      "end_bodies": 3,
+      "end_sided": 0.2853105794852641,
+      "end_grip_n": 5.500121190725805,
+      "end_clean": true
+     },
+     "ppo": {
+      "mean_mm": 22.652709503261566,
+      "end_mm": 23.904534905120318,
+      "end_held": true,
+      "end_pen_mm": 0.38710766316032824,
+      "end_bodies": 4,
+      "end_sided": 0.19327454643930939,
+      "end_grip_n": 6.2418300066675325,
+      "end_clean": true
+     }
+    },
+    {
+     "start": 38,
+     "near": false,
+     "ff": {
+      "mean_mm": 2957.991808205162,
+      "end_mm": 8851.0787087775,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 2748.3259710372554,
+      "end_mm": 8428.881847645835,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 40,
+     "near": false,
+     "ff": {
+      "mean_mm": 2817.8279179608176,
+      "end_mm": 8019.213748507806,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 2659.214550312943,
+      "end_mm": 7700.615227742899,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 42,
+     "near": false,
+     "ff": {
+      "mean_mm": 2307.1015406820607,
+      "end_mm": 6502.979556614578,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 2072.2463077600933,
+      "end_mm": 6057.835358940889,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 44,
+     "near": false,
+     "ff": {
+      "mean_mm": 1840.538530657262,
+      "end_mm": 5118.113825646055,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 1620.0520847552773,
+      "end_mm": 4695.17876128261,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 46,
+     "near": false,
+     "ff": {
+      "mean_mm": 1350.3341511494098,
+      "end_mm": 3733.600179528402,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 1266.4410416348564,
+      "end_mm": 3592.8100803372145,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 48,
+     "near": false,
+     "ff": {
+      "mean_mm": 666.6298162662891,
+      "end_mm": 2044.6504659859675,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 756.3189625072656,
+      "end_mm": 2266.6889121979652,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 50,
+     "near": false,
+     "ff": {
+      "mean_mm": 512.7894364589432,
+      "end_mm": 1489.6809606074842,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 440.90575564767954,
+      "end_mm": 1342.2111905226097,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 52,
+     "near": false,
+     "ff": {
+      "mean_mm": 328.4608523251937,
+      "end_mm": 906.1691949309659,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 303.7135841002162,
+      "end_mm": 872.2093003697166,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    },
+    {
+     "start": 54,
+     "near": false,
+     "ff": {
+      "mean_mm": 175.22156720610207,
+      "end_mm": 454.6612387923546,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     },
+     "ppo": {
+      "mean_mm": 129.9996033199644,
+      "end_mm": 344.55112386653025,
+      "end_held": false,
+      "end_pen_mm": 0.0,
+      "end_bodies": 0,
+      "end_sided": 1.0,
+      "end_grip_n": 0.0,
+      "end_clean": false
+     }
+    }
+   ]
+  }
+ ]
+}
