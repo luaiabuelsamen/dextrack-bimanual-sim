@@ -143,6 +143,79 @@ because the first three searches had been gamed by contact *count*, and
 force had read as a symptom of penetration rather than a failure of its
 own.
 
+**The force-capped score, four search seeds, held-out starts, and the
+physics grid (2026-09-16, evening).** The three experiments the afternoon
+proposed, run and looked at.
+
+*Force cap in the score.* Grip under 40× weight is now part of the clean
+criterion and a capped penalty in the score (`stage2_carry.py`). The first
+version of the cap was uncapped and taught a lesson: a 2500× burial seed
+scored 5, the hill-climb accepted the first pose that let go (score 0.4),
+and could never re-enter contact — alarm clock, apple and bowl all "dropped"
+under a score meant to relax them (`results/stage2_carry_fcap_uncapped_*`,
+kept). Capped at 0.3, a buried hold (~0.45) still beats a drop (0.75+).
+
+*Four seeds, whole reference, capped score* (`results/stage2_carry_fcap_s{0..3}*.json`,
+every clean pose re-carried from its stored offset and under 8 wrist
+perturbations; renders in `out/carry_fcap_s*/`, not committed):
+
+| per seed | seed 0 | seed 1 | seed 2 | seed 3 | union |
+|---|---:|---:|---:|---:|---:|
+| clean, search's reading | 14 | 17 | 18 | 14 | 26 |
+| clean under ≥ 4 of 8 perturbations | 10 | 13 | 9 | 8 | **20** |
+| under all 8 | 1 | 2 | 2 | 2 | **5** |
+
+So a single run of this search finds 8–13 robust clean poses out of 40;
+four runs together find 20, and the union has not stopped growing (10 → 15
+→ 18 → 20 over seeds 0–3). Restarts are the method, not a refinement. The
+five that survive all eight — banana, cube, flute, headphones, scissors
+([reset → end](../figures/carry_robust_five_fcap.jpg)) — are not the five
+from the two-seed run: flashlight survives 7, 1, 7 and 0 of 8 under the four
+seeds, so "all eight" is itself a per-seed lottery and the ≥ 4 count is the
+one to quote. Twelve references never contact the object from their seed
+under any of the four seeds and one seed each rescues the medium cylinder
+and the phone at 0 and 3 of 8; the four that stay buried (alarm clock,
+apple, bowl, bunny) stay buried.
+
+*Held-out starts for the five policies* (`stage3_carry_eval.py`,
+`results/stage3_carry_eval.json`; every second frame of each reference,
+feedforward against PPO from the same state):
+
+| reference | starts | feedforward held | PPO held | median error, FF → PPO |
+|---|---:|---:|---:|---|
+| camera | 27 | 26 | 26 | 15.1 → 6.7 mm |
+| cube | 37 | 32 | 31 | 11.4 → 8.4 mm |
+| flashlight | 9 | 9 | 9 | 17.8 → 7.4 mm |
+| doorknob | 27 | 4 | 5 | drop → drop |
+| pyramid | 25 | 3 | 3 | drop → drop |
+
+The policy halves the error on every start the feedforward already carries
+from and rescues nothing where it does not. The doorknob and pyramid seeds
+carry from a window of about ten frames around the frame they were searched
+on and from nowhere else — the wrist offset is fitted to that start. A
+policy trained around one start is a tracker for that start's grasp, which
+is what stage 3 was always going to be.
+
+*Physics grid* (`carry_softcontact.py`, `results/stage2_carry_softcontact.json`;
+the stuck four plus cube and flashlight as controls, same search and score):
+
+| setting | stuck four | cube (control) | flashlight (control) |
+|---|---|---|---|
+| default | buried or dropped, 0 of 8 robust each | clean 8/8 | clean 7/8 |
+| contact solref 0.02 → 0.06 s | deeper: 4–11 mm | **drops** | sinks to 9.3 mm |
+| + finger force ×0.3 | same | drops | 9.3 mm |
+| weld solref 0.01 → 0.10 s | alarm clock 2362×, bowl 9602× | drops | drops |
+| all three | nothing held clean | drops | drops |
+
+Softer MuJoCo contact means deeper penetration at the same load, which the
+score sees and the controls fail on; a compliant wrist lets the object push
+the hand away and the controls drop. None of it relaxes the four. This is
+not DexTrack's physics — PhysX with a depenetration cap is a different
+model, not a softer version of this one — and it says the MuJoCo knobs that
+sound like "softer" are not the way to it. The four stuck references are a
+geometry problem (vessels and a wide clock the fingers cannot span) until
+someone shows otherwise.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with

@@ -5350,3 +5350,37 @@ robust poses fail (camera 88x, banana 67x); 17 of 40 remain, 4 under all
 eight perturbations (cube, flashlight, pyramid, doorknob). Recorded against
 yesterday's count of 19 / 5.
 
+## Evening: force cap, four seeds, held-out starts, physics grid
+
+    per seed (capped score, whole reference)   s0  s1  s2  s3   union
+    clean, search's reading                    14  17  18  14     26
+    clean under >= 4/8 perturbations           10  13   9   8     20
+    under 8/8                                   1   2   2   2      5
+
+A single search finds 8-13; the union over four grows 10 -> 15 -> 18 -> 20
+and has not plateaued. Restarts are the method. The 8/8 set is itself
+seed-dependent (flashlight 7,1,7,0), so quote the >= 4/8 count: 20 of 40.
+Rendered the five 8/8 poses (banana, cube, flute, headphones, scissors):
+all real grasps; banana is a fingertip pinch at 3 N.
+
+Uncapped grip penalty, my error: a 2500x burial seed scored 5, the
+hill-climb took the first drop (0.4) and never re-entered contact --
+alarmclock/apple/bowl "dropped". Capped at 0.3 so a buried hold (~0.45)
+beats a drop (0.75+). The uncapped runs are kept as `_fcap_uncapped_*`.
+
+Held-out starts (every 2nd frame): PPO halves the error on every start the
+feedforward carries from (camera 26/27, cube 32/37, flashlight 9/9) and
+rescues none it does not (doorknob 4->5 of 27, pyramid 3->3 of 25). Those
+two carry only within ~10 frames of the searched start.
+
+Physics grid on the stuck four + cube/flashlight controls: softer contact
+solref (0.02->0.06 s) DEEPENS penetration (4-11 mm) and the cube drops; force
+x0.3 adds nothing; weld solref 0.10 drops both controls; all three drops
+everything. Nothing relaxes alarmclock/apple/bowl/bunny. MuJoCo "softer" is
+not PhysX's depenetration cap; the four are a geometry problem until shown
+otherwise.
+
+Also: `pkill -f carry_softcontact.py` from a shell whose command line held the
+pattern killed the shell and silently skipped a patch; the memory note about
+pgrep matching itself applies to pkill. Verified state before relaunching.
+
