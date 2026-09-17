@@ -5406,3 +5406,15 @@ tracker for the 18. Restarts (union still growing at 4), and for the 12
 non-contacting references a search that starts from contact rather than
 from the retarget.
 
+### D2 rendered: the rotation term on screen, and a shelf the end-state rule passed
+
+`figures/physics_carry*_d2.gif` (banana, eyeglasses, binoculars; no
+controller and PPO each). Banana: 38 -> 11 deg, the object stops swinging.
+Eyeglasses: 34 -> 16 deg. Binoculars, the seed our rule called robust-clean
+(4/8): rendered, its end state is the binoculars lying upside down across the
+fingers of an upturned hand at 137 deg -- 0.65 mm, 19 contacts, 32x, "held"
+-- a shelf, not a grasp, and the carry passes through a 24 mm / 31 kN burial
+on the way. Same failure class as the small cube resting in cupped fingers.
+Our rule has no orientation bound; DexTrack's does, and it is what catches
+these. The clean criterion should carry a rotation bound from here on.
+

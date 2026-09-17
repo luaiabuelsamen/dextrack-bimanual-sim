@@ -48,7 +48,7 @@ for _key, _seq, _title in (
 
 
 def carry_seed(seq_name):
-    rows = json.loads(CARRY_SEEDS.read_text())["rows"]
+    rows = json.loads(CARRY_SEEDS.read_text())["rows"]      # module-level, so --carry-seeds can swap it
     by = {f"{r['subject']}/{r['seq']}": r for r in rows}
     hits = [k for k in by if k.split("/", 1)[1] == seq_name]
     if len(hits) != 1:
@@ -519,20 +519,37 @@ def render(name, cache, out):
 
 
 def main():
+    global CARRY_SEEDS, CARRY_CKPT
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("demos", nargs="+", choices=DEMOS)
+    ap.add_argument("demos", nargs="+",
+                    help="a name from DEMOS, or carry_<seq> / carryppo_<seq> for any "
+                         "sequence in --carry-seeds")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--render-only", action="store_true")
     ap.add_argument("--capture-only", action="store_true")
+    ap.add_argument("--carry-seeds", default=str(CARRY_SEEDS))
+    ap.add_argument("--carry-ckpt", default=str(CARRY_CKPT))
+    ap.add_argument("--suffix", default="", help="appended to the output name")
     a = ap.parse_args()
     if a.render_only and a.capture_only:
         ap.error("choose one of --render-only and --capture-only")
+    CARRY_SEEDS, CARRY_CKPT = Path(a.carry_seeds), Path(a.carry_ckpt)
+    known = {r["seq"] for r in json.loads(CARRY_SEEDS.read_text())["rows"]}
     for name in a.demos:
-        cache = Path("out/tracking_gifs") / name
+        if name not in DEMOS:
+            for prefix, mode in (("carryppo_", "carry_ppo"), ("carry_", "carry")):
+                if name.startswith(prefix) and name[len(prefix):] in known:
+                    seq = name[len(prefix):]
+                    DEMOS[name] = (seq, mode, seq.rsplit("_", 1)[0].replace("_", " / ").upper())
+                    break
+            else:
+                ap.error(f"{name!r} is not a demo and not a carry seed in {CARRY_SEEDS}")
+    for name in a.demos:
+        cache = Path("out/tracking_gifs") / f"{name}{a.suffix}"
         if not a.render_only:
             capture(name, cache, a.seed)
         if not a.capture_only:
-            render(name, cache, Path(f"figures/physics_{name}.gif"))
+            render(name, cache, Path(f"figures/physics_{name}{a.suffix}.gif"))
 
 
 if __name__ == "__main__":

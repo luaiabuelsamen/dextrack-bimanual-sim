@@ -141,6 +141,14 @@ PPO policy trained from that start.
 |---|---|
 | ![Shadow hand starts with a red fingertip inside a translucent cube and ends holding it between thumb and fingers](figures/physics_carry_cube.gif) | ![The same start under PPO, holding the cube closer to the reference path](figures/physics_carryppo_cube.gif) |
 
+| Banana, after D2 — no controller, 17 mm, 38° | Banana, after D2 — PPO with a rotation term, 8 mm, 11° |
+|---|---|
+| ![Shadow hand starts with red links inside a translucent banana and ends pinching it, the banana swinging](figures/physics_carry_banana_eat_1_d2.gif) | ![The same start under the rotation-rewarded PPO policy, the banana held steady at 11 degrees](figures/physics_carryppo_banana_eat_1_d2.gif) |
+
+Eyeglasses, the same pair: [no controller](figures/physics_carry_eyeglasses_clean_1_d2.gif), [PPO](figures/physics_carryppo_eyeglasses_clean_1_d2.gif), 34° → 16°.
+And a failure the end-state rule passed and the rotation bound catches:
+[binoculars](figures/physics_carry_binoculars_lift_d2.gif) ends "held" at 0.65 mm on 19 contacts — lying upside-down across the fingers of an upturned hand at 137°, a shelf, not a grasp; [its policy](figures/physics_carryppo_binoculars_lift_d2.gif) drops it.
+
 The other three of the five robust seeds:
 [pyramid](figures/physics_carry_pyramid.gif) ([PPO](figures/physics_carryppo_pyramid.gif)),
 [doorknob](figures/physics_carry_doorknob.gif) ([PPO](figures/physics_carryppo_doorknob.gif)),
