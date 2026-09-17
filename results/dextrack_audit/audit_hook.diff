@@ -1,5 +1,5 @@
 --- tasks/allegro_hand_tracking_generalist.py.orig	2026-09-17 21:06:10.120213247 +0000
-+++ tasks/allegro_hand_tracking_generalist.py	2026-09-17 22:02:21.947540095 +0000
++++ tasks/allegro_hand_tracking_generalist.py	2026-09-17 22:43:57.931766024 +0000
 @@ -1745,6 +1745,18 @@
          self.hand_angvels = self.root_state_tensor[:, 10:13]
          self.saved_root_tensor = self.root_state_tensor.clone()
@@ -48,7 +48,50 @@
          self.goal_init_state = to_torch(self.goal_init_state, device=self.device, dtype=torch.float).view(self.num_envs, 13)
          self.goal_states = self.goal_init_state.clone( )
          # self.goal_pose = self.goal_states[:, 0:7] #
-@@ -11399,6 +11426,32 @@
+@@ -5942,6 +5969,42 @@
+             self.success_tolerance, self.reach_goal_bonus, self.fall_dist, self.fall_penalty,
+             self.max_consecutive_successes, self.av_factor,self.goal_cond, hand_up_threshold_1, hand_up_threshold_2 , len(self.fingertips), self.w_obj_ornt, self.w_obj_vels, self.separate_stages, self.hand_pose_guidance_glb_trans_coef, self.hand_pose_guidance_glb_rot_coef, self.hand_pose_guidance_fingerpose_coef, self.rew_finger_obj_dist_coef, self.rew_delta_hand_pose_coef, self.rew_obj_pose_coef, self.goal_dist_thres, envs_hand_qtars, self.cur_targets, self.use_hand_actions_rew, self.prev_dof_vel, self.cur_dof_vel, self.rew_smoothness_coef, self.early_terminate, self.env_cond_type, self.env_cond_hand_masks, self.train_free_hand,  self.cur_ornt_rew_coef
+         )
++        # PENETRATION-AWARE TERM (env-var gated; off by default). depth = deepest
++        # sampled hand-surface point inside the object's convex parts, metres;
++        # grip = PhysX net contact force summed over links geometrically touching
++        # the object, in multiples of the object's weight. Weights:
++        #   AUDIT_PEN_W   reward per metre of depth (100 -> 0.1 per mm)
++        #   AUDIT_FORCE_W reward per unit of (grip_x - 40)/40 above the cap
++        import os as _os
++        if _os.environ.get("AUDIT_PEN_W") or _os.environ.get("AUDIT_FORCE_W"):
++            if not hasattr(self, "_pen_probe"):
++                import sys as _sys; _sys.path.insert(0, "/workspace")
++                from penetration_torch import PenetrationProbe
++                _names = self.gym.get_actor_rigid_body_names(self.envs[0], 0)
++                _inst = self.object_code_list[0].split("_nf_")[0]
++                self._pen_probe = PenetrationProbe(
++                    "../assets/allegro_hand_description/urdf/allegro_hand_description_right_fly_v2.urdf",
++                    f"../assets/meshdatav3_scaled/sem/{_inst}/coacd", _names, self.device)
++                self._pen_nb0 = self.gym.get_env_rigid_body_count(self.envs[0])
++                self._pen_nhand = len(_names)
++                self._pen_cf = gymtorch.wrap_tensor(self.gym.acquire_net_contact_force_tensor(self.sim))
++                self._pen_weight = 500.0 * self._pen_probe.volume * 9.81
++                self._pen_w = float(_os.environ.get("AUDIT_PEN_W", "0")); self._force_w = float(_os.environ.get("AUDIT_FORCE_W", "0"))
++                self._pen_stats = []
++                print(f"PEN-REWARD on: weight {self._pen_weight:.2f} N, hulls {self._pen_probe.planes.shape[0]}, w_pen {self._pen_w}, w_force {self._force_w}", flush=True)
++            self.gym.refresh_rigid_body_state_tensor(self.sim)
++            self.gym.refresh_net_contact_force_tensor(self.sim)
++            _rb = self.rigid_body_states[:, :self._pen_nhand]
++            _depth, _ntouch, _per_link = self._pen_probe(_rb, self.object_pose)
++            _cf = self._pen_cf.view(self.num_envs, -1, 3)[:, :self._pen_nhand][:, self._pen_probe.link_idx]
++            _touch = (_per_link > -self._pen_probe.touch).float()
++            _grip_x = (torch.norm(_cf, dim=-1) * _touch).sum(-1) / self._pen_weight
++            _term = self._pen_w * _depth + self._force_w * torch.clamp((_grip_x - 40.0) / 40.0, min=0.0)
++            self.rew_buf[:] = self.rew_buf - _term
++            self._pen_stats.append((float(_depth.mean()) * 1000, float((_depth > 0.002).float().mean()), float(_grip_x.mean()), float(_term.mean())))
++            if len(self._pen_stats) % 200 == 0:
++                a = np.array(self._pen_stats[-200:])
++                print(f"PEN-REWARD last200: depth mean {a[:,0].mean():.2f} mm, frac>2mm {a[:,1].mean():.2f}, grip_x mean {a[:,2].mean():.0f}, term mean {a[:,3].mean():.3f}", flush=True)
+ 
+         self.extras['successes'] = self.successes
+         self.extras['current_successes'] = self.current_successes
+@@ -11399,6 +11462,32 @@
  
          self.gym.set_dof_position_target_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self.prev_targets),
                                                          gymtorch.unwrap_tensor(all_hand_indices), len(all_hand_indices))
@@ -81,7 +124,7 @@
  
          # all_indices = torch.unique(torch.cat([all_hand_indices, self.object_indices[env_ids], self.table_indices[env_ids], ]).to(torch.int32))  ##
          
-@@ -12029,7 +12082,45 @@
+@@ -12029,7 +12118,45 @@
  
  
  
@@ -127,7 +170,7 @@
          env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
          goal_env_ids = self.reset_goal_buf.nonzero(as_tuple=False).squeeze(-1)
  
-@@ -12403,6 +12494,7 @@
+@@ -12403,6 +12530,7 @@
          self.gym.set_dof_position_target_tensor_indexed(self.sim,
                                                          gymtorch.unwrap_tensor(self.prev_targets),
                                                          gymtorch.unwrap_tensor(all_hand_indices), len(all_hand_indices))
@@ -135,7 +178,7 @@
          self.prev_dof_vel[:, :] = self.cur_dof_vel[:, :]
          
          
-@@ -12429,7 +12521,62 @@
+@@ -12429,7 +12557,81 @@
          
          
  
@@ -189,6 +232,25 @@
 +            "rb_states_pre": getattr(self, "_audit_rb_pre_last", None),
 +            "rb_states_afterreset": getattr(self, "_audit_rb_afterreset", None),
 +        }
++        # all-environment penetration at eval time, via the GPU probe, so a
++        # checkpoint's number is a mean over envs rather than env 0 alone
++        if os.environ.get("AUDIT_ALLENV"):
++            if not hasattr(self, "_ev_probe"):
++                import sys as _sys; _sys.path.insert(0, "/workspace")
++                from penetration_torch import PenetrationProbe
++                _inst = self.object_code_list[0].split("_nf_")[0]
++                self._ev_probe = PenetrationProbe("../assets/allegro_hand_description/urdf/allegro_hand_description_right_fly_v2.urdf", f"../assets/meshdatav3_scaled/sem/{_inst}/coacd", list(self._audit_names), self.device)
++                self._ev_rows = []
++            _d, _nt, _pl = self._ev_probe(self.rigid_body_states[:, :len(self._audit_names)], self.object_pose)
++            _cf = self._audit_cf_t.view(self.num_envs, -1, 3)[:, :len(self._audit_names)][:, self._ev_probe.link_idx]
++            _g = (torch.norm(_cf, dim=-1) * (_pl > -self._ev_probe.touch).float()).sum(-1) / (500.0 * self._ev_probe.volume * 9.81)
++            _e = torch.norm(self.object_pos - self.goal_pos, dim=-1) if hasattr(self, "goal_pos") else torch.zeros(self.num_envs, device=self.device)
++            self._ev_rows.append(torch.stack([_d * 1000, (_d > 0.002).float(), _g, _e * 100], -1).detach().cpu().numpy())
++            if self.ref_ts >= 269:
++                _a = np.stack(self._ev_rows[1:], 0)      # (T, N, 4)
++                _np = _a.mean(0)                         # per env
++                print("AUDIT_ALLENV envs=%d  pen_mm mean %.2f (per-env %s)  frac>2mm %.2f  grip_x mean %.0f  err_cm mean %.2f  end err per env %s" % (
++                    _a.shape[1], _np[:, 0].mean(), np.round(_np[:, 0], 2).tolist(), _np[:, 1].mean(), _np[:, 2].mean(), _np[:, 3].mean(), np.round(_a[-1, :, 3], 1).tolist()), flush=True)
 +        self._audit_rows.append(row)
 +        if len(self._audit_rows) % 10 == 0 or self.ref_ts >= 269:
 +            _np.save(out, _np.array(self._audit_rows, dtype=object), allow_pickle=True)

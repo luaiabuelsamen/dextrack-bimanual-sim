@@ -109,6 +109,15 @@ millimetres while holding the object at 1–2 mm of interpenetration with
 5–10 mm excursions on 5–8 % of frames, one is lost mid-clip. Their
 successes are not burials of our kind. See `STAGE2.md`.
 
+## Status after the Isaac Gym session (2026-09-17, night)
+
+D1 done at scale: the generalist holds 17 of 43 clips at a median 1.7 mm of
+interpenetration, 36 % of frames over 2 mm. New: a GPU penetration probe as
+a reward term in their trainer cuts a released policy's interpenetration by
+39 % and grip by 37 % with every rollout still held (16 of 16), for 3 mm of
+error, in 150 epochs. The lever now is that term, on the generalist, across
+clips, with a weight sweep, scored on both rules. See `STAGE2.md`.
+
 ## Guardrails
 
 1. **Render before believing.** No count enters a document until every pose

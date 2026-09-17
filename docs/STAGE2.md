@@ -332,6 +332,40 @@ about 40 % of these clips by the object criterion, and does so at 1 to 3 mm
 of interpenetration on a third to three quarters of frames. Not our burial;
 not zero either; and invisible to their metric.
 
+## Penetration-aware training in their framework (2026-09-17, night)
+
+The audit's probe, made cheap enough to run every control step for thousands
+of environments (`experiments/tracking/penetration_torch.py`: the hand's
+collision primitives as sampled surface points, the object as the face
+planes of its convex parts, a bounding-sphere cull, batched on the GPU;
+correlation 0.88 with the offline audit on the same rollout, 3.5 ms per
+step at 4096 environments on a one-hull object, about 100 ms per 1024 on a
+64-hull one), and added to DexTrack's reward as an env-var-gated term
+(`AUDIT_PEN_W` per metre of depth, `AUDIT_FORCE_W` per unit of grip above
+40× weight; the diff is in `results/dextrack_audit/audit_hook.diff`).
+Fine-tuned from their released small-cube checkpoint, 1024 environments,
+their trainer otherwise untouched.
+
+| checkpoint, 16 environments each, same starts | penetration mean | frames > 2 mm | grip on touching links | position error | held at the end |
+|---|---:|---:|---:|---:|---:|
+| released `s2_cubesmall_inspect` | 2.18 mm | 45 % | 54× weight | 0.14 cm | 16 of 16 |
+| + depth term 100/m + force term, 75 epochs | (evaluated at 4: 2.59 mm on env 0) | 59 % | 39× | 0.38 cm | worse; a miss |
+| **+ depth term 300/m, no force term, 150 epochs** | **1.33 mm** | **26 %** | **34×** | 0.41 cm | **16 of 16** |
+
+**A 39 % cut in interpenetration and a 37 % cut in grip force, every
+rollout still held, for 3 mm of tracking error, in 150 epochs of
+fine-tuning.** Training-time depth fell from 0.79 mm to 0.40 mm and the
+fraction of steps over 2 mm from 7 % to 1 %. This is the first policy in
+either framework trained to hold an object *and* stay out of it, and it
+says the interpenetration their metric never sees is not load-bearing: the
+policy gives most of it up when asked and keeps the object. Caveats: one
+object, one checkpoint, 16 evaluation rollouts from the same start frame;
+the first variant with a force term made things worse, so the weights
+matter and were not swept; and at 4 environments one fine-tuned rollout
+lost the cube, which 16 did not reproduce. Next: the same term on the
+generalist across the 43 clips, a weight sweep, and their own success rule
+alongside.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with

@@ -5467,3 +5467,14 @@ evaluated rollout got WORSE on penetration (1.76 -> 2.59 mm mean, 33 % ->
 improved. Single env, single rollout; the all-env readout exists now. A
 pen-only, w 300, 150-epoch variant is running.
 
+## 2026-09-17 night: penetration-aware fine-tuning in DexTrack
+
+GPU probe (penetration_torch.py) as a reward term. Cube ckpt, 1024 envs:
+    16 envs each        pen mean   >2mm   grip(touch)   err     held
+    released            2.18 mm    45 %   54x           0.14    16/16
+    +pen 300/m, 150 ep  1.33 mm    26 %   34x           0.41    16/16
+Depth term with a force term (first try, 75 ep) made eval penetration worse
+(2.59 mm, 59 %) -- recorded as a miss. Training-time depth 0.79 -> 0.40 mm.
+Pod stopped; total spend today about $1.20. Artifacts:
+results/dextrack_audit/finetune/ (logs, ckpt, patches); hook diff 286 lines.
+
