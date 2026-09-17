@@ -5418,3 +5418,37 @@ on the way. Same failure class as the small cube resting in cupped fingers.
 Our rule has no orientation bound; DexTrack's does, and it is what catches
 these. The clean criterion should carry a rotation bound from here on.
 
+## 2026-09-17: D1, DexTrack's released checkpoints audited for burial
+
+Rented 3090, ~$1.50 of GPU time. Their code/data/ckpts, Isaac Gym Preview 4,
+their test script at 4 envs, headless. Hook logs object pose, link poses and
+net contact force per step; penetration computed geometrically from their
+URDF primitives against their convex decomposition.
+
+Their release does not run its own checkpoints: hand created at zero joint
+pose (palm on the object), physics stepped once BEFORE the root-state
+snapshot that resets restore from, so every reset re-launches the object
+mid-flight; and an object born exactly on the ground plane is ejected at
+9 m/s by depenetration. Unmodified: all three checkpoints lose the object
+at step 1, their own success counter 0/4. Two switchable fixes (settle
+links with the object parked; create the object 3 mm up, at rest) make two
+of three track.
+
+    clip     weight   pos err   pen mean/med/max mm   >2mm   >5mm   grip med/mean/max x   >40x
+    cube     0.61 N   0.44 cm   1.75 / 1.1 / 10.6     33%    5%     25 / 52 / 269         152
+    duck     2.44 N   0.26 cm   2.28 / 2.0 / 7.5      50%    8%      3 / 13 / 255          28
+    flute    0.41 N   holds to fr 160 then lost       0.74 / 0 / 3.5   19%  0%   0 / 19 / 152   73
+
+Their successful rollouts hold at 1-2 mm of interpenetration typically, with
+5-10 mm excursions on 5-8% of frames, forces mostly modest and spiking to
+250x. Not our 10-17 mm burials. Rotation drifts 40-150 deg (orientation not
+rewarded for these ckpts). Their own rule: 0 successes here.
+
+Wrong turns today, kept: I first blamed my datasetv4.1 stub (its field is
+unused); then the hand's stale zero pose at the first step (real, but not
+the launcher); then hand-object contact through 15 cm of air (it was the
+palm-thumb and index-middle SELF-collision pairs, equal magnitudes, present
+with the object 10 m away); the CPU-pipeline contact dump hung the pod and
+needed a container restart. What resolved it: proving the root-state writes
+reach PhysX by parking the object 10 m up, then lifting it 3 mm.
+

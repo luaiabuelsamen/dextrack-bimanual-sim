@@ -1,0 +1,224 @@
+--- tasks/allegro_hand_tracking_generalist.py.orig	2026-09-17 21:06:10.120213247 +0000
++++ tasks/allegro_hand_tracking_generalist.py	2026-09-17 22:02:21.947540095 +0000
+@@ -1745,6 +1745,18 @@
+         self.hand_angvels = self.root_state_tensor[:, 10:13]
+         self.saved_root_tensor = self.root_state_tensor.clone()
+         self.saved_root_tensor[self.object_indices, 9:10] = 0.0
++        if __import__("os").environ.get("AUDIT_FIX") in ("2", "3"):
++            # AUDIT FIX 3: the snapshot above was taken after the object had
++            # already been ejected by the zero-pose hand (velocities of metres
++            # and tens of radians per second at init). Restore resets from the
++            # creation pose at rest instead.
++            self.saved_root_tensor[self.object_indices, :7] = self.object_init_state[:, :7]
++            self.saved_root_tensor[self.object_indices, 7:13] = 0.0
++            print("AUDIT_FIX 3: reset snapshot replaced with creation pose at rest", flush=True)
++        if __import__("os").environ.get("AUDIT_LOG"):
++            print("AUDIT init: object saved_root", self.saved_root_tensor[self.object_indices[0]].detach().cpu().numpy().round(3).tolist(),
++                  "object_init_state", self.object_init_state[0].detach().cpu().numpy().round(3).tolist()[:7],
++                  "goal_init", self.goal_init_state[0].detach().cpu().numpy().round(3).tolist()[:3] if hasattr(self, "goal_init_state") else None, flush=True)
+         self.num_dofs = self.gym.get_sim_dof_count(self.sim) // self.num_envs
+         print(f"[Debug] num_dofs: {self.num_dofs}")
+         
+@@ -5223,6 +5235,9 @@
+                 self.gym.begin_aggregate(env_ptr, max_agg_bodies, max_agg_shapes, True)
+             # 
+             shadow_hand_actor = self.gym.create_actor(env_ptr, shadow_hand_asset, shadow_hand_start_pose, "hand", i, -1, 0)
++            if not hasattr(self, "_audit_hand_handles"):
++                self._audit_hand_handles = []
++            self._audit_hand_handles.append((env_ptr, shadow_hand_actor))
+             self.hand_start_states.append(
+                 [shadow_hand_start_pose.p.x, shadow_hand_start_pose.p.y, shadow_hand_start_pose.p.z,
+                  shadow_hand_start_pose.r.x, shadow_hand_start_pose.r.y, shadow_hand_start_pose.r.z,
+@@ -5428,6 +5443,18 @@
+ 
+         # # create envs # #
+         self.object_init_state = to_torch(self.object_init_state, device=self.device, dtype=torch.float).view(self.num_envs, 13)
++        if __import__("os").environ.get("AUDIT_FIX"):
++            # AUDIT FIX: apply the first-frame joint state at creation. Without
++            # this the hand stands at its zero pose (palm at the origin, on top of
++            # the object) when the first physics step runs, and PhysX ejects the
++            # object at ~9 m/s before the policy has acted.
++            import numpy as _np
++            for _i, (_env, _h) in enumerate(self._audit_hand_handles):
++                _st = self.gym.get_actor_dof_states(_env, _h, gymapi.STATE_ALL)
++                _q = self.shadow_hand_default_dof_pos[_i].detach().cpu().numpy() if hasattr(self, "shadow_hand_default_dof_pos") else self.tot_hand_dof_pos[_i].detach().cpu().numpy()
++                _st["pos"][:len(_q)] = _q; _st["vel"][:] = 0.0
++                self.gym.set_actor_dof_states(_env, _h, _st, gymapi.STATE_ALL)
++            print("AUDIT_FIX: creation-time joint state applied to", len(self._audit_hand_handles), "hands", flush=True)
+         self.goal_init_state = to_torch(self.goal_init_state, device=self.device, dtype=torch.float).view(self.num_envs, 13)
+         self.goal_states = self.goal_init_state.clone( )
+         # self.goal_pose = self.goal_states[:, 0:7] #
+@@ -11399,6 +11426,32 @@
+ 
+         self.gym.set_dof_position_target_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self.prev_targets),
+                                                         gymtorch.unwrap_tensor(all_hand_indices), len(all_hand_indices))
++        if __import__("os").environ.get("AUDIT_FIX") in ("2", "3") and not getattr(self, "_audit_settled", False):
++            # AUDIT FIX 2: the joint state written above reaches the link poses
++            # only during the next physics step, and that step collides the
++            # stale zero pose of the hand with the object. Park every object
++            # 10 m up, take one physics step so the links move to the written
++            # joint state, then put the objects back at rest. Initial reset only.
++            self._audit_settled = True
++            self.gym.refresh_actor_root_state_tensor(self.sim)
++            _oi = self.object_indices.to(torch.int32)
++            _saved = self.root_state_tensor[_oi.long()].clone()
++            self.root_state_tensor[_oi.long(), 2] += 10.0
++            self.root_state_tensor[_oi.long(), 7:13] = 0.0
++            self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self.root_state_tensor), gymtorch.unwrap_tensor(_oi), len(_oi))
++            self.gym.simulate(self.sim); self.gym.fetch_results(self.sim, True)
++            if __import__("os").environ.get("AUDIT_PARK") != "1":
++                self.root_state_tensor[_oi.long()] = _saved
++                self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self.root_state_tensor), gymtorch.unwrap_tensor(_oi), len(_oi))
++            self.shadow_hand_dof_pos[env_ids, :] = self.shadow_hand_default_dof_pos[env_ids, :]
++            self.shadow_hand_dof_state[env_ids, :, 1] = 0.0
++            self.gym.set_dof_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self.dof_state), gymtorch.unwrap_tensor(all_hand_indices), len(all_hand_indices))
++            print("AUDIT_FIX 2: settled links with objects parked", flush=True)
++        if __import__("os").environ.get("AUDIT_LOG"):
++            if not hasattr(self, "_audit_rb_pre_t"):
++                self._audit_rb_pre_t = gymtorch.wrap_tensor(self.gym.acquire_rigid_body_state_tensor(self.sim))
++            self.gym.refresh_rigid_body_state_tensor(self.sim)
++            self._audit_rb_afterreset = self._audit_rb_pre_t[:self.gym.get_env_rigid_body_count(self.envs[0])].detach().cpu().numpy().copy()
+ 
+         # all_indices = torch.unique(torch.cat([all_hand_indices, self.object_indices[env_ids], self.table_indices[env_ids], ]).to(torch.int32))  ##
+         
+@@ -12029,7 +12082,45 @@
+ 
+ 
+ 
++    def _audit_pin_object(self):
++        # AUDIT FIX 3b: on the first control step, push the creation pose at
++        # rest to PhysX for every object, regardless of what the reset wrote.
++        import os
++        if os.environ.get("AUDIT_FIX") != "3":
++            return
++        self._audit_pin_n = getattr(self, "_audit_pin_n", 0) + 1
++        park = os.environ.get("AUDIT_PARK") == "1" and self._audit_pin_n <= 3
++        if self._audit_pin_n > 1 and not park:
++            return
++        _oi = self.object_indices.to(torch.int32)
++        self.root_state_tensor[_oi.long(), :7] = self.object_init_state[:, :7]
++        if park:
++            self.root_state_tensor[_oi.long(), 2] += float(os.environ.get("AUDIT_PARK_DZ", "10.0"))
++        self.root_state_tensor[_oi.long(), 7:13] = 0.0
++        self.gym.set_actor_root_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self.root_state_tensor), gymtorch.unwrap_tensor(_oi), len(_oi))
++        print("AUDIT_FIX 3b: object pinned at creation pose before the first step", flush=True)
++
++    def _audit_pre(self):
++        import os
++        if not os.environ.get("AUDIT_LOG"):
++            return
++        self.gym.refresh_actor_root_state_tensor(self.sim)
++        self.gym.refresh_rigid_body_state_tensor(self.sim)
++        if not hasattr(self, "_audit_pre_rows"):
++            self._audit_pre_rows = []
++        oi = int(self.object_indices[0]) if hasattr(self, "object_indices") else None
++        rs = self.root_state_tensor[oi].detach().cpu().numpy().copy() if oi is not None else None
++        nb = self.gym.get_env_rigid_body_count(self.envs[0])
++        if not hasattr(self, "_audit_rb_pre_t"):
++            self._audit_rb_pre_t = gymtorch.wrap_tensor(self.gym.acquire_rigid_body_state_tensor(self.sim))
++        rbp = self._audit_rb_pre_t[:nb].detach().cpu().numpy().copy()
++        self._audit_pre_rows.append({"ref_ts": int(self.ref_ts), "obj_root_pre": rs,
++                                     "progress": int(self.progress_buf[0].item())})
++        self._audit_pre_last = rs
++        self._audit_rb_pre_last = rbp
++
+     def pre_physics_step(self, actions):
++        self._audit_pre()
+         env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
+         goal_env_ids = self.reset_goal_buf.nonzero(as_tuple=False).squeeze(-1)
+ 
+@@ -12403,6 +12494,7 @@
+         self.gym.set_dof_position_target_tensor_indexed(self.sim,
+                                                         gymtorch.unwrap_tensor(self.prev_targets),
+                                                         gymtorch.unwrap_tensor(all_hand_indices), len(all_hand_indices))
++        self._audit_pin_object()
+         self.prev_dof_vel[:, :] = self.cur_dof_vel[:, :]
+         
+         
+@@ -12429,7 +12521,62 @@
+         
+         
+ 
++    def _audit_log(self):
++        # AUDIT HOOK (added for the burial audit; env-var gated, off by default).
++        # Per step, env 0: object pose, hand dof, every rigid body pose, and the
++        # PhysX net contact force on every rigid body. Penetration is computed
++        # offline from the poses with the same meshes PhysX collided.
++        import os, numpy as _np
++        out = os.environ.get("AUDIT_LOG")
++        if not out:
++            return
++        if not hasattr(self, "_audit_rows"):
++            self._audit_rows = []
++            self._audit_cf_t = gymtorch.wrap_tensor(self.gym.acquire_net_contact_force_tensor(self.sim))
++            self._audit_rb_t = gymtorch.wrap_tensor(self.gym.acquire_rigid_body_state_tensor(self.sim))
++            self._audit_names = self.gym.get_actor_rigid_body_names(self.envs[0], 0)
++            try:
++                _props = self.gym.get_actor_rigid_shape_properties(self.envs[0], 0)
++                _bsm = self.gym.get_actor_rigid_body_shape_indices(self.envs[0], 0)
++                print("AUDIT hand shapes:", len(_props), "per body:", [(self._audit_names[b], _bsm[b].start, _bsm[b].count) for b in range(len(_bsm)) if _bsm[b].count > 0], flush=True)
++                _oprops = self.gym.get_actor_rigid_shape_properties(self.envs[0], 1)
++                print("AUDIT object shapes:", len(_oprops), "actor names:", [self.gym.get_actor_name(self.envs[0], a) for a in range(self.gym.get_actor_count(self.envs[0]))], flush=True)
++            except Exception as e:
++                print("AUDIT shape query failed:", e, flush=True)
++            self._audit_nb0 = self.gym.get_env_rigid_body_count(self.envs[0])
++        self.gym.refresh_net_contact_force_tensor(self.sim)
++        self.gym.refresh_rigid_body_state_tensor(self.sim)
++        nb = self._audit_nb0
++        if os.environ.get("AUDIT_CONTACTS") and len(self._audit_rows) < 3:
++            try:
++                cs = self.gym.get_env_rigid_contacts(self.envs[0])
++                names_all = self._audit_names + ["object", "goal_object"]
++                out = []
++                for c in cs[:40]:
++                    b0, b1 = int(c["body0"]), int(c["body1"])
++                    out.append((names_all[b0] if 0 <= b0 < len(names_all) else b0, names_all[b1] if 0 <= b1 < len(names_all) else b1, round(float(c["initialOverlap"]),4), round(float(c["lambda"]),2)))
++                print("AUDIT_CONTACTS step", len(self._audit_rows), "n=", len(cs), out, flush=True)
++            except Exception as e:
++                print("AUDIT_CONTACTS failed:", repr(e), flush=True)
++        row = {
++            "ref_ts": int(self.ref_ts), "progress": int(self.progress_buf[0].item()),
++            "object_pose": self.object_pose[0].detach().cpu().numpy().copy(),
++            "goal_pos": self.goal_pos[0].detach().cpu().numpy().copy() if hasattr(self, "goal_pos") else None,
++            "goal_rot": self.goal_rot[0].detach().cpu().numpy().copy() if hasattr(self, "goal_rot") else None,
++            "hand_dof_pos": self.shadow_hand_dof_pos[0].detach().cpu().numpy().copy(),
++            "rb_states": self._audit_rb_t[:nb].detach().cpu().numpy().copy(),
++            "net_contact_force": self._audit_cf_t[:nb].detach().cpu().numpy().copy(),
++            "rb_names": list(self._audit_names),
++            "obj_root_pre": getattr(self, "_audit_pre_last", None),
++            "rb_states_pre": getattr(self, "_audit_rb_pre_last", None),
++            "rb_states_afterreset": getattr(self, "_audit_rb_afterreset", None),
++        }
++        self._audit_rows.append(row)
++        if len(self._audit_rows) % 10 == 0 or self.ref_ts >= 269:
++            _np.save(out, _np.array(self._audit_rows, dtype=object), allow_pickle=True)
++
+     def post_physics_step(self):
++        self._audit_log()
+         
+         if self.to_real and self.add_global_movements and self.progress_buf[0].item() >= self.add_global_movements_af_step:
+             pass
+--- train_pool_2.py.orig	2026-09-17 21:19:09.003773187 +0000
++++ train_pool_2.py	2026-09-17 21:21:06.477308885 +0000
+@@ -1161,7 +1161,7 @@
+         if args.use_vision:
+             cuda_visible_text = f"CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7  " 
+             #
+-            cmd = f"{cuda_visible_text} python train.py task={task_type} train={train_type} sim_device='cuda:{cuda_idx}' rl_device='cuda:{cuda_idx}'  capture_video={capture_video} force_render={force_render} headless={args.headless}   task.env.numEnvs={args.numEnvs} train.params.config.minibatch_size={args.minibatch_size}  task.env.useRelativeControl={args.use_relative_control}  train.params.config.max_epochs={args.max_epochs} task.env.mocap_sv_info_fn={mocap_sv_info_fn} task.env.goal_cond={args.goal_cond} task.env.object_name={object_name} tag={tag} train.params.config.name={train_name} train.params.config.full_experiment_name={full_experiment_name} task.sim.dt={args.dt} test={args.test} task.env.use_kinematics_bias={args.use_kinematics_bias} task.env.w_obj_ornt={args.w_obj_ornt} task.env.observationType={obs_type}  task.env.separate_stages={args.separate_stages} task.env.rigid_obj_density={args.rigid_obj_density}   task.env.kinematics_only={args.kinematics_only}  task.env.use_fingertips={args.use_fingertips}  task.env.glb_trans_vel_scale={args.glb_trans_vel_scale} task.env.glb_rot_vel_scale={args.glb_rot_vel_scale} task.env.use_kinematics_bias_wdelta={args.use_kinematics_bias_wdelta} task.env.hand_pose_guidance_glb_trans_coef={args.hand_pose_guidance_glb_trans_coef} task.env.hand_pose_guidance_glb_rot_coef={args.hand_pose_guidance_glb_rot_coef} task.env.hand_pose_guidance_fingerpose_coef={args.hand_pose_guidance_fingerpose_coef} task.env.rew_finger_obj_dist_coef={args.rew_finger_obj_dist_coef} task.env.rew_delta_hand_pose_coef={args.rew_delta_hand_pose_coef} task.env.dofSpeedScale={args.dofSpeedScale} task.env.use_twostage_rew={args.use_twostage_rew} task.env.ground_distance={args.ground_distance} task.env.use_canonical_state={args.use_canonical_state} task.env.disable_obj_gravity={args.disable_gravity} train.params.config.save_best_after=50 task.env.right_hand_dist_thres={args.right_hand_dist_thres} checkpoint={args.checkpoint} task.env.use_real_twostage_rew={args.use_real_twostage_rew} task.env.start_grasping_fr={args.start_grasping_fr} task.env.controlFrequencyInv={args.controlFrequencyInv} task.env.episodeLength={args.episodeLength} task.env.start_frame={args.start_frame} task.env.rew_obj_pose_coef={args.rew_obj_pose_coef} task.env.goal_dist_thres={args.goal_dist_thres} task.env.lifting_separate_stages={args.lifting_separate_stages} task.env.strict_lifting_separate_stages={args.strict_lifting_separate_stages} task.env.table_z_dim={args.table_z_dim} task.env.add_table={args.add_table} exp_dir={exp_dir} task.env.use_taco_obj_traj={args.use_taco_obj_traj} task.env.pre_optimized_traj={ cur_pre_optimized_traj } task.env.hand_type={ args.hand_type } enableCameraSensors={enableCameraSensors} graphics_device_id={cuda_idx} {downsample_config} {target_inst_tag_list_fn_config} {teacher_model_config} {multiple_teacher_model_config} {base_traj_config} {history_setting_config} {w_franka_config} {randomize_config} {early_terminate_config} {substeps_config} {forcasting_model_config} {use_window_future_selection_config} {forcasting_inv_freq_config} {controller_setting_config} {forcasting_history_ws_config} {impedance_control_config} {w_obj_latent_features_config} {net_type_config} {history_freq_config} {use_future_obs_config} {w_history_window_index_config}" 
++            cmd = f"{cuda_visible_text} python train.py task={task_type} train={train_type} sim_device='cuda:{cuda_idx}' rl_device='cuda:{cuda_idx}'  capture_video={capture_video} force_render={force_render} headless={args.headless}   task.env.numEnvs={args.numEnvs} train.params.config.minibatch_size={args.minibatch_size}  task.env.useRelativeControl={args.use_relative_control}  train.params.config.max_epochs={args.max_epochs} task.env.mocap_sv_info_fn={mocap_sv_info_fn} task.env.goal_cond={args.goal_cond} task.env.object_name={object_name} tag={tag} train.params.config.name={train_name} train.params.config.full_experiment_name={full_experiment_name} task.sim.dt={args.dt} test={args.test} task.env.use_kinematics_bias={args.use_kinematics_bias} task.env.w_obj_ornt={args.w_obj_ornt} task.env.observationType={obs_type}  task.env.separate_stages={args.separate_stages} task.env.rigid_obj_density={args.rigid_obj_density}   task.env.kinematics_only={args.kinematics_only}  task.env.use_fingertips={args.use_fingertips}  task.env.glb_trans_vel_scale={args.glb_trans_vel_scale} task.env.glb_rot_vel_scale={args.glb_rot_vel_scale} task.env.use_kinematics_bias_wdelta={args.use_kinematics_bias_wdelta} task.env.hand_pose_guidance_glb_trans_coef={args.hand_pose_guidance_glb_trans_coef} task.env.hand_pose_guidance_glb_rot_coef={args.hand_pose_guidance_glb_rot_coef} task.env.hand_pose_guidance_fingerpose_coef={args.hand_pose_guidance_fingerpose_coef} task.env.rew_finger_obj_dist_coef={args.rew_finger_obj_dist_coef} task.env.rew_delta_hand_pose_coef={args.rew_delta_hand_pose_coef} task.env.dofSpeedScale={args.dofSpeedScale} task.env.use_twostage_rew={args.use_twostage_rew} task.env.ground_distance={args.ground_distance} task.env.use_canonical_state={args.use_canonical_state} task.env.disable_obj_gravity={args.disable_gravity} train.params.config.save_best_after=50 task.env.right_hand_dist_thres={args.right_hand_dist_thres} checkpoint={args.checkpoint} task.env.use_real_twostage_rew={args.use_real_twostage_rew} task.env.start_grasping_fr={args.start_grasping_fr} task.env.controlFrequencyInv={args.controlFrequencyInv} task.env.episodeLength={args.episodeLength} task.env.start_frame={args.start_frame} task.env.rew_obj_pose_coef={args.rew_obj_pose_coef} task.env.goal_dist_thres={args.goal_dist_thres} task.env.lifting_separate_stages={args.lifting_separate_stages} task.env.strict_lifting_separate_stages={args.strict_lifting_separate_stages} task.env.table_z_dim={args.table_z_dim} task.env.add_table={args.add_table} exp_dir={exp_dir} task.env.use_taco_obj_traj={args.use_taco_obj_traj} task.env.pre_optimized_traj={ cur_pre_optimized_traj } task.env.hand_type={ args.hand_type } enableCameraSensors={enableCameraSensors} graphics_device_id=-1 {downsample_config} {target_inst_tag_list_fn_config} {teacher_model_config} {multiple_teacher_model_config} {base_traj_config} {history_setting_config} {w_franka_config} {randomize_config} {early_terminate_config} {substeps_config} {forcasting_model_config} {use_window_future_selection_config} {forcasting_inv_freq_config} {controller_setting_config} {forcasting_history_ws_config} {impedance_control_config} {w_obj_latent_features_config} {net_type_config} {history_freq_config} {use_future_obs_config} {w_history_window_index_config}" 
+         else:
+             
+             if args.use_vision_obs:
+@@ -1172,10 +1172,10 @@
+                 cuda_idxx = 0
+                 
+             
+-            cmd = f"{cuda_visible_text} python train.py task={task_type} train={train_type} sim_device='cuda:{cuda_idxx}' rl_device='cuda:{cuda_idxx}'  capture_video={capture_video} force_render={force_render} headless={args.headless}   task.env.numEnvs={args.numEnvs} train.params.config.minibatch_size={args.minibatch_size}  task.env.useRelativeControl={args.use_relative_control}  train.params.config.max_epochs={args.max_epochs} task.env.mocap_sv_info_fn={mocap_sv_info_fn} task.env.goal_cond={args.goal_cond} task.env.object_name={object_name} tag={tag} train.params.config.name={train_name} train.params.config.full_experiment_name={full_experiment_name} task.sim.dt={args.dt} test={args.test} task.env.use_kinematics_bias={args.use_kinematics_bias} task.env.w_obj_ornt={args.w_obj_ornt} task.env.observationType={obs_type}  task.env.separate_stages={args.separate_stages} task.env.rigid_obj_density={args.rigid_obj_density}   task.env.kinematics_only={args.kinematics_only}  task.env.use_fingertips={args.use_fingertips}  task.env.glb_trans_vel_scale={args.glb_trans_vel_scale} task.env.glb_rot_vel_scale={args.glb_rot_vel_scale} task.env.use_kinematics_bias_wdelta={args.use_kinematics_bias_wdelta} task.env.hand_pose_guidance_glb_trans_coef={args.hand_pose_guidance_glb_trans_coef} task.env.hand_pose_guidance_glb_rot_coef={args.hand_pose_guidance_glb_rot_coef} task.env.hand_pose_guidance_fingerpose_coef={args.hand_pose_guidance_fingerpose_coef} task.env.rew_finger_obj_dist_coef={args.rew_finger_obj_dist_coef} task.env.rew_delta_hand_pose_coef={args.rew_delta_hand_pose_coef} task.env.dofSpeedScale={args.dofSpeedScale} task.env.use_twostage_rew={args.use_twostage_rew} task.env.ground_distance={args.ground_distance} task.env.use_canonical_state={args.use_canonical_state} task.env.disable_obj_gravity={args.disable_gravity} train.params.config.save_best_after=50 task.env.right_hand_dist_thres={args.right_hand_dist_thres} checkpoint={args.checkpoint} task.env.use_real_twostage_rew={args.use_real_twostage_rew} task.env.start_grasping_fr={args.start_grasping_fr} task.env.controlFrequencyInv={args.controlFrequencyInv} task.env.episodeLength={args.episodeLength} task.env.start_frame={args.start_frame} task.env.rew_obj_pose_coef={args.rew_obj_pose_coef} task.env.goal_dist_thres={args.goal_dist_thres} task.env.lifting_separate_stages={args.lifting_separate_stages} task.env.strict_lifting_separate_stages={args.strict_lifting_separate_stages} task.env.table_z_dim={args.table_z_dim} task.env.add_table={args.add_table} exp_dir={exp_dir} task.env.use_taco_obj_traj={args.use_taco_obj_traj} task.env.pre_optimized_traj={ cur_pre_optimized_traj } task.env.hand_type={ args.hand_type } enableCameraSensors={enableCameraSensors} graphics_device_id={cuda_idx} task.env.use_hand_actions_rew={args.use_hand_actions_rew} task.env.supervised_training={args.supervised_training} {training_mode_config} {test_inst_config} {preload_experience_config} {single_instance_training_config} {sampleds_with_object_code_fn_config} {log_path_config} {train_dir_config} {grab_opt_res_config}  {taco_opt_res_config} {single_instance_tag_config} {obj_type_to_optimized_res_fn_config} {supervised_loss_coef_config} {pure_supervised_training_config} {inst_tag_to_latent_feature_fn_config} {object_type_to_latent_feature_fn_config} {obj_type_to_opt_res_config} {maxx_inst_nn_config} {tracking_folder_info_config} {only_training_on_succ_samples_config} {use_teacher_model_config} {use_strict_maxx_nn_ts_config} {taco_interped_data_sv_additional_tag_config} {strict_maxx_nn_ts_config} {grab_train_test_setting_config} {use_local_canonical_state_config} {bound_loss_coef_config} {rew_thres_config} {rew_smoothness_coef_config} {obj_type_to_base_traj_fn_config} {use_base_traj_config} {rew_thres_with_selected_insts_config} {selected_inst_idxes_dict_config} {customize_damping_config} {customize_global_damping_config} {train_on_all_trajs_config} {single_instance_state_based_train_config} {data_selection_ratio_config} {wo_vel_obs_config} {downsample_config} {target_inst_tag_list_fn_config} {teacher_model_config} {multiple_teacher_model_config} {base_traj_config} {history_setting_config} {good_inst_opt_res_config} {w_franka_config} {randomize_config} {early_terminate_config} {substeps_config} {forcasting_model_config} {use_window_future_selection_config} {forcasting_inv_freq_config} {controller_setting_config} {forcasting_history_ws_config} {sv_info_during_training_config} {impedance_control_config} {w_obj_latent_features_config} {net_type_config} {history_freq_config} {use_future_obs_config} {w_history_window_index_config} {randomize_conditions_config} {w_inst_latent_features_config} {masked_mimic_training_setting} {forcasting_model_training_setting} {randomize_condition_type_config} {contact_condition_setting} {partial_info_dict_setting} {st_ed_state_cond_setting} {forcasting_diffusion_model_config} {history_glbfeat_setting} {random_shift_conditions_setting} {only_use_hand_first_frame_config} {forecasting_agent_training_config} {use_world_model_config} {train_controller_config} {train_forecasting_model_config} {forecasting_model_weight_fn_config} {single_inst_tag_config} {activate_forecaster_config} {comput_reward_traj_hand_qpos_config} {use_future_ref_as_obs_goal_config} {forecast_obj_pos_config} {multiple_kine_source_trajs_fn_config} {use_multiple_kine_source_trajs_config} {include_obj_rot_in_obs_config} {compute_hand_rew_buf_threshold_config} {w_kine_retar_with_arm_config} {w_finger_pos_rew_config} {franka_delta_delta_mult_coef_config} {control_arm_via_ik_config} {warm_actions_mult_coef_config} {hand_qpos_rew_coef_config} {ornt_rew_scheduling_config} {glb_mult_factor_scaling_config} {not_use_kine_bias_config} {disable_hand_obj_contact_config} {wo_fingertip_rot_vel_config} {arm_ctl_params_config} {ts_teacher_model_config} {randomize_setting_config} {obj_init_pos_rand_sigma_config} {obs_simplified_config} {w_traj_modifications_config} {rand_obj_mass_range_config} {use_v2_leap_warm_urdf_config} {action_specific_rand_config} {hand_specific_randomizations_config} {schedule_hodist_coef_config} {reset_obj_mass_config} {use_vision_obs_config} {w_rotation_axis_rew_config} {add_physical_params_in_obs_config} {whether_randomize_obs_act_config} {obs_rand_noise_scale_config} {dagger_style_training_config} {teacher_subj_idx_config} {action_chunking_config} {horizon_length_config} {bc_style_training_config} {demonstration_tuning_config} {bc_relative_targets_config} {distill_full_to_partial_config} {train_free_hand_config} {simreal_modeling_config} {more_allegro_stiffness_config} {distinguish_kine_with_base_traj_config} {distill_delta_targets_config} {preset_cond_type_config} {preload_all_saved_exp_buffers_config} {use_actual_prev_targets_in_obs_config} {use_no_obj_pose_config} {multi_traj_use_joint_order_in_sim_config} {action_chunking_skip_frames_config} {multi_inst_chunking_config} {add_obj_features_config} {kine_ed_tag_config} {only_rot_axis_guidance_config} {add_penalty_config} {use_multi_step_control_config} {schedule_episod_length_config} {use_actual_traj_length_config} {randomize_reset_frame_config} {add_forece_obs_config} {distill_via_bc_config} {record_experiences_config} {learning_rate_config} {forecasting_obs_with_original_obs_config} {glb_action_penalty_schedule_config} {hand_targets_smooth_config} {preset_multi_traj_index_config} {save_experiences_via_ts_config} {load_experiences_maxx_ts_config} {switch_between_models_config} {traj_idx_to_experience_sv_folder_config} {load_chunking_experiences_v2_config} {history_chunking_obs_version_config} {load_chunking_experiences_from_real_config} {closed_loop_to_real_config} {use_transformer_model_config} {obj_pure_code_to_kine_traj_st_idx_config} {w_forecasting_config}"     
++            cmd = f"{cuda_visible_text} python train.py task={task_type} train={train_type} sim_device='cuda:{cuda_idxx}' rl_device='cuda:{cuda_idxx}'  capture_video={capture_video} force_render={force_render} headless={args.headless}   task.env.numEnvs={args.numEnvs} train.params.config.minibatch_size={args.minibatch_size}  task.env.useRelativeControl={args.use_relative_control}  train.params.config.max_epochs={args.max_epochs} task.env.mocap_sv_info_fn={mocap_sv_info_fn} task.env.goal_cond={args.goal_cond} task.env.object_name={object_name} tag={tag} train.params.config.name={train_name} train.params.config.full_experiment_name={full_experiment_name} task.sim.dt={args.dt} test={args.test} task.env.use_kinematics_bias={args.use_kinematics_bias} task.env.w_obj_ornt={args.w_obj_ornt} task.env.observationType={obs_type}  task.env.separate_stages={args.separate_stages} task.env.rigid_obj_density={args.rigid_obj_density}   task.env.kinematics_only={args.kinematics_only}  task.env.use_fingertips={args.use_fingertips}  task.env.glb_trans_vel_scale={args.glb_trans_vel_scale} task.env.glb_rot_vel_scale={args.glb_rot_vel_scale} task.env.use_kinematics_bias_wdelta={args.use_kinematics_bias_wdelta} task.env.hand_pose_guidance_glb_trans_coef={args.hand_pose_guidance_glb_trans_coef} task.env.hand_pose_guidance_glb_rot_coef={args.hand_pose_guidance_glb_rot_coef} task.env.hand_pose_guidance_fingerpose_coef={args.hand_pose_guidance_fingerpose_coef} task.env.rew_finger_obj_dist_coef={args.rew_finger_obj_dist_coef} task.env.rew_delta_hand_pose_coef={args.rew_delta_hand_pose_coef} task.env.dofSpeedScale={args.dofSpeedScale} task.env.use_twostage_rew={args.use_twostage_rew} task.env.ground_distance={args.ground_distance} task.env.use_canonical_state={args.use_canonical_state} task.env.disable_obj_gravity={args.disable_gravity} train.params.config.save_best_after=50 task.env.right_hand_dist_thres={args.right_hand_dist_thres} checkpoint={args.checkpoint} task.env.use_real_twostage_rew={args.use_real_twostage_rew} task.env.start_grasping_fr={args.start_grasping_fr} task.env.controlFrequencyInv={args.controlFrequencyInv} task.env.episodeLength={args.episodeLength} task.env.start_frame={args.start_frame} task.env.rew_obj_pose_coef={args.rew_obj_pose_coef} task.env.goal_dist_thres={args.goal_dist_thres} task.env.lifting_separate_stages={args.lifting_separate_stages} task.env.strict_lifting_separate_stages={args.strict_lifting_separate_stages} task.env.table_z_dim={args.table_z_dim} task.env.add_table={args.add_table} exp_dir={exp_dir} task.env.use_taco_obj_traj={args.use_taco_obj_traj} task.env.pre_optimized_traj={ cur_pre_optimized_traj } task.env.hand_type={ args.hand_type } enableCameraSensors={enableCameraSensors} graphics_device_id=-1 task.env.use_hand_actions_rew={args.use_hand_actions_rew} task.env.supervised_training={args.supervised_training} {training_mode_config} {test_inst_config} {preload_experience_config} {single_instance_training_config} {sampleds_with_object_code_fn_config} {log_path_config} {train_dir_config} {grab_opt_res_config}  {taco_opt_res_config} {single_instance_tag_config} {obj_type_to_optimized_res_fn_config} {supervised_loss_coef_config} {pure_supervised_training_config} {inst_tag_to_latent_feature_fn_config} {object_type_to_latent_feature_fn_config} {obj_type_to_opt_res_config} {maxx_inst_nn_config} {tracking_folder_info_config} {only_training_on_succ_samples_config} {use_teacher_model_config} {use_strict_maxx_nn_ts_config} {taco_interped_data_sv_additional_tag_config} {strict_maxx_nn_ts_config} {grab_train_test_setting_config} {use_local_canonical_state_config} {bound_loss_coef_config} {rew_thres_config} {rew_smoothness_coef_config} {obj_type_to_base_traj_fn_config} {use_base_traj_config} {rew_thres_with_selected_insts_config} {selected_inst_idxes_dict_config} {customize_damping_config} {customize_global_damping_config} {train_on_all_trajs_config} {single_instance_state_based_train_config} {data_selection_ratio_config} {wo_vel_obs_config} {downsample_config} {target_inst_tag_list_fn_config} {teacher_model_config} {multiple_teacher_model_config} {base_traj_config} {history_setting_config} {good_inst_opt_res_config} {w_franka_config} {randomize_config} {early_terminate_config} {substeps_config} {forcasting_model_config} {use_window_future_selection_config} {forcasting_inv_freq_config} {controller_setting_config} {forcasting_history_ws_config} {sv_info_during_training_config} {impedance_control_config} {w_obj_latent_features_config} {net_type_config} {history_freq_config} {use_future_obs_config} {w_history_window_index_config} {randomize_conditions_config} {w_inst_latent_features_config} {masked_mimic_training_setting} {forcasting_model_training_setting} {randomize_condition_type_config} {contact_condition_setting} {partial_info_dict_setting} {st_ed_state_cond_setting} {forcasting_diffusion_model_config} {history_glbfeat_setting} {random_shift_conditions_setting} {only_use_hand_first_frame_config} {forecasting_agent_training_config} {use_world_model_config} {train_controller_config} {train_forecasting_model_config} {forecasting_model_weight_fn_config} {single_inst_tag_config} {activate_forecaster_config} {comput_reward_traj_hand_qpos_config} {use_future_ref_as_obs_goal_config} {forecast_obj_pos_config} {multiple_kine_source_trajs_fn_config} {use_multiple_kine_source_trajs_config} {include_obj_rot_in_obs_config} {compute_hand_rew_buf_threshold_config} {w_kine_retar_with_arm_config} {w_finger_pos_rew_config} {franka_delta_delta_mult_coef_config} {control_arm_via_ik_config} {warm_actions_mult_coef_config} {hand_qpos_rew_coef_config} {ornt_rew_scheduling_config} {glb_mult_factor_scaling_config} {not_use_kine_bias_config} {disable_hand_obj_contact_config} {wo_fingertip_rot_vel_config} {arm_ctl_params_config} {ts_teacher_model_config} {randomize_setting_config} {obj_init_pos_rand_sigma_config} {obs_simplified_config} {w_traj_modifications_config} {rand_obj_mass_range_config} {use_v2_leap_warm_urdf_config} {action_specific_rand_config} {hand_specific_randomizations_config} {schedule_hodist_coef_config} {reset_obj_mass_config} {use_vision_obs_config} {w_rotation_axis_rew_config} {add_physical_params_in_obs_config} {whether_randomize_obs_act_config} {obs_rand_noise_scale_config} {dagger_style_training_config} {teacher_subj_idx_config} {action_chunking_config} {horizon_length_config} {bc_style_training_config} {demonstration_tuning_config} {bc_relative_targets_config} {distill_full_to_partial_config} {train_free_hand_config} {simreal_modeling_config} {more_allegro_stiffness_config} {distinguish_kine_with_base_traj_config} {distill_delta_targets_config} {preset_cond_type_config} {preload_all_saved_exp_buffers_config} {use_actual_prev_targets_in_obs_config} {use_no_obj_pose_config} {multi_traj_use_joint_order_in_sim_config} {action_chunking_skip_frames_config} {multi_inst_chunking_config} {add_obj_features_config} {kine_ed_tag_config} {only_rot_axis_guidance_config} {add_penalty_config} {use_multi_step_control_config} {schedule_episod_length_config} {use_actual_traj_length_config} {randomize_reset_frame_config} {add_forece_obs_config} {distill_via_bc_config} {record_experiences_config} {learning_rate_config} {forecasting_obs_with_original_obs_config} {glb_action_penalty_schedule_config} {hand_targets_smooth_config} {preset_multi_traj_index_config} {save_experiences_via_ts_config} {load_experiences_maxx_ts_config} {switch_between_models_config} {traj_idx_to_experience_sv_folder_config} {load_chunking_experiences_v2_config} {history_chunking_obs_version_config} {load_chunking_experiences_from_real_config} {closed_loop_to_real_config} {use_transformer_model_config} {obj_pure_code_to_kine_traj_st_idx_config} {w_forecasting_config}"     
+             
+         print(cmd)
+-        os.system(cmd)
++        print("AUDIT_CMD:", cmd, flush=True); os.system(cmd)
+     
+     
+     tracking_data_sv_root = args.tracking_data_sv_root

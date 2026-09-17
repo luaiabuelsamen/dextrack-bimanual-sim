@@ -1,0 +1,29 @@
+{
+ "frames": 299,
+ "object_weight_n": 2.443933439292951,
+ "hull_parts": 64,
+ "pen_mm_mean": 2.4975411433683505,
+ "pen_mm_max": 7.375412802583956,
+ "pen_mm_median": 2.220072777055663,
+ "frames_over_2mm": 165,
+ "frames_over_5mm": 28,
+ "grip_x_mean": 64.96662268367177,
+ "grip_x_max": 359.9630889835677,
+ "frames_over_40x": 229,
+ "frames_red": 267,
+ "pos_err_cm_mean": 0.25796502547098765,
+ "rot_err_deg_mean": 36.47924975149111,
+ "dextrack_obj_strict": false,
+ "dextrack_obj_loose": true,
+ "end": {
+  "ref_ts": 298,
+  "pen_mm": 0.0,
+  "links": [],
+  "n_links": 0,
+  "points_inside": 0,
+  "grip_n": 89.65644836425781,
+  "grip_x": 36.68530694117272,
+  "pos_err_m": 0.00019337616686243564,
+  "rot_err_rad": 0.0050073664232749854
+ }
+}

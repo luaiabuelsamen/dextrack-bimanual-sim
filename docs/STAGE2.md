@@ -246,6 +246,73 @@ pinches at 2 and 63 N, and both are recorded as failures, not excluded.
 Rotation that remains (knife 41°, duck 44°, bunny 43°, binoculars 68°) is
 the object turning in a fingertip pinch, and the reward did not fix it.
 
+## D1, the audit of DexTrack's released checkpoints (2026-09-17)
+
+Run on a rented RTX 3090 (RunPod community cloud, $0.22/h, about $1.50 of
+GPU time in total, pod stopped afterwards). Their code, data, assets and the
+three released GRAB checkpoints (`s2_cubesmall_inspect`, `s2_duck_inspect`,
+`s2_flute_pass`), Isaac Gym Preview 4, their `run_tracking_headless_grab_single_test.sh`
+path at 4 environments instead of 100, headless as their maintainer
+recommends in issue #3. A 30-line env-var-gated hook in their task records,
+for environment 0 at every control step, the object pose, every hand link's
+pose and PhysX's net contact force on every link
+(`results/dextrack_audit/audit_hook.diff`). Penetration is then measured
+geometrically with the same shapes PhysX collided: the URDF's box and sphere
+collision primitives on the Allegro links, densely sampled, against the
+convex decomposition their loader gives PhysX
+(`experiments/tracking/audit_dextrack.py`).
+
+**The released code does not run its own checkpoints as released.** Their
+environment creates the hand at its zero joint pose, palm at the origin on
+top of the object, and steps physics once before it snapshots the root
+states it later resets from; the snapshot therefore holds the object
+mid-flight (0.14 m up, 2.5 m/s, 63 rad/s), and every reset re-launches it.
+With that repaired, the object born exactly on the ground plane is still
+ejected at 9 m/s in the first step by PhysX's depenetration. Under the
+unmodified release all three checkpoints lose the object at step one and
+their own success counter reads 0 of 4 environments. Two fixes make the
+policies work: settle the hand's links to the reference pose with the
+object parked, and create the object 3 mm above the plane at rest. Both are
+in the diff, both are switchable, and neither touches the policy, the
+reward or the reference. A stub replaced the `datasetv4.1` archive for a
+field their code reads but never uses (`target_qpos`); the object scale it
+also carries is 1.0 for GRAB, matching the only decomposition present.
+
+**With those fixes, two of the three track and one holds then loses it.**
+Per rollout, 298 frames, frame 0 excluded; grip is the sum of PhysX net
+contact force over links that geometrically touch the object, in multiples
+of the object's weight at their density of 500 kg/m³:
+
+| clip | object weight | position error | penetration mean / median / max | frames > 2 mm | > 5 mm | grip median / mean / max | frames > 40× |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| small cube | 0.61 N | **0.44 cm** | 1.75 / 1.1 / 10.6 mm | 99 (33 %) | 15 (5 %) | 25× / 52× / 269× | 152 |
+| duck | 2.44 N | **0.26 cm** | 2.28 / 2.0 / 7.5 mm | 150 (50 %) | 23 (8 %) | 3× / 13× / 255× | 28 |
+| flute | 0.41 N | 0.1–3 cm to frame 160, then lost (93 cm) | 0.74 / 0.0 / 3.5 mm | 57 (19 %) | 0 | 0× / 19× / 152× | 73 |
+
+**What that says.** Their successful rollouts are not the 10–17 mm burials
+this pipeline produced; they hold the object at 1–2 mm of interpenetration
+most of the time, with excursions to 5–10 mm on 5–8 % of frames, at forces
+that are mostly modest on these light objects and spike to 250× weight.
+Against our rule (held, under 3 mm, under 40× weight) the duck passes on
+most frames, the cube fails the force half on about half of its frames, and
+the flute passes while it holds and then drops. Against their own rule, all
+three read 0 successes in these runs: the cube and duck track position to
+millimetres but the object rotates in the hand by 40–150° over the lift
+(orientation is not in the reward for these checkpoints,
+`w_obj_ornt=False`), and the flute is lost. The penetration their metric
+never sees is real but small; the mechanism that made ours large — a stiff
+weld, stiff servos and an impulse-resolved contact model — is not theirs.
+
+**Caveats, all of them.** Three clips, one environment read per clip, from
+subject s2's training split, not the 197-clip test set. The initial
+conditions are mine, not theirs, and their released initialization does not
+run. Sampled surface points underestimate penetration between samples.
+Rotation error is measured against the logged `goal_rot` and may include a
+frame convention I have not verified. The audit is of the checkpoints they
+released, which may differ from the ones behind Table 1. Everything is
+under `results/dextrack_audit/`: per-frame logs, audits, launch command,
+and the diff.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with

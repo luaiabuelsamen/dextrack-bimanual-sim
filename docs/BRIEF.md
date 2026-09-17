@@ -100,6 +100,15 @@ target 22 not met and not reachable from 18 robust seeds. See
 a robust seed, not the tracker. D1 (the audit) is unchanged and still needs
 an x86 machine.
 
+## Status after D1 (2026-09-17)
+
+D1 ran on a rented 3090. The released code does not run its own
+checkpoints (initialization launches the object); with two switchable
+initialization fixes, two of three released GRAB checkpoints track to
+millimetres while holding the object at 1–2 mm of interpenetration with
+5–10 mm excursions on 5–8 % of frames, one is lost mid-clip. Their
+successes are not burials of our kind. See `STAGE2.md`.
+
 ## Guardrails
 
 1. **Render before believing.** No count enters a document until every pose
