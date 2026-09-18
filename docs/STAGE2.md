@@ -352,9 +352,17 @@ their trainer otherwise untouched.
 | + depth term 100/m + force term, 75 epochs | (evaluated at 4: 2.59 mm on env 0) | 59 % | 39× | 0.38 cm | worse; a miss |
 | **+ depth term 300/m, no force term, 150 epochs** | **1.33 mm** | **26 %** | **34×** | 0.41 cm | **16 of 16** |
 
-**A 39 % cut in interpenetration and a 37 % cut in grip force, every
-rollout still held, for 3 mm of tracking error, in 150 epochs of
-fine-tuning.** Training-time depth fell from 0.79 mm to 0.40 mm and the
+The weight sweep, same protocol (`results/dextrack_audit/finetune/sweep/`):
+
+| depth weight (per metre) | penetration mean | frames > 2 mm | grip on touching links | position error | held |
+|---|---:|---:|---:|---:|---:|
+| 0 (released) | 2.18 mm | 45 % | 54× | 0.14 cm | 16 of 16 |
+| 100 | 1.59 mm | 33 % | 38× | 0.25 cm | 16 of 16 |
+| 300 | 1.33 mm | 26 % | 34× | 0.41 cm | 16 of 16 |
+| **1000** | **1.18 mm** | **26 %** | **24×** | 0.29 cm | **16 of 16** |
+
+Monotone in the weight: **at 1000, interpenetration is down 46 % and grip
+56 %, every rollout still held, for 1.5 mm of tracking error.** Training-time depth fell from 0.79 mm to 0.40 mm and the
 fraction of steps over 2 mm from 7 % to 1 %. This is the first policy in
 either framework trained to hold an object *and* stay out of it, and it
 says the interpenetration their metric never sees is not load-bearing: the

@@ -5478,3 +5478,12 @@ Depth term with a force term (first try, 75 ep) made eval penetration worse
 Pod stopped; total spend today about $1.20. Artifacts:
 results/dextrack_audit/finetune/ (logs, ckpt, patches); hook diff 286 lines.
 
+### Cube weight sweep (16 envs each, from the released ckpt, 150 ep)
+    w      pen mm   >2mm   grip   err cm   held
+    0      2.18     45 %   54x    0.14     16/16
+    100    1.59     33 %   38x    0.25     16/16
+    300    1.33     26 %   34x    0.41     16/16
+    1000   1.18     26 %   24x    0.29     16/16
+Monotone. Generalist-based fits (apple, torus, stamp, flashlight, w 300)
+running.
+
