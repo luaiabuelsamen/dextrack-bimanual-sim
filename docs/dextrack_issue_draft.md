@@ -52,6 +52,6 @@ and is there an intended initialization I am missing (for example a
 
 Repro: fresh clone, README install, `bash scripts/run_tracking_headless_grab_single_test.sh 0 ori_grab_s2_cubesmall_inspect_1 ./ckpts/s2_cubesmall_inspect_ckpt.pth True`, then read the object position from `ts_to_hand_obj_obs_reset_1.npy` at ts 1: it is at z ≈ 0.2 with the hand 15 cm away.
 
-Diff: `results/dextrack_audit/audit_hook.diff` in
+Diff: `dextrack/task_hook.diff` in
 https://github.com/luaiabuelsamen/dextrack-bimanual-sim (the `AUDIT_FIX`
 blocks; the `AUDIT_LOG` blocks are instrumentation and can be ignored).

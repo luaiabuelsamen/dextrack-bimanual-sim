@@ -256,11 +256,11 @@ path at 4 environments instead of 100, headless as their maintainer
 recommends in issue #3. A 30-line env-var-gated hook in their task records,
 for environment 0 at every control step, the object pose, every hand link's
 pose and PhysX's net contact force on every link
-(`results/dextrack_audit/audit_hook.diff`). Penetration is then measured
+(`dextrack/task_hook.diff`). Penetration is then measured
 geometrically with the same shapes PhysX collided: the URDF's box and sphere
 collision primitives on the Allegro links, densely sampled, against the
 convex decomposition their loader gives PhysX
-(`experiments/tracking/audit_dextrack.py`).
+(`dextrack/audit.py`).
 
 **The released code does not run its own checkpoints as released.** Their
 environment creates the hand at its zero joint pose, palm at the origin on
@@ -335,7 +335,7 @@ not zero either; and invisible to their metric.
 ## Penetration-aware training in their framework (2026-09-17, night)
 
 The audit's probe, made cheap enough to run every control step for thousands
-of environments (`experiments/tracking/penetration_torch.py`: the hand's
+of environments (`dextrack/penetration_torch.py`: the hand's
 collision primitives as sampled surface points, the object as the face
 planes of its convex parts, a bounding-sphere cull, batched on the GPU;
 correlation 0.88 with the offline audit on the same rollout at its sparse
@@ -343,7 +343,7 @@ setting (see the correction below: too sparse to train against), 3.5 ms per
 step at 4096 environments on a one-hull object, about 100 ms per 1024 on a
 64-hull one), and added to DexTrack's reward as an env-var-gated term
 (`AUDIT_PEN_W` per metre of depth, `AUDIT_FORCE_W` per unit of grip above
-40× weight; the diff is in `results/dextrack_audit/audit_hook.diff`).
+40× weight; the diff is in `dextrack/task_hook.diff`).
 Fine-tuned from their released small-cube checkpoint, 1024 environments,
 their trainer otherwise untouched.
 

@@ -5547,3 +5547,6 @@ tracker (cube: -26 % pen, -56 % grip, 16/16) and fails on the generalist's
 marginal clips by two exits (drop at >=300, no change at 100). Control run
 (cube from scratch, 3000 ep) still training; pod stops 06:41 PDT.
 
+
+### Layout change (2026-09-18)
+The Isaac Gym tooling moved to `dextrack/` (probe, audit, renderer, task hook diff, pod scripts). Older entries reference `experiments/tracking/{audit,render}_dextrack.py`, `penetration_torch.py` and `results/dextrack_audit/audit_hook.diff` at their old paths.
