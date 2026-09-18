@@ -23,3 +23,6 @@ vendor/GRAB/
 
 # agent worktrees: separate checkouts, never part of this repo
 .claude/worktrees/
+
+# the dextrack run specs ARE source; the bare runs/ rule above is for training output
+!dextrack/runs/

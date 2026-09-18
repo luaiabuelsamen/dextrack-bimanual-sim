@@ -1,0 +1,10 @@
+{
+ "kind": "scratch",
+ "base": "cube",
+ "clip": "ori_grab_s2_cubesmall_inspect_1",
+ "checkpoint": "./logs/scratch_cube_scratch/tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__18-02-24-37/nn/last_tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__ep_2800_rew_-45.67001.pth",
+ "w_pen": 0,
+ "epochs": 4200,
+ "envs": 1024,
+ "note": "D4 step 1 continued to the frame budget behind their released cube checkpoint (228M frames = 7000 epochs at 1024 envs x 32 horizon); 2844 epochs (93M) left the cube untouched"
+}

@@ -1,0 +1,4 @@
+{"kind": "finetune", "base": "cube", "clip": "ori_grab_s2_cubesmall_inspect_1",
+ "checkpoint": "./ckpts/s2_cubesmall_inspect_ckpt.pth",
+ "w_pen": 1000, "spacing": 0.002, "sdf_res": 0.001, "epochs": 150, "envs": 1024,
+ "note": "the headline fine-tune: released cube policy + dense penetration term"}

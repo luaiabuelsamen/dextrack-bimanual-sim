@@ -1,0 +1,3 @@
+{"kind": "scratch", "base": "cube", "clip": "ori_grab_s2_cubesmall_inspect_1",
+ "checkpoint": null, "w_pen": 0, "epochs": 3000, "envs": 1024,
+ "note": "D4 step 1, the control: their per-clip policy from scratch, no penetration term"}

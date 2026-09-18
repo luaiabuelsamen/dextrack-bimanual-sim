@@ -1,0 +1,4 @@
+{"kind": "finetune", "base": "gen", "clip": "ori_grab_s10_apple_eat_1",
+ "checkpoint": "./ckpts/grab_trajs_tracking_ckpt.pth",
+ "w_pen": 100, "gate_m": 0.1, "spacing": 0.002, "sdf_res": 0.001, "epochs": 150, "envs": 1024,
+ "note": "generalist on the apple, term charged only within 10 cm of the target"}

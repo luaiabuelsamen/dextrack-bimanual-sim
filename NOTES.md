@@ -5618,3 +5618,12 @@ First clip tried (camera_takepicture_2) failed: generalist does not hold the
 camera, both hands followed their references away. Choose the clip by whether
 the policy holds it, THEN by reference cleanliness.
 
+### Both hands measured (2026-09-18)
+Second probe over the left hand's bodies (last block of rigid_body_states):
+right 0.78 mm / 11 % >2mm, LEFT 0.24 mm / 3 % >2mm, err 8.34 cm, held 16/16.
+The left hand's reference asks for 7.94 mm and position control delivers 0.24:
+contact resists the target. A penetrating reference does not imply a
+penetrating simulated hand. Note err drifted 7.22 -> 8.34 cm between two runs
+of the same deterministic policy: Isaac Gym GPU physics is not bit-repeatable,
+so single-run differences under ~1 cm mean nothing.
+

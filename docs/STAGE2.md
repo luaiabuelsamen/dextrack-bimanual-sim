@@ -624,8 +624,15 @@ presses 39 % less deeply into it.** Frames over 2 mm halve. That is the
 result a second hand should produce: the load is shared, so neither hand has
 to bury itself to keep the object. It costs 2.6 cm of tracking error.
 
-Two honest limits. The probe measures the right hand only, so the left hand's
-own interpenetration is not in that table. And the first clip tried,
+The left hand is measured too, on a second probe over its own bodies: **0.24 mm
+mean, 3 % of frames past 2 mm**, a third of the right hand's. That is
+worth a moment. Its reference asks for 7.94 mm, and it is driven straight at
+that reference under position control, yet physics delivers a quarter of a
+millimetre: contact resists the target long before the hand reaches it. A
+kinematic reference that penetrates does not imply a simulated hand that
+penetrates, which is the other half of the reference finding above.
+
+One honest limit remains. The first clip tried,
 `s1_camera_takepicture_2`, produced nothing: the generalist does not hold the
 camera, so both hands followed their references away and left the object on
 the ground (`figures/bimanual_isaac_camera.gif`). The clip was chosen for

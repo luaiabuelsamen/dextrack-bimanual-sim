@@ -1,0 +1,4 @@
+{"kind": "finetune", "base": "gen", "clip": "ori_grab_s1_gamecontroller_lift",
+ "checkpoint": "./ckpts/grab_trajs_tracking_ckpt.pth",
+ "w_pen": 0, "epochs": 150, "envs": 1024,
+ "note": "D4 step 4: fine-tune the right-hand policy inside the two-hand scene (AUDIT_BIMANUAL must be set in the environment); no penetration term, so the question is only whether training adapts to the second hand"}
