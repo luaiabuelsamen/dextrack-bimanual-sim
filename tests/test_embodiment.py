@@ -3,7 +3,7 @@ import numpy as np
 import mujoco
 import pytest
 
-from oppdef.embodiment import HANDS, ARMS, make, inventory, hand_xml
+from handsim.embodiment import HANDS, ARMS, make, inventory, hand_xml
 
 
 @pytest.mark.slow

@@ -5,7 +5,7 @@ import numpy as np
 import mujoco
 import pytest
 
-from oppdef.envs.bimanual import BimanualBox, BASE_HALF, PEG_HALF, SOCKET_FRICTION
+from handsim.envs.bimanual import BimanualBox, BASE_HALF, PEG_HALF, SOCKET_FRICTION
 
 
 @pytest.fixture(scope="module")

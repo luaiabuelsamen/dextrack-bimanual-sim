@@ -123,7 +123,7 @@ The workflow, the protocol and every script: **[dextrack/README.md](dextrack/REA
 ## The MuJoCo side: our own pipeline, and what it found first
 
 Before the GPU, the DexTrack-shaped pipeline was rebuilt here on GRAB with a
-Shadow hand in MuJoCo (`src/oppdef/human/`). Its finding is the reason the
+Shadow hand in MuJoCo (`src/handsim/human/`). Its finding is the reason the
 probe exists: **a static hold test selects burials.** Every tracking policy
 it trained was tracking a hand inside the object, and every clean grasp seed
 dropped. The fix was to score the *end of an open-loop carry* instead
@@ -153,19 +153,19 @@ the four burials this project was first measured on
 ## Layout
 
 ```
-dextrack/            DexTrack in Isaac Gym: the hook, the probe, the audit, the renderer
-  task_hook.diff       patch to their task (init fixes, logger, all-env probe, reward term)
-  penetration_torch.py GPU probe: dense hand samples, hull planes or signed-depth volume
-  audit.py render.py   offline audit of a logged rollout; MuJoCo replay with the numbers
-  pod/                 pod setup, fine-tune / from-scratch / evaluation / audit scripts
-docs/                BRIEF.md (goal, D1–D4, guardrails) · STAGE2.md (the evidence)
-                     dextrack_issue_draft.md · PIPELINE.md, TASKS.md, pre-registrations (earlier)
-results/dextrack_audit/  their per-clip audits, the 43-clip generalist, fine-tune logs and checkpoints
-results/ figures/    everything else with provenance; retracted/ holds withdrawn work
-src/oppdef/          the MuJoCo pipeline (human/: GRAB → retarget → carry search → PPO → distil → two hands)
-experiments/tracking/  stage2_carry.py, stage3_carry.py, render_tracking.py, dextrack_metric.py
-experiments/grasp_metrics/  the earlier grasp-quality benchmark (below)
-NOTES.md             the measurement log and every retraction
+dextrack/               DexTrack in Isaac Gym: the hook, the probe, the audit, the renderer, pod scripts
+docs/                   BRIEF.md (goal, D1–D4, guardrails) · STAGE2.md (the evidence) · PIPELINE.md
+                        dextrack_issue_draft.md · archive/ (pre-registrations, reviews, old plans)
+src/handsim/            the MuJoCo pipeline: human/ (GRAB → retarget → carry search → PPO → distil → two hands),
+                        grasping/, hands/, envs/, learning/ and the shared abstractions
+experiments/tracking/   experiments on that pipeline (stage2_carry.py, stage3_carry.py, render_tracking.py, dextrack_metric.py)
+experiments/infra/      backend benchmarks
+results/                live results with provenance; results/dextrack_audit/ holds everything from the pod
+figures/                live renders, each with its per-frame JSON manifest
+tests/                  invariants of the MuJoCo pipeline (`make test-fast`)
+legacy/                 the retired grasp-metrics benchmark, retracted experiments, their results and figures (read-only)
+CLAUDE.md               how to work here: layout, the measurement rules, the pod protocol
+NOTES.md                the dated lab log and every retraction
 ```
 
 ## Reproduce
@@ -191,12 +191,12 @@ The repository began as a grasp-quality benchmark (238 sampled grasps, 4
 hands, 4 shapes, 2 carry tasks, pre-registered): a wrench objective beat the
 shipped keypoint retarget (n = 60, McNemar p = 0.0075), contact force
 predicted task success (AUC 0.800), and every metric inverted on capsules
-([figure](figures/g3_metrics.png), [docs/TASKS.md](docs/TASKS.md)). Four
+([figure](legacy/figures/g3_metrics.png), [docs/archive/TASKS.md](docs/archive/TASKS.md)). Four
 claims from that programme were retracted, including the "opposition
 deficit" the repository was named after (all four hands oppose within 2.8
 mm once measured at the right point). Every withdrawn result is kept under
-`results/retracted/`, `figures/retracted/` and `experiments/retracted/`
-with a note saying what was wrong. The Python package is still `oppdef`.
+`legacy/results/retracted/`, `legacy/figures/retracted/` and `legacy/experiments/retracted/`
+with a note saying what was wrong. The Python package was renamed from `oppdef` to `handsim` with the cleanup of 2026-09-18; the old `OPPDEF_*` environment variables are still honoured.
 
 ## How this repository is meant to be read
 

@@ -9,9 +9,9 @@ import argparse
 
 import numpy as np
 
-from oppdef.envs.bimanual import build
-from oppdef.sim.port import strip_visual, rollout_cpu
-from oppdef.vec import CpuVec, throughput
+from handsim.envs.bimanual import build
+from handsim.sim.port import strip_visual, rollout_cpu
+from handsim.vec import CpuVec, throughput
 
 
 def main():

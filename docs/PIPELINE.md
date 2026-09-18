@@ -124,7 +124,7 @@ approximation — the mug's hull is **3.52×** the mug's own volume, because it
 fills both the cup's cavity and the handle's hole. Every handle grasp in the
 dataset would have been physically impossible, and a correctly placed hand reads
 as 20–40 mm of penetration that is not there. Convex decomposition brings the
-mug to 0.92× (`src/oppdef/human/decompose.py`).
+mug to 0.92× (`src/handsim/human/decompose.py`).
 
 ### Stage 3: a per-reference PPO result, on an invalid initial condition
 

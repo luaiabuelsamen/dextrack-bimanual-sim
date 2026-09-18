@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 import mujoco
 
-from oppdef.hands.f5d6 import MIMIC, TIP_OFFSETS, effort_of, is_dependent
+from handsim.hands.f5d6 import MIMIC, TIP_OFFSETS, effort_of, is_dependent
 
 
 @pytest.mark.slow
@@ -16,7 +16,7 @@ def test_tracked_fingertips_move_when_the_distal_joint_moves():
     about that very point -- moving it displaced the tracked point by exactly
     0.0000 mm on all five fingers, so every objective reading them was blind to
     the last joint of every finger."""
-    from oppdef.hands.specs import load
+    from handsim.hands.specs import load
     m, _cfg = load("f5d6")
     d = mujoco.MjData(m)
     for finger in ("ff", "mf", "rf", "lf"):
@@ -40,7 +40,7 @@ def test_mimic_couplings_are_present():
     """The URDF couples each distal joint to its proximal one, so the right
     hand has SIX independent joints. Dropped, the model had eleven and this
     project actuated all of them -- roughly twice the true freedom."""
-    from oppdef.hands.specs import load
+    from handsim.hands.specs import load
     m, _cfg = load("f5d6")
     assert m.neq >= 5, f"expected mimic equality constraints, got neq={m.neq}"
     names = {mujoco.mj_id2name(m, mujoco.mjtObj.mjOBJ_EQUALITY, e)

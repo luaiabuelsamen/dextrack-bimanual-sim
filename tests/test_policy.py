@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from oppdef.policy import (make_chunks, chunk_dataset, TemporalEnsembler, Norm,
+from handsim.policy import (make_chunks, chunk_dataset, TemporalEnsembler, Norm,
                            Scripted)
 
 

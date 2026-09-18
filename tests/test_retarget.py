@@ -8,10 +8,10 @@ import numpy as np
 import pytest
 import mujoco
 
-from oppdef.grasping.retarget_pose import (correspond, tip_graph, align_reference, box_surface,
+from handsim.grasping.retarget_pose import (correspond, tip_graph, align_reference, box_surface,
                              geometric_epsilon, transform_ref, retargeter_for,
                              grasp_centre)
-from oppdef.data import SyntheticSource
+from handsim.data import SyntheticSource
 
 
 def _ref():
@@ -155,7 +155,7 @@ def test_base_hinges_are_specified_in_the_unit_the_spec_compiles():
 @pytest.mark.slow
 def test_bimanual_wrist_actually_reaches_a_commanded_rotation():
     """The end-to-end version of the same defect: command, then measure."""
-    from oppdef.envs.bimanual import BimanualBox
+    from handsim.envs.bimanual import BimanualBox
     e = BimanualBox()
     j = mujoco.mj_name2id(e.m, mujoco.mjtObj.mjOBJ_JOINT, "rh_rz")
     mujoco.mj_resetData(e.m, e.d)
@@ -172,7 +172,7 @@ def test_every_hand_builds_with_a_floating_base():
     """Shadow's palm carries a 2-DoF wrist and f5d6's sits inside a whole robot,
     so bolting six more DoF onto the palm exceeded MuJoCo's 6-per-body limit.
     The base needs its own carrier body."""
-    from oppdef.embodiment import HANDS
+    from handsim.embodiment import HANDS
     for hk in HANDS:
         if hk == "leap_left":
             continue

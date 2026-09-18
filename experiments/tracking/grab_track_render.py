@@ -17,8 +17,8 @@ import numpy as np
 import mujoco
 from PIL import Image
 
-from oppdef.human import grab, scene, track
-from oppdef.human.retarget import retarget_sequence
+from handsim.human import grab, scene, track
+from handsim.human.retarget import retarget_sequence
 from experiments.tracking.grab_inventory import contact_mask, longest_run, _tree
 
 

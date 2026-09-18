@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 
-from oppdef.human import grab, track as T
+from handsim.human import grab, track as T
 
 
 def one(row, hand_r="shadow", hand_l="shadow_left", stride=8, grip=8.0,

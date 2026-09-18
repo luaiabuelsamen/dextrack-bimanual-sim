@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "oppdef"
+name = "handsim"
 version = "0.1.0"
-description = "Opposition deficit: what a robot hand cannot oppose, and what to retarget instead"
+description = "Dexterous hand-object tracking from human motion, measured for interpenetration: DexTrack in Isaac Gym, a MuJoCo pipeline, two hands"
 requires-python = ">=3.10"
 dependencies = ["mujoco>=3.8", "numpy", "scipy"]
 

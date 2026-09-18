@@ -26,7 +26,7 @@ import numpy as np
 import torch
 import mujoco
 
-from oppdef.human import grab, track, rl, distill
+from handsim.human import grab, track, rl, distill
 
 
 def per_reference(row, hand="shadow", steps=200_000, seed=0, verbose=False,
@@ -210,7 +210,7 @@ def main(a):
     tr = [s for s in store if s["obj"] not in test]
     print(f"\nholding out objects {sorted(test)}", flush=True)
 
-    from oppdef.learning.bc import train as bc_train
+    from handsim.learning.bc import train as bc_train
     O = np.concatenate([s["O"] for s in tr]).astype(np.float32)
     A = np.concatenate([s["A"] for s in tr]).astype(np.float32)
     model = bc_train(O, A, seed=a.seed, epochs=a.epochs)

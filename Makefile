@@ -4,8 +4,8 @@
 PY  ?= python3
 # a stale system-site anyio plugin breaks collection; this venv needs none
 export PYTEST_DISABLE_PLUGIN_AUTOLOAD := 1
-export PYTHONPATH := $(CURDIR)
-GPU ?= ./mjx_env.sh python
+export PYTHONPATH := $(CURDIR)/src:$(CURDIR)
+GPU ?= ./scripts/mjx_env.sh python
 
 .PHONY: help install test test-fast axis inventory expert matched matched-fig \
         g1 g1-analysis render-tasks render-tracking vec parity parity-mjx clean vendor
@@ -23,30 +23,30 @@ test:             ## everything except GPU
 	$(PY) -m pytest -q -m "not gpu"
 
 # -- measurements ----------------------------------------------------------
-axis:             ## M1: the opposition axis (floor + aperture, with provenance)
-	$(PY) -m oppdef.hands.axis
+axis:             ## legacy M1: the opposition axis (floor + aperture, with provenance)
+	$(PY) -m handsim.hands.axis
 
 inventory:        ## what hands and arms this machine can build
-	$(PY) -m experiments.grasp_metrics.inventory
+	$(PY) -m legacy.experiments.grasp_metrics.inventory
 
-# -- tasks and comparisons -------------------------------------------------
+# -- legacy: the retired grasp-metrics benchmark (legacy/) -------------------
 g1:               ## T1: the pre-registered three-arm comparison (docs/G1_PREREGISTRATION.md)
-	$(PY) experiments/grasp_metrics/g1.py
+	$(PY) legacy/experiments/grasp_metrics/g1.py
 
 g1-analysis:      ## the pre-registered analysis of the above
-	$(PY) experiments/grasp_metrics/g1_analysis.py
+	$(PY) legacy/experiments/grasp_metrics/g1_analysis.py
 
 matched:          ## T1: budget-matched pose vs wrench (two arms)
-	$(PY) experiments/grasp_metrics/matched.py
+	$(PY) legacy/experiments/grasp_metrics/matched.py
 
 matched-fig:      ## figure for the matched comparison (statistics derived, not typed)
-	$(PY) experiments/grasp_metrics/fig_matched.py
+	$(PY) legacy/experiments/grasp_metrics/fig_matched.py
 
 expert:           ## T2: the bimanual peg task and its one-handed control
-	$(PY) -m experiments.grasp_metrics.bimanual_expert
+	$(PY) -m legacy.experiments.grasp_metrics.bimanual_expert
 
 render-tasks:     ## re-render every task GIF by replaying saved grasps
-	MUJOCO_GL=egl $(PY) experiments/grasp_metrics/render_tasks.py
+	MUJOCO_GL=egl $(PY) legacy/experiments/grasp_metrics/render_tasks.py
 
 render-tracking:  ## capture and render the README's measured GRAB tracking demos
 	OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl PYTHONPATH=src:. $(PY) -m experiments.tracking.render_tracking mug bowl binoculars camera

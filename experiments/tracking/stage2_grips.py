@@ -20,8 +20,8 @@ from pathlib import Path
 
 import numpy as np
 
-from oppdef.human import grab, scene, track as T, grasp as G
-from oppdef.human.retarget import retarget_sequence
+from handsim.human import grab, scene, track as T, grasp as G
+from handsim.human.retarget import retarget_sequence
 from experiments.tracking.grab_inventory import contact_mask, longest_run, _tree
 
 

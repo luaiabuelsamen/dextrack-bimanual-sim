@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import PillowWriter
 from matplotlib.collections import PolyCollection, LineCollection
 
-from oppdef.human import grab
+from handsim.human import grab
 
 # MANO chains for drawing: wrist -> proximal -> middle -> distal -> tip vertex
 CHAINS = [[0, 13, 14, 15, 16], [0, 1, 2, 3, 17], [0, 4, 5, 6, 18],
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     s = grab.load(a.seq, stride=a.stride, verts=True)
-    from oppdef.human import mano as _mano
+    from handsim.human import mano as _mano
     globals()["HAND_FACES"] = _mano.load("right").faces
     out = Path(a.out or f"figures/grab_{s.name}.gif")
     out.parent.mkdir(parents=True, exist_ok=True)

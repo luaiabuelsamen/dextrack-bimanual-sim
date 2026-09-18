@@ -30,8 +30,8 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial import cKDTree
 
-from oppdef import paths
-from oppdef.human import grab
+from handsim import paths
+from handsim.human import grab
 
 NEAR_M = 0.005          # a hand vertex this close counts as touching
 

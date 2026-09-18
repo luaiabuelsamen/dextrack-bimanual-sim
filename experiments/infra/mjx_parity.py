@@ -10,9 +10,9 @@ import argparse
 
 import numpy as np
 
-from oppdef.envs.bimanual import build
-from oppdef.sim.port import strip_visual
-from oppdef.vec import parity
+from handsim.envs.bimanual import build
+from handsim.sim.port import strip_visual
+from handsim.vec import parity
 
 
 def main():

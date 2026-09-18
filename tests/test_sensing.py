@@ -3,7 +3,7 @@ import numpy as np
 import mujoco
 import pytest
 
-from oppdef.sensing import ObsSpec, FULL, ONBOARD_ONLY, LEGACY, PRIVILEGED
+from handsim.sensing import ObsSpec, FULL, ONBOARD_ONLY, LEGACY, PRIVILEGED
 
 
 def test_onboard_only_drops_every_privileged_channel():
@@ -22,8 +22,8 @@ def test_legacy_spec_records_what_the_first_bc_actually_saw():
 
 @pytest.mark.slow
 def test_touch_sensors_fire_and_do_not_change_physics():
-    from oppdef.envs.bimanual import BimanualBox
-    from oppdef.control.expert import Expert
+    from handsim.envs.bimanual import BimanualBox
+    from handsim.control.expert import Expert
 
     plain = Expert(two_handed=True).run(verbose=False)
     ex = Expert(two_handed=True, tactile=True)
@@ -51,7 +51,7 @@ def test_touch_sensors_fire_and_do_not_change_physics():
 
 @pytest.mark.slow
 def test_observation_dimension_matches_the_declared_spec():
-    from oppdef.envs.bimanual import BimanualBox
+    from handsim.envs.bimanual import BimanualBox
     e = BimanualBox(tactile=True)
     mujoco.mj_forward(e.m, e.d)
     for spec in (FULL, ONBOARD_ONLY, LEGACY, ObsSpec(proprio_pos=True)):

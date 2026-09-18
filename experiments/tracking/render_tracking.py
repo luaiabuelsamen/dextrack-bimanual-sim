@@ -101,7 +101,7 @@ def contact_diagnostics(m, d, obj_gids, obj_bid):
 
 
 def capture(name, cache, seed):
-    from oppdef.human import grab, track
+    from handsim.human import grab, track
 
     seq_name, mode, _title = DEMOS[name]
     subject = carry_seed(seq_name)["subject"] if mode.startswith("carry") else "s1"
@@ -113,7 +113,7 @@ def capture(name, cache, seed):
             ["git", "rev-parse", "HEAD"], text=True).strip(),
         "mujoco": mujoco.__version__, "numpy": np.__version__,
         "physics_source_sha256": {str(p): digest(p)
-                                  for p in sorted(Path("src/oppdef").rglob("*.py"))},
+                                  for p in sorted(Path("src/handsim").rglob("*.py"))},
         "reference_stride": 8,
         "scope": "Selected per-reference simulation; assisted initial grasp; "
                  "mocap-driven wrists and actuated fingers; free object under gravity.",
@@ -133,7 +133,7 @@ def capture(name, cache, seed):
             "seeds_file": str(CARRY_SEEDS), "seeds_sha256": digest(CARRY_SEEDS)})
         if mode == "carry_ppo":
             import torch
-            from oppdef.human import rl
+            from handsim.human import rl
 
             torch.set_num_threads(1)
             ck = CARRY_CKPT / f"ppo_{seq_name}_carry.pt"
@@ -160,7 +160,7 @@ def capture(name, cache, seed):
                 rt.apply(k, None)
     elif mode == "ppo":
         import torch
-        from oppdef.human import rl
+        from handsim.human import rl
 
         torch.set_num_threads(1)
         rt = track.ReferenceTracker(seq)

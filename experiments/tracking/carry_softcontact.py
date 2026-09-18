@@ -27,7 +27,7 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-from oppdef.human import grab, track as T
+from handsim.human import grab, track as T
 from experiments.tracking.stage2_carry import carry, score_of, search
 
 SETTINGS = {

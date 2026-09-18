@@ -32,7 +32,7 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-from oppdef.human import grab, track as T
+from handsim.human import grab, track as T
 
 W = 0.2 * 9.81            # object weight this pipeline standardises on
 

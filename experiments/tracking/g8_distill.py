@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from oppdef.human import distill
+from handsim.human import distill
 
 
 def main(a):
@@ -42,7 +42,7 @@ def main(a):
           f"{len({e.obj for e in eps})} objects")
     model, (O, A, is_test) = distill.train(a.out, holdout_frac=a.holdout,
                                            epochs=a.epochs)
-    from oppdef.learning.bc import policy_fn
+    from handsim.learning.bc import policy_fn
     act = policy_fn(model)
     for name, sel in (("train", ~is_test), ("HELD-OUT OBJECTS", is_test)):
         if sel.sum() == 0:

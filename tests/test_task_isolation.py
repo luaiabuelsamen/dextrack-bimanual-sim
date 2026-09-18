@@ -8,8 +8,8 @@ re-form. Found by G4's reproducibility check.
 import numpy as np
 import pytest
 
-from oppdef.grasping.synth import GraspScene
-from oppdef.grasping.task import carry, run_task
+from handsim.grasping.synth import GraspScene
+from handsim.grasping.task import carry, run_task
 
 
 @pytest.mark.slow

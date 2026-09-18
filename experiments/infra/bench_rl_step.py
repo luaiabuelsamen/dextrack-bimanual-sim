@@ -53,8 +53,8 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-from oppdef import paths
-from oppdef.human import grab, track, rl
+from handsim import paths
+from handsim.human import grab, track, rl
 
 if str(paths.REPO) not in sys.path:     # track.py imports experiments.* itself
     sys.path.insert(0, str(paths.REPO))
@@ -82,7 +82,7 @@ def load_rl_at(rev: str):
     """`rl.py` exactly as committed at `rev`, as its own module, with the
     per-iteration timer patched in if its source still matches."""
     src = subprocess.run(
-        ["git", "-C", str(paths.REPO), "show", f"{rev}:src/oppdef/human/rl.py"],
+        ["git", "-C", str(paths.REPO), "show", f"{rev}:src/handsim/human/rl.py"],
         capture_output=True, text=True, check=True).stdout
     if "t_iter" not in src and all(src.count(old) == 1 for old, _new in _TIMER_PATCH):
         for old, new in _TIMER_PATCH:

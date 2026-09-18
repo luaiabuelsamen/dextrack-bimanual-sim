@@ -121,7 +121,7 @@ def sheet(images, path):
 
 if __name__ == "__main__":
     import sys
-    from oppdef.human import grab, track
+    from handsim.human import grab, track
 
     seq_name = sys.argv[1] if len(sys.argv) > 1 else "cup_lift"
     frame = int(sys.argv[2]) if len(sys.argv) > 2 else 0

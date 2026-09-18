@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 import mujoco
 
-from oppdef.human import grab, track, perception as P
+from handsim.human import grab, track, perception as P
 
 
 def run(seq_name, hand="shadow", alpha=0.4, cam_offset=(0.35, -0.30, 0.25),

@@ -17,8 +17,8 @@ import numpy as np
 import mujoco
 from PIL import Image
 
-from oppdef.human import grab, scene
-from oppdef.human.retarget import retarget_sequence
+from handsim.human import grab, scene
+from handsim.human.retarget import retarget_sequence
 
 
 def shots(seq_name, hand="shadow", window=None, n=5, w=560, h=560,

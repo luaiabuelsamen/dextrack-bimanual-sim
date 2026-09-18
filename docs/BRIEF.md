@@ -197,7 +197,7 @@ trained from scratch. That is the base the next goal stands on.
 **One GRAB two-handed clip tracked by two Allegro hands in DexTrack's
 Isaac Gym trainer, both hands scored on their rule and on ours, rendered.**
 
-What exists for it: GRAB records both hands and `oppdef.human.grab` loads
+What exists for it: GRAB records both hands and `handsim.human.grab` loads
 them; 136 of GRAB's 291 sequences have both hands on the object at once and
 63 hold that for 15 frames or more (`scene.py`); the MuJoCo bimanual scene
 and grasp search exist (`BimanualScene`, the binoculars and camera GIFs);

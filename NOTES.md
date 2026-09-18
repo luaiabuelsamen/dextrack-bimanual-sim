@@ -5550,3 +5550,12 @@ marginal clips by two exits (drop at >=300, no change at 100). Control run
 
 ### Layout change (2026-09-18)
 The Isaac Gym tooling moved to `dextrack/` (probe, audit, renderer, task hook diff, pod scripts). Older entries reference `experiments/tracking/{audit,render}_dextrack.py`, `penetration_torch.py` and `results/dextrack_audit/audit_hook.diff` at their old paths.
+
+### Repository cleanup (2026-09-18)
+Package `oppdef` renamed `handsim` (OPPDEF_* env vars still honoured).
+Retired work consolidated under `legacy/` (grasp_metrics and retracted
+experiments, their results and figures, the attic); old planning docs and
+pre-registrations under `docs/archive/`; `mjx_env.sh` under `scripts/`.
+`CLAUDE.md` states the layout, the measurement rules and the pod protocol
+so new work follows them. Earlier entries reference the old paths.
+

@@ -26,7 +26,7 @@ import numpy as np
 import mujoco
 from PIL import Image, ImageDraw, ImageFont
 
-from oppdef.human import grab, track as T
+from handsim.human import grab, track as T
 from experiments.tracking.stage2_carry import contact_state, LOST_M
 
 _FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"

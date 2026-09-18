@@ -8,8 +8,8 @@ import numpy as np
 import pytest
 import mujoco
 
-from oppdef.vec import CpuVec, Batch, make_vec
-from oppdef.sim.port import rollout_cpu
+from handsim.vec import CpuVec, Batch, make_vec
+from handsim.sim.port import rollout_cpu
 
 XML = """
 <mujoco>

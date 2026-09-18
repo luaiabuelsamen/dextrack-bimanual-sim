@@ -13,8 +13,8 @@ def test_visual_strip_is_physics_neutral():
     stops being bit-identical, the port has started changing the physics and
     every GPU number needs re-deriving."""
     import mujoco
-    from oppdef.envs.bimanual import build
-    from oppdef.sim.port import strip_visual, rollout_cpu
+    from handsim.envs.bimanual import build
+    from handsim.sim.port import strip_visual, rollout_cpu
 
     full, _ = build()
     _, spec = build()
@@ -37,7 +37,7 @@ def test_visual_strip_is_physics_neutral():
 def test_task_requires_two_hands():
     """The headline claim: the expert extracts the peg, the one-handed control
     lifts the base instead. Criterion v2 (peg >= 8 cm, base LIFT < 2 cm)."""
-    from oppdef.control.expert import Expert
+    from handsim.control.expert import Expert
 
     two = Expert(two_handed=True).run(verbose=False)
     one = Expert(two_handed=False).run(verbose=False)
@@ -60,7 +60,7 @@ def test_opposition_floor_is_the_corrected_one():
     all four hands oppose within 2.8 mm of one another and f5d6 opposes better
     than LEAP. See NOTES.md 2026-09-13.
     """
-    from oppdef.hands.axis import opposition_axis
+    from handsim.hands.axis import opposition_axis
 
     f = opposition_axis("f5d6", restarts=8)
     leap = opposition_axis("leap", restarts=8)

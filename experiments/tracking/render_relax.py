@@ -20,7 +20,7 @@ import numpy as np
 import mujoco
 from PIL import Image
 
-from oppdef.human import grab, track as T
+from handsim.human import grab, track as T
 
 
 def shot(rt, w, h, cam):

@@ -9,9 +9,9 @@ import numpy as np
 import pytest
 import mujoco
 
-from oppdef.hands.axis import opposition_axis, provenance
-from oppdef.hands.specs import SPECS, load
-from oppdef.hands.model import (tip_bodies, mimic_pairs, finger_body_set,
+from handsim.hands.axis import opposition_axis, provenance
+from handsim.hands.specs import SPECS, load
+from handsim.hands.model import (tip_bodies, mimic_pairs, finger_body_set,
                                 apply_mimic, self_penetration)
 
 #: the retracted values, kept so the old numbers cannot come back unnoticed

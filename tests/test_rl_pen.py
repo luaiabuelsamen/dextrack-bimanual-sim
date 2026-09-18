@@ -1,4 +1,4 @@
-"""The penetration cost and the hold proxy in the PPO reward (`oppdef.human.rl`).
+"""The penetration cost and the hold proxy in the PPO reward (`handsim.human.rl`).
 
 Needs GRAB; skipped without it. Builds the smallest tracker the pipeline has
 -- an 8-frame window of s1/cubesmall_lift at stride 8 -- once per module
@@ -18,8 +18,8 @@ import numpy as np
 import pytest
 import mujoco
 
-from oppdef import paths
-from oppdef.human import grab, track, rl
+from handsim import paths
+from handsim.human import grab, track, rl
 
 CLIP = "s1/cubesmall_lift.npz"
 BASE = "3216767"        # the commit before the cost existed
@@ -51,7 +51,7 @@ def load_base_rl():
     """`rl.py` exactly as committed at BASE, as its own module."""
     try:
         src = subprocess.run(
-            ["git", "-C", str(REPO), "show", f"{BASE}:src/oppdef/human/rl.py"],
+            ["git", "-C", str(REPO), "show", f"{BASE}:src/handsim/human/rl.py"],
             capture_output=True, text=True, check=True).stdout
     except (OSError, subprocess.CalledProcessError) as e:      # noqa: PERF203
         pytest.skip(f"cannot read rl.py at {BASE}: {e}")

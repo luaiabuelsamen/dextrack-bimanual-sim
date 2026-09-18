@@ -23,7 +23,7 @@ import mujoco
 
 def record_expert(two_handed=True):
     """Run the expert on CPU, capturing every ctrl it applies."""
-    from oppdef.control.expert import Expert
+    from handsim.control.expert import Expert
     ex = Expert(two_handed=two_handed)
     seq = []
     orig = mujoco.mj_step
@@ -43,7 +43,7 @@ def record_expert(two_handed=True):
 def replay_warp(model, ctrl_seq, nworld=1, nconmax=256, njmax=512):
     import warp as wp
     import mujoco_warp as mjw
-    from oppdef.sim import warp_fix   # packaged path; a bare
+    from handsim.sim import warp_fix   # packaged path; a bare
     warp_fix.apply(verbose=False)     # `import warp_fix` only
                                       # worked from the repo root
     wp.init()
@@ -83,7 +83,7 @@ def main():
         peg_out = float(qpos[e.hinge_q]) - ex.out0
         box = qpos[e.box_q:e.box_q + 3]
         box0 = np.array([0.0, 0.0, 0.060])       # BASE_HALF[2] = 0.025 -> set below
-        from oppdef.envs.bimanual import BASE_HALF
+        from handsim.envs.bimanual import BASE_HALF
         box0 = np.array([0.0, 0.0, BASE_HALF[2]])
         disp = float(np.linalg.norm(box - box0))
         lift = float(box[2] - box0[2])

@@ -26,12 +26,12 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial import cKDTree
 
-from oppdef import paths
-from oppdef.human import grab
+from handsim import paths
+from handsim.human import grab
 
-from oppdef.human.windows import (       # noqa: E402  -- these moved into the
+from handsim.human.windows import (       # noqa: E402  -- these moved into the
     CONTACT_M, MIN_FRAMES, contact_mask, longest_run, object_tree, _tree,
-)                                        # library; see oppdef/human/windows.py
+)                                        # library; see handsim/human/windows.py
 
 
 def survey(subjects, stride: int, limit: int | None, thresh: float):

@@ -1,8 +1,8 @@
 """Cache a convex decomposition for every GRAB object. Run once."""
 import json, time
 from pathlib import Path
-from oppdef import paths
-from oppdef.human import decompose as D
+from handsim import paths
+from handsim.human import decompose as D
 
 objs = sorted(p.stem for p in
               (paths.GRAB/"tools/object_meshes/contact_meshes").glob("*.ply"))

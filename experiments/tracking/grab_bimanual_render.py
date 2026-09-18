@@ -18,8 +18,8 @@ import numpy as np
 import mujoco
 from PIL import Image
 
-from oppdef.human import grab, scene, track
-from oppdef.human.retarget import retarget_sequence
+from handsim.human import grab, scene, track
+from handsim.human.retarget import retarget_sequence
 
 
 def _place(sc, sd, palm_p, palm_q, q):

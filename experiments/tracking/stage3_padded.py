@@ -18,7 +18,7 @@ from pathlib import Path
 
 import numpy as np
 
-from oppdef.human import grab, track, rl
+from handsim.human import grab, track, rl
 
 
 def main():

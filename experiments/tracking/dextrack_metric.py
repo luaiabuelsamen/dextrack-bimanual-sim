@@ -26,7 +26,7 @@ import numpy as np
 import mujoco
 import torch
 
-from oppdef.human import grab, track as T, rl
+from handsim.human import grab, track as T, rl
 from experiments.tracking.stage2_carry import contact_state, LOST_M, CLEAN_GRIP_X, W
 
 STRICT = (0.10, np.radians(20), 0.8)
