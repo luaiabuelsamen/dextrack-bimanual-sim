@@ -172,6 +172,11 @@ described in [docs/STAGE2.md](docs/STAGE2.md).
 |---|---|
 | ![DexTrack Allegro hand holding a translucent small cube, links turning red where they sink past 2 mm](figures/dextrack_cubesmall.gif) | ![DexTrack Allegro hand holding a translucent duck, the index finger red at 6 mm inside](figures/dextrack_duck.gif) |
 
+| Released policy (top) vs the same policy fine-tuned 150 epochs with the penetration probe in the reward (bottom): 2.87 → 2.12 mm mean interpenetration, grip 106× → 47× weight, 16 of 16 rollouts held |
+|---|
+| ![Three moments of the cube clip, released policy above and penetration-aware fine-tune below, fewer red links below](figures/dextrack_cubesmall_base_vs_penft.jpg) |
+| ![The fine-tuned DexTrack policy carrying the translucent cube in a light grip, one thumb-tip excursion](figures/dextrack_cubesmall_penft.gif) |
+
 | Generalist, apple: held, 74 % of frames over 2 mm | Generalist, mug: never grasped, lost |
 |---|---|
 | ![DexTrack generalist holding a translucent apple with the palm and two fingers red](figures/dextrack_gen_apple.gif) | ![DexTrack generalist nudging a translucent mug that rolls away](figures/dextrack_gen_mug.gif) |

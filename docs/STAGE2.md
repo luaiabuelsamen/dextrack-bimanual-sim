@@ -376,6 +376,30 @@ term uses) gives the honest table
 | 300 | 1.33 mm | **2.34 mm** | **50 %** | 75× | 0.41 cm | 16 of 16 |
 | 1000 | 1.18 mm | **2.23 mm** | **47 %** | 68× | 0.29 cm | 16 of 16 |
 
+**Trained on the dense measure** (2 mm grid read through the signed-depth
+volume, the same 150 epochs from the released checkpoint, w = 1000;
+`results/dextrack_audit/finetune/cubesmall_pen_dense_w1000_ep474.pth`),
+judged by the exact plane test on the same 2 mm grid:
+
+| trained on | dense penetration | frames > 2 mm | grip on touching links | position error | held |
+|---|---:|---:|---:|---:|---:|
+| nothing (released) | 2.87 mm | 60 % | 106× | 0.14 cm | 16 of 16 |
+| sparse probe, w 1000 | 2.23 mm | 47 % | 68× | 0.29 cm | 16 of 16 |
+| **dense volume, w 1000** | **2.12 mm** | **42 %** | **47×** | 0.41 cm | **16 of 16** |
+
+A 26 % cut in interpenetration, frames over 2 mm from 60 % to 42 %, grip
+down 56 %, every rollout held, for 2.7 mm of tracking error. The env-0
+rollout under the independent 400-point sampler agrees (2.38 to 1.94 mm,
+137 to 91 frames over 2 mm, grip 30× to 16×). Rendered
+(`figures/dextrack_cubesmall_penft.gif`, released policy alongside in
+`figures/dextrack_cubesmall_base_vs_penft.jpg`): the fine-tuned hand
+carries the cube in a lighter, more open grip, 0 to 6× weight on the
+touching links through most of the clip, with excursions that are fewer
+but not gone (a 9 mm thumb-tip excursion at frame 86). Training-time dense
+depth fell from 1.27 to 0.48 mm while the evaluated mean is 2.12 mm: the
+gap between what the trainer sees and what the deterministic test rollout
+does is the next thing to explain, not to average over.
+
 The effect is real and monotone in the weight but **half of what the sparse
 probe reported: at 1000, interpenetration is down 22 % (2.87 to 2.23 mm),
 frames over 2 mm from 60 % to 47 %, grip 36 %, every rollout held, for 1.5

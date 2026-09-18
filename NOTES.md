@@ -5519,3 +5519,14 @@ could not init CUDA on either of its GPUs. Migrated to a new pod
 (q7mu6hb7pkych1) by pod-to-pod rsync of /workspace; venv rebuilt from the
 old site-packages versions (uv, py3.8, torch 2.4.1+cu121, rl_games 1.6.1).
 
+### Dense-volume fine-tune result (new pod, 2026-09-17 ~18:40 PDT)
+Cube, w 1000, 150 ep on the 2 mm grid via the 1 mm volume; exact test at
+16 envs: pen 2.12 mm (base 2.87, sparse-trained 2.23), >2mm 42 % (60 / 47),
+grip 47x (106 / 68), err 0.41 cm, 16/16 held. Env-0 offline 400-pt audit:
+2.38 -> 1.94 mm, grip 30x -> 16x. Train-time dense depth ended at 0.48 mm
+vs 2.12 evaluated: unexplained train/eval gap; a stochastic-player eval
+was queued to test the deterministic-mean hypothesis. Queue on the pod:
+apple generalist fine-tune (dense, w 300) then the from-scratch cube
+control (3000 ep) for D4 step 1. Stop timer 12 h. Spend so far today
+under $3 of the $10.
+
