@@ -1,0 +1,146 @@
+[
+ {
+  "clip": "passive_active_info_ori_grab_s1_binoculars_see_1_nf_300",
+  "frames": 150,
+  "hands": {
+   "right": {
+    "pen_mm_mean": 7.965293884277344,
+    "pen_mm_median": 9.611600875854492,
+    "pen_mm_max": 11.599283218383789,
+    "frac_over_2mm": 0.8333333333333334,
+    "frac_over_5mm": 0.7733333333333333,
+    "frac_over_10mm": 0.4666666666666667,
+    "frac_touching": 0.8666666666666667
+   }
+  },
+  "inst": "ori_grab_s1_binoculars_see_1"
+ },
+ {
+  "clip": "passive_active_info_ori_grab_s1_bowl_drink_1_nf_300",
+  "frames": 150,
+  "hands": {
+   "right": {
+    "pen_mm_mean": 5.289172172546387,
+    "pen_mm_median": 7.501824378967285,
+    "pen_mm_max": 9.17158317565918,
+    "frac_over_2mm": 0.68,
+    "frac_over_5mm": 0.64,
+    "frac_over_10mm": 0.0,
+    "frac_touching": 0.7266666666666667
+   }
+  },
+  "inst": "ori_grab_s1_bowl_drink_1"
+ },
+ {
+  "clip": "passive_active_info_ori_grab_s1_camera_takepicture_2_nf_300",
+  "frames": 150,
+  "hands": {
+   "right": {
+    "pen_mm_mean": 5.539555549621582,
+    "pen_mm_median": 5.433123588562012,
+    "pen_mm_max": 8.675679206848145,
+    "frac_over_2mm": 0.9,
+    "frac_over_5mm": 0.6266666666666667,
+    "frac_over_10mm": 0.0,
+    "frac_touching": 0.92
+   }
+  },
+  "inst": "ori_grab_s1_camera_takepicture_2"
+ },
+ {
+  "clip": "passive_active_info_ori_grab_s1_flute_play_1_nf_300",
+  "frames": 150,
+  "hands": {
+   "right": {
+    "pen_mm_mean": 3.1837317943573,
+    "pen_mm_median": 3.5883378982543945,
+    "pen_mm_max": 3.8923373222351074,
+    "frac_over_2mm": 0.8933333333333333,
+    "frac_over_5mm": 0.0,
+    "frac_over_10mm": 0.0,
+    "frac_touching": 0.9133333333333333
+   }
+  },
+  "inst": "ori_grab_s1_flute_play_1"
+ },
+ {
+  "clip": "passive_active_info_ori_grab_s1_gamecontroller_play_1_nf_300",
+  "frames": 150,
+  "hands": {
+   "right": {
+    "pen_mm_mean": 8.078727722167969,
+    "pen_mm_median": 8.790410995483398,
+    "pen_mm_max": 15.912808418273926,
+    "frac_over_2mm": 0.8466666666666667,
+    "frac_over_5mm": 0.74,
+    "frac_over_10mm": 0.3466666666666667,
+    "frac_touching": 0.8866666666666667
+   }
+  },
+  "inst": "ori_grab_s1_gamecontroller_play_1"
+ },
+ {
+  "clip": "passive_active_info_ori_grab_s1_mug_drink_2_nf_300",
+  "frames": 150,
+  "hands": {
+   "right": {
+    "pen_mm_mean": 5.652181625366211,
+    "pen_mm_median": 5.563110828399658,
+    "pen_mm_max": 8.159887313842773,
+    "frac_over_2mm": 1.0,
+    "frac_over_5mm": 0.6066666666666667,
+    "frac_over_10mm": 0.0,
+    "frac_touching": 1.0
+   }
+  },
+  "inst": "ori_grab_s1_mug_drink_2"
+ },
+ {
+  "clip": "passive_active_info_ori_grab_s1_teapot_pass_1_nf_300",
+  "frames": 150,
+  "hands": {
+   "right": {
+    "pen_mm_mean": 8.772754669189453,
+    "pen_mm_median": 10.019290924072266,
+    "pen_mm_max": 10.350346565246582,
+    "frac_over_2mm": 0.9,
+    "frac_over_5mm": 0.88,
+    "frac_over_10mm": 0.54,
+    "frac_touching": 0.9266666666666666
+   }
+  },
+  "inst": "ori_grab_s1_teapot_pass_1"
+ },
+ {
+  "clip": "passive_active_info_ori_grab_s2_camera_browse_1_nf_300",
+  "frames": 150,
+  "hands": {
+   "right": {
+    "pen_mm_mean": 7.039290428161621,
+    "pen_mm_median": 7.760729789733887,
+    "pen_mm_max": 9.376527786254883,
+    "frac_over_2mm": 0.9266666666666666,
+    "frac_over_5mm": 0.8,
+    "frac_over_10mm": 0.0,
+    "frac_touching": 0.9466666666666667
+   }
+  },
+  "inst": "ori_grab_s2_camera_browse_1"
+ },
+ {
+  "clip": "passive_active_info_ori_grab_s2_cubesmall_inspect_1_nf_300",
+  "frames": 150,
+  "hands": {
+   "right": {
+    "pen_mm_mean": 4.259050369262695,
+    "pen_mm_median": 4.737336158752441,
+    "pen_mm_max": 7.196700096130371,
+    "frac_over_2mm": 0.86,
+    "frac_over_5mm": 0.36,
+    "frac_over_10mm": 0.0,
+    "frac_touching": 0.88
+   }
+  },
+  "inst": "ori_grab_s2_cubesmall_inspect_1"
+ }
+]

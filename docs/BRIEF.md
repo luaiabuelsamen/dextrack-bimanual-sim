@@ -221,7 +221,18 @@ In order, each with its own stop rule:
    result.** The continuation is training. Budget for one per-clip policy:
    228 M to 704 M frames, eight to twenty-four hours on a 3090, two to five
    dollars.
-2. **The reference.** One clip from the 63, both hands retargeted to
+2. **The reference.** DONE 2026-09-18, by reflection rather than retargeting.
+   The left hand they do not ship is built (`dextrack/left_hand.py`, their own
+   left urdf has a mirroring bug worth 19 mm), the second trajectory is the
+   right hand reflected across the object (`dextrack/bimanual_reference.py`,
+   exact), and both hands are rendered with the probe on each
+   (`dextrack/render_reference.py`, `figures/bimanual_camera_reference.gif`).
+   Clip: `s1_camera_takepicture_2`, 161 two-handed frames. The stop rule
+   caught something bigger than it was aimed at: **none of their references
+   are clean**, 3.2 to 8.8 mm mean interpenetration across nine clips, so the
+   gate is applied relative to the rest rather than absolutely. The human's
+   own left hand waits on the GRAB-to-DexTrack object frame map.
+   ORIGINAL TEXT: One clip from the 63, both hands retargeted to
    Allegro in their `passive_active_info` format (object pose, two 22-dof
    trajectories), checked by rendering the kinematic replay with the
    probe on both hands. Stop rule: kinematic penetration over 10 mm on

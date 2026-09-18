@@ -502,6 +502,86 @@ framework costs 228 M to 704 M frames, which at 1024 environments on a
 3090 is 7,000 to 21,500 epochs, eight to twenty-four hours, two to five
 dollars. A bimanual clip should be budgeted at the upper end.
 
+## Their references are already inside the object (2026-09-18)
+
+Everything above measures what a trained policy does to the object. This
+measures what they asked it to do. A DexTrack reference is a kinematic hand
+trajectory and an object trajectory; placing the hand by forward kinematics
+on their own URDF and running the same probe the training runs use gives the
+interpenetration built into the target, before any simulator has seen it
+(`dextrack/reference_penetration.py`, nine clips, 2 mm grid, exact plane
+test):
+
+| clip | mean | median | max | frames > 2 mm | frames > 10 mm |
+|---|---:|---:|---:|---:|---:|
+| `s1_flute_play_1` | 3.18 mm | 3.59 mm | 3.89 mm | 89 % | 0 % |
+| `s2_cubesmall_inspect_1` | 4.26 mm | 4.74 mm | 7.20 mm | 86 % | 0 % |
+| `s1_bowl_drink_1` | 5.29 mm | 7.50 mm | 9.17 mm | 68 % | 0 % |
+| `s1_camera_takepicture_2` | 5.54 mm | 5.43 mm | 8.68 mm | 90 % | 0 % |
+| `s1_mug_drink_2` | 5.65 mm | 5.56 mm | 8.16 mm | 100 % | 0 % |
+| `s2_camera_browse_1` | 7.04 mm | 7.76 mm | 9.38 mm | 93 % | 0 % |
+| `s1_binoculars_see_1` | 7.97 mm | 9.61 mm | 11.60 mm | 83 % | 47 % |
+| `s1_gamecontroller_play_1` | 8.08 mm | 8.79 mm | 15.91 mm | 85 % | 35 % |
+| `s1_teapot_pass_1` | 8.77 mm | 10.02 mm | 10.35 mm | 90 % | 54 % |
+
+**Not one reference is clean.** The hand spends 68 to 100 % of its frames
+more than 2 mm inside the object, a third to a half of them more than 10 mm
+on the worst three. Their retargeting has no penetration term, and this is
+what that costs.
+
+It reframes every fine-tuning result on this page. A policy rewarded for
+tracking this reference is being rewarded for going into the object, so the
+penetration term is not correcting a policy that drifted, it is fighting the
+tracking reward directly. That is why the cube fine-tune traded tracking
+error for depth rather than getting both, and why the generalist on a clip
+it barely held preferred to let go. It also puts the released policy in a
+better light than the raw number does: on the small cube their reference
+asks for 4.26 mm and their policy delivers 2.87 mm, so the policy already
+improves on its target; ours delivers 2.12 mm.
+
+The lever this suggests, for later: fix the reference rather than penalise
+the policy. A retarget with a depth term would move the target out of the
+object, and then tracking and not interpenetrating stop being opposed.
+
+## A two-hand reference in their format (2026-09-18)
+
+Their format stores one hand. Two hands need a second 22-vector, and the
+pieces to make one did not exist:
+
+- **The left hand.** They ship `allegro_hand_description_left.urdf` with no
+  base at all and Drake package paths that resolve nowhere, so
+  `dextrack/left_hand.py` splices their left fingers onto the right hand's
+  six-joint fly base, giving a left hand whose 22-vector means exactly what
+  the right hand's does. Their own left file carries the ring finger's mount
+  rotation unmirrored, +5 degrees where the mirror of the right hand's +5 is
+  -5, which splays that finger the wrong way and moves its tip 19 mm; every
+  finger joint is therefore mirrored from the right hand instead, and the
+  result is verified exact over random poses.
+- **The second trajectory.** `dextrack/bimanual_reference.py` reflects the
+  right hand's palm across a plane through the object's centre in the
+  object's frame and copies the sixteen finger joints unchanged, which is
+  exact rather than approximate because the left model is the right model
+  mirrored. It is a constructed two-hand reference, two hands placed
+  symmetrically about the object and moving with it, not a recording of what
+  the human's two hands did, and it is labelled that way in the file.
+- **The picture.** `dextrack/render_reference.py` places both hands by
+  forward kinematics on their own URDFs, draws the object from its convex
+  decomposition, paints any link past 2 mm red and reads the probe for each
+  hand every frame (`figures/bimanual_camera_reference.gif`).
+
+The clip is `s1_camera_takepicture_2`: 161 frames with both human hands on
+the object, and the cleanest reference among the long two-handed candidates
+that does not spend frames past 10 mm. `s1_binoculars_see_1` has a longer
+history in this project but fails that gate at 47 % of frames over 10 mm.
+
+Why the human's own left hand is not used yet: GRAB's object frame is not
+theirs. They re-canonicalize the meshes, so aligning a GRAB clip to their
+reference leaves a 30-degree orientation residual no rigid transform
+removes, and carrying a human fingertip into their world needs that
+per-object map solved first. `dextrack/retarget.py` fits a GRAB hand onto
+their URDF in their convention and is ready for it; the map is the missing
+piece, and it is a separate problem from standing up the environment.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with

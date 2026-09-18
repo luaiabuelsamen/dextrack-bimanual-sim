@@ -22,7 +22,7 @@ was written down; **[NOTES.md](NOTES.md) is the log and is authoritative.**
 | **D1 · Audit DexTrack's released policies with penetration read live** | done | their release cannot run its own checkpoints; fixed, two of three per-clip policies track at 1–2 mm of interpenetration; the generalist holds 17 of 43 GRAB clips at a median 1.7 mm |
 | **Penetration as a reward term in their trainer** | done, bounded | a per-clip policy gives up a fifth to a quarter of its interpenetration and half its grip (two seeds: one keeps all 16 rollouts, one loses 4 of 16); the generalist on a marginal clip lets go instead |
 | **D2 · Our MuJoCo pipeline on DexTrack's rule** | done | 20 of 40 references hold under perturbation; 6 strict / 13 loose of 40 on their rule, 16 of 40 on ours |
-| **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | control run, first result | from scratch at 93 M frames their per-clip policy never grasps the cube; their released checkpoint for it carries 228 M frames, so the control is running to that budget before it is judged |
+| **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | two-hand reference built and rendered | the left hand they do not ship is built and verified, and a two-hand reference in their format is rendered with the probe on each hand. Their own references turn out to sit 3.2 to 8.8 mm inside the object before anything is simulated |
 
 The goal, the guardrails and D4's stop rules: **[docs/BRIEF.md](docs/BRIEF.md)**.
 The evidence behind every row: **[docs/STAGE2.md](docs/STAGE2.md)**.
@@ -103,7 +103,30 @@ past 2 mm red, the audit's numbers on every frame.
 |---|---|
 | ![DexTrack generalist holding a translucent apple with the palm and two fingers red](figures/dextrack_gen_apple.gif) | ![DexTrack generalist nudging a translucent mug that rolls away](figures/dextrack_gen_mug.gif) |
 
-## Next: two hands
+## Two hands
+
+![Two Allegro hands gripping a translucent GRAB camera from opposite sides, penetration read per hand every frame](figures/bimanual_camera_reference.gif)
+
+A two-hand reference in DexTrack's own format, rendered by forward
+kinematics on their URDFs with the penetration probe on each hand. Three
+pieces had to be built: the left Allegro hand they do not ship
+([`dextrack/left_hand.py`](dextrack/left_hand.py), whose own left urdf
+carries a mirroring bug worth 19 mm at the ring fingertip), the second
+trajectory ([`dextrack/bimanual_reference.py`](dextrack/bimanual_reference.py),
+the right hand reflected across the object, exact because the left model is
+the right model mirrored), and the renderer
+([`dextrack/render_reference.py`](dextrack/render_reference.py)).
+
+Measuring the reference rather than a rollout turned up the thing that
+explains the rest of this page: **none of their references are clean.**
+Across nine clips the kinematic hand sits 3.2 to 8.8 mm inside the object,
+68 to 100 % of frames past 2 mm, before any policy exists. Their retarget
+has no penetration term, so a policy rewarded for tracking is rewarded for
+going in, and a penetration term added later is fighting the tracking
+reward rather than correcting a drift. On the small cube the reference asks
+for 4.26 mm, their policy delivers 2.87 mm and ours 2.12 mm.
+
+## Next
 
 One GRAB two-handed clip tracked by two Allegro hands in DexTrack's trainer,
 both hands scored on their rule and on ours, rendered. GRAB records both

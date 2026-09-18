@@ -5580,3 +5580,22 @@ ledger's held column does exactly that and is wrong for un-grasped runs.
 Their own rule is not fooled: strict and loose both False here (mean pos
 21.6 cm > 10, rot 77 deg > 40).
 
+### Their references are inside the object (2026-09-18)
+FK on their own urdf + our probe, 9 clips (results/dextrack_audit/
+reference_penetration.json): mean 3.2-8.8 mm, 68-100 % of frames >2 mm,
+3 clips 35-54 % >10 mm. Cleanest flute_play_1 3.18, worst teapot_pass_1 8.77.
+Cube reference 4.26 vs their policy 2.87 vs our fine-tune 2.12 -- the policy
+already beats its target. This is why the pen term fights tracking: the
+target IS inside. Lever for later: a retarget with a depth term.
+
+### Two-hand reference built (2026-09-18)
+left_hand.py (their left urdf has joint_8 rpy unmirrored, 19 mm ring tip
+error; all 16 finger joints mirrored from the right instead, exact to 0.00 mm),
+bimanual_reference.py (reflect right palm across object axis, copy joints;
+exact because the left model is the mirror), render_reference.py (FK + probe
+per hand). Clip s1_camera_takepicture_2 (161 two-handed frames, 5.5 mm ref,
+0 % >10 mm); binoculars_see_1 rejected at 47 % >10 mm.
+GRAB->DexTrack object frame map is NOT a rigid transform (30 deg orientation
+residual after Kabsch); retarget.py fits a GRAB hand onto their urdf in their
+convention but cannot be used across frames until that map is solved.
+
