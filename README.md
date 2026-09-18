@@ -2,6 +2,7 @@
 
 [![training](https://img.shields.io/badge/training-Isaac%20Gym%20%2F%20PhysX-76b900)](dextrack/README.md)
 [![render](https://img.shields.io/badge/render-MuJoCo-2a78d6)](dextrack/render.py)
+[![ci](https://github.com/luaiabuelsamen/dextrack-bimanual-sim/actions/workflows/ci.yml/badge.svg)](https://github.com/luaiabuelsamen/dextrack-bimanual-sim/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-2a78d6)](LICENSE)
 
 Dexterous hand-object tracking from human motion, measured where the
