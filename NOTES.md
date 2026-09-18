@@ -5500,3 +5500,22 @@ function over a box surface sits mid-edge/mid-face, away from corners; 20
 points per link leave room to hide in. Generalist sparse sweep killed at
 40 min. Dense-grid fine-tune (w1000, chunked probe) launched.
 
+### Making the dense probe affordable (2026-09-17, late)
+Exact plane test with the 2 mm grid (33k points/hand) at 1024 envs: cube
+217 ms, apple (64 hulls) 9.0 s per step -- unusable for training. Two
+changes in penetration_torch.py, each verified equal to the exact test:
+  * signed-depth VOLUME per object (1 mm voxels, object frame, built once
+    on the GPU in ~2 s; trilinear lookup, points outside the bounding
+    sphere skipped): |diff| vs exact planes mean 0.03 mm, max 0.22 mm on
+    the apple; cost no longer depends on hull count.
+  * one object<-link transform per (env, link) and a single einsum over
+    the shared link point sets instead of 34M per-point quaternion ops.
+Result at 1024 envs on the 3090: cube 64 ms, apple 124 ms (2 mm grid);
+30 / 76 ms on a 3 mm grid. Eval keeps the exact plane test (spacing
+0.002, no volume) so the judging measure is not the training measure.
+Cube fine-tune on the volume probe (w 1000) ran 20 epochs in 200 s, then
+the pod's GPU fell off the bus ("GPU is lost"); after stop/start the host
+could not init CUDA on either of its GPUs. Migrated to a new pod
+(q7mu6hb7pkych1) by pod-to-pod rsync of /workspace; venv rebuilt from the
+old site-packages versions (uv, py3.8, torch 2.4.1+cu121, rl_games 1.6.1).
+

@@ -118,6 +118,15 @@ def quat_apply(q, v):
     return v + 2 * (w * uv + uuv)
 
 
+def quat_to_mat(q):
+    """(..., 4) xyzw -> (..., 3, 3) rotation matrices."""
+    x, y, z, w = q.unbind(-1)
+    return torch.stack([
+        torch.stack([1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)], -1),
+        torch.stack([2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)], -1),
+        torch.stack([2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)], -1)], -2)
+
+
 def quat_inv_apply(q, v):
     qi = q * torch.tensor([-1.0, -1.0, -1.0, 1.0], device=q.device)
     return quat_apply(qi, v)
@@ -126,7 +135,16 @@ def quat_inv_apply(q, v):
 class PenetrationProbe:
     """Holds link points and object planes on the device; call per step."""
 
-    def __init__(self, urdf_path, obj_dir, body_names, device, touch=0.001, spacing=0.0):
+    def __init__(self, urdf_path, obj_dir, body_names, device, touch=0.001, spacing=0.0, sdf_res=0.0, sdf_margin=0.03):
+        """spacing: hand-surface sample grid (0 = sparse set). sdf_res > 0:
+        precompute the object's signed depth on a voxel grid of that
+        resolution (metres, object frame, `sdf_margin` around the hulls) and
+        read every sampled point by trilinear interpolation instead of
+        testing it against hull planes. Same convention (positive inside, the
+        least plane violation), same result to interpolation error, and the
+        per-step cost no longer depends on the number of hulls: the exact
+        plane test with the 2 mm grid takes 9 s per step at 1024 envs on a
+        64-hull object, the volume a few ms."""
         pts = link_sample_points(urdf_path, spacing=spacing)
         self.spacing = spacing
         self.n_points = int(sum(len(v) for v in pts.values()))
@@ -151,9 +169,41 @@ class PenetrationProbe:
         self.radii = torch.from_numpy(r).to(device) + 0.01          # (K,) + 1 cm margin
         self.touch = touch
         self.device = device
+        self.sdf = None
+        if sdf_res > 0:
+            self._build_sdf(parts, sdf_res, sdf_margin)
+
+    def _build_sdf(self, parts, res, margin):
+        lo = np.min([h.vertices.min(0) for h in parts], 0) - margin
+        hi = np.max([h.vertices.max(0) for h in parts], 0) + margin
+        n = np.ceil((hi - lo) / res).astype(int) + 1
+        axes = [torch.linspace(float(lo[i]), float(lo[i] + (n[i] - 1) * res), int(n[i]), device=self.device) for i in range(3)]
+        Z, Y, X = torch.meshgrid(axes[2], axes[1], axes[0], indexing="ij")          # volume indexed [z, y, x]
+        G = torch.stack([X, Y, Z], -1).reshape(-1, 3)
+        depth = torch.full((G.shape[0],), -1e3, device=self.device)
+        for k in range(self.planes.shape[0]):
+            pl = self.planes[k]
+            for i in range(0, G.shape[0], 1 << 20):
+                s = G[i:i + (1 << 20)] @ pl[:, :3].T + pl[:, 3]
+                depth[i:i + (1 << 20)] = torch.maximum(depth[i:i + (1 << 20)], -s.max(-1).values)
+        self.sdf = depth.view(int(n[2]), int(n[1]), int(n[0]))[None, None]         # (1, 1, D, H, W)
+        self.sdf_lo = torch.tensor(lo, dtype=torch.float32, device=self.device)
+        self.sdf_hi = torch.tensor(lo + (n - 1) * res, dtype=torch.float32, device=self.device)
+        self.sdf_res = res
+        allv = np.concatenate([h.vertices for h in parts])
+        c = 0.5 * (allv.min(0) + allv.max(0))
+        self.obj_center = torch.tensor(c, dtype=torch.float32, device=self.device)
+        self.obj_radius = float(np.linalg.norm(allv - c, axis=1).max()) + 0.01
+
+    def _sdf_depth(self, pts):
+        """pts (N, Q, 3) in the object frame -> depth (N, Q), trilinear."""
+        import torch.nn.functional as F
+        g = 2 * (pts - self.sdf_lo) / (self.sdf_hi - self.sdf_lo) - 1                # (N, Q, 3) in [-1, 1], xyz order
+        v = F.grid_sample(self.sdf, g.view(1, -1, 1, 1, 3), mode="bilinear", padding_mode="border", align_corners=True)
+        return v.view(pts.shape[0], pts.shape[1])
 
     @torch.no_grad()
-    def __call__(self, rb_states, obj_pose, chunk=256):
+    def __call__(self, rb_states, obj_pose, chunk=None):
         """rb_states: (N, B, 13) rigid body states of the hand's actor; obj_pose:
         (N, 7) xyz + xyzw. Returns depth (N,) in metres (0 if nothing inside),
         n_touch (N,) links within `touch`, and per-link depth (N, L). Envs are
@@ -161,6 +211,9 @@ class PenetrationProbe:
         env, and the (envs, points, faces) tensor at 1024 envs would not fit
         beside a training run."""
         N = rb_states.shape[0]
+        if chunk is None:      # keep the (envs, points, hulls) cull tensor near 2e8 elements
+            Q = self.points.shape[0] * self.points.shape[1]
+            chunk = max(1, min(int(2e8 // (Q * self.planes.shape[0])), int(2e7 // Q)))
         if N > chunk:
             outs = [self._call(rb_states[i:i + chunk], obj_pose[i:i + chunk]) for i in range(0, N, chunk)]
             return tuple(torch.cat([o[k] for o in outs], 0) for k in range(3))
@@ -170,27 +223,45 @@ class PenetrationProbe:
         N = rb_states.shape[0]
         lp = rb_states[:, self.link_idx, :3]                       # (N, L, 3)
         lq = rb_states[:, self.link_idx, 3:7]                      # (N, L, 4)
-        pts = quat_apply(lq.unsqueeze(2).expand(-1, -1, self.points.shape[1], -1).reshape(N, -1, 4),
-                         self.points.unsqueeze(0).expand(N, -1, -1, -1).reshape(N, -1, 3)) \
-            + lp.unsqueeze(2).expand(-1, -1, self.points.shape[1], -1).reshape(N, -1, 3)
-        pts = quat_inv_apply(obj_pose[:, 3:7].unsqueeze(1).expand(-1, pts.shape[1], -1),
-                             pts - obj_pose[:, :3].unsqueeze(1))   # into the object frame
+        # one object<-link transform per (env, link), then a single einsum
+        # over the shared link point sets: the points are the bulk of the
+        # work (33k per hand on the dense grid) and this touches each once
+        Rl = quat_to_mat(lq)                                       # (N, L, 3, 3)
+        Ro = quat_to_mat(obj_pose[:, 3:7])                         # (N, 3, 3)
+        RoT = Ro.transpose(1, 2).unsqueeze(1)                      # (N, 1, 3, 3)
+        R = RoT @ Rl                                               # (N, L, 3, 3)
+        t = (RoT @ (lp - obj_pose[:, None, :3]).unsqueeze(-1)).squeeze(-1)   # (N, L, 3)
+        pts = (torch.einsum("nlij,lpj->nlpi", R, self.points) + t.unsqueeze(2)).reshape(N, -1, 3)
+        K = self.planes.shape[0]
+        Q = pts.shape[1]
+        if self.sdf is not None:
+            # only points inside the object's bounding sphere (+ margin) are
+            # looked up; the rest of the hand is far and reads -1e3
+            flat = pts.reshape(-1, 3)
+            near = ((flat - self.obj_center) ** 2).sum(-1) <= self.obj_radius ** 2
+            idx = torch.nonzero(near).flatten()
+            best = torch.full((N * Q,), -1e3, device=self.device)
+            if idx.numel():
+                best[idx] = self._sdf_depth(flat[idx].view(1, -1, 3)).reshape(-1)
+            return self._finish(best, N)
         # cull: which (env, point, hull) triples are within the hull's bounding
         # sphere. Then test planes only for hulls that have any candidate in
         # any env, restricted to the envs where they do.
-        K = self.planes.shape[0]
-        Q = pts.shape[1]
         d2 = ((pts.unsqueeze(2) - self.centers.view(1, 1, K, 3)) ** 2).sum(-1)   # (N, Q, K)
         cand = d2 <= (self.radii ** 2).view(1, 1, K)
-        best = torch.full((N, Q), -1e3, device=self.device)
-        hull_hit = cand.any(1)                                      # (N, K)
-        for k in torch.nonzero(hull_hit.any(0)).flatten().tolist():
-            envs = torch.nonzero(hull_hit[:, k]).flatten()
+        best = torch.full((N * Q,), -1e3, device=self.device)
+        # only the candidate (env, point) pairs of each hull are tested, so the
+        # work is proportional to how many points are near the object rather
+        # than envs x points x hulls; with the dense grid on a 64-hull object
+        # the full product would not fit
+        for k in torch.nonzero(cand.any(1).any(0)).flatten().tolist():
+            idx = torch.nonzero(cand[:, :, k].reshape(-1)).flatten()      # flat (env, point) ids
             pl = self.planes[k]
-            s = pts[envs] @ pl[:, :3].T + pl[:, 3]                  # (n, Q, F)
-            depth = -s.max(-1).values                               # (n, Q)
-            depth = torch.where(cand[envs, :, k], depth, torch.full_like(depth, -1e3))
-            best[envs] = torch.maximum(best[envs], depth)
+            s = pts.reshape(-1, 3)[idx] @ pl[:, :3].T + pl[:, 3]          # (n, F)
+            best[idx] = torch.maximum(best[idx], -s.max(-1).values)
+        return self._finish(best, N)
+
+    def _finish(self, best, N):
         best = best.view(N, len(self.link_idx), -1)
         best = torch.where(self.pmask.unsqueeze(0), best, torch.full_like(best, -1e3))
         per_link = best.max(-1).values                             # (N, L), >0 = inside
