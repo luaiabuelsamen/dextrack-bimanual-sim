@@ -5637,3 +5637,13 @@ object better than the policy can, so the policy withdraws. Fourth time a
 number improved because a hand let go. Fixes: soften the left drive, reward
 the right hand's share of the load, or make both hands policy-controlled.
 
+### Correction to the caption above (2026-09-18)
+"Learned to let go" was my wording and it is wrong: it implies a grasp that
+was released. The contact timeline says otherwise -- fine-tuned contact is
+frames 275-297 ONLY (last 8 %), peak 447 N, nothing at all for the first
+three quarters; the generalist it started from first touches at frame 11 and
+has contact in every quarter (152/299, peak 260 N). The policy never closes
+on the object; it collides with it as the clip ends. Figure re-rendered with
+an accurate title. Check a contact TIMELINE, not a contact COUNT, before
+describing what a policy did.
+

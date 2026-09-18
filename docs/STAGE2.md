@@ -651,11 +651,16 @@ adapts to a second hand (`dextrack/runs/gamecontroller_bimanual.json`):
 | generalist, unchanged | 0.81 mm | 0.24 mm | 17.0x | 7.48 cm | 16 of 16 |
 | fine-tuned in the two-hand scene | 0.17 mm | 0.57 mm | 3.0x | 2.28 cm | 16 of 16 |
 
-Every column improves and the reading is wrong. **The policy learned to let
-go.** Its right hand touches the object on 23 of 299 frames, against 152 for
-the generalist it started from, and carries 0 N of grip through the middle of
-the clip (`figures/bimanual_isaac_gc_finetuned.gif`: the left hand holds the
-controller, the right sits beside it). Tracking error falls because the left
+Every column improves and the reading is wrong. **The policy stopped taking
+hold at all.** Its right hand touches the object on 23 of 299 frames against
+152 for the generalist it started from, and those 23 are not spread through
+the clip: they are frames 275 to 297, the last eight per cent, arriving at
+447 N. For the first three quarters there is no contact whatsoever
+(`figures/bimanual_isaac_gc_finetuned.gif`: the left hand holds the
+controller, the right sits beside it). The generalist it started from grabs
+at frame 11 and is in contact somewhere in every quarter. So this is not a
+hand that grasps and releases; it is a hand that never closes, then collides
+with the object as the clip ends. Tracking error falls because the left
 hand, under position control at the right hand's own gains, is close to a
 kinematic mover and carries the object along the reference more accurately
 than the policy can. Once that is true, the policy's best move is to stop

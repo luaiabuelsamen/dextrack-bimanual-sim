@@ -114,9 +114,10 @@ object held in all sixteen environments and drops the right hand's
 interpenetration from 1.21 mm to 0.74 mm, because the load is shared.
 
 Training a policy inside that scene then produced the session's sharpest
-negative: every metric improved because **the right hand learned to let go**,
-touching the object on 23 frames of 299 against the generalist's 152, while
-the position-driven left hand carried it
+negative: every metric improved because **the right hand stopped taking hold
+at all**, touching the object on 23 frames of 299 against the generalist's
+152, and those 23 are the last eight per cent of the clip rather than a grasp
+that slipped, while the position-driven left hand carried it throughout
 ([the render](figures/bimanual_isaac_gc_finetuned.gif)). An objective that
 only asks where the object ends up is satisfied by a hand that does nothing,
 whenever something else in the scene will do the work. A partner driven
