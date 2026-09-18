@@ -338,7 +338,8 @@ The audit's probe, made cheap enough to run every control step for thousands
 of environments (`experiments/tracking/penetration_torch.py`: the hand's
 collision primitives as sampled surface points, the object as the face
 planes of its convex parts, a bounding-sphere cull, batched on the GPU;
-correlation 0.88 with the offline audit on the same rollout, 3.5 ms per
+correlation 0.88 with the offline audit on the same rollout at its sparse
+setting (see the correction below: too sparse to train against), 3.5 ms per
 step at 4096 environments on a one-hull object, about 100 ms per 1024 on a
 64-hull one), and added to DexTrack's reward as an env-var-gated term
 (`AUDIT_PEN_W` per metre of depth, `AUDIT_FORCE_W` per unit of grip above
@@ -352,27 +353,41 @@ their trainer otherwise untouched.
 | + depth term 100/m + force term, 75 epochs | (evaluated at 4: 2.59 mm on env 0) | 59 % | 39× | 0.38 cm | worse; a miss |
 | **+ depth term 300/m, no force term, 150 epochs** | **1.33 mm** | **26 %** | **34×** | 0.41 cm | **16 of 16** |
 
-The weight sweep, same protocol (`results/dextrack_audit/finetune/sweep/`):
+**Correction (2026-09-17, later the same night): the probe the policy was
+trained on was too sparse, and the policy partly learned the probe rather
+than the geometry.** The reward term sampled each link's collision box at
+twelve random surface points plus its eight corners. The depth of a convex
+link into a convex part is the maximum of a concave function over the
+link's surface, which can sit in the middle of an edge or a face, so a
+policy rewarded on twenty points per link can hold those points shallow
+while the surface between them goes deeper. It did. The dense offline
+audit of env 0 read the fine-tuned rollouts *worse* than the released one
+(2.86 vs 2.40 mm), which the probe's 1.18 vs 2.18 could not explain by
+env-to-env variation alone. Re-scoring every checkpoint over all 16
+environments with a 2 mm grid on every box face (33,114 points per hand,
+`penetration_torch.py --spacing`; the same grid is now what the reward
+term uses) gives the honest table
+(`results/dextrack_audit/finetune/dense/`):
 
-| depth weight (per metre) | penetration mean | frames > 2 mm | grip on touching links | position error | held |
-|---|---:|---:|---:|---:|---:|
-| 0 (released) | 2.18 mm | 45 % | 54× | 0.14 cm | 16 of 16 |
-| 100 | 1.59 mm | 33 % | 38× | 0.25 cm | 16 of 16 |
-| 300 | 1.33 mm | 26 % | 34× | 0.41 cm | 16 of 16 |
-| **1000** | **1.18 mm** | **26 %** | **24×** | 0.29 cm | **16 of 16** |
+| depth weight (per metre) | sparse probe (what was trained on) | **dense, 2 mm grid** | frames > 2 mm (dense) | grip on touching links (dense) | position error | held |
+|---|---:|---:|---:|---:|---:|---:|
+| 0 (released) | 2.18 mm | **2.87 mm** | **60 %** | 106× | 0.14 cm | 16 of 16 |
+| 100 | 1.59 mm | **2.43 mm** | **55 %** | 89× | 0.25 cm | 16 of 16 |
+| 300 | 1.33 mm | **2.34 mm** | **50 %** | 75× | 0.41 cm | 16 of 16 |
+| 1000 | 1.18 mm | **2.23 mm** | **47 %** | 68× | 0.29 cm | 16 of 16 |
 
-Monotone in the weight: **at 1000, interpenetration is down 46 % and grip
-56 %, every rollout still held, for 1.5 mm of tracking error.** Training-time depth fell from 0.79 mm to 0.40 mm and the
-fraction of steps over 2 mm from 7 % to 1 %. This is the first policy in
-either framework trained to hold an object *and* stay out of it, and it
-says the interpenetration their metric never sees is not load-bearing: the
-policy gives most of it up when asked and keeps the object. Caveats: one
-object, one checkpoint, 16 evaluation rollouts from the same start frame;
-the first variant with a force term made things worse, so the weights
-matter and were not swept; and at 4 environments one fine-tuned rollout
-lost the cube, which 16 did not reproduce. Next: the same term on the
-generalist across the 43 clips, a weight sweep, and their own success rule
-alongside.
+The effect is real and monotone in the weight but **half of what the sparse
+probe reported: at 1000, interpenetration is down 22 % (2.87 to 2.23 mm),
+frames over 2 mm from 60 % to 47 %, grip 36 %, every rollout held, for 1.5
+mm of tracking error.** The sparse-probe table above is kept as the record
+of the mistake. Grip reads higher under the dense grid because more links
+register as touching; the ratio is what to compare. The sparse-probe
+sweep on the generalist (apple, torus, stamp, flashlight) was stopped
+before its first result, since it optimised the gameable measure; the
+next fine-tune runs on the dense grid (chunked over environments, 256 at
+a time, so the 1024-env tensor fits beside training). Lesson for the file
+next to the others: a measurement a policy optimises has to be as dense
+as the audit that judges it, or the policy will find the gap.
 
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end

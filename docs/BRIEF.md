@@ -113,10 +113,12 @@ successes are not burials of our kind. See `STAGE2.md`.
 
 D1 done at scale: the generalist holds 17 of 43 clips at a median 1.7 mm of
 interpenetration, 36 % of frames over 2 mm. New: a GPU penetration probe as
-a reward term in their trainer cuts a released policy's interpenetration by
-39 % and grip by 37 % with every rollout still held (16 of 16), for 3 mm of
-error, in 150 epochs. The lever now is that term, on the generalist, across
-clips, with a weight sweep, scored on both rules. See `STAGE2.md`.
+a reward term in their trainer cuts a released policy's interpenetration
+by 22 % (2.87 to 2.23 mm on a 2 mm surface grid; the sparse probe it was
+trained on claimed 46 %, and the policy had partly learned the probe) and
+grip by 36 % with every rollout still held (16 of 16), for 1.5 mm of
+error, in 150 epochs. The lever now is the same term on the dense grid,
+then on the generalist across clips, scored on both rules. See `STAGE2.md`.
 
 ## Guardrails
 

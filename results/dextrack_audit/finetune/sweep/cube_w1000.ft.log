@@ -1,0 +1,828 @@
+bash: warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8)
+Importing module 'gym_38' (/workspace/isaacgym_pkg/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /workspace/isaacgym_pkg/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 2.4.1+cu121
+Device count 1
+/workspace/isaacgym_pkg/isaacgym/python/isaacgym/_bindings/src/gymtorch
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+Using /root/.cache/torch_extensions/py38_cu121 as PyTorch extensions root...
+Emitting ninja build file /root/.cache/torch_extensions/py38_cu121/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Loading extension module gymtorch...
+train.py:117: Hydra14MigrationWarning: 
+The version_base parameter is not specified.
+Hydra will assume defaults for version 1.1.
+Hydra 1.4 will remove this compatibility behavior.
+Before upgrading to Hydra 1.4, set version_base="1.3" and test your application.
+See https://hydra.cc/docs/upgrades/1.3_to_1.4/prepare_for_1_4/ for preparation instructions.
+  @hydra.main(config_name="config", config_path="./cfg")
+/workspace/dextrack-venv/lib/python3.8/site-packages/hydra/_internal/defaults_list.py:251: UserWarning: In 'config': Defaults list is missing `_self_`. See https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order for more information
+  warnings.warn(msg, UserWarning)
+/workspace/dextrack-venv/lib/python3.8/site-packages/hydra/_internal/defaults_list.py:415: UserWarning: In config: Invalid overriding of hydra/job_logging:
+Default list overrides requires 'override' keyword.
+See https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/defaults_list_override for more information.
+
+  deprecation_warning(msg)
+task: 
+    name: AllegroHandTrackingGeneralist
+    physics_engine: physx
+    env: 
+        env_name: AllegroHandTrackingGeneralist
+        grab_inst_tag_to_opt_stat_fn: /cephfs/xueyi/uni_manip/isaacgym_rl_exp_grab/statistics/obj_type_to_optimized_res.npy
+        grab_inst_tag_to_optimized_res_fn: 
+        taco_inst_tag_to_optimized_res_fn: 
+        object_type_to_latent_feature_fn: ../assets/obj_type_to_obj_feat.npy
+        inst_tag_to_latent_feature_fn: ../assets/inst_tag_to_obj_feat.npy
+        add_global_movements: False
+        add_global_movements_af_step: 369
+        schedule_episod_length: False
+        episod_length_low: 270
+        episod_length_high: 500
+        episod_length_warming_up_steps: 130
+        episod_length_increasing_steps: 200
+        use_actual_traj_length: False
+        randomize_reset_frame: False
+        add_forece_obs: False
+        teacher_model_w_vel_obs: False
+        load_chunking_experiences_v2: False
+        history_chunking_obs_version: v1
+        switch_between_models: False
+        switch_to_trans_model_frame_after: 310
+        switch_to_trans_model_ckpt_fn: 
+        hand_glb_mult_scaling_progress_before: 900
+        forecasting_obs_with_original_obs: False
+        use_multi_step_control: False
+        nn_control_substeps: 10
+        add_global_motion_penalty: False
+        add_torque_penalty: False
+        add_work_penalty: False
+        schedule_glb_action_penalty: False
+        glb_penalty_low: 0.0003
+        glb_penalty_high: 1.0
+        glb_penalty_warming_up_steps: 50
+        glb_penalty_increasing_steps: 300
+        add_hand_targets_smooth: False
+        hand_targets_smooth_coef: 0.4
+        action_chunking_skip_frames: 1
+        multi_inst_chunking: False
+        add_obj_features: False
+        kine_ed_tag: .npy
+        only_rot_axis_guidance: False
+        multi_traj_use_joint_order_in_sim: False
+        preset_multi_traj_index: -1
+        preload_action_targets_fn: 
+        preload_action_target_env_idx: 0
+        preload_action_start_frame: 190
+        use_no_obj_pose: False
+        use_actual_prev_targets_in_obs: False
+        test_inst_base_traj_tag: 
+        distinguish_kine_with_base_traj: False
+        more_allegro_stiffness: False
+        train_free_hand: False
+        tune_hand_pd: False
+        simreal_modeling: False
+        action_chunking: False
+        action_chunking_frames: 1
+        distill_via_bc: False
+        distill_full_to_partial: False
+        bc_style_training: False
+        bc_relative_targets: False
+        add_physical_params_in_obs: False
+        whether_randomize_obs_act: True
+        whether_randomize_obs: True
+        whether_randomize_act: True
+        obs_rand_noise_scale: 100.0
+        w_rotation_axis_rew: False
+        compute_rot_axis_rew_threshold: 120
+        use_vision_obs: False
+        reset_obj_mass: False
+        obj_mass_reset: 0.27
+        recompute_inertia: False
+        use_v2_leap_warm_urdf: False
+        hand_specific_randomizations: False
+        action_specific_randomizations: False
+        action_specific_rand_noise_scale: 0.5
+        w_traj_modifications: False
+        obs_simplified: False
+        randomize_obj_init_pos: False
+        randomize_obs_more: False
+        obj_init_pos_rand_sigma: 0.1
+        estimate_vels: False
+        train_student_model: False
+        ts_teacher_model_obs_dim: 731
+        arm_stiffness: 400.0
+        arm_effort: 200.0
+        arm_damping: 80.0
+        closed_loop_to_real: False
+        wo_fingertip_pos: False
+        wo_fingertip_rot_vel: False
+        wo_fingertip_vel: False
+        not_use_kine_bias: False
+        disable_hand_obj_contact: False
+        wo_hand_obj_contact: False
+        hand_glb_mult_factor_scaling_coef: 1.0
+        hand_glb_mult_scaling_progress_after: 900
+        schedule_ornt_rew_coef: False
+        lowest_ornt_rew_coef: 0.03
+        highest_ornt_rew_coef: 2.0
+        ornt_rew_coef_warm_starting_steps: 10
+        ornt_rew_coef_increasing_steps: 200
+        schedule_hodist_rew_coef: False
+        lowest_rew_finger_obj_dist_coef: 0.1
+        highest_rew_finger_obj_dist_coef: 0.5
+        hodist_rew_coef_warm_starting_steps: 100
+        hodist_rew_coef_increasing_steps: 300
+        load_kine_info_retar_with_arm: False
+        kine_info_with_arm_sv_root: 
+        w_finger_pos_rew: False
+        hand_qpos_rew_coef: 0.0
+        control_arm_via_ik: False
+        warm_trans_actions_mult_coef: 0.04
+        warm_rot_actions_mult_coef: 0.04
+        franka_delta_delta_mult_coef: 1.0
+        single_inst_tag: 
+        activate_forecaster: True
+        open_loop_test: False
+        use_multiple_kine_source_trajs: False
+        multiple_kine_source_trajs_fn: 
+        compute_hand_rew_buf_threshold: 500
+        comput_reward_traj_hand_qpos: True
+        use_future_ref_as_obs_goal: True
+        forecasting_model_inv_freq: 1
+        forecast_obj_pos: False
+        history_window_size: 60
+        glb_feat_per_skip: 1
+        centralize_info: False
+        forecast_future_freq: 1
+        include_obj_rot_in_obs: False
+        st_ed_state_cond: False
+        use_clip_glb_features: False
+        only_use_hand_first_frame: False
+        partial_hand_info: False
+        partial_obj_info: False
+        partial_obj_pos_info: False
+        hist_cond_partial_hand_info: False
+        hist_cond_partial_obj_info: False
+        hist_cond_partial_obj_pos_info: False
+        preset_cond_type: 0
+        preset_inv_cond_freq: 1
+        randomize_conditions: False
+        randomize_condition_type: 
+        add_contact_conditions: False
+        contact_info_sv_root: /cephfs/xueyi/data/GRAB_Tracking_PK_reduced_300_contactflag
+        random_shift_cond: False
+        random_shift_cond_freq: False
+        maxx_inv_cond_freq: 30
+        masked_mimic_training: False
+        w_history_window_index: True
+        use_future_obs: False
+        history_freq: 5
+        net_type: v4
+        w_obj_latent_features: True
+        w_inst_latent_features: False
+        impedance_stiffness_low: 1.0
+        impedance_stiffness_high: 50.0
+        w_impedance_bias_control: False
+        stiffness_coef: 100.0
+        damping_coef: 4.0
+        effort_coef: 0.95
+        use_forcasting_model: False
+        forcasting_model_weights: 
+        forcasting_model_n_layers: 7
+        w_glb_traj_feat_cond: False
+        forcasting_history_ws: 30
+        sv_info_during_training: False
+        forcasting_model_training: False
+        forcasting_model_lr: 0.0001
+        forcasting_model_weight_decay: 5e-05
+        forcasting_diffusion_model: False
+        use_partial_to_complete_model: False
+        partial_to_complete_model_weights: 
+        wo_vel_obs: False
+        w_franka: False
+        good_inst_opt_res: 
+        early_terminate: False
+        use_window_future_selection: False
+        use_history_obs: False
+        history_length: 5
+        forcasting_inv_freq: 1
+        use_teacher_model: False
+        teacher_model_inst_tags_fn: 
+        teacher_index_to_inst_tags: 
+        downsample: False
+        target_inst_tag_list_fn: 
+        customize_damping: True
+        customize_global_damping: False
+        train_on_all_trajs: True
+        base_traj: 
+        obj_type_to_base_traj_fn: 
+        use_base_traj: False
+        use_strict_maxx_nn_ts: True
+        strict_maxx_nn_ts: 300
+        taco_interped_data_sv_additional_tag: interpfr_60_interpfr2_60_nntrans_40
+        grab_obj_type_to_opt_res_fn: 
+        taco_obj_type_to_opt_res_fn: 
+        only_training_on_succ_samples: False
+        rew_smoothness_coef: 0.0
+        rew_grab_thres: 100.0
+        rew_taco_thres: 50.0
+        data_selection_ratio: 1.0
+        rew_thres_with_selected_insts: False
+        selected_inst_idxes_dict: 
+        grab_train_test_setting: True
+        maxx_inst_nn: 1
+        use_local_canonical_state: True
+        object_feat_dim: 256
+        tracking_save_info_fn: ./data/GRAB_Tracking_PK_reduced_300/data
+        tracking_info_st_tag: passive_active_info_
+        use_hand_actions_rew: False
+        supervised_training: True
+        test_subj_nm: 
+        test_inst_tag: ori_grab_s2_cubesmall_inspect_1_nf_300
+        test_optimized_res: 
+        single_instance_state_based_test: False
+        single_instance_state_based_train: True
+        sampleds_with_object_code_fn: 
+        numEnvs: 16
+        envSpacing: 1.5
+        episodeLength: 1000
+        enableDebugVis: False
+        aggregateMode: 1
+        hand_type: allegro
+        test: False
+        start_frame: 0
+        separate_stages: False
+        use_fingertips: True
+        ground_distance: 0.0
+        disable_obj_gravity: False
+        right_hand_dist_thres: 0.12
+        add_table: False
+        table_z_dim: 0.5
+        glb_trans_vel_scale: 0.5
+        glb_rot_vel_scale: 0.5
+        pre_optimized_traj: 
+        use_twostage_rew: False
+        use_real_twostage_rew: False
+        start_grasping_fr: False
+        lifting_separate_stages: False
+        strict_lifting_separate_stages: False
+        hand_pose_guidance_glb_trans_coef: 0.6
+        hand_pose_guidance_glb_rot_coef: 0.1
+        hand_pose_guidance_fingerpose_coef: 0.1
+        use_kinematics_bias: True
+        use_kinematics_bias_wdelta: True
+        goal_dist_thres: 0.0
+        use_taco_obj_traj: True
+        rew_finger_obj_dist_coef: 0.3
+        rew_delta_hand_pose_coef: 0.5
+        rew_obj_pose_coef: 1.0
+        tight_obs: False
+        use_canonical_state: False
+        use_unified_canonical_state: False
+        rigid_obj_density: 500.0
+        kinematics_only: False
+        w_obj_ornt: False
+        w_obj_vels: False
+        mocap_sv_info_fn: ./data/GRAB_Tracking_PK_reduced_300/data/passive_active_info_ori_grab_s2_cubesmall_inspect_1_nf_300.npy
+        object_name: ori_grab_s2_cubesmall_inspect_1_nf_300
+        exp_logging_dir: 
+        random_prior: True
+        random_time: True
+        repose_z: False
+        goal_cond: False
+        object_code_dict: 
+            sem/Headphone: [1]
+        stiffnessScale: 1.0
+        forceLimitScale: 1.0
+        useRelativeControl: True
+        dofSpeedScale: 20.0
+        actionsMovingAverage: 1.0
+        controlFrequencyInv: 1
+        startPositionNoise: 0.0
+        startRotationNoise: 0.0
+        resetPositionNoise: 0.0
+        resetRotationNoise: 0.0
+        resetDofPosRandomInterval: 0.0
+        resetDofVelRandomInterval: 0.0
+        distRewardScale: 20
+        transition_scale: 0.5
+        orientation_scale: 0.1
+        rotRewardScale: 1.0
+        rotEps: 0.1
+        actionPenaltyScale: -0.0002
+        reachGoalBonus: 250
+        fallDistance: 0.4
+        fallPenalty: 0.0
+        objectType: pot
+        observationType: pure_state_wref_wdelta
+        handAgentIndex: [[0, 1, 2, 3, 4, 5]]
+        asymmetric_observations: False
+        successTolerance: 0.1
+        printNumSuccesses: False
+        maxConsecutiveSuccesses: 0
+        asset: 
+            assetRoot: ../assets
+            assetFileName: mjcf/open_ai_assets/hand/shadow_hand.xml
+            assetFileNameBlock: urdf/objects/cube_multicolor.urdf
+            assetFileNameBall: urdf/objects/ball.urdf
+            assetFileNameEgg: mjcf/open_ai_assets/hand/egg.xml
+            assetFileNamePen: mjcf/open_ai_assets/hand/pen.xml
+        vision: 
+            color: 
+                hand: [0.5, 0.5, 0.5]
+                object: [1.0, 0.2, 0.2]
+                goal: [0.5, 1.0, 0.35]
+            pointclouds: 
+                numPresample: 65536
+                numDownsample: 1024
+                numEachPoint: 6
+            camera: 
+                eye: [[0.0, 0.0, 0.55], [0.5, 0.0, 0.05], [-0.5, 0.0, 0.05], [0.0, 0.5, 0.05], [0.0, -0.5, 0.05]]
+                lookat: [[0.01, 0.0, 0.05], [0.0, 0.0, 0.05], [0.0, 0.0, 0.05], [0.0, 0.0, 0.05], [0.0, 0.0, 0.05]]
+            probe: 
+                num_probes: 0
+                width: 256
+                height: 256
+                eye: [[1.6, 0.0, 2.5]]
+                forward: [[-0.8, 0.0, -2.0]]
+            bar: 
+                x_n: -1
+                x_p: 1
+                y_n: -1
+                y_p: 1
+                z_n: 0.51
+                z_p: 1.3
+                depth: 1.2
+    task: 
+        randomize: False
+        rand_obj_mass_lowest_range: 0.5
+        rand_obj_mass_highest_range: 1.5
+        randomization_params: 
+            frequency: 1000
+            observations: 
+                range: [0, 0.002]
+                range_correlated: [0, 0.001]
+                operation: additive
+                distribution: gaussian
+                schedule: linear
+                schedule_steps: 40000
+            actions: 
+                range: [0.0, 0.05]
+                range_correlated: [0, 0.015]
+                operation: additive
+                distribution: gaussian
+                schedule: linear
+                schedule_steps: 40000
+            sim_params: 
+                gravity: 
+                    range: [0, 0.4]
+                    operation: additive
+                    distribution: gaussian
+                    schedule: linear
+                    schedule_steps: 40000
+            actor_params: 
+                hand: 
+                    color: False
+                    dof_properties: 
+                        damping: 
+                            range: [0.3, 3.0]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 30000
+                        stiffness: 
+                            range: [0.75, 1.5]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 30000
+                        lower: 
+                            range: [0, 0.01]
+                            operation: additive
+                            distribution: gaussian
+                            schedule: linear
+                            schedule_steps: 30000
+                        upper: 
+                            range: [0, 0.01]
+                            operation: additive
+                            distribution: gaussian
+                            schedule: linear
+                            schedule_steps: 30000
+                    rigid_body_properties: 
+                        mass: 
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 30000
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            range: [0.7, 1.3]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 30000
+                object: 
+                    rigid_body_properties: 
+                        mass: 
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 30000
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            range: [0.7, 1.3]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 30000
+    sim: 
+        dt: 0.0166
+        substeps: 2
+        use_gpu_pipeline: True
+        up_axis: z
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            num_position_iterations: 8
+            num_velocity_iterations: 0
+            contact_offset: 0.002
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1000.0
+            default_buffer_size_multiplier: 5.0
+        flex: 
+            num_outer_iterations: 5
+            num_inner_iterations: 20
+            warm_start: 0.8
+            relaxation: 0.75
+    test: True
+train: 
+    params: 
+        seed: 42
+        algo: 
+            name: a2c_continuous_supervised
+        model: 
+            name: continuous_a2c_logstd
+        network: 
+            name: actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            mlp: 
+                units: [1024, 512, 256, 128]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: True
+        load_path: /workspace/DexTrack/isaacgymenvs/logs/sweep_cube_w1000/tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__17-23-46-00/nn/last_tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__ep_474_rew__119.14_.pth
+        config: 
+            forecasting_obs_with_original_obs: False
+            test_inst_tag: ori_grab_s2_cubesmall_inspect_1_nf_300
+            add_obj_features: False
+            traj_idx_to_experience_sv_folder: 
+            history_chunking_obs_version: v1
+            load_chunking_experiences_from_real: False
+            use_transformer_model: False
+            switch_between_models: False
+            switch_to_trans_model_frame_after: 310
+            switch_to_trans_model_ckpt_fn: 
+            history_length: 5
+            target_inst_tag_list_fn: 
+            teacher_subj_idx: 2
+            action_chunking: False
+            action_chunking_frames: 1
+            bc_relative_targets: False
+            action_chunking_skip_frames: 1
+            distill_via_bc: False
+            load_chunking_experiences_v2: False
+            save_experiences_via_ts: False
+            simreal_modeling: False
+            demonstration_tuning_model: False
+            demonstration_tuning_model_freq: 1
+            distill_delta_targets: False
+            record_for_distill_to_ctlv2: False
+            preload_all_saved_exp_buffers: False
+            load_experiences_maxx_ts: 600
+            bc_style_training: False
+            use_no_obj_pose: False
+            train_student_model: False
+            ts_teacher_model_obs_dim: 731
+            ts_teacher_model_weights_fn: 
+            dagger_style_training: False
+            rollout_student_model: True
+            rollout_teacher_model: False
+            masked_mimic_training: False
+            masked_mimic_teacher_model_path: 
+            maxx_inst_nn: 1
+            use_world_model: False
+            train_controller: False
+            train_forecasting_model: False
+            forecasting_model_weight_fn: 
+            forecasting_obs_dim: 797
+            forecasting_act_dim: 29
+            forecasting_nn_frames: 10
+            w_franka: False
+            use_teacher_model: False
+            teacher_model_path: 
+            teacher_index_to_weights: 
+            grab_obj_type_to_opt_res_fn: 
+            taco_obj_type_to_opt_res_fn: 
+            supervised_loss_coef: 0.0
+            pure_supervised_training: False
+            single_instance_tag: 
+            obj_type_to_optimized_res_fn: 
+            train_dir: ./logs/isaacgym_rl_exp_grab_300_train_allegro_wcustomdamping_new_supv1_0.0_ctlinv_1_teacherfrom_duck_v3goal_v2
+            log_path: ./logs/isaacgym_rl_exp_grab_300_train_allegro_wcustomdamping_new_supv1_0.0_ctlinv_1_teacherfrom_duck_v3goal_v2
+            training_mode: regular
+            record_experiences: False
+            name: tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_
+            preload_experiences_tf: False
+            preload_experiences_path: 
+            single_instance_training: True
+            single_instance_state_based_train: False
+            full_experiment_name: tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_
+            env_name: rlgpu
+            multi_gpu: False
+            mixed_precision: True
+            normalize_input: True
+            normalize_value: True
+            value_bootstrap: True
+            num_actors: 16
+            reward_shaper: 
+                scale_value: 0.01
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 0.0005
+            lr_schedule: adaptive
+            kl_threshold: 0.008
+            score_to_win: 20000
+            max_epochs: 1000
+            save_best_after: 50
+            save_frequency: 200
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            ppo: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 16
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0
+pbt: 
+    enabled: False
+task_name: AllegroHandTrackingGeneralist
+experiment: 
+num_envs: 
+seed: 42
+torch_deterministic: False
+max_iterations: 
+enableCameraSensors: False
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: -1
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: True
+checkpoint: /workspace/DexTrack/isaacgymenvs/logs/sweep_cube_w1000/tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__17-23-46-00/nn/last_tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__ep_474_rew__119.14_.pth
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_
+wandb_entity: 
+wandb_project: isaacgymenvs
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+capture_video_freq: 1464
+capture_video_len: 300
+force_render: False
+render_mode: ansi
+exp_dir: .
+tag: tracking_ori_grab_s2_cubesmall_inspect_1_nf_300
+headless: True
+two_hands: True
+scaled_object_asset_file: arctic_microwave_wcollision.urdf
+gt_data_fn: /home/xueyi/diffsim/Control-VAE/ReferenceData/shadow_arctic_s06_microwave_data_v3_opt2.npy
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+[Warning] [carb.gym.plugin] useGpuPipeline is set, forcing GPU PhysX
+[Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+[Error] [carb.gym.plugin] Graphics is nullptr in GymCreateTextureFromFile
+{'forecasting_obs_with_original_obs': False, 'test_inst_tag': 'ori_grab_s2_cubesmall_inspect_1_nf_300', 'add_obj_features': False, 'traj_idx_to_experience_sv_folder': '', 'history_chunking_obs_version': 'v1', 'load_chunking_experiences_from_real': False, 'use_transformer_model': False, 'switch_between_models': False, 'switch_to_trans_model_frame_after': 310, 'switch_to_trans_model_ckpt_fn': '', 'history_length': 5, 'target_inst_tag_list_fn': '', 'teacher_subj_idx': 2, 'action_chunking': False, 'action_chunking_frames': 1, 'bc_relative_targets': False, 'action_chunking_skip_frames': 1, 'distill_via_bc': False, 'load_chunking_experiences_v2': False, 'save_experiences_via_ts': False, 'simreal_modeling': False, 'demonstration_tuning_model': False, 'demonstration_tuning_model_freq': 1, 'distill_delta_targets': False, 'record_for_distill_to_ctlv2': False, 'preload_all_saved_exp_buffers': False, 'load_experiences_maxx_ts': 600, 'bc_style_training': False, 'use_no_obj_pose': False, 'train_student_model': False, 'ts_teacher_model_obs_dim': 731, 'ts_teacher_model_weights_fn': '', 'dagger_style_training': False, 'rollout_student_model': True, 'rollout_teacher_model': False, 'masked_mimic_training': False, 'masked_mimic_teacher_model_path': '', 'maxx_inst_nn': 1, 'use_world_model': False, 'train_controller': False, 'train_forecasting_model': False, 'forecasting_model_weight_fn': '', 'forecasting_obs_dim': 797, 'forecasting_act_dim': 29, 'forecasting_nn_frames': 10, 'w_franka': False, 'use_teacher_model': False, 'teacher_model_path': '', 'teacher_index_to_weights': '', 'grab_obj_type_to_opt_res_fn': '', 'taco_obj_type_to_opt_res_fn': '', 'supervised_loss_coef': 0.0, 'pure_supervised_training': False, 'single_instance_tag': '', 'obj_type_to_optimized_res_fn': '', 'train_dir': './logs/isaacgym_rl_exp_grab_300_train_allegro_wcustomdamping_new_supv1_0.0_ctlinv_1_teacherfrom_duck_v3goal_v2', 'log_path': './logs/isaacgym_rl_exp_grab_300_train_allegro_wcustomdamping_new_supv1_0.0_ctlinv_1_teacherfrom_duck_v3goal_v2', 'training_mode': 'regular', 'record_experiences': False, 'name': 'tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_', 'preload_experiences_tf': False, 'preload_experiences_path': '', 'single_instance_training': True, 'single_instance_state_based_train': False, 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'mixed_precision': True, 'normalize_input': True, 'normalize_value': True, 'value_bootstrap': True, 'num_actors': 16, 'reward_shaper': {'scale_value': 0.01}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 0.0005, 'lr_schedule': 'adaptive', 'kl_threshold': 0.008, 'score_to_win': 20000, 'max_epochs': 1000, 'save_best_after': 50, 'save_frequency': 200, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'ppo': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 16, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to play
+[BasePlayer] Creating regular env:  rlgpu
+Averaging factor:  0.01
+right_hand_dist_thres: 0.12
+[INFO] train_student_model: False
+grab_inst_tag_to_optimized_res_fn: ['']
+tracking_save_info_fn: ./data/GRAB_Tracking_PK_reduced_300/data
+Get all grab tags with grab_inst_tags: 1269
+grab_inst_tag_to_opt_res: 1071
+Loaded inst_tag_to_optimized_res with number of total instances 1071
+test_inst_tag: ori_grab_s2_cubesmall_inspect_1_nf_300, test_optimized_res: 
+[Debug] Loading ('ori_grab_s6_banana_peel_1_nf_300', 'ori_grab_s6_banana_peel_1_nf_300')
+[Debug] Loading ('ori_grab_s6_knife_lift_nf_300', 'ori_grab_s6_knife_lift_nf_300')
+[Debug] Loading ('ori_grab_s4_bowl_pass_1_nf_300', 'ori_grab_s4_bowl_pass_1_nf_300')
+[Debug] Loading ('ori_grab_s2_phone_call_1_nf_300', 'ori_grab_s2_phone_call_1_nf_300')
+[Debug] Loading ('ori_grab_s9_bowl_lift_nf_300', 'ori_grab_s9_bowl_lift_nf_300')
+[Debug] Loading ('ori_grab_s8_banana_lift_nf_300', 'ori_grab_s8_banana_lift_nf_300')
+[Debug] Loading ('ori_grab_s10_camera_takepicture_1_nf_300', 'ori_grab_s10_camera_takepicture_1_nf_300')
+[Debug] Loading ('ori_grab_s10_waterbottle_pass_1_nf_300', 'ori_grab_s10_waterbottle_pass_1_nf_300')
+[Debug] Loading ('ori_grab_s10_banana_peel_2_nf_300', 'ori_grab_s10_banana_peel_2_nf_300')
+[Debug] Loading ('ori_grab_s7_eyeglasses_pass_1_nf_300', 'ori_grab_s7_eyeglasses_pass_1_nf_300')
+[Debug] Loading ('ori_grab_s6_headphones_pass_1_nf_300', 'ori_grab_s6_headphones_pass_1_nf_300')
+[Debug] Loading ('ori_grab_s5_wineglass_lift_nf_300', 'ori_grab_s5_wineglass_lift_nf_300')
+[Debug] Loading ('ori_grab_s3_airplane_pass_1_nf_300', 'ori_grab_s3_airplane_pass_1_nf_300')
+[Debug] Loading ('ori_grab_s9_banana_peel_1_nf_300', 'ori_grab_s9_banana_peel_1_nf_300')
+[Debug] Loading ('ori_grab_s2_cubesmall_inspect_1_nf_300', 'ori_grab_s2_cubesmall_inspect_1_nf_300')
+[3] tot_succ_nn / tot_nn: 0 / 1
+[Debug] data_inst_tag_list: 1
+0/1 Loading from /cephfs/xueyi/uni_manip/isaacgym_rl_exp_taco_grab_interpseq_interpfr_60_interpfr2_60_nntrans_40_eval/tracking_TACO_taco_20230930_037_INTERPSEQ_ori_grab_s2_phone_call_1_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5_interpfr_60_interpfr2_60_nntrans_40_04-20-05-36/ts_to_hand_obj_obs_reset_1_sorted_best.npy
+0/1 Loading from /cephfs/xueyi/uni_manip/isaacgym_rl_exp_taco_grab_interpseq_interpfr_60_interpfr2_60_nntrans_40_eval/tracking_TACO_taco_20230930_037_INTERPSEQ_ori_grab_s2_phone_call_1_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5_interpfr_60_interpfr2_60_nntrans_40_04-20-05-36/ts_to_hand_obj_obs_reset_1_sorted_best.npy, len(data_name_to_data): 0
+Loading from /cephfs/xueyi/uni_manip/isaacgym_rl_exp_taco_grab_interpseq_interpfr_60_interpfr2_60_nntrans_40_eval/tracking_TACO_taco_20230930_037_INTERPSEQ_ori_grab_s2_phone_call_1_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5_interpfr_60_interpfr2_60_nntrans_40_04-20-05-36/ts_to_hand_obj_obs_reset_1_sorted_best.npy, cur_traj_maxx_length: 300, maxx_trajectory_length: 300
+Existing func _preload_mocap_tracking_ctl_data
+[Loading tracking kine info] 0/1: ('ori_grab_s2_cubesmall_inspect_1_nf_300', 'ori_grab_s2_cubesmall_inspect_1_nf_300')
+Loading single with data_inst_tag: ('ori_grab_s2_cubesmall_inspect_1_nf_300', 'ori_grab_s2_cubesmall_inspect_1_nf_300')
+cur_kine_obj_trans: [2.41e-05 3.65e-05 2.53e-02]
+cur_kine_qs: (300, 22)
+cur_data_episode_length: 300, maxx_trajectory_length: 300
+tot_hand_preopt_res: torch.Size([1, 300, 22]), tot_hand_qs: torch.Size([1, 300, 22]), tot_hand_qtars: torch.Size([1, 300, 22]), tot_kine_qs: torch.Size([1, 300, 22]), tot_kine_obj_trans: torch.Size([1, 300, 3]), tot_kine_obj_ornt: torch.Size([1, 300, 4]), maxx_episode_length_per_traj: tensor([299], device='cuda:0', dtype=torch.int32)
+Obs type: pure_state_wref_wdelta
+controlFrequencyInv: 1
+==> Loading mocap reference information from ./data/GRAB_Tracking_PK_reduced_300/data/passive_active_info_ori_grab_s2_apple_lift_nf_300.npy
+lift_fr: 0, cur_obj_transl: [1.79e-07 2.08e-04 6.12e-02]
+==> Info loaded with hand_qs: (300, 22), goal_hand_qs: (300, 22), goal_obj_trans: (300, 3), goal_obj_rot_quat: (300, 4)
+joint_idxes_ordering: [ 0  1  2  3  4  5  6  7  8  9 14 15 16 17 18 19 20 21 10 11 12 13]
+joint_idxes_inversed_ordering: [ 0  1  2  3  4  5  6  7  8  9 18 19 20 21 10 11 12 13 14 15 16 17]
+obs_type: pure_state_wref_wdelta, num_obs: 469
+numObservationsWActions: 492, numActions: 22, numObservations: 469
+enable_camera_sensors: False, graphics_device_id: -1
+[Debug] shadow_hand_asset_file: allegro_hand_description/urdf/allegro_hand_description_right_fly_v2.urdf
+self.num_shadow_hand_bodies:  27
+self.num_shadow_hand_shapes:  21
+self.num_shadow_hand_dofs:  22
+self.num_shadow_hand_actuators:  22
+self.num_shadow_hand_tendons:  0
+asset_rigid_body_names:  ['hand_root', 'link_palm_x', 'link_palm_y', 'link_palm_z', 'link_palm_rx', 'link_palm_ry', 'palm_link', 'link_0', 'link_1', 'link_2', 'link_3', 'link_3_tip', 'link_12', 'link_13', 'link_14', 'link_15', 'link_15_tip', 'link_4', 'link_5', 'link_6', 'link_7', 'link_7_tip', 'link_8', 'link_9', 'link_10', 'link_11', 'link_11_tip']
+[Debug] shadow_hand_dof_names: ['WRJ0x', 'WRJ0y', 'WRJ0z', 'WRJ0rx', 'WRJ0ry', 'WRJ0rz', 'joint_0', 'joint_1', 'joint_2', 'joint_3', 'joint_12', 'joint_13', 'joint_14', 'joint_15', 'joint_4', 'joint_5', 'joint_6', 'joint_7', 'joint_8', 'joint_9', 'joint_10', 'joint_11']
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+[Debug] shadow_hand_dof_lower_limits: tensor([-1.0000, -1.0000, -1.0000, -3.1400, -3.1400, -3.1400, -0.4700, -0.1960,
+        -0.1740, -0.2270,  0.2630, -0.1050, -0.1890, -0.1620, -0.4700, -0.1960,
+        -0.1740, -0.2270, -0.4700, -0.1960, -0.1740, -0.2270], device='cuda:0')
+[Debug] shadow_hand_dof_upper_limits: tensor([1.0000, 1.0000, 1.0000, 3.1400, 3.1400, 3.1400, 0.4700, 1.6100, 1.7090,
+        1.6180, 1.3960, 1.1630, 1.6440, 1.7190, 0.4700, 1.6100, 1.7090, 1.6180,
+        0.4700, 1.6100, 1.7090, 1.6180], device='cuda:0')
+key: WRJ0rx val: 3
+key: WRJ0ry val: 4
+key: WRJ0rz val: 5
+key: WRJ0x val: 0
+key: WRJ0y val: 1
+key: WRJ0z val: 2
+key: joint_0 val: 6
+key: joint_1 val: 7
+key: joint_10 val: 23
+key: joint_11 val: 24
+key: joint_11_tip val: 25
+key: joint_12 val: 11
+key: joint_13 val: 12
+key: joint_14 val: 13
+key: joint_15 val: 14
+key: joint_15_tip val: 15
+key: joint_2 val: 8
+key: joint_3 val: 9
+key: joint_3_tip val: 10
+key: joint_4 val: 16
+key: joint_5 val: 17
+key: joint_6 val: 18
+key: joint_7 val: 19
+key: joint_7_tip val: 20
+key: joint_8 val: 21
+key: joint_9 val: 22
+[Debug] object_dof_lower_limits: tensor([], device='cuda:0')
+[Debug] object_dof_upper_limits: tensor([], device='cuda:0')
+[Debug] fingertips handles: [16, 11, 21, 26]
+[Debug] body_name: palm, idx: 6
+[Debug] body_name: thumb, idx: 16
+[Debug] body_name: index, idx: 11
+[Debug] body_name: middle, idx: 21
+[Debug] body_name: ring, idx: 26
+len(object_code_list): 1
+first_frame_hand_kine_qs: tensor([-0.1104,  0.0429,  0.1694,  1.7716,  0.2565, -1.2635, -0.0424,  0.2664,
+         0.2466,  0.0856,  0.9722,  0.2946,  0.8590,  0.1782,  0.0199,  0.3815,
+         0.2693,  0.0671,  0.2477,  0.4972,  0.3279,  0.1055], device='cuda:0'), load_kine_info_retar_with_arm: False, 
+mass: [0.062474433332681656]
+AUDIT_FIX: creation-time joint state applied to 16 hands
+tot_obj_succ_nn: 0
+num_shadow_hand_dofs: 22
+Registering the history observations...
+[Debug] shadow_hand_default_dof_pos: torch.Size([16, 22])
+[Debug] dof_state: torch.Size([352, 2])
+AUDIT_FIX 3: reset snapshot replaced with creation pose at rest
+AUDIT init: object saved_root [0.0, 0.0, 0.02500000037252903, 0.7099999785423279, 0.012000000104308128, 0.007000000216066837, 0.7039999961853027, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] object_init_state [0.0, 0.0, 0.02500000037252903, 0.7099999785423279, 0.012000000104308128, 0.007000000216066837, 0.7039999961853027] goal_init [0.0, 0.0, 0.22499999403953552]
+[Debug] num_dofs: 22
+{'observation_space': Box(-inf, inf, (469,), float32), 'action_space': Box(-1.0, 1.0, (22,), float32), 'agents': 1, 'value_size': 1}
+build mlp: 469
+RunningMeanStd:  (1,)
+RunningMeanStd:  (469,)
+switch_between_models: False
+=> loading checkpoint '/workspace/DexTrack/isaacgymenvs/logs/sweep_cube_w1000/tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__17-23-46-00/nn/last_tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__ep_474_rew__119.14_.pth'
+[INFO] Initial hand dof pos: tensor([-0.1104,  0.0429,  0.1694,  1.7716,  0.2565, -1.2635, -0.0424,  0.2664,
+         0.2466,  0.0856,  0.9722,  0.2946,  0.8590,  0.1782,  0.0199,  0.3815,
+         0.2693,  0.0671,  0.2477,  0.4972,  0.3279,  0.1055], device='cuda:0')
+AUDIT_FIX 2: settled links with objects parked
+AUDIT_FIX 3b: object pinned at creation pose before the first step
+AUDIT hand shapes: 21 per body: [('palm_link', 0, 1), ('link_0', 1, 1), ('link_1', 2, 1), ('link_2', 3, 1), ('link_3', 4, 1), ('link_3_tip', 5, 1), ('link_12', 6, 1), ('link_13', 7, 1), ('link_14', 8, 1), ('link_15', 9, 1), ('link_15_tip', 10, 1), ('link_4', 11, 1), ('link_5', 12, 1), ('link_6', 13, 1), ('link_7', 14, 1), ('link_7_tip', 15, 1), ('link_8', 16, 1), ('link_9', 17, 1), ('link_10', 18, 1), ('link_11', 19, 1), ('link_11_tip', 20, 1)]
+AUDIT object shapes: 1 actor names: ['hand', 'object', 'goal_object']
+AUDIT_FIX 3b: object pinned at creation pose before the first step
+AUDIT_FIX 3b: object pinned at creation pose before the first step
+save the ts_to_hand_obj_states to ./logs/isaacgym_rl_exp_grab_300_train_allegro_wcustomdamping_new_supv1_0.0_ctlinv_1_teacherfrom_duck_v3goal_v2/tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__18-00-01-10/ts_to_hand_obj_obs_reset_1.npy
+AUDIT_ALLENV envs=16  pen_mm mean 1.18 (per-env [1.940000057220459, 1.1100000143051147, 1.0399999618530273, 1.159999966621399, 1.0299999713897705, 1.1699999570846558, 1.090000033378601, 1.1699999570846558, 1.100000023841858, 1.0, 1.340000033378601, 1.2899999618530273, 1.0399999618530273, 1.2200000286102295, 1.100000023841858, 1.0499999523162842])  frac>2mm 0.26  grip_x mean 24  err_cm mean 0.29  end err per env [0.30000001192092896, 0.20000000298023224, 0.5, 0.30000001192092896, 0.20000000298023224, 0.10000000149011612, 0.30000001192092896, 0.5, 0.20000000298023224, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.10000000149011612, 0.20000000298023224, 3.799999952316284, 0.6000000238418579]
+/workspace/dextrack-venv/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+/workspace/dextrack-venv/lib/python3.8/site-packages/gym/spaces/box.py:84: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  logger.warn(f"Box bound precision lowered by casting to {self.dtype}")
+/workspace/DexTrack/isaacgymenvs/../isaacgymenvs/tasks/allegro_hand_tracking_generalist.py:4684: DeprecationWarning: an integer is required (got type isaacgym._bindings.linux-x86_64.gym_38.DofDriveMode).  Implicit conversion to integers using __int__ is deprecated, and may be removed in a future version of Python.
+  asset_options.default_dof_drive_mode = gymapi.DOF_MODE_POS
+/workspace/dextrack-venv/lib/python3.8/site-packages/rl_games/algos_torch/torch_ext.py:62: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return func(*args, **kwargs)
+Error executing job with overrides: ['task=AllegroHandTrackingGeneralist', 'train=HumanoidPPOSupervisedSN', 'sim_device=cuda:0', 'rl_device=cuda:0', 'capture_video=False', 'force_render=False', 'headless=True', 'task.env.numEnvs=16', 'train.params.config.minibatch_size=16', 'task.env.useRelativeControl=True', 'train.params.config.max_epochs=1000', 'task.env.mocap_sv_info_fn=./data/GRAB_Tracking_PK_reduced_300/data/passive_active_info_ori_grab_s2_cubesmall_inspect_1_nf_300.npy', 'task.env.goal_cond=False', 'task.env.object_name=ori_grab_s2_cubesmall_inspect_1_nf_300', 'tag=tracking_ori_grab_s2_cubesmall_inspect_1_nf_300', 'train.params.config.name=tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_', 'train.params.config.full_experiment_name=tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_', 'task.sim.dt=0.0166', 'test=True', 'task.env.use_kinematics_bias=True', 'task.env.w_obj_ornt=False', 'task.env.observationType=pure_state_wref_wdelta', 'task.env.separate_stages=False', 'task.env.rigid_obj_density=500.0', 'task.env.kinematics_only=False', 'task.env.use_fingertips=True', 'task.env.glb_trans_vel_scale=0.5', 'task.env.glb_rot_vel_scale=0.5', 'task.env.use_kinematics_bias_wdelta=True', 'task.env.hand_pose_guidance_glb_trans_coef=0.6', 'task.env.hand_pose_guidance_glb_rot_coef=0.1', 'task.env.hand_pose_guidance_fingerpose_coef=0.1', 'task.env.rew_finger_obj_dist_coef=0.3', 'task.env.rew_delta_hand_pose_coef=0.5', 'task.env.dofSpeedScale=20.0', 'task.env.use_twostage_rew=False', 'task.env.ground_distance=0.0', 'task.env.use_canonical_state=False', 'task.env.disable_obj_gravity=False', 'train.params.config.save_best_after=50', 'task.env.right_hand_dist_thres=0.12', 'checkpoint=logs/sweep_cube_w1000/tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__17-23-46-00/nn/last_tracking_ori_grab_s2_cubesmall_inspect_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False__ep_474_rew__119.14_.pth', 'task.env.use_real_twostage_rew=False', 'task.env.start_grasping_fr=False', 'task.env.controlFrequencyInv=1', 'task.env.episodeLength=1000', 'task.env.start_frame=0', 'task.env.rew_obj_pose_coef=1.0', 'task.env.goal_dist_thres=0.0', 'task.env.lifting_separate_stages=False', 'task.env.strict_lifting_separate_stages=False', 'task.env.table_z_dim=0.5', 'task.env.add_table=False', 'exp_dir=.', 'task.env.use_taco_obj_traj=True', 'task.env.pre_optimized_traj=', 'task.env.hand_type=allegro', 'enableCameraSensors=False', 'graphics_device_id=-1', 'task.env.use_hand_actions_rew=False', 'task.env.supervised_training=True', 'train.params.config.training_mode=regular', 'task.env.test_inst_tag=ori_grab_s2_cubesmall_inspect_1_nf_300', 'task.env.test_optimized_res=', 'train.params.config.test_inst_tag=ori_grab_s2_cubesmall_inspect_1_nf_300', 'train.params.config.preload_experiences_tf=False', 'train.params.config.preload_experiences_path=', 'train.params.config.single_instance_training=True', 'task.env.sampleds_with_object_code_fn=', 'train.params.config.log_path=./logs/isaacgym_rl_exp_grab_300_train_allegro_wcustomdamping_new_supv1_0.0_ctlinv_1_teacherfrom_duck_v3goal_v2', 'train.params.config.train_dir=./logs/isaacgym_rl_exp_grab_300_train_allegro_wcustomdamping_new_supv1_0.0_ctlinv_1_teacherfrom_duck_v3goal_v2', 'task.env.grab_inst_tag_to_optimized_res_fn=', 'task.env.taco_inst_tag_to_optimized_res_fn=', 'train.params.config.single_instance_tag=', 'train.params.config.obj_type_to_optimized_res_fn=', 'train.params.config.supervised_loss_coef=0.0', 'train.params.config.pure_supervised_training=False', 'task.env.inst_tag_to_latent_feature_fn=../assets/inst_tag_to_obj_feat.npy', 'task.env.object_type_to_latent_feature_fn=../assets/obj_type_to_obj_feat.npy', 'task.env.grab_obj_type_to_opt_res_fn=', 'task.env.taco_obj_type_to_opt_res_fn=', 'train.params.config.grab_obj_type_to_opt_res_fn=', 'train.params.config.taco_obj_type_to_opt_res_fn=', 'task.env.maxx_inst_nn=1', 'train.params.config.maxx_inst_nn=1', 'task.env.tracking_save_info_fn=./data/GRAB_Tracking_PK_reduced_300/data', 'task.env.tracking_info_st_tag=passive_active_info_', 'task.env.only_training_on_succ_samples=False', 'train.params.config.use_teacher_model=False', 'task.env.use_strict_maxx_nn_ts=True', 'task.env.taco_interped_data_sv_additional_tag=interpfr_60_interpfr2_60_nntrans_40', 'task.env.strict_maxx_nn_ts=300', 'task.env.grab_train_test_setting=True', 'task.env.use_local_canonical_state=True', 'train.params.config.bounds_loss_coef=0.0', 'task.env.rew_grab_thres=100.0', 'task.env.rew_taco_thres=50.0', 'task.env.rew_smoothness_coef=0.0', 'task.env.obj_type_to_base_traj_fn=', 'task.env.use_base_traj=False', 'task.env.rew_thres_with_selected_insts=False', 'task.env.selected_inst_idxes_dict=', 'task.env.customize_damping=True', 'task.env.customize_global_damping=False', 'task.env.train_on_all_trajs=True', 'task.env.single_instance_state_based_train=True', 'task.env.data_selection_ratio=1.0', 'task.env.wo_vel_obs=False', 'task.env.downsample=False', 'task.env.target_inst_tag_list_fn=', 'task.env.use_teacher_model=False', 'train.params.config.use_teacher_model=False', 'train.params.config.teacher_model_path=', 'task.env.teacher_model_inst_tags_fn=', 'train.params.config.teacher_index_to_weights=', 'task.env.teacher_index_to_inst_tags=', 'task.env.use_history_obs=False', 'task.env.history_length=5', 'train.params.config.history_length=5', 'task.env.good_inst_opt_res=', 'task.env.w_franka=False', 'train.params.config.w_franka=False', 'task.task.randomize=False', 'task.env.early_terminate=False', 'task.sim.substeps=2', 'task.env.use_forcasting_model=False', 'task.env.forcasting_model_weights=', 'task.env.forcasting_model_n_layers=7', 'task.env.w_glb_traj_feat_cond=False', 'task.env.use_window_future_selection=False', 'task.env.forcasting_inv_freq=1', 'task.env.stiffness_coef=100.0', 'task.env.damping_coef=4.0', 'task.env.effort_coef=0.95', 'task.env.forcasting_history_ws=30', 'task.env.sv_info_during_training=False', 'task.env.impedance_stiffness_low=1.0', 'task.env.impedance_stiffness_high=50.0', 'task.env.w_impedance_bias_control=False', 'task.env.w_obj_latent_features=True', 'task.env.net_type=v4', 'task.env.history_freq=5', 'task.env.use_future_obs=False', 'task.env.w_history_window_index=True', 'task.env.randomize_conditions=False', 'task.env.w_inst_latent_features=False', 'task.env.masked_mimic_training=False', 'train.params.config.masked_mimic_training=False', 'train.params.config.masked_mimic_teacher_model_path=', 'task.env.forcasting_model_training=False', 'task.env.forcasting_model_lr=0.0001', 'task.env.forcasting_model_weight_decay=5e-05', 'task.env.randomize_condition_type=', 'task.env.add_contact_conditions=False', 'task.env.contact_info_sv_root=/cephfs/xueyi/data/GRAB_Tracking_PK_reduced_300_contactflag', 'task.env.partial_hand_info=False', 'task.env.partial_obj_info=False', 'task.env.st_ed_state_cond=False', 'task.env.forcasting_diffusion_model=False', 'task.env.history_window_size=60', 'task.env.glb_feat_per_skip=1', 'task.env.centralize_info=False', 'task.env.random_shift_cond=False', 'task.env.random_shift_cond_freq=False', 'task.env.maxx_inv_cond_freq=30', 'task.env.only_use_hand_first_frame=False', 'train.params.config.forecasting_obs_dim=797', 'train.params.config.forecasting_act_dim=29', 'train.params.config.forecasting_nn_frames=10', 'train.params.config.use_world_model=False', 'train.params.config.train_controller=False', 'train.params.config.train_forecasting_model=False', 'train.params.config.forecasting_model_weight_fn=', 'task.env.single_inst_tag=', 'task.env.activate_forecaster=True', 'task.env.comput_reward_traj_hand_qpos=True', 'task.env.use_future_ref_as_obs_goal=True', 'task.env.forecast_obj_pos=False', 'task.env.multiple_kine_source_trajs_fn=', 'task.env.use_multiple_kine_source_trajs=False', 'task.env.include_obj_rot_in_obs=False', 'task.env.compute_hand_rew_buf_threshold=500', 'task.env.load_kine_info_retar_with_arm=False', 'task.env.kine_info_with_arm_sv_root=', 'task.env.w_finger_pos_rew=False', 'task.env.franka_delta_delta_mult_coef=1.0', 'task.env.control_arm_via_ik=False', 'task.env.warm_trans_actions_mult_coef=0.04', 'task.env.warm_rot_actions_mult_coef=0.04', 'task.env.hand_qpos_rew_coef=0.0', 'task.env.schedule_ornt_rew_coef=False', 'task.env.lowest_ornt_rew_coef=0.03', 'task.env.highest_ornt_rew_coef=2.0', 'task.env.ornt_rew_coef_warm_starting_steps=10', 'task.env.ornt_rew_coef_increasing_steps=200', 'task.env.hand_glb_mult_factor_scaling_coef=1.0', 'task.env.hand_glb_mult_scaling_progress_after=900', 'task.env.hand_glb_mult_scaling_progress_before=900', 'task.env.not_use_kine_bias=False', 'task.env.disable_hand_obj_contact=False', 'task.env.wo_fingertip_pos=False', 'task.env.wo_fingertip_rot_vel=False', 'task.env.wo_fingertip_vel=False', 'task.env.arm_stiffness=400.0', 'task.env.arm_effort=200.0', 'task.env.arm_damping=80.0', 'train.params.config.train_student_model=False', 'train.params.config.ts_teacher_model_obs_dim=731', 'train.params.config.ts_teacher_model_weights_fn=', 'task.env.train_student_model=False', 'task.env.ts_teacher_model_obs_dim=731', 'task.env.randomize_obj_init_pos=False', 'task.env.randomize_obs_more=False', 'task.env.obj_init_pos_rand_sigma=0.1', 'task.env.obs_simplified=False', 'task.env.w_traj_modifications=False', 'task.task.rand_obj_mass_lowest_range=0.5', 'task.task.rand_obj_mass_highest_range=1.5', 'task.env.use_v2_leap_warm_urdf=False', 'task.env.action_specific_randomizations=False', 'task.env.action_specific_rand_noise_scale=0.5', 'task.env.hand_specific_randomizations=False', 'task.env.schedule_hodist_rew_coef=False', 'task.env.highest_rew_finger_obj_dist_coef=0.5', 'task.env.lowest_rew_finger_obj_dist_coef=0.1', 'task.env.hodist_rew_coef_warm_starting_steps=100', 'task.env.hodist_rew_coef_increasing_steps=300', 'task.env.reset_obj_mass=False', 'task.env.obj_mass_reset=0.27', 'task.env.recompute_inertia=False', 'task.env.use_vision_obs=False', 'task.env.w_rotation_axis_rew=False', 'task.env.add_physical_params_in_obs=False', 'task.env.whether_randomize_obs_act=True', 'task.env.whether_randomize_obs=True', 'task.env.whether_randomize_act=True', 'task.env.obs_rand_noise_scale=100.0', 'train.params.config.dagger_style_training=False', 'train.params.config.rollout_teacher_model=False', 'train.params.config.rollout_student_model=True', 'train.params.config.teacher_subj_idx=2', 'task.env.action_chunking=False', 'task.env.action_chunking_frames=1', 'train.params.config.action_chunking=False', 'train.params.config.action_chunking_frames=1', 'train.params.config.horizon_length=32', 'train.params.config.bc_style_training=False', 'task.env.bc_style_training=False', 'train.params.config.demonstration_tuning_model=False', 'train.params.config.demonstration_tuning_model_freq=1', 'train.params.config.bc_relative_targets=False', 'task.env.distill_full_to_partial=False', 'task.env.train_free_hand=False', 'task.env.simreal_modeling=False', 'train.params.config.simreal_modeling=False', 'task.env.more_allegro_stiffness=False', 'task.env.distinguish_kine_with_base_traj=False', 'train.params.config.distill_delta_targets=False', 'task.env.preset_cond_type=0', 'train.params.config.preload_all_saved_exp_buffers=False', 'task.env.use_actual_prev_targets_in_obs=False', 'train.params.config.use_no_obj_pose=False', 'task.env.use_no_obj_pose=False', 'task.env.multi_traj_use_joint_order_in_sim=False', 'train.params.config.action_chunking_skip_frames=1', 'task.env.multi_inst_chunking=False', 'train.params.config.add_obj_features=False', 'task.env.add_obj_features=False', 'task.env.kine_ed_tag=.npy', 'task.env.only_rot_axis_guidance=False', 'task.env.add_global_motion_penalty=False', 'task.env.add_torque_penalty=False', 'task.env.add_work_penalty=False', 'task.env.use_multi_step_control=False', 'task.env.nn_control_substeps=10', 'task.env.schedule_episod_length=False', 'task.env.episod_length_low=270', 'task.env.episod_length_high=500', 'task.env.episod_length_warming_up_steps=130', 'task.env.episod_length_increasing_steps=200', 'task.env.use_actual_traj_length=False', 'task.env.randomize_reset_frame=False', 'task.env.add_forece_obs=False', 'task.env.distill_via_bc=False', 'train.params.config.distill_via_bc=False', 'train.params.config.record_experiences=False', 'train.params.config.learning_rate=0.0005', 'task.env.forecasting_obs_with_original_obs=False', 'train.params.config.forecasting_obs_with_original_obs=False', 'task.env.schedule_glb_action_penalty=False', 'task.env.glb_penalty_low=0.0003', 'task.env.glb_penalty_high=1.0', 'task.env.glb_penalty_warming_up_steps=50', 'task.env.glb_penalty_increasing_steps=300', 'task.env.add_hand_targets_smooth=False', 'task.env.hand_targets_smooth_coef=0.4', 'task.env.preset_multi_traj_index=-1', 'train.params.config.save_experiences_via_ts=False', 'train.params.config.load_experiences_maxx_ts=600', 'train.params.config.switch_between_models=False', 'train.params.config.switch_to_trans_model_frame_after=310', 'train.params.config.switch_to_trans_model_ckpt_fn=', 'task.env.switch_between_models=False', 'task.env.switch_to_trans_model_frame_after=310', 'task.env.switch_to_trans_model_ckpt_fn=', 'train.params.config.traj_idx_to_experience_sv_folder=', 'train.params.config.load_chunking_experiences_v2=False', 'task.env.load_chunking_experiences_v2=False', 'train.params.config.history_chunking_obs_version=v1', 'task.env.history_chunking_obs_version=v1', 'train.params.config.load_chunking_experiences_from_real=False', 'task.env.closed_loop_to_real=False', 'train.params.config.use_transformer_model=False']
+Traceback (most recent call last):
+  File "train.py", line 354, in launch_rlg_hydra
+    runner.run({
+  File "/workspace/dextrack-venv/lib/python3.8/site-packages/rl_games/torch_runner.py", line 135, in run
+    self.run_play(args)
+  File "/workspace/dextrack-venv/lib/python3.8/site-packages/rl_games/torch_runner.py", line 123, in run_play
+    player.run()
+  File "/workspace/DexTrack/isaacgymenvs/../isaacgymenvs/learning/a2c_supervised_player.py", line 392, in run
+    obses, r, done, info = self.env_step(self.env, action)
+  File "/workspace/dextrack-venv/lib/python3.8/site-packages/rl_games/common/player.py", line 183, in env_step
+    obs, rewards, dones, infos = env.step(actions)
+  File "/workspace/DexTrack/isaacgymenvs/../isaacgymenvs/tasks/vec_task.py", line 432, in step
+    self.post_physics_step()
+  File "/workspace/DexTrack/isaacgymenvs/../isaacgymenvs/tasks/allegro_hand_tracking_generalist.py", line 12634, in post_physics_step
+    self._audit_log()
+  File "/workspace/DexTrack/isaacgymenvs/../isaacgymenvs/tasks/allegro_hand_tracking_generalist.py", line 12631, in _audit_log
+    _np.save(out, _np.array(self._audit_rows, dtype=object), allow_pickle=True)
+AttributeError: 'numpy.ndarray' object has no attribute 'save'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+Using VHACD cache directory '/root/.isaacgym/vhacd'
+Found existing convex decomposition for mesh '../assets/meshdatav3_scaled/sem/ori_grab_s2_cubesmall_inspect_1/coacd/decomposed.obj'

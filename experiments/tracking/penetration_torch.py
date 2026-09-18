@@ -25,8 +25,34 @@ import trimesh
 from scipy.spatial.transform import Rotation as R
 
 
-def link_sample_points(urdf_path, n_box=12, n_sph=12):
-    """{link name: (P, 3) float32 points in the link frame} from URDF collisions."""
+def _box_grid(half, spacing):
+    """Every face of a box gridded at `spacing` (corners and edges included)."""
+    axes = [np.linspace(-half[i], half[i], max(2, int(np.ceil(2 * half[i] / spacing)) + 1)) for i in range(3)]
+    p = []
+    for ax in range(3):
+        a, b = [i for i in range(3) if i != ax]
+        A, B = np.meshgrid(axes[a], axes[b], indexing="ij")
+        for sign in (-1, 1):
+            q = np.zeros((A.size, 3)); q[:, a] = A.ravel(); q[:, b] = B.ravel(); q[:, ax] = sign * half[ax]
+            p.append(q)
+    return np.concatenate(p)
+
+
+def link_sample_points(urdf_path, n_box=12, n_sph=12, spacing=0.0):
+    """{link name: (P, 3) float32 points in the link frame} from URDF collisions.
+
+    spacing == 0: the sparse set (12 random surface points + 8 corners per
+    box, 36 icosphere vertices per sphere; ~20 points per link). spacing > 0:
+    a deterministic grid over every box face at that spacing (metres) and a
+    162-vertex icosphere per sphere.
+
+    The sparse set is NOT safe as a training signal. The depth of a convex
+    link into a convex part is the maximum of a concave function over the
+    link's surface, so it can sit in the interior of a face or an edge, away
+    from every corner. A policy rewarded on the sparse set learns to keep the
+    sampled points shallow while the surface between them goes deeper: on the
+    cube, fine-tunes that halved the sparse depth raised the dense depth
+    (docs/STAGE2.md). Use spacing ~2 mm for anything a policy optimises."""
     root = ET.parse(urdf_path).getroot()
     out = {}
     for link in root.findall("link"):
@@ -41,12 +67,18 @@ def link_sample_points(urdf_path, n_box=12, n_sph=12):
                 continue
             if g.find("box") is not None:
                 s = np.array([float(x) for x in g.find("box").get("size").split()])
-                m = trimesh.creation.box(extents=s)
-                p, _ = trimesh.sample.sample_surface(m, n_box, seed=0)
-                p = np.concatenate([np.asarray(p), m.vertices])          # corners matter most
+                if spacing > 0:
+                    p = _box_grid(s / 2, spacing)
+                else:
+                    m = trimesh.creation.box(extents=s)
+                    p, _ = trimesh.sample.sample_surface(m, n_box, seed=0)
+                    p = np.concatenate([np.asarray(p), m.vertices])      # corners matter most
             elif g.find("sphere") is not None:
                 r = float(g.find("sphere").get("radius"))
-                p = trimesh.creation.icosphere(subdivisions=1, radius=r).vertices[:n_sph * 3]
+                if spacing > 0:
+                    p = trimesh.creation.icosphere(subdivisions=2, radius=r).vertices
+                else:
+                    p = trimesh.creation.icosphere(subdivisions=1, radius=r).vertices[:n_sph * 3]
             elif g.find("cylinder") is not None:
                 r = float(g.find("cylinder").get("radius")); h = float(g.find("cylinder").get("length"))
                 p, _ = trimesh.sample.sample_surface(trimesh.creation.cylinder(radius=r, height=h), n_box, seed=0)
@@ -94,8 +126,10 @@ def quat_inv_apply(q, v):
 class PenetrationProbe:
     """Holds link points and object planes on the device; call per step."""
 
-    def __init__(self, urdf_path, obj_dir, body_names, device, touch=0.001):
-        pts = link_sample_points(urdf_path)
+    def __init__(self, urdf_path, obj_dir, body_names, device, touch=0.001, spacing=0.0):
+        pts = link_sample_points(urdf_path, spacing=spacing)
+        self.spacing = spacing
+        self.n_points = int(sum(len(v) for v in pts.values()))
         self.link_idx = [i for i, n in enumerate(body_names) if n in pts]
         P = max(len(pts[body_names[i]]) for i in self.link_idx)
         arr = np.zeros((len(self.link_idx), P, 3), np.float32)
@@ -119,10 +153,20 @@ class PenetrationProbe:
         self.device = device
 
     @torch.no_grad()
-    def __call__(self, rb_states, obj_pose):
+    def __call__(self, rb_states, obj_pose, chunk=256):
         """rb_states: (N, B, 13) rigid body states of the hand's actor; obj_pose:
         (N, 7) xyz + xyzw. Returns depth (N,) in metres (0 if nothing inside),
-        n_touch (N,) links within `touch`, and per-link depth (N, L)."""
+        n_touch (N,) links within `touch`, and per-link depth (N, L). Envs are
+        processed `chunk` at a time: the dense point set is ~33k points per
+        env, and the (envs, points, faces) tensor at 1024 envs would not fit
+        beside a training run."""
+        N = rb_states.shape[0]
+        if N > chunk:
+            outs = [self._call(rb_states[i:i + chunk], obj_pose[i:i + chunk]) for i in range(0, N, chunk)]
+            return tuple(torch.cat([o[k] for o in outs], 0) for k in range(3))
+        return self._call(rb_states, obj_pose)
+
+    def _call(self, rb_states, obj_pose):
         N = rb_states.shape[0]
         lp = rb_states[:, self.link_idx, :3]                       # (N, L, 3)
         lq = rb_states[:, self.link_idx, 3:7]                      # (N, L, 4)

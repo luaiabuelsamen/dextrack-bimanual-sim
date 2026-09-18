@@ -5484,6 +5484,19 @@ results/dextrack_audit/finetune/ (logs, ckpt, patches); hook diff 286 lines.
     100    1.59     33 %   38x    0.25     16/16
     300    1.33     26 %   34x    0.41     16/16
     1000   1.18     26 %   24x    0.29     16/16
-Monotone. Generalist-based fits (apple, torus, stamp, flashlight, w 300)
-running.
+Monotone -- BUT the probe was gameable, see next entry.
+
+### Correction: the sparse probe was learned, not the geometry
+Dense offline audit of env 0 read the fine-tunes WORSE (w1000 2.86 vs base
+2.40 mm). Re-scored all 16 envs with a 2 mm grid on every box face
+(33k points/hand, `spacing=0.002`), results/dextrack_audit/finetune/dense/:
+    w      sparse   dense    >2mm(dense)  grip(dense)  err    held
+    0      2.18     2.87     60 %         106x         0.14   16/16
+    100    1.59     2.43     55 %         89x          0.25   16/16
+    300    1.33     2.34     50 %         75x          0.41   16/16
+    1000   1.18     2.23     47 %         68x          0.29   16/16
+Real, monotone, half the claimed size: 22 % not 46 %. Max of a concave
+function over a box surface sits mid-edge/mid-face, away from corners; 20
+points per link leave room to hide in. Generalist sparse sweep killed at
+40 min. Dense-grid fine-tune (w1000, chunked probe) launched.
 

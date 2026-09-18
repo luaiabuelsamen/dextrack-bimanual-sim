@@ -1,0 +1,5 @@
+cube_w100 DONE
+cube_w1000 DONE
+sweep killed Fri Sep 18 00:13:53 UTC 2026 after cube w100/w1000; apple/torus at ~40 min (sparse probe, gameable)
+apple_w300 DONE
+torus_w300 DONE
