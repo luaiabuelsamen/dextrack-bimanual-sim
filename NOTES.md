@@ -5627,3 +5627,13 @@ penetrating simulated hand. Note err drifted 7.22 -> 8.34 cm between two runs
 of the same deterministic policy: Isaac Gym GPU physics is not bit-repeatable,
 so single-run differences under ~1 cm mean nothing.
 
+### Two-hand fine-tune: the policy learns to let go (2026-09-18)
+150 ep from the generalist inside the two-hand scene, no pen term:
+    base  right 0.81 mm  left 0.24  grip 17.0x  err 7.48 cm  held 16/16
+    ft    right 0.17 mm  left 0.57  grip 3.0x  err 2.28 cm  held 16/16
+Every column "improves" and it is an artifact: right-hand contact 152/299 ->
+23/299, grip 0 N through the middle. The position-driven left hand carries the
+object better than the policy can, so the policy withdraws. Fourth time a
+number improved because a hand let go. Fixes: soften the left drive, reward
+the right hand's share of the load, or make both hands policy-controlled.
+

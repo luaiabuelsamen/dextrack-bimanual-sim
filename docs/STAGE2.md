@@ -640,6 +640,43 @@ reference cleanliness before checking whether the policy could hold it, which
 is the wrong order; `gamecontroller_lift` is one of the seventeen of
 forty-three the generalist does hold.
 
+### Training in it, and what the policy actually learned
+
+Fine-tuning the right-hand policy inside the two-hand scene, 150 epochs from
+the generalist, no penetration term, so the only question is whether training
+adapts to a second hand (`dextrack/runs/gamecontroller_bimanual.json`):
+
+| right hand | its penetration | left hand's | grip | tracking error | held |
+|---|---:|---:|---:|---:|---:|
+| generalist, unchanged | 0.81 mm | 0.24 mm | 17.0x | 7.48 cm | 16 of 16 |
+| fine-tuned in the two-hand scene | 0.17 mm | 0.57 mm | 3.0x | 2.28 cm | 16 of 16 |
+
+Every column improves and the reading is wrong. **The policy learned to let
+go.** Its right hand touches the object on 23 of 299 frames, against 152 for
+the generalist it started from, and carries 0 N of grip through the middle of
+the clip (`figures/bimanual_isaac_gc_finetuned.gif`: the left hand holds the
+controller, the right sits beside it). Tracking error falls because the left
+hand, under position control at the right hand's own gains, is close to a
+kinematic mover and carries the object along the reference more accurately
+than the policy can. Once that is true, the policy's best move is to stop
+interfering, and interpenetration and grip fall to near zero because nothing
+is being held.
+
+That is the same lesson as the penetration term on the generalist, in a new
+place: **an objective that only asks for the object to be in the right spot
+is satisfied by a hand that does nothing, whenever something else in the
+scene will do the work.** It is also the fourth time in this project that a
+number improved because a hand withdrew.
+
+What it says about the design. A second hand driven at the reference is too
+strong a partner to train against. Three ways out, in increasing order of
+cost: soften the left hand's drive so it cannot carry the object alone;
+require the right hand to contribute, by rewarding its contact or its share
+of the load; or make both hands policy-controlled, which is the real bimanual
+problem and needs the doubled action space this design deliberately avoided.
+The environment is built and measured either way, and that was the thing that
+did not exist.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with
