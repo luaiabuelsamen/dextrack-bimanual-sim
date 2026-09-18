@@ -415,6 +415,19 @@ in progress: weight 100 and the term charged only while the object is
 within 10 cm of its target (`AUDIT_PEN_GATE=0.1`), so dropping forfeits
 the pose reward without buying relief.
 
+Gated and at weight 100 (charged only within 10 cm of the target), same
+clip and epochs: fine-tuned 2.64 mm, 43 % over 2 mm, grip 10×,
+14 of 16 held, against the released 2.34 mm, 46 %, 19×, 13 of 16.
+The gate keeps the object in hand and halves the grip, and penetration
+does not move. So on the generalist the term is either strong enough to
+make the policy let go or too weak to change where the fingers sit; the
+cube's per-clip policy had a middle. One more point (weight 300, gated) is
+queued to see whether the gate alone opens that middle. Note also that
+the trainer's printed depth (0.3 mm) averages over environments that have
+already lost the object under exploration noise, which is why it cannot
+be compared with the evaluated 2.6 mm; the statistic now reports tracked
+environments only.
+
 The effect is real and monotone in the weight but **half of what the sparse
 probe reported: at 1000, interpenetration is down 22 % (2.87 to 2.23 mm),
 frames over 2 mm from 60 % to 47 %, grip 36 %, every rollout held, for 1.5

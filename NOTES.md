@@ -5536,3 +5536,8 @@ held, end err 58 cm everywhere. A bare penalty's cheapest solution.
 Gate added to the hook (AUDIT_PEN_GATE=0.1 m: term only while tracked);
 apple_w100_gated running beside the from-scratch cube control.
 
+### Apple, gated w 100: holds, grip halves, penetration unchanged
+ft 2.64 mm / 43 % / 10x / 14/16 vs base 2.34 / 46 % / 19x / 13/16.
+Train-time depth stat averaged over dropped envs -> now tracked-only.
+w 300 gated queued beside the scratch control (epoch 624/3000 at 20:31).
+

@@ -4,3 +4,4 @@ GPU lost on the host at ~00:30 UTC during cube_w1000_sdf (20 epochs in 200 s); p
 cube_w1000_sdf DONE
 stoch DONE
 apple_w300_sdf DONE
+apple_w100_gated DONE
