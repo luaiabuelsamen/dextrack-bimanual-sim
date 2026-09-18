@@ -254,3 +254,52 @@ Guardrails as before: nothing runs on the pod that did not run at 4
 environments first; every number rendered before it is written down; the
 measure the policy optimises is never the measure that judges it.
 
+## What the literature says to change, for two hands (2026-09-18)
+
+Read from `../dexmanip-survey`, which reviews 28 method rows that put a
+learned closed-loop controller on two multi-fingered hands. Four findings
+bear directly on what went wrong here, and each names a fix.
+
+**The failure has a name and a standard remedy.** `bidexgrasp_2026` reports
+that a coupled two-hand objective "often yields imbalanced solutions, where
+one hand dominates stability while the other contributes marginally", which
+is exactly the right hand withdrawing while the left carried the object.
+`physhoi_2023` multiplies a contact-graph term into its imitation reward and
+the survey's note says it "exists to stop the policy learning not to touch
+the object"; `maniptrans_2025` rewards each fingertip with an exponential in
+its distance, `exp(-100 d)` on the thumb. **Adopted:** a fingertip contact
+term, `dextrack/pod/patches/patch_contact_reward.py`, on distance to the
+object's bounding sphere so it has gradient at any separation.
+
+**A reference-driven partner is the wrong partner.** Nobody in the corpus
+drives one hand straight at a kinematic reference while training the other.
+`dexmachina_2025` instead gives the OBJECT six virtual PD joints pulled
+toward the demonstration, with gains that start high and decay to zero, so
+the help is removed on a schedule rather than being permanent.
+`maniptrans_2025` makes the second hand a residual on a frozen imitator
+rather than a playback. **To adopt next:** replace the left hand's fixed
+reference drive with a decaying assist, or make it a residual.
+
+**Asymmetry works, but only with a relative frame.** `asymdex_2024` is the
+one corpus paper that puts roles inside a policy: the dominant hand gets full
+finger and wrist control, the facilitating hand only a 6-DoF base pose, and
+the dominant hand and object are written in a frame attached to the object
+the facilitating hand holds. Its ablation is the useful part: 0.7701 for the
+full method, 0.1086 for relative frames without asymmetry, 0.0164 for
+asymmetry without them. Our design is asymmetric with no relative frame,
+which is the 0.0164 cell.
+
+**And success has to require both hands.** `maniptrans_2025` scores a
+sequence successful only if both hands succeed, and its rate falls from 58.1
+percent single-hand to 39.5 bimanual. A rule that can be satisfied by one
+hand will be.
+
+Two further notes for this project's own claim. `dextrack_2025` "has a
+penetration-depth formula and applies it only to input references, never to
+its own rollouts, and presents tolerance of severe hand-object penetrations
+as robustness", which is what we found independently. And of the eight
+reference-tracking methods, penetration "is handled at the reference, if at
+all, and never at the rollout" -- `toporetarget_2026` is the only one that
+reports max depth and the fraction of frames past 2 mm, and it too does not
+re-measure after the policy runs. Measuring the rollout is the open gap.
+
