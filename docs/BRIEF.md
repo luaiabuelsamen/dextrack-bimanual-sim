@@ -232,12 +232,11 @@ In order, each with its own stop rule:
    are clean**, 3.2 to 8.8 mm mean interpenetration across nine clips, so the
    gate is applied relative to the rest rather than absolutely. The human's
    own left hand waits on the GRAB-to-DexTrack object frame map.
-   ORIGINAL TEXT: One clip from the 63, both hands retargeted to
-   Allegro in their `passive_active_info` format (object pose, two 22-dof
-   trajectories), checked by rendering the kinematic replay with the
-   probe on both hands. Stop rule: kinematic penetration over 10 mm on
-   either hand for a quarter of the frames means the clip is a burial in
-   the reference; pick another.
+   As originally written: one clip from the 63, both hands in their
+   `passive_active_info` format (object pose, two 22-dof trajectories),
+   checked by rendering the kinematic replay with the probe on both hands;
+   stop rule, kinematic penetration over 10 mm on either hand for a quarter
+   of the frames means the clip is a burial in the reference, pick another.
 3. **The environment.** A second hand actor from the left URDF, observations
    and reward duplicated per hand, the penetration term summed over both,
    the success rule per hand. Four-environment smoke on the Jetson-side
