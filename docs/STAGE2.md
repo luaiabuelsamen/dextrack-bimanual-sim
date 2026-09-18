@@ -388,7 +388,17 @@ judged by the exact plane test on the same 2 mm grid:
 | **dense volume, w 1000** | **2.12 mm** | **42 %** | **47×** | 0.41 cm | **16 of 16** |
 
 A 26 % cut in interpenetration, frames over 2 mm from 60 % to 42 %, grip
-down 56 %, every rollout held, for 2.7 mm of tracking error. The env-0
+down 56 %, every rollout held, for 2.7 mm of tracking error. **A second
+seed does not reproduce the "every rollout held" part**: same spec, seed
+2, 12 of 16 held, the four lost at 10 to 14 cm; over the twelve that
+held, penetration 2.17 mm (a 20 % cut), grip 57×, frames over 2 mm
+34 % including the dropped rollouts' near-zero
+(`results/dextrack_audit/finetune/dense/cube_w1000_sdf_s2.*`,
+`figures/dextrack_cubesmall_penft_s2.gif`). Across two seeds, then: the
+term cuts interpenetration by a fifth to a quarter on rollouts that hold,
+and on one seed of two it costs a quarter of the holds. The single-seed
+"16 of 16" above is one sample, and the number to quote is the two-seed
+range until a third seed is run. The env-0
 rollout under the independent 400-point sampler agrees (2.38 to 1.94 mm,
 137 to 91 frames over 2 mm, grip 30× to 16×). Rendered
 (`figures/dextrack_cubesmall_penft.gif`, released policy alongside in

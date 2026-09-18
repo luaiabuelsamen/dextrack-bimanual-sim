@@ -5559,3 +5559,9 @@ pre-registrations under `docs/archive/`; `mjx_env.sh` under `scripts/`.
 `CLAUDE.md` states the layout, the measurement rules and the pod protocol
 so new work follows them. Earlier entries reference the old paths.
 
+### Cube dense fine-tune, seed 2 (2026-09-17 23:04 PDT)
+12/16 held (4 lost at 10-14 cm); held-only pen 2.17 mm (base 2.87), all-env
+1.87 (dragged down by the dropped ones), grip 57x, err 5.6 cm. Seed 1 was
+2.12 / 16/16. Quote the range, run a third seed before any single number.
+Ledger + W&B + Hub rows exist for it.
+

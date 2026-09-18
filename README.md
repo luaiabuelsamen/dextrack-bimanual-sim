@@ -20,7 +20,7 @@ was written down; **[NOTES.md](NOTES.md) is the log and is authoritative.**
 | deliverable | state | the number |
 |---|---|---|
 | **D1 · Audit DexTrack's released policies with penetration read live** | done | their release cannot run its own checkpoints; fixed, two of three per-clip policies track at 1–2 mm of interpenetration; the generalist holds 17 of 43 GRAB clips at a median 1.7 mm |
-| **Penetration as a reward term in their trainer** | done, bounded | a per-clip policy gives up 26 % of its interpenetration and half its grip and keeps every rollout; the generalist on a marginal clip lets go instead |
+| **Penetration as a reward term in their trainer** | done, bounded | a per-clip policy gives up a fifth to a quarter of its interpenetration and half its grip (two seeds: one keeps all 16 rollouts, one loses 4 of 16); the generalist on a marginal clip lets go instead |
 | **D2 · Our MuJoCo pipeline on DexTrack's rule** | done | 20 of 40 references hold under perturbation; 6 strict / 13 loose of 40 on their rule, 16 of 40 on ours |
 | **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | proposed, control run in progress | first step, their per-clip policy trained from scratch, is training tonight |
 
@@ -65,9 +65,10 @@ never by the measure it trained on:
 |---|---:|---:|---:|---:|---:|
 | nothing (released) | 2.87 mm | 60 % | 106× weight | 0.14 cm | 16 of 16 |
 | a sparse 20-point probe | 2.23 mm | 47 % | 68× | 0.29 cm | 16 of 16 |
-| **the dense probe** | **2.12 mm** | **42 %** | **47×** | 0.41 cm | **16 of 16** |
+| **the dense probe**, seed 1 | **2.12 mm** | **42 %** | **47×** | 0.41 cm | **16 of 16** |
+| the dense probe, seed 2 | 1.87 mm (2.17 on the 12 held) | 34 % | 57× | 5.6 cm | 12 of 16 |
 
-The sparse row is the record of a mistake: that probe reported 1.18 mm for
+Seed 2 shows the trade the term can make: less interpenetration on the rollouts that hold, and four rollouts lost. Two seeds are not a distribution; the range is what to quote. The sparse row is the record of a mistake: that probe reported 1.18 mm for
 its own policy, because the policy had learned to keep the sampled points
 shallow while the surface between them went deeper. The measure a policy
 optimises has to be as dense as the one that judges it.
