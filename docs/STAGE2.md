@@ -400,6 +400,21 @@ depth fell from 1.27 to 0.48 mm while the evaluated mean is 2.12 mm: the
 gap between what the trainer sees and what the deterministic test rollout
 does is the next thing to explain, not to average over.
 
+**On the generalist it collapses.** The same term at weight 300 on the
+generalist checkpoint, apple clip (64 hulls, 3.5 N), 150 epochs: the
+policy learned to let go. Exact test at 16 environments: released 2.34 mm,
+46 % over 2 mm, 13 of 16 held; fine-tuned 0.31 mm, 5 %, grip 4×, **0 of 16
+held**, end error 58 cm in every environment
+(`results/dextrack_audit/finetune/dense/apple_w300_sdf.*`). Zero
+penetration by not touching is the cheapest solution to a bare penalty,
+and it is the same failure this project's own pipeline recorded under
+"a penetration penalty in the reward". The per-clip cube policy did not
+take that exit because its tracking reward is worth more to it; the
+generalist's grip on the apple was worth less than 0.7 per step. Rerun
+in progress: weight 100 and the term charged only while the object is
+within 10 cm of its target (`AUDIT_PEN_GATE=0.1`), so dropping forfeits
+the pose reward without buying relief.
+
 The effect is real and monotone in the weight but **half of what the sparse
 probe reported: at 1000, interpenetration is down 22 % (2.87 to 2.23 mm),
 frames over 2 mm from 60 % to 47 %, grip 36 %, every rollout held, for 1.5

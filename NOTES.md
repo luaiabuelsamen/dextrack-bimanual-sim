@@ -5530,3 +5530,9 @@ apple generalist fine-tune (dense, w 300) then the from-scratch cube
 control (3000 ep) for D4 step 1. Stop timer 12 h. Spend so far today
 under $3 of the $10.
 
+### Apple generalist fine-tune, dense term w 300: the policy lets go
+base 2.34 mm / 46 % / 13 of 16 held; ft 0.31 mm / 5 % / grip 4x / 0 of 16
+held, end err 58 cm everywhere. A bare penalty's cheapest solution.
+Gate added to the hook (AUDIT_PEN_GATE=0.1 m: term only while tracked);
+apple_w100_gated running beside the from-scratch cube control.
+

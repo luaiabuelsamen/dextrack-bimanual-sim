@@ -1,1 +1,6 @@
 ALL
+cube_w1000_dense (exact planes) killed at epoch ~345/474: 1.7 min/epoch, would not finish in the 2 h timeout
+GPU lost on the host at ~00:30 UTC during cube_w1000_sdf (20 epochs in 200 s); pod stop/start; relaunched
+cube_w1000_sdf DONE
+stoch DONE
+apple_w300_sdf DONE
