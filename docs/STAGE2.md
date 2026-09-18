@@ -458,6 +458,50 @@ a time, so the 1024-env tensor fits beside training). Lesson for the file
 next to the others: a measurement a policy optimises has to be as dense
 as the audit that judges it, or the policy will find the gap.
 
+## D4 step 1: their per-clip policy from scratch (2026-09-18)
+
+The control the bimanual deliverable rests on, because no two-hand
+checkpoint exists and every bimanual run will start from nothing: their
+released per-clip command line, small cube, 1024 environments, no
+penetration term, `dextrack/runs/cube_scratch.json`.
+
+**At 2844 epochs it has not learned to pick the cube up.** Of 260
+evaluated frames, 41 register any hand-object contact at all; mean
+0.2 links, zero grip on touching links, 0.22 mm penetration because
+there is nothing to penetrate. Mean position error 21.6 cm, rotation
+77°, peak 38 cm at mid-clip. The hand follows the reference wrist
+through the air and the cube sits where it started
+(`figures/dextrack_cubesmall_scratch.gif`). Reward −41.3, still creeping
+up at the end.
+
+Two cautions this run supplies for free. First, its end-of-clip error is
+3 to 4 cm in all sixteen environments, because the reference brings the
+hand back down beside the resting cube; a rule that reads only the final
+distance calls that sixteen holds. Ours does, in the ledger's `held`
+column, and it is wrong. DexTrack's own rule is not fooled here: it fails
+the clip on mean position (21.6 cm against their 10 cm) and on rotation
+(77° against 20 or 40). Second, **the epoch budget in the brief was
+wrong by two and a half times**, and their released checkpoints say so
+themselves:
+
+| released checkpoint | epoch | frames | reward |
+|---|---:|---:|---:|
+| `s2_cubesmall_inspect` | 324 | 228,096,000 | +208.9 |
+| `s2_duck_inspect` | 1000 | 704,000,000 | +193.3 |
+| generalist | 2200 | 3,520,000,000 | +19.6 |
+
+Their per-clip epochs are 704,000 frames each; ours at 1024 environments
+and horizon 32 are 32,768. So "3000 epochs" in the stop rule bought 93.2 M
+frames, 41 % of what stands behind their cube checkpoint. The stop rule
+should have been written in frames, and is now: **the control runs to
+229 M frames (7000 epochs at this width) before it is judged.** That
+continuation is training.
+
+The estimate this replaces the guess with: a per-clip policy in this
+framework costs 228 M to 704 M frames, which at 1024 environments on a
+3090 is 7,000 to 21,500 epochs, eight to twenty-four hours, two to five
+dollars. A bimanual clip should be budgeted at the upper end.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with

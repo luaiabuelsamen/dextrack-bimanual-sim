@@ -47,11 +47,21 @@ def parse_eval_log(path: Path) -> dict | None:
 
 
 def load_summary(d: Path, tag: str, who: str) -> dict | None:
-    js = d / f"{tag}.{who}.summary.json"
-    if js.exists():
-        return json.loads(js.read_text())
-    log = d / f"{tag}.{who}.log"
-    return parse_eval_log(log) if log.exists() else None
+    """The evaluation of `who` ("base" or "ft"). A from-scratch run has no
+    base and writes its single evaluation as `<tag>.summary.json` /
+    `<tag>.eval.log`; that is read as the "ft" slot."""
+    names = [f"{tag}.{who}", f"{tag}"] if who == "ft" else [f"{tag}.{who}"]
+    for n in names:
+        js = d / f"{n}.summary.json"
+        if js.exists():
+            return json.loads(js.read_text())
+    for n in names:
+        for log in (d / f"{n}.log", d / f"{n}.eval.log"):
+            if log.exists():
+                got = parse_eval_log(log)
+                if got:
+                    return got
+    return None
 
 
 def train_settings(d: Path, tag: str) -> dict:
