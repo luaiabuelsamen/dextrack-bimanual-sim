@@ -1,0 +1,216 @@
+--- allegro_hand_tracking_generalist.py.prebimanual	2026-09-18 08:14:45.483536264 +0000
++++ allegro_hand_tracking_generalist.py	2026-09-18 08:23:28.134445697 +0000
+@@ -8,6 +8,8 @@
+ # import xxlimited
+ # from matplotlib.pyplot import axis
+ import numpy as np
++import numpy as _np
++import os as _os
+ import os
+ import os.path as osp
+ import random
+@@ -1732,7 +1734,11 @@
+         self.dof_state = gymtorch.wrap_tensor(dof_state_tensor)
+         print(f"[Debug] dof_state: {self.dof_state.size()}")
+         # self.dof_state[:, 0] = self.shadow_hand_default_dof_pos.unsqueeze(0).repeat(self.num_envs, 1).view(-1).contiguous()
+-        self.dof_state[:, 0] = self.shadow_hand_default_dof_pos.view(-1).contiguous()
++        if getattr(self, "_bi_left_asset", None) is not None:      # BIMANUAL
++            # the sim now holds both hands dofs; seed only the right hands
++            self.dof_state.view(self.num_envs, -1, 2)[:, :self.num_shadow_hand_dofs, 0] = self.shadow_hand_default_dof_pos
++        else:
++            self.dof_state[:, 0] = self.shadow_hand_default_dof_pos.view(-1).contiguous()
+         self.shadow_hand_dof_state = self.dof_state.view(self.num_envs, -1, 2)[:, :self.num_shadow_hand_dofs]
+         self.shadow_hand_dof_pos = self.shadow_hand_dof_state[..., 0]
+         self.shadow_hand_dof_vel = self.shadow_hand_dof_state[..., 1]
+@@ -1763,8 +1769,8 @@
+         # prev delta target and the current delta targets #
+         self.prev_targets = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)
+         self.cur_targets = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)
+-        self.prev_delta_targets = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)
+-        self.cur_delta_targets = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)
++        self.prev_delta_targets = torch.zeros((self.num_envs, self.num_shadow_hand_dofs), dtype=torch.float, device=self.device)
++        self.cur_delta_targets = torch.zeros((self.num_envs, self.num_shadow_hand_dofs), dtype=torch.float, device=self.device)
+         
+         
+         
+@@ -1805,8 +1811,8 @@
+             self.cur_delta_tracking_targets = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device) 
+         
+         
+-        self.prev_dof_vel = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)
+-        self.cur_dof_vel = torch.zeros((self.num_envs, self.num_dofs), dtype=torch.float, device=self.device)
++        self.prev_dof_vel = torch.zeros((self.num_envs, self.num_shadow_hand_dofs), dtype=torch.float, device=self.device)
++        self.cur_dof_vel = torch.zeros((self.num_envs, self.num_shadow_hand_dofs), dtype=torch.float, device=self.device)
+         self.maxx_grasping_steps = 150
+         self.maxx_grasping_steps = 300
+         if self.use_twostage_rew:
+@@ -4684,6 +4690,22 @@
+         asset_options.default_dof_drive_mode = gymapi.DOF_MODE_POS
+         shadow_hand_asset = self.gym.load_asset(self.sim, asset_root, shadow_hand_asset_file, asset_options)
+ 
++        # BIMANUAL: a second hand, loaded with the right hand's own asset
++        # options so the two differ only in geometry. Built by
++        # dextrack/left_hand.py; their own left urdf has no base.
++        self._bi_path = _os.environ.get("AUDIT_BIMANUAL")
++        self._bi_left_asset = None
++        if self._bi_path:
++            _left_file = _os.environ.get(
++                "AUDIT_LEFT_URDF",
++                "allegro_hand_description/urdf/allegro_hand_description_left_fly_v2.urdf")
++            self._bi_left_asset = self.gym.load_asset(self.sim, asset_root, _left_file, asset_options)
++            self._bi_left_bodies = self.gym.get_asset_rigid_body_count(self._bi_left_asset)
++            self._bi_left_shapes = self.gym.get_asset_rigid_shape_count(self._bi_left_asset)
++            self._bi_left_dofs = self.gym.get_asset_dof_count(self._bi_left_asset)
++            print(f"BIMANUAL: left hand {_left_file}: {self._bi_left_bodies} bodies, "
++                  f"{self._bi_left_dofs} dofs, reference {self._bi_path}", flush=True)
++
+         ### TODO: what's the difference between tendons and regular actuators? 
+         self.num_shadow_hand_bodies = self.gym.get_asset_rigid_body_count(shadow_hand_asset)
+         self.num_shadow_hand_shapes = self.gym.get_asset_rigid_shape_count(shadow_hand_asset)
+@@ -5072,6 +5094,9 @@
+         # max_agg_shapes = self.num_shadow_hand_shapes * 1 + 2 * self.num_object_shapes + 1
+         max_agg_bodies = self.num_shadow_hand_bodies * 1 + 2 * maxx_num_obj_bodies + 1
+         max_agg_shapes = self.num_shadow_hand_shapes * 1 + 2 * maxx_num_obj_shapes + 1
++        if self._bi_left_asset is not None:                      # BIMANUAL
++            max_agg_bodies += self._bi_left_bodies
++            max_agg_shapes += self._bi_left_shapes
+ 
+         self.shadow_hands = []
+         self.envs = []
+@@ -5401,6 +5426,18 @@
+             if self.use_vision_obs:
+                 self._load_cameras(env_ptr, i, self.camera_props, self.camera_eye_list, self.camera_lookat_list)
+             
++            # BIMANUAL: last actor, so the dof and rigid-body tensors keep
++            # the right hand at the indices the rest of this file assumes
++            if self._bi_left_asset is not None:
++                left_actor = self.gym.create_actor(env_ptr, self._bi_left_asset,
++                                                   shadow_hand_start_pose, "hand_left", i, -1, 0)
++                self.gym.set_actor_dof_properties(env_ptr, left_actor, shadow_hand_dof_props)
++                if not hasattr(self, "_bi_left_handles"):
++                    self._bi_left_handles, self._bi_left_indices = [], []
++                self._bi_left_handles.append(left_actor)
++                self._bi_left_indices.append(self.gym.get_actor_index(env_ptr, left_actor, gymapi.DOMAIN_SIM))
++                self._bi_left_dof_start = self.gym.get_actor_dof_index(env_ptr, left_actor, 0, gymapi.DOMAIN_ENV)
++
+             if self.aggregate_mode > 0:
+                 self.gym.end_aggregate(env_ptr)
+ 
+@@ -5455,6 +5492,20 @@
+                 _st["pos"][:len(_q)] = _q; _st["vel"][:] = 0.0
+                 self.gym.set_actor_dof_states(_env, _h, _st, gymapi.STATE_ALL)
+             print("AUDIT_FIX: creation-time joint state applied to", len(self._audit_hand_handles), "hands", flush=True)
++        if getattr(self, "_bi_left_asset", None) is not None:
++            # BIMANUAL: the same fix for the left hand. Left at its zero pose it
++            # stands on top of the object when the first physics step runs, and
++            # the object is ejected before anything has acted -- their own bug,
++            # reproduced by adding a second hand without repeating the fix.
++            self._bi_load_ref()
++            _q0 = self._bi_left_ref[0].detach().cpu().numpy()
++            for _env, _h in zip(self.envs, self._bi_left_handles):
++                _st = self.gym.get_actor_dof_states(_env, _h, gymapi.STATE_ALL)
++                _st["pos"][:len(_q0)] = _q0
++                _st["vel"][:] = 0.0
++                self.gym.set_actor_dof_states(_env, _h, _st, gymapi.STATE_ALL)
++            print("BIMANUAL: left hand placed at its reference first frame at creation,",
++                  len(self._bi_left_handles), "envs", flush=True)
+         self.goal_init_state = to_torch(self.goal_init_state, device=self.device, dtype=torch.float).view(self.num_envs, 13)
+         self.goal_states = self.goal_init_state.clone( )
+         # self.goal_pose = self.goal_states[:, 0:7] #
+@@ -5465,6 +5516,9 @@
+         self.hand_start_states = to_torch(self.hand_start_states, device=self.device).view(self.num_envs, 13)
+         self.fingertip_handles = to_torch(self.fingertip_handles, dtype=torch.long, device=self.device)
+         self.hand_indices = to_torch(self.hand_indices, dtype=torch.long, device=self.device)
++        if getattr(self, "_bi_left_asset", None) is not None:     # BIMANUAL
++            self._bi_left_indices = to_torch(self._bi_left_indices, dtype=torch.long, device=self.device)
++            self._bi_load_ref()
+         self.object_indices = to_torch(self.object_indices, dtype=torch.long, device=self.device)
+         self.goal_object_indices = to_torch(self.goal_object_indices, dtype=torch.long, device=self.device)
+         self.env_object_latent_feat = np.stack(self.env_object_latent_feat, axis=0) # nn_envs x nn_latent_feat_dim
+@@ -12545,6 +12599,10 @@
+         self.prev_targets[:, self.actuated_dof_indices] = self.cur_targets[:, self.actuated_dof_indices]
+ 
+         all_hand_indices = torch.unique(torch.cat([self.hand_indices]).to(torch.int32))
++        if getattr(self, "_bi_left_asset", None) is not None:      # BIMANUAL
++            self._bi_drive()
++            all_hand_indices = torch.unique(
++                torch.cat([self.hand_indices, self._bi_left_indices]).to(torch.int32))
+         self.gym.set_dof_position_target_tensor_indexed(self.sim,
+                                                         gymtorch.unwrap_tensor(self.prev_targets),
+                                                         gymtorch.unwrap_tensor(all_hand_indices), len(all_hand_indices))
+@@ -12621,6 +12679,10 @@
+             "rb_states": self._audit_rb_t[:nb].detach().cpu().numpy().copy(),
+             "net_contact_force": self._audit_cf_t[:nb].detach().cpu().numpy().copy(),
+             "rb_names": list(self._audit_names),
++            # BIMANUAL: the left hand is the last actor, so its bodies are the
++            # last block of the rigid-body tensor
++            "rb_states_left": (self.rigid_body_states[0, -self._bi_left_bodies:].detach().cpu().numpy().copy()
++                               if getattr(self, "_bi_left_asset", None) is not None else None),
+             "obj_root_pre": getattr(self, "_audit_pre_last", None),
+             "rb_states_pre": getattr(self, "_audit_rb_pre_last", None),
+             "rb_states_afterreset": getattr(self, "_audit_rb_afterreset", None),
+@@ -12641,22 +12703,59 @@
+             self._ev_rows.append(torch.stack([_d * 1000, (_d > 0.002).float(), _g, _e * 100], -1).detach().cpu().numpy())
+             if self.ref_ts >= 269:
+                 _a = np.stack(self._ev_rows[1:], 0)      # (T, N, 4)
+-                _np = _a.mean(0)                         # per env
++                _per_env = _a.mean(0)                    # per env
+                 if os.environ.get("AUDIT_SUMMARY"):
+                     import json as _json
+                     _json.dump({"spacing": os.environ.get("AUDIT_PROBE_SPACING", "0"), "envs": int(_a.shape[1]), "frames": int(_a.shape[0]),
+-                                "pen_mm_mean": float(_np[:, 0].mean()), "pen_mm_per_env": _np[:, 0].round(3).tolist(),
+-                                "frac_over_2mm": float(_np[:, 1].mean()), "grip_x_mean": float(_np[:, 2].mean()), "grip_x_per_env": _np[:, 2].round(2).tolist(),
+-                                "err_cm_mean": float(_np[:, 3].mean()), "end_err_cm_per_env": _a[-1, :, 3].round(2).tolist(),
++                                "pen_mm_mean": float(_per_env[:, 0].mean()), "pen_mm_per_env": _per_env[:, 0].round(3).tolist(),
++                                "frac_over_2mm": float(_per_env[:, 1].mean()), "grip_x_mean": float(_per_env[:, 2].mean()), "grip_x_per_env": _per_env[:, 2].round(2).tolist(),
++                                "err_cm_mean": float(_per_env[:, 3].mean()), "end_err_cm_per_env": _a[-1, :, 3].round(2).tolist(),
+                                 "held": int((_a[-1, :, 3] < 10.0).sum()), "pen_mm_per_frame": _a[:, :, 0].mean(1).round(3).tolist(),
+                                 "object": str(self.object_code_list[0]), "audit_env": {k: v for k, v in os.environ.items() if k.startswith("AUDIT_")}},
+                                open(os.environ["AUDIT_SUMMARY"], "w"), indent=1)
+                 print("AUDIT_ALLENV spacing=%s envs=%d  pen_mm mean %.2f (per-env %s)  frac>2mm %.2f  grip_x mean %.0f  err_cm mean %.2f  end err per env %s" % (
+-                    os.environ.get("AUDIT_PROBE_SPACING", "0"), _a.shape[1], _np[:, 0].mean(), np.round(_np[:, 0], 2).tolist(), _np[:, 1].mean(), _np[:, 2].mean(), _np[:, 3].mean(), np.round(_a[-1, :, 3], 1).tolist()), flush=True)
++                    os.environ.get("AUDIT_PROBE_SPACING", "0"), _a.shape[1], _per_env[:, 0].mean(), np.round(_per_env[:, 0], 2).tolist(), _per_env[:, 1].mean(), _per_env[:, 2].mean(), _per_env[:, 3].mean(), np.round(_a[-1, :, 3], 1).tolist()), flush=True)
+         self._audit_rows.append(row)
+         if len(self._audit_rows) % 10 == 0 or self.ref_ts >= 269:
+             _np.save(out, _np.array(self._audit_rows, dtype=object), allow_pickle=True)
+ 
++    def _bi_load_ref(self):
++        """The left trajectory and where its dofs live, loaded once."""
++        if getattr(self, "_bi_left_ref", None) is not None:
++            return
++        _ref = _np.load(self._bi_path, allow_pickle=True)
++        _ref = _ref if hasattr(_ref, "files") else _ref.item()
++        _q = _ref["robot_delta_states_weights_np_left"]
++        self._bi_left_ref = torch.tensor(_np.asarray(_q, dtype=_np.float32), device=self.device)
++        self._bi_left_slice = slice(self._bi_left_dof_start, self._bi_left_dof_start + self._bi_left_dofs)
++        self._bi_reset_done = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
++        print(f"BIMANUAL: left reference {tuple(self._bi_left_ref.shape)}, "
++              f"env dofs {self._bi_left_slice.start}:{self._bi_left_slice.stop}", flush=True)
++
++    def _bi_drive(self):
++        """Point the left hand at its reference for each environment's own frame.
++
++        Position targets, the same drive the right hand is under, so the left
++        hand pushes on the object rather than passing through it. On the first
++        step after a reset the joints are also written directly: a hand that
++        started at the zero pose would otherwise be flung at the object by the
++        first target, which is the failure their own initialization has.
++        """
++        ts = torch.clamp(self.progress_buf, 0, self._bi_left_ref.shape[0] - 1)
++        q = self._bi_left_ref[ts]                                   # (envs, 22)
++        self.prev_targets[:, self._bi_left_slice] = q
++
++        fresh = (self.progress_buf <= 1) & (~self._bi_reset_done)
++        if fresh.any():
++            dof = self.dof_state.view(self.num_envs, -1, 2)
++            dof[fresh, self._bi_left_slice, 0] = q[fresh]
++            dof[fresh, self._bi_left_slice, 1] = 0.0
++            idx = self._bi_left_indices[fresh].to(torch.int32)
++            self.gym.set_dof_state_tensor_indexed(self.sim, gymtorch.unwrap_tensor(self.dof_state),
++                                                  gymtorch.unwrap_tensor(idx), len(idx))
++            self._bi_reset_done |= fresh
++        self._bi_reset_done &= (self.progress_buf > 1)
++
+     def post_physics_step(self):
+         self._audit_log()
+         

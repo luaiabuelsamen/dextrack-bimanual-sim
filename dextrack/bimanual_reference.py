@@ -162,7 +162,11 @@ def main() -> None:
     built = build(ref, a.axis)
     a.out.parent.mkdir(parents=True, exist_ok=True)
     np.save(a.out, built, allow_pickle=True)
-    print(f"wrote {a.out}: {len(built['robot_delta_states_weights_np'])} frames, two hands")
+    # also without pickle: the pod runs numpy 1.24 against their Python 3.8 and
+    # cannot read arrays pickled by numpy 2
+    npz = a.out.with_suffix(".npz")
+    np.savez(npz, **{k: v for k, v in built.items() if isinstance(v, np.ndarray)})
+    print(f"wrote {a.out} and {npz}: {len(built['robot_delta_states_weights_np'])} frames, two hands")
     if a.check:
         check(built)
 

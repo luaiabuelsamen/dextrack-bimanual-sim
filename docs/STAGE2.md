@@ -582,6 +582,57 @@ per-object map solved first. `dextrack/retarget.py` fits a GRAB hand onto
 their URDF in their convention and is ready for it; the map is the missing
 piece, and it is a separate problem from standing up the environment.
 
+## Two hands in their simulator (2026-09-18)
+
+The environment. Their task builds one hand, one object and a goal marker per
+environment, and its thirteen thousand lines index the degree-of-freedom and
+rigid-body tensors on the assumption that the hand comes first. So the left
+hand is appended as the **last** actor: every existing slice still addresses
+the right hand, and nothing they wrote has to change
+(`dextrack/task_bimanual.diff`, gated on `AUDIT_BIMANUAL`; unset, the task is
+exactly theirs). The policy keeps the right hand and the left hand is
+position-driven to the reference's left trajectory, which is what makes this
+reachable from their released checkpoints rather than requiring a doubled
+action space and a from-scratch policy.
+
+Four things had to be fixed to get it to run, each the same shape as a bug
+already in their code:
+
+- their default-pose write assumes the only degrees of freedom in the
+  simulation belong to the hand, and fills the whole two-hand tensor with the
+  right hand's pose;
+- two bookkeeping buffers are sized from the simulation's degree-of-freedom
+  count but filled with hand-width data, which is invisible while there is one
+  hand;
+- the left hand left at its zero pose stands on top of the object when the
+  first physics step runs and ejects it at a metre and a quarter, which is
+  **their own initialization bug reproduced** by adding a second hand without
+  repeating the fix for it;
+- and the audit hook's all-environment block bound a local name that shadowed
+  the numpy alias its own save needed.
+
+The result, `s1_gamecontroller_lift`, sixteen environments, their generalist
+checkpoint driving the right hand, the exact plane test on the right hand:
+
+| | right-hand penetration | frames > 2 mm | grip | tracking error | held |
+|---|---:|---:|---:|---:|---:|
+| their generalist alone | 1.21 mm | 20 % | 14.7x | 4.64 cm | 16 of 16 |
+| **plus a reference-driven left hand** | 0.74 mm | 11 % | 15.2x | 7.22 cm | 16 of 16 |
+
+**The object is still held in all sixteen environments, and the right hand
+presses 39 % less deeply into it.** Frames over 2 mm halve. That is the
+result a second hand should produce: the load is shared, so neither hand has
+to bury itself to keep the object. It costs 2.6 cm of tracking error.
+
+Two honest limits. The probe measures the right hand only, so the left hand's
+own interpenetration is not in that table. And the first clip tried,
+`s1_camera_takepicture_2`, produced nothing: the generalist does not hold the
+camera, so both hands followed their references away and left the object on
+the ground (`figures/bimanual_isaac_camera.gif`). The clip was chosen for
+reference cleanliness before checking whether the policy could hold it, which
+is the wrong order; `gamecontroller_lift` is one of the seventeen of
+forty-three the generalist does hold.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with

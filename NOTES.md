@@ -5599,3 +5599,22 @@ GRAB->DexTrack object frame map is NOT a rigid transform (30 deg orientation
 residual after Kabsch); retarget.py fits a GRAB hand onto their urdf in their
 convention but cannot be used across frames until that map is solved.
 
+### Two hands in Isaac Gym (2026-09-18)
+Left hand appended as the LAST actor -> every existing tensor slice still
+addresses the right hand. Policy right, reference-driven left. Gated on
+AUDIT_BIMANUAL; diff in dextrack/task_bimanual.diff.
+Fixes needed: (1) dof_state default-pose write filled all 44 dofs with the
+right hand's 22; (2) prev/cur_delta_targets and prev/cur_dof_vel sized from
+num_dofs but filled hand-width; (3) left hand at zero pose ejected the object
+1.25 m on step 1 -- THEIR init bug, reproduced by adding a hand without
+repeating the fix; (4) audit hook's _np local shadowed the numpy alias.
+s1_gamecontroller_lift, 16 envs, generalist ckpt, exact plane test on the
+RIGHT hand:
+    one hand   pen 1.21 mm  >2mm 20 %  grip 14.7x  err 4.64 cm  held 16/16
+    two hands  pen 0.74 mm  >2mm 11 %  grip 15.2x  err 7.22 cm  held 16/16
+Right hand presses 38 % less deeply with the second hand present; error +2.6 cm.
+Probe measures the RIGHT hand only -- left-hand penetration not in that table.
+First clip tried (camera_takepicture_2) failed: generalist does not hold the
+camera, both hands followed their references away. Choose the clip by whether
+the policy holds it, THEN by reference cleanliness.
+

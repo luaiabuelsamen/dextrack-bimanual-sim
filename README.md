@@ -22,7 +22,7 @@ was written down; **[NOTES.md](NOTES.md) is the log and is authoritative.**
 | **D1 · Audit DexTrack's released policies with penetration read live** | done | their release cannot run its own checkpoints; fixed, two of three per-clip policies track at 1–2 mm of interpenetration; the generalist holds 17 of 43 GRAB clips at a median 1.7 mm |
 | **Penetration as a reward term in their trainer** | done, bounded | a per-clip policy gives up a fifth to a quarter of its interpenetration and half its grip (two seeds: one keeps all 16 rollouts, one loses 4 of 16); the generalist on a marginal clip lets go instead |
 | **D2 · Our MuJoCo pipeline on DexTrack's rule** | done | 20 of 40 references hold under perturbation; 6 strict / 13 loose of 40 on their rule, 16 of 40 on ours |
-| **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | two-hand reference built and rendered | the left hand they do not ship is built and verified, and a two-hand reference in their format is rendered with the probe on each hand. Their own references turn out to sit 3.2 to 8.8 mm inside the object before anything is simulated |
+| **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | running in their simulator | two hands on one object in Isaac Gym, the policy on the right and the reference on the left: the object is still held in 16 of 16 environments and the right hand presses 38 % less deeply into it |
 
 The goal, the guardrails and D4's stop rules: **[docs/BRIEF.md](docs/BRIEF.md)**.
 The evidence behind every row: **[docs/STAGE2.md](docs/STAGE2.md)**.
@@ -104,6 +104,15 @@ past 2 mm red, the audit's numbers on every frame.
 | ![DexTrack generalist holding a translucent apple with the palm and two fingers red](figures/dextrack_gen_apple.gif) | ![DexTrack generalist nudging a translucent mug that rolls away](figures/dextrack_gen_mug.gif) |
 
 ## Two hands
+
+![Two Allegro hands holding a translucent gamecontroller in Isaac Gym, the right driven by DexTrack's policy and the left by the reference](figures/bimanual_isaac_gamecontroller.gif)
+
+Two hands on one object in DexTrack's own simulator. The left hand is
+appended as the last actor, so every tensor slice in their task still
+addresses the right hand and nothing they wrote changes. Adding it leaves the
+object held in all sixteen environments and drops the right hand's
+interpenetration from 1.21 mm to 0.74 mm, because the load is shared. The
+reference, before any of this, looks like:
 
 ![Two Allegro hands gripping a translucent GRAB camera from opposite sides, penetration read per hand every frame](figures/bimanual_camera_reference.gif)
 

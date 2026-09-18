@@ -59,11 +59,26 @@ def urdf_links(urdf):
     return out
 
 
-def build_model(urdf, meshes_dir, obj_dir, link_names, show_collision):
+def build_model(urdf, meshes_dir, obj_dir, link_names, show_collision, left_urdf=None, left_names=None):
+    """One mocap body per link. `left_urdf` adds a second hand, prefixed `L/`,
+    for a bimanual log (the task writes the left hand's bodies as
+    `rb_states_left`)."""
     links = urdf_links(urdf)
     spec = mujoco.MjSpec()
     spec.compiler.meshdir = "."
     m = spec.worldbody
+    if left_urdf is not None:
+        for n in (left_names or []):
+            vis, _ = urdf_links(left_urdf).get(n, (None, []))
+            if vis is None:
+                continue
+            mf = Path(meshes_dir) / Path(vis).name
+            if not mf.exists():
+                continue
+            b = m.add_body(name=f"L/{n}", mocap=True)
+            spec.add_mesh(name=f"mL_{n}", file=str(mf.resolve()))
+            b.add_geom(name=f"vL_{n}", type=mujoco.mjtGeom.mjGEOM_MESH, meshname=f"mL_{n}",
+                       contype=0, conaffinity=0, rgba=[0.80, 0.86, 0.80, 1.0])
     for n in link_names:
         vis, cols = links.get(n, (None, []))
         if vis is None and not cols:
@@ -112,6 +127,8 @@ def main():
     ap.add_argument("--dist", type=float, default=0.34)
     ap.add_argument("--fps", type=float, default=12.0)
     ap.add_argument("--collision", action="store_true", help="also draw the collision primitives")
+    ap.add_argument("--left-urdf", default="out/dextrack_assets/allegro_hand_description_left_fly_v2.urdf",
+                    help="second hand, drawn when the log carries rb_states_left")
     a = ap.parse_args()
 
     rows = np.load(a.log, allow_pickle=True)[1:]           # drop the pre-pin first row
@@ -120,7 +137,9 @@ def main():
     # ends and the hook logs that state too
     rows, audit = rows[:-1], audit[:-1]
     names = list(rows[0]["rb_names"])
-    model = build_model(a.urdf, a.meshes, a.obj_dir, names, a.collision)
+    left_urdf = Path(a.left_urdf) if (a.left_urdf and rows[0].get("rb_states_left") is not None) else None
+    left_names = names if left_urdf is not None else None      # same link set, mirrored hand
+    model = build_model(a.urdf, a.meshes, a.obj_dir, names, a.collision, left_urdf, left_names)
     data = mujoco.MjData(model)
     mocap_of = {model.body(i).name: model.body_mocapid[i] for i in range(model.nbody) if model.body_mocapid[i] >= 0}
     weight = json.loads(Path(a.audit).read_text())["summary"]["object_weight_n"]
@@ -134,6 +153,14 @@ def main():
                     q = rb[i, 3:7]
                     data.mocap_pos[mocap_of[n]] = rb[i, :3]
                     data.mocap_quat[mocap_of[n]] = [q[3], q[0], q[1], q[2]]
+            lrb = r.get("rb_states_left")
+            if left_urdf is not None and lrb is not None:
+                for i, n in enumerate(left_names):
+                    key = f"L/{n}"
+                    if key in mocap_of:
+                        q = lrb[i, 3:7]
+                        data.mocap_pos[mocap_of[key]] = lrb[i, :3]
+                        data.mocap_quat[mocap_of[key]] = [q[3], q[0], q[1], q[2]]
             op = r["object_pose"]
             data.mocap_pos[mocap_of["object"]] = op[:3]
             data.mocap_quat[mocap_of["object"]] = [op[6], op[3], op[4], op[5]]
@@ -141,6 +168,8 @@ def main():
             red = set(f["links"]) if f["pen_mm"] > 2.0 else set()
             for gi in range(model.ngeom):
                 gname = model.geom(gi).name
+                if gname.startswith("vL_"):
+                    continue
                 if gname.startswith("v_") and gname != "v_obj":
                     ln = gname[2:]
                     model.geom_rgba[gi] = [0.90, 0.15, 0.15, 1.0] if ln in red else [0.78, 0.83, 0.90, 1.0]

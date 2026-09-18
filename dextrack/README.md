@@ -12,6 +12,8 @@ its policies do to the object. The Jetson side of the repository (`src/`,
 | `penetration_torch.py` | the GPU penetration probe: the hand's URDF collision boxes and spheres sampled on a 2 mm grid (33k points per hand), the object as the face planes of its convex parts or as a 1 mm signed-depth volume. Batched over environments; 64 ms per step at 1024 environments on the cube, 124 ms on a 64-hull apple. The sparse setting (20 points per link) exists for comparison and is not safe to train against: a policy learned it (`docs/STAGE2.md`). |
 | `audit.py` | the offline audit of a logged rollout: penetration from 400-point sampling of the same primitives, links touching, PhysX net contact force on touching links as a multiple of the object's weight, position and rotation error, their success flags. Independent of the probe; this is what judges a trained policy. |
 | `render.py` | replays the logged Isaac Gym poses in MuJoCo as a camera (no physics), object translucent, any link past 2 mm red, the audit's numbers on every frame. Isaac Gym cannot render inside a headless container. |
+| `task_bimanual.diff` | the second hand in their task: appended as the last actor, position-driven from the reference, gated on `AUDIT_BIMANUAL`. |
+| `pod/patches/patch_bimanual.py` | how that diff was produced, step by step. |
 | `left_hand.py` | builds the left Allegro hand they do not ship, in their 22-dof convention, mirrored from the right hand and verified exact. |
 | `bimanual_reference.py` | a two-hand reference in their format: the right hand reflected across the object, finger joints copied. |
 | `render_reference.py` | renders a one- or two-hand reference by forward kinematics on their urdfs, with the probe on each hand. |
