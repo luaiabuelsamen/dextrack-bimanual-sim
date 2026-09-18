@@ -83,6 +83,11 @@ def add(args) -> dict:
            "gif": args.gif, "audit": args.audit, "ckpt": args.ckpt, "note": args.note}
     if args.audit and Path(args.audit).exists():
         row["audit_env0"] = json.loads(Path(args.audit).read_text())["summary"]
+    spec = d / f"{args.tag}.spec.json"                  # written by pod/run.py: the spec, commands, commits, timings
+    if spec.exists():
+        rec = json.loads(spec.read_text())
+        row["spec"] = rec.get("spec"); row["commits"] = rec.get("commits")
+        row["train_seconds"] = rec.get("train_seconds"); row["train_cmd"] = rec.get("train_cmd")
     LEDGER.parent.mkdir(parents=True, exist_ok=True)
     with LEDGER.open("a") as f:
         f.write(json.dumps(row) + "\n")

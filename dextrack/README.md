@@ -12,15 +12,43 @@ its policies do to the object. The Jetson side of the repository (`src/`,
 | `penetration_torch.py` | the GPU penetration probe: the hand's URDF collision boxes and spheres sampled on a 2 mm grid (33k points per hand), the object as the face planes of its convex parts or as a 1 mm signed-depth volume. Batched over environments; 64 ms per step at 1024 environments on the cube, 124 ms on a 64-hull apple. The sparse setting (20 points per link) exists for comparison and is not safe to train against: a policy learned it (`docs/STAGE2.md`). |
 | `audit.py` | the offline audit of a logged rollout: penetration from 400-point sampling of the same primitives, links touching, PhysX net contact force on touching links as a multiple of the object's weight, position and rotation error, their success flags. Independent of the probe; this is what judges a trained policy. |
 | `render.py` | replays the logged Isaac Gym poses in MuJoCo as a camera (no physics), object translucent, any link past 2 mm red, the audit's numbers on every frame. Isaac Gym cannot render inside a headless container. |
-| `pod/setup_pod.sh` | rebuilds the environment on a fresh RunPod pod: uv, Python 3.8, torch 2.4.1+cu121, rl_games 1.6.1, Isaac Gym Preview 4 (from `isaacgym_pkg/`), DexTrack's wheel, then the imports check. |
-| `pod/ft_any.sh` | fine-tune any checkpoint on any clip with the penetration term at 1024 environments, then evaluate base and fine-tuned at 16 environments with the exact plane test. |
-| `pod/scratch_cube.sh` | their per-clip policy trained from scratch on the small cube (the bimanual plan's control), then the same evaluation. |
-| `pod/dense_eval.sh`, `pod/sweep.sh`, `pod/ft_dense.sh` | the evaluation and sweep scripts as they ran; `sweep.sh` is the sparse-probe sweep, kept as the record of the mistake. |
+| `pod/setup_pod.sh`, `pod/DATA.md`, `pod/data.sha256` | a fresh pod from the five release archives: clone, verify, extract, venv, smoke (see below). |
+| `pod/run.py`, `../runs/*.json` | the spec-driven launcher and the specs of every run worth repeating. |
+| `pod/ft_any.sh`, `pod/scratch_cube.sh`, `pod/dense_eval.sh`, `pod/sweep.sh`, `pod/ft_dense.sh` | the evaluation and sweep scripts as they ran; `sweep.sh` is the sparse-probe sweep, kept as the record of the mistake. |
 | `pod/gen_batch.sh`, `pod/summarize_gen.py` | the 43-clip generalist audit. |
 | `pod/patches/` | the incremental patches that became `task_hook.diff`, in order. |
 | `pod/wandb_utils.py` | the trainer's W&B observer, restored: the release imports it commented out and the class was missing. |
 | `track.py` | the ledger, W&B evaluation runs and Hub upload (see Observability). |
 | `pod/train_cmd_cube.txt`, `pod/gen_cmd.txt` | DexTrack's own test command lines for the cube checkpoint and the generalist; every run is a `sed` of one of these. |
+
+## Bringing up a pod
+
+`pod/setup_pod.sh` on a fresh pod with the five archives from
+[`pod/DATA.md`](pod/DATA.md) in `/workspace/inputs/`: it clones the
+[DexTrack fork](https://github.com/luaiabuelsamen/DexTrack/tree/audit)
+(branch `audit`, the hook as a commit) and this repository, verifies the
+archives against `pod/data.sha256`, extracts them, builds the Python 3.8
+venv with the pinned stack, and refuses to declare the pod ready until a
+4-environment smoke run reports a penetration line. About fifteen minutes
+plus the archive upload.
+
+## Launching a run
+
+Every run is a JSON spec in [`runs/`](runs/): the clip, the base command
+family (`cube` or `gen`), the starting checkpoint or none, the term
+weight, gate and probe settings, epochs, environments, seed. On the pod:
+
+```bash
+python /workspace/run.py /workspace/specs/cube_w1000_dense.json                 # train, then evaluate base and fine-tuned
+python /workspace/run.py /workspace/specs/cube_scratch.json --tag cube_scratch_s2 --set seed=2
+python /workspace/run.py /workspace/specs/apple_w100_gated.json --dry-run       # print the resolved commands
+```
+
+The launcher writes `<tag>.spec.json` beside the logs with the spec, the
+resolved commands, both repositories' commits and timings; `track.py add`
+folds that into the ledger row, so any row can be relaunched from its
+spec. The shell scripts in `pod/` are what ran before the launcher existed
+and are kept as the record.
 
 ## The protocol
 
@@ -36,6 +64,15 @@ its policies do to the object. The Jetson side of the repository (`src/`,
    printed on one `AUDIT_ALLENV` line.
 3. **Audit env 0 offline** (`audit.py`) with the independent 400-point
    sampler, and **render it** (`render.py`) before a number is written down.
+
+## Tests and CI
+
+`tests/test_probe.py` pins the probe on synthetic geometry with known
+answers: the dense grid recovers a 3 mm corner and a 2 mm sphere depth,
+the volume matches the plane test within a third of a voxel, chunking is
+invisible, and the sparse set reads no more than the dense one on the
+edge geometry a policy exploited. CI (`.github/workflows/ci.yml`) runs
+them with the MuJoCo pipeline's fast invariants on every push.
 
 ## Observability
 
