@@ -421,8 +421,15 @@ clip and epochs: fine-tuned 2.64 mm, 43 % over 2 mm, grip 10×,
 The gate keeps the object in hand and halves the grip, and penetration
 does not move. So on the generalist the term is either strong enough to
 make the policy let go or too weak to change where the fingers sit; the
-cube's per-clip policy had a middle. One more point (weight 300, gated) is
-queued to see whether the gate alone opens that middle. Note also that
+cube's per-clip policy had a middle. Weight 300 with the gate: the policy lets
+go again, 0 of 16 held, 0.17 mm. The gate does not open a middle on the
+generalist: the tracked fraction of training environments sat at 26 %
+throughout, so for this policy on this clip holding the apple was never
+worth much, and any penalty large enough to move the fingers is large
+enough to make it stop trying. **Where the term works is where the
+tracking reward is strong**: a per-clip specialist gives up 26 % of its
+interpenetration and half its grip and keeps every rollout; a generalist
+that only marginally holds the clip gives up the clip. Note also that
 the trainer's printed depth (0.3 mm) averages over environments that have
 already lost the object under exploration noise, which is why it cannot
 be compared with the evaluated 2.6 mm; the statistic now reports tracked

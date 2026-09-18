@@ -183,7 +183,9 @@ grid read through a signed-depth volume (64 to 124 ms per step at 1024
 environments on any object) and is judged by the exact plane test. The
 rented host lost its GPU mid-run; work moved to a second pod, where the
 first fine-tune on the dense measure cut interpenetration 26 % (2.87 to
-2.12 mm) and grip 56 % with 16 of 16 held (`STAGE2.md`). Owner's
+2.12 mm) and grip 56 % with 16 of 16 held; on the generalist's apple clip the same
+term either makes the policy let go (weight 300, gated or not) or changes
+nothing (weight 100), so the term is a specialist's tool for now (`STAGE2.md`). Owner's
 question, answered here: **we have not reproduced DexTrack.** Their code
 runs, their policies track, their generalist holds 17 of 43, and their
 trainer accepts our term. Their Table 1 is not reproduced, their own

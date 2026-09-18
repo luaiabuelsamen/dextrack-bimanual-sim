@@ -1,0 +1,1157 @@
+bash: warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8)
+Importing module 'gym_38' (/workspace/isaacgym_pkg/isaacgym/python/isaacgym/_bindings/linux-x86_64/gym_38.so)
+Setting GYM_USD_PLUG_INFO_PATH to /workspace/isaacgym_pkg/isaacgym/python/isaacgym/_bindings/linux-x86_64/usd/plugInfo.json
+PyTorch version 2.4.1+cu121
+Device count 1
+/workspace/isaacgym_pkg/isaacgym/python/isaacgym/_bindings/src/gymtorch
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+Using /root/.cache/torch_extensions/py38_cu121 as PyTorch extensions root...
+Emitting ninja build file /root/.cache/torch_extensions/py38_cu121/gymtorch/build.ninja...
+Building extension module gymtorch...
+Allowing ninja to set a default number of workers... (overridable by setting the environment variable MAX_JOBS=N)
+ninja: no work to do.
+Loading extension module gymtorch...
+train.py:117: UserWarning: 
+The version_base parameter is not specified.
+Please specify a compatability version level, or None.
+Will assume defaults for version 1.1
+  @hydra.main(config_name="config", config_path="./cfg")
+/workspace/dextrack-venv/lib/python3.8/site-packages/hydra/_internal/defaults_list.py:251: UserWarning: In 'config': Defaults list is missing `_self_`. See https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order for more information
+  warnings.warn(msg, UserWarning)
+/workspace/dextrack-venv/lib/python3.8/site-packages/hydra/_internal/defaults_list.py:415: UserWarning: In config: Invalid overriding of hydra/job_logging:
+Default list overrides requires 'override' keyword.
+See https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/defaults_list_override for more information.
+
+  deprecation_warning(msg)
+task: 
+    name: AllegroHandTrackingGeneralist
+    physics_engine: physx
+    env: 
+        env_name: AllegroHandTrackingGeneralist
+        grab_inst_tag_to_opt_stat_fn: /cephfs/xueyi/uni_manip/isaacgym_rl_exp_grab/statistics/obj_type_to_optimized_res.npy
+        grab_inst_tag_to_optimized_res_fn: ./isaacgym_rl_exp_grab_300_train_wcustomidamping_samples_realv3_/statistics/data_inst_tag_to_optimized_res.npy
+        taco_inst_tag_to_optimized_res_fn: 
+        object_type_to_latent_feature_fn: ../assets/obj_type_to_obj_feat.npy
+        inst_tag_to_latent_feature_fn: ../assets/inst_tag_to_obj_feat.npy
+        add_global_movements: False
+        add_global_movements_af_step: 369
+        schedule_episod_length: False
+        episod_length_low: 270
+        episod_length_high: 500
+        episod_length_warming_up_steps: 130
+        episod_length_increasing_steps: 200
+        use_actual_traj_length: False
+        randomize_reset_frame: False
+        add_forece_obs: False
+        teacher_model_w_vel_obs: False
+        load_chunking_experiences_v2: False
+        history_chunking_obs_version: v1
+        switch_between_models: False
+        switch_to_trans_model_frame_after: 310
+        switch_to_trans_model_ckpt_fn: 
+        hand_glb_mult_scaling_progress_before: 900
+        forecasting_obs_with_original_obs: False
+        use_multi_step_control: False
+        nn_control_substeps: 10
+        add_global_motion_penalty: False
+        add_torque_penalty: False
+        add_work_penalty: False
+        schedule_glb_action_penalty: False
+        glb_penalty_low: 0.0003
+        glb_penalty_high: 1.0
+        glb_penalty_warming_up_steps: 50
+        glb_penalty_increasing_steps: 300
+        add_hand_targets_smooth: False
+        hand_targets_smooth_coef: 0.4
+        action_chunking_skip_frames: 1
+        multi_inst_chunking: False
+        add_obj_features: False
+        kine_ed_tag: .npy
+        only_rot_axis_guidance: False
+        multi_traj_use_joint_order_in_sim: False
+        preset_multi_traj_index: -1
+        preload_action_targets_fn: 
+        preload_action_target_env_idx: 0
+        preload_action_start_frame: 190
+        use_no_obj_pose: False
+        use_actual_prev_targets_in_obs: False
+        test_inst_base_traj_tag: 
+        distinguish_kine_with_base_traj: False
+        more_allegro_stiffness: False
+        train_free_hand: False
+        tune_hand_pd: False
+        simreal_modeling: False
+        action_chunking: False
+        action_chunking_frames: 1
+        distill_via_bc: False
+        distill_full_to_partial: False
+        bc_style_training: False
+        bc_relative_targets: False
+        add_physical_params_in_obs: False
+        whether_randomize_obs_act: True
+        whether_randomize_obs: True
+        whether_randomize_act: True
+        obs_rand_noise_scale: 100.0
+        w_rotation_axis_rew: False
+        compute_rot_axis_rew_threshold: 120
+        use_vision_obs: False
+        reset_obj_mass: False
+        obj_mass_reset: 0.27
+        recompute_inertia: False
+        use_v2_leap_warm_urdf: False
+        hand_specific_randomizations: False
+        action_specific_randomizations: False
+        action_specific_rand_noise_scale: 0.5
+        w_traj_modifications: False
+        obs_simplified: False
+        randomize_obj_init_pos: False
+        randomize_obs_more: False
+        obj_init_pos_rand_sigma: 0.1
+        estimate_vels: False
+        train_student_model: False
+        ts_teacher_model_obs_dim: 731
+        arm_stiffness: 400.0
+        arm_effort: 200.0
+        arm_damping: 80.0
+        closed_loop_to_real: False
+        wo_fingertip_pos: False
+        wo_fingertip_rot_vel: False
+        wo_fingertip_vel: False
+        not_use_kine_bias: False
+        disable_hand_obj_contact: False
+        wo_hand_obj_contact: False
+        hand_glb_mult_factor_scaling_coef: 1.0
+        hand_glb_mult_scaling_progress_after: 900
+        schedule_ornt_rew_coef: False
+        lowest_ornt_rew_coef: 0.03
+        highest_ornt_rew_coef: 0.33
+        ornt_rew_coef_warm_starting_steps: 100
+        ornt_rew_coef_increasing_steps: 200
+        schedule_hodist_rew_coef: False
+        lowest_rew_finger_obj_dist_coef: 0.1
+        highest_rew_finger_obj_dist_coef: 0.5
+        hodist_rew_coef_warm_starting_steps: 100
+        hodist_rew_coef_increasing_steps: 300
+        load_kine_info_retar_with_arm: False
+        kine_info_with_arm_sv_root: 
+        w_finger_pos_rew: False
+        hand_qpos_rew_coef: 0.0
+        control_arm_via_ik: False
+        warm_trans_actions_mult_coef: 0.04
+        warm_rot_actions_mult_coef: 0.04
+        franka_delta_delta_mult_coef: 1.0
+        single_inst_tag: 
+        activate_forecaster: True
+        open_loop_test: False
+        use_multiple_kine_source_trajs: False
+        multiple_kine_source_trajs_fn: 
+        compute_hand_rew_buf_threshold: 500
+        comput_reward_traj_hand_qpos: True
+        use_future_ref_as_obs_goal: True
+        forecasting_model_inv_freq: 1
+        forecast_obj_pos: False
+        history_window_size: 60
+        glb_feat_per_skip: 1
+        centralize_info: False
+        forecast_future_freq: 1
+        include_obj_rot_in_obs: False
+        st_ed_state_cond: False
+        use_clip_glb_features: False
+        only_use_hand_first_frame: False
+        partial_hand_info: False
+        partial_obj_info: False
+        partial_obj_pos_info: False
+        hist_cond_partial_hand_info: False
+        hist_cond_partial_obj_info: False
+        hist_cond_partial_obj_pos_info: False
+        preset_cond_type: 0
+        preset_inv_cond_freq: 1
+        randomize_conditions: False
+        randomize_condition_type: 
+        add_contact_conditions: False
+        contact_info_sv_root: /cephfs/xueyi/data/GRAB_Tracking_PK_reduced_300_contactflag
+        random_shift_cond: False
+        random_shift_cond_freq: False
+        maxx_inv_cond_freq: 30
+        masked_mimic_training: False
+        w_history_window_index: True
+        use_future_obs: False
+        history_freq: 5
+        net_type: v4
+        w_obj_latent_features: True
+        w_inst_latent_features: False
+        impedance_stiffness_low: 1.0
+        impedance_stiffness_high: 50.0
+        w_impedance_bias_control: False
+        stiffness_coef: 100.0
+        damping_coef: 4.0
+        effort_coef: 0.95
+        use_forcasting_model: False
+        forcasting_model_weights: 
+        forcasting_model_n_layers: 7
+        w_glb_traj_feat_cond: False
+        forcasting_history_ws: 30
+        sv_info_during_training: False
+        forcasting_model_training: False
+        forcasting_model_lr: 0.0001
+        forcasting_model_weight_decay: 5e-05
+        forcasting_diffusion_model: False
+        use_partial_to_complete_model: False
+        partial_to_complete_model_weights: 
+        wo_vel_obs: False
+        w_franka: False
+        good_inst_opt_res: 
+        early_terminate: False
+        use_window_future_selection: False
+        use_history_obs: False
+        history_length: 5
+        forcasting_inv_freq: 1
+        use_teacher_model: False
+        teacher_model_inst_tags_fn: 
+        teacher_index_to_inst_tags: 
+        downsample: False
+        target_inst_tag_list_fn: 
+        customize_damping: True
+        customize_global_damping: False
+        train_on_all_trajs: True
+        base_traj: 
+        obj_type_to_base_traj_fn: 
+        use_base_traj: False
+        use_strict_maxx_nn_ts: True
+        strict_maxx_nn_ts: 300
+        taco_interped_data_sv_additional_tag: interpfr_60_interpfr2_60_nntrans_40
+        grab_obj_type_to_opt_res_fn: 
+        taco_obj_type_to_opt_res_fn: 
+        only_training_on_succ_samples: False
+        rew_smoothness_coef: 0.0
+        rew_grab_thres: 100.0
+        rew_taco_thres: 50.0
+        data_selection_ratio: 1.0
+        rew_thres_with_selected_insts: False
+        selected_inst_idxes_dict: 
+        grab_train_test_setting: True
+        maxx_inst_nn: 1
+        use_local_canonical_state: True
+        object_feat_dim: 256
+        tracking_save_info_fn: ./data/GRAB_Tracking_PK_reduced_300/data
+        tracking_info_st_tag: passive_active_info_
+        use_hand_actions_rew: False
+        supervised_training: True
+        test_subj_nm: 
+        test_inst_tag: ori_grab_s10_apple_eat_1_nf_300
+        test_optimized_res: 
+        single_instance_state_based_test: False
+        single_instance_state_based_train: False
+        sampleds_with_object_code_fn: 
+        numEnvs: 1024
+        envSpacing: 1.5
+        episodeLength: 1000
+        enableDebugVis: False
+        aggregateMode: 1
+        hand_type: allegro
+        test: False
+        start_frame: 0
+        separate_stages: False
+        use_fingertips: True
+        ground_distance: 0.0
+        disable_obj_gravity: False
+        right_hand_dist_thres: 0.12
+        add_table: False
+        table_z_dim: 0.5
+        glb_trans_vel_scale: 0.5
+        glb_rot_vel_scale: 0.5
+        pre_optimized_traj: runs/tracking_ori_grab_s2_apple_lift_obs_pure_state_wref_wdelta_density_500_trans_0.5_rot_0.5_goalcond_False_kinebais_wdelta_rewhandpos_dist__28-19-23-38/ts_to_hand_obj_obs_reset_1.npy
+        use_twostage_rew: False
+        use_real_twostage_rew: False
+        start_grasping_fr: False
+        lifting_separate_stages: False
+        strict_lifting_separate_stages: False
+        hand_pose_guidance_glb_trans_coef: 0.6
+        hand_pose_guidance_glb_rot_coef: 0.1
+        hand_pose_guidance_fingerpose_coef: 0.1
+        use_kinematics_bias: True
+        use_kinematics_bias_wdelta: True
+        goal_dist_thres: 0.0
+        use_taco_obj_traj: True
+        rew_finger_obj_dist_coef: 0.3
+        rew_delta_hand_pose_coef: 0.5
+        rew_obj_pose_coef: 1.0
+        tight_obs: False
+        use_canonical_state: False
+        use_unified_canonical_state: False
+        rigid_obj_density: 500.0
+        kinematics_only: False
+        w_obj_ornt: False
+        w_obj_vels: False
+        mocap_sv_info_fn: ./data/GRAB_Tracking_PK_reduced_300/data/passive_active_info_ori_grab_s10_apple_eat_1_nf_300.npy
+        object_name: ori_grab_s10_apple_eat_1_nf_300
+        exp_logging_dir: 
+        random_prior: True
+        random_time: True
+        repose_z: False
+        goal_cond: False
+        object_code_dict: 
+            sem/Headphone: [1]
+        stiffnessScale: 1.0
+        forceLimitScale: 1.0
+        useRelativeControl: True
+        dofSpeedScale: 20.0
+        actionsMovingAverage: 1.0
+        controlFrequencyInv: 1
+        startPositionNoise: 0.0
+        startRotationNoise: 0.0
+        resetPositionNoise: 0.0
+        resetRotationNoise: 0.0
+        resetDofPosRandomInterval: 0.0
+        resetDofVelRandomInterval: 0.0
+        distRewardScale: 20
+        transition_scale: 0.5
+        orientation_scale: 0.1
+        rotRewardScale: 1.0
+        rotEps: 0.1
+        actionPenaltyScale: -0.0002
+        reachGoalBonus: 250
+        fallDistance: 0.4
+        fallPenalty: 0.0
+        objectType: pot
+        observationType: pure_state_wref_wdelta
+        handAgentIndex: [[0, 1, 2, 3, 4, 5]]
+        asymmetric_observations: False
+        successTolerance: 0.1
+        printNumSuccesses: False
+        maxConsecutiveSuccesses: 0
+        asset: 
+            assetRoot: ../assets
+            assetFileName: mjcf/open_ai_assets/hand/shadow_hand.xml
+            assetFileNameBlock: urdf/objects/cube_multicolor.urdf
+            assetFileNameBall: urdf/objects/ball.urdf
+            assetFileNameEgg: mjcf/open_ai_assets/hand/egg.xml
+            assetFileNamePen: mjcf/open_ai_assets/hand/pen.xml
+        vision: 
+            color: 
+                hand: [0.5, 0.5, 0.5]
+                object: [1.0, 0.2, 0.2]
+                goal: [0.5, 1.0, 0.35]
+            pointclouds: 
+                numPresample: 65536
+                numDownsample: 1024
+                numEachPoint: 6
+            camera: 
+                eye: [[0.0, 0.0, 0.55], [0.5, 0.0, 0.05], [-0.5, 0.0, 0.05], [0.0, 0.5, 0.05], [0.0, -0.5, 0.05]]
+                lookat: [[0.01, 0.0, 0.05], [0.0, 0.0, 0.05], [0.0, 0.0, 0.05], [0.0, 0.0, 0.05], [0.0, 0.0, 0.05]]
+            probe: 
+                num_probes: 0
+                width: 256
+                height: 256
+                eye: [[1.6, 0.0, 2.5]]
+                forward: [[-0.8, 0.0, -2.0]]
+            bar: 
+                x_n: -1
+                x_p: 1
+                y_n: -1
+                y_p: 1
+                z_n: 0.51
+                z_p: 1.3
+                depth: 1.2
+    task: 
+        randomize: False
+        rand_obj_mass_lowest_range: 0.5
+        rand_obj_mass_highest_range: 1.5
+        randomization_params: 
+            frequency: 1000
+            observations: 
+                range: [0, 0.002]
+                range_correlated: [0, 0.001]
+                operation: additive
+                distribution: gaussian
+                schedule: linear
+                schedule_steps: 40000
+            actions: 
+                range: [0.0, 0.05]
+                range_correlated: [0, 0.015]
+                operation: additive
+                distribution: gaussian
+                schedule: linear
+                schedule_steps: 40000
+            sim_params: 
+                gravity: 
+                    range: [0, 0.4]
+                    operation: additive
+                    distribution: gaussian
+                    schedule: linear
+                    schedule_steps: 40000
+            actor_params: 
+                hand: 
+                    color: False
+                    dof_properties: 
+                        damping: 
+                            range: [0.3, 3.0]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 30000
+                        stiffness: 
+                            range: [0.75, 1.5]
+                            operation: scaling
+                            distribution: loguniform
+                            schedule: linear
+                            schedule_steps: 30000
+                        lower: 
+                            range: [0, 0.01]
+                            operation: additive
+                            distribution: gaussian
+                            schedule: linear
+                            schedule_steps: 30000
+                        upper: 
+                            range: [0, 0.01]
+                            operation: additive
+                            distribution: gaussian
+                            schedule: linear
+                            schedule_steps: 30000
+                    rigid_body_properties: 
+                        mass: 
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 30000
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            range: [0.7, 1.3]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 30000
+                object: 
+                    rigid_body_properties: 
+                        mass: 
+                            range: [0.5, 1.5]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 30000
+                    rigid_shape_properties: 
+                        friction: 
+                            num_buckets: 250
+                            range: [0.7, 1.3]
+                            operation: scaling
+                            distribution: uniform
+                            schedule: linear
+                            schedule_steps: 30000
+    sim: 
+        dt: 0.0166
+        substeps: 2
+        use_gpu_pipeline: True
+        up_axis: z
+        gravity: [0.0, 0.0, -9.81]
+        physx: 
+            num_threads: 4
+            solver_type: 1
+            num_position_iterations: 8
+            num_velocity_iterations: 0
+            contact_offset: 0.002
+            rest_offset: 0.0
+            bounce_threshold_velocity: 0.2
+            max_depenetration_velocity: 1000.0
+            default_buffer_size_multiplier: 5.0
+        flex: 
+            num_outer_iterations: 5
+            num_inner_iterations: 20
+            warm_start: 0.8
+            relaxation: 0.75
+    test: False
+train: 
+    params: 
+        seed: 42
+        algo: 
+            name: a2c_continuous_supervised
+        model: 
+            name: continuous_a2c_logstd
+        network: 
+            name: actor_critic
+            separate: False
+            space: 
+                continuous: 
+                    mu_activation: None
+                    sigma_activation: None
+                    mu_init: 
+                        name: default
+                    sigma_init: 
+                        name: const_initializer
+                        val: 0
+                    fixed_sigma: True
+            mlp: 
+                units: [8192, 4096, 2048, 1024, 512, 256, 128]
+                activation: elu
+                d2rl: False
+                initializer: 
+                    name: default
+                regularizer: 
+                    name: None
+        load_checkpoint: True
+        load_path: /workspace/DexTrack/isaacgymenvs/ckpts/grab_trajs_tracking_ckpt.pth
+        config: 
+            forecasting_obs_with_original_obs: False
+            history_length: 5
+            target_inst_tag_list_fn: 
+            teacher_subj_idx: 2
+            test_inst_tag: ori_grab_s10_apple_eat_1_nf_300
+            add_obj_features: False
+            traj_idx_to_experience_sv_folder: 
+            history_chunking_obs_version: v1
+            load_chunking_experiences_from_real: False
+            use_transformer_model: False
+            switch_between_models: False
+            switch_to_trans_model_frame_after: 310
+            switch_to_trans_model_ckpt_fn: 
+            action_chunking: False
+            action_chunking_frames: 1
+            bc_relative_targets: False
+            action_chunking_skip_frames: 1
+            distill_via_bc: False
+            load_chunking_experiences_v2: False
+            save_experiences_via_ts: False
+            load_experiences_maxx_ts: 600
+            simreal_modeling: False
+            demonstration_tuning_model: False
+            demonstration_tuning_model_freq: 1
+            distill_delta_targets: False
+            record_for_distill_to_ctlv2: False
+            preload_all_saved_exp_buffers: False
+            bc_style_training: False
+            use_no_obj_pose: False
+            train_student_model: False
+            ts_teacher_model_obs_dim: 731
+            ts_teacher_model_weights_fn: 
+            dagger_style_training: False
+            rollout_student_model: True
+            rollout_teacher_model: False
+            maxx_inst_nn: 1
+            use_world_model: False
+            train_controller: False
+            forecasting_model_weight_fn: 
+            train_forecasting_model: False
+            forecasting_obs_dim: 797
+            forecasting_act_dim: 29
+            forecasting_nn_frames: 10
+            masked_mimic_training: False
+            masked_mimic_teacher_model_path: 
+            w_franka: False
+            teacher_model_path: 
+            teacher_index_to_weights: 
+            use_teacher_model: False
+            grab_obj_type_to_opt_res_fn: 
+            taco_obj_type_to_opt_res_fn: 
+            supervised_loss_coef: 0.0
+            pure_supervised_training: False
+            single_instance_tag: 
+            obj_type_to_optimized_res_fn: 
+            train_dir: ./logs/dense_apple_w300_gated
+            log_path: ./logs/dense_apple_w300_gated
+            training_mode: regular
+            record_experiences: False
+            name: tracking_ori_grab_s10_apple_eat_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5
+            preload_experiences_tf: False
+            preload_experiences_path: 
+            single_instance_training: True
+            single_instance_state_based_train: False
+            full_experiment_name: tracking_ori_grab_s10_apple_eat_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5
+            env_name: rlgpu
+            multi_gpu: False
+            mixed_precision: True
+            normalize_input: True
+            normalize_value: True
+            value_bootstrap: True
+            num_actors: 1024
+            reward_shaper: 
+                scale_value: 0.01
+            normalize_advantage: True
+            gamma: 0.99
+            tau: 0.95
+            learning_rate: 0.0005
+            lr_schedule: adaptive
+            kl_threshold: 0.008
+            score_to_win: 20000
+            max_epochs: 2350
+            save_best_after: 50
+            save_frequency: 200
+            print_stats: True
+            grad_norm: 1.0
+            entropy_coef: 0.0
+            truncate_grads: True
+            ppo: True
+            e_clip: 0.2
+            horizon_length: 32
+            minibatch_size: 1024
+            mini_epochs: 5
+            critic_coef: 4
+            clip_value: True
+            seq_len: 4
+            bounds_loss_coef: 0.0
+pbt: 
+    enabled: False
+task_name: AllegroHandTrackingGeneralist
+experiment: 
+num_envs: 
+seed: 42
+torch_deterministic: False
+max_iterations: 
+enableCameraSensors: False
+physics_engine: physx
+pipeline: gpu
+sim_device: cuda:0
+rl_device: cuda:0
+graphics_device_id: -1
+num_threads: 4
+solver_type: 1
+num_subscenes: 4
+test: False
+checkpoint: /workspace/DexTrack/isaacgymenvs/ckpts/grab_trajs_tracking_ckpt.pth
+sigma: 
+multi_gpu: False
+wandb_activate: False
+wandb_group: 
+wandb_name: tracking_ori_grab_s10_apple_eat_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5
+wandb_entity: 
+wandb_project: isaacgymenvs
+wandb_tags: []
+wandb_logcode_dir: 
+capture_video: False
+capture_video_freq: 1464
+capture_video_len: 300
+force_render: False
+render_mode: ansi
+exp_dir: .
+tag: tracking_ori_grab_s10_apple_eat_1_nf_300
+headless: True
+two_hands: True
+scaled_object_asset_file: arctic_microwave_wcollision.urdf
+gt_data_fn: /home/xueyi/diffsim/Control-VAE/ReferenceData/shadow_arctic_s06_microwave_data_v3_opt2.npy
+Setting seed: 42
+Using rl_device: cuda:0
+Using sim_device: cuda:0
+[Warning] [carb.gym.plugin] useGpuPipeline is set, forcing GPU PhysX
+[Warning] [carb.gym.plugin] useGpu is set, forcing single scene (0 subscenes)
+Not connected to PVD
++++ Using GPU PhysX
+Physics Engine: PhysX
+Physics Device: cuda:0
+GPU Pipeline: enabled
+[Error] [carb.gym.plugin] Graphics is nullptr in GymCreateTextureFromFile
+{'forecasting_obs_with_original_obs': False, 'history_length': 5, 'target_inst_tag_list_fn': '', 'teacher_subj_idx': 2, 'test_inst_tag': 'ori_grab_s10_apple_eat_1_nf_300', 'add_obj_features': False, 'traj_idx_to_experience_sv_folder': '', 'history_chunking_obs_version': 'v1', 'load_chunking_experiences_from_real': False, 'use_transformer_model': False, 'switch_between_models': False, 'switch_to_trans_model_frame_after': 310, 'switch_to_trans_model_ckpt_fn': '', 'action_chunking': False, 'action_chunking_frames': 1, 'bc_relative_targets': False, 'action_chunking_skip_frames': 1, 'distill_via_bc': False, 'load_chunking_experiences_v2': False, 'save_experiences_via_ts': False, 'load_experiences_maxx_ts': 600, 'simreal_modeling': False, 'demonstration_tuning_model': False, 'demonstration_tuning_model_freq': 1, 'distill_delta_targets': False, 'record_for_distill_to_ctlv2': False, 'preload_all_saved_exp_buffers': False, 'bc_style_training': False, 'use_no_obj_pose': False, 'train_student_model': False, 'ts_teacher_model_obs_dim': 731, 'ts_teacher_model_weights_fn': '', 'dagger_style_training': False, 'rollout_student_model': True, 'rollout_teacher_model': False, 'maxx_inst_nn': 1, 'use_world_model': False, 'train_controller': False, 'forecasting_model_weight_fn': '', 'train_forecasting_model': False, 'forecasting_obs_dim': 797, 'forecasting_act_dim': 29, 'forecasting_nn_frames': 10, 'masked_mimic_training': False, 'masked_mimic_teacher_model_path': '', 'w_franka': False, 'teacher_model_path': '', 'teacher_index_to_weights': '', 'use_teacher_model': False, 'grab_obj_type_to_opt_res_fn': '', 'taco_obj_type_to_opt_res_fn': '', 'supervised_loss_coef': 0.0, 'pure_supervised_training': False, 'single_instance_tag': '', 'obj_type_to_optimized_res_fn': '', 'train_dir': './logs/dense_apple_w300_gated', 'log_path': './logs/dense_apple_w300_gated', 'training_mode': 'regular', 'record_experiences': False, 'name': 'tracking_ori_grab_s10_apple_eat_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5', 'preload_experiences_tf': False, 'preload_experiences_path': '', 'single_instance_training': True, 'single_instance_state_based_train': False, 'full_experiment_name': None, 'env_name': 'rlgpu', 'multi_gpu': False, 'mixed_precision': True, 'normalize_input': True, 'normalize_value': True, 'value_bootstrap': True, 'num_actors': 1024, 'reward_shaper': {'scale_value': 0.01}, 'normalize_advantage': True, 'gamma': 0.99, 'tau': 0.95, 'learning_rate': 0.0005, 'lr_schedule': 'adaptive', 'kl_threshold': 0.008, 'score_to_win': 20000, 'max_epochs': 2350, 'save_best_after': 50, 'save_frequency': 200, 'print_stats': True, 'grad_norm': 1.0, 'entropy_coef': 0.0, 'truncate_grads': True, 'ppo': True, 'e_clip': 0.2, 'horizon_length': 32, 'minibatch_size': 1024, 'mini_epochs': 5, 'critic_coef': 4, 'clip_value': True, 'seq_len': 4, 'bounds_loss_coef': 0.0, 'device': 'cuda:0', 'population_based_training': False, 'pbt_idx': None}
+self.seed = 42
+Started to train
+Averaging factor:  0.01
+right_hand_dist_thres: 0.12
+[INFO] train_student_model: False
+grab_inst_tag_to_optimized_res_fn: ['']
+tracking_save_info_fn: ./data/GRAB_Tracking_PK_reduced_300/data
+Get all grab tags with grab_inst_tags: 1269
+grab_inst_tag_to_opt_res: 1071
+Loaded inst_tag_to_optimized_res with number of total instances 1071
+test_inst_tag: ori_grab_s10_apple_eat_1_nf_300, test_optimized_res: 
+[Debug] Loading ('ori_grab_s10_cup_drink_2_nf_300', 'ori_grab_s10_cup_drink_2_nf_300')
+[Debug] Loading ('ori_grab_s10_airplane_fly_1_nf_300', 'ori_grab_s10_airplane_fly_1_nf_300')
+[Debug] Loading ('ori_grab_s10_cup_drink_1_nf_300', 'ori_grab_s10_cup_drink_1_nf_300')
+[Debug] Loading ('ori_grab_s10_airplane_lift_nf_300', 'ori_grab_s10_airplane_lift_nf_300')
+[Debug] Loading ('ori_grab_s10_cup_lift_nf_300', 'ori_grab_s10_cup_lift_nf_300')
+[Debug] Loading ('ori_grab_s10_airplane_pass_1_nf_300', 'ori_grab_s10_airplane_pass_1_nf_300')
+[Debug] Loading ('ori_grab_s10_cubelarge_lift_nf_300', 'ori_grab_s10_cubelarge_lift_nf_300')
+[Debug] Loading ('ori_grab_s10_alarmclock_lift_Retake_nf_300', 'ori_grab_s10_alarmclock_lift_Retake_nf_300')
+[Debug] Loading ('ori_grab_s10_cubelarge_inspect_1_nf_300', 'ori_grab_s10_cubelarge_inspect_1_nf_300')
+[Debug] Loading ('ori_grab_s10_alarmclock_pass_1_nf_300', 'ori_grab_s10_alarmclock_pass_1_nf_300')
+[Debug] Loading ('ori_grab_s10_cup_pass_1_nf_300', 'ori_grab_s10_cup_pass_1_nf_300')
+[Debug] Loading ('ori_grab_s10_alarmclock_see_1_nf_300', 'ori_grab_s10_alarmclock_see_1_nf_300')
+[Debug] Loading ('ori_grab_s10_cup_pour_1_nf_300', 'ori_grab_s10_cup_pour_1_nf_300')
+[Debug] Loading ('ori_grab_s10_apple_eat_1_nf_300', 'ori_grab_s10_apple_eat_1_nf_300')
+[3] tot_succ_nn / tot_nn: 0 / 1
+[Debug] data_inst_tag_list: 1
+0/1 Loading from /cephfs/xueyi/uni_manip/isaacgym_rl_exp_taco_grab_interpseq_interpfr_60_interpfr2_60_nntrans_40_eval/tracking_TACO_taco_20230930_037_INTERPSEQ_ori_grab_s2_phone_call_1_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5_interpfr_60_interpfr2_60_nntrans_40_04-20-05-36/ts_to_hand_obj_obs_reset_1_sorted_best.npy
+0/1 Loading from /cephfs/xueyi/uni_manip/isaacgym_rl_exp_taco_grab_interpseq_interpfr_60_interpfr2_60_nntrans_40_eval/tracking_TACO_taco_20230930_037_INTERPSEQ_ori_grab_s2_phone_call_1_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5_interpfr_60_interpfr2_60_nntrans_40_04-20-05-36/ts_to_hand_obj_obs_reset_1_sorted_best.npy, len(data_name_to_data): 0
+Loading from /cephfs/xueyi/uni_manip/isaacgym_rl_exp_taco_grab_interpseq_interpfr_60_interpfr2_60_nntrans_40_eval/tracking_TACO_taco_20230930_037_INTERPSEQ_ori_grab_s2_phone_call_1_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5_interpfr_60_interpfr2_60_nntrans_40_04-20-05-36/ts_to_hand_obj_obs_reset_1_sorted_best.npy, cur_traj_maxx_length: 300, maxx_trajectory_length: 300
+Existing func _preload_mocap_tracking_ctl_data
+[Loading tracking kine info] 0/1: ('ori_grab_s10_apple_eat_1_nf_300', 'ori_grab_s10_apple_eat_1_nf_300')
+Loading single with data_inst_tag: ('ori_grab_s10_apple_eat_1_nf_300', 'ori_grab_s10_apple_eat_1_nf_300')
+cur_kine_obj_trans: [-9.89e-05  9.31e-05  6.14e-02]
+cur_kine_qs: (300, 22)
+cur_data_episode_length: 300, maxx_trajectory_length: 300
+tot_hand_preopt_res: torch.Size([1, 300, 22]), tot_hand_qs: torch.Size([1, 300, 22]), tot_hand_qtars: torch.Size([1, 300, 22]), tot_kine_qs: torch.Size([1, 300, 22]), tot_kine_obj_trans: torch.Size([1, 300, 3]), tot_kine_obj_ornt: torch.Size([1, 300, 4]), maxx_episode_length_per_traj: tensor([299], device='cuda:0', dtype=torch.int32)
+Obs type: pure_state_wref_wdelta
+controlFrequencyInv: 1
+==> Loading mocap reference information from ./data/GRAB_Tracking_PK_reduced_300/data/passive_active_info_ori_grab_s2_apple_lift_nf_300.npy
+lift_fr: 0, cur_obj_transl: [1.79e-07 2.08e-04 6.12e-02]
+==> Info loaded with hand_qs: (300, 22), goal_hand_qs: (300, 22), goal_obj_trans: (300, 3), goal_obj_rot_quat: (300, 4)
+joint_idxes_ordering: [ 0  1  2  3  4  5  6  7  8  9 14 15 16 17 18 19 20 21 10 11 12 13]
+joint_idxes_inversed_ordering: [ 0  1  2  3  4  5  6  7  8  9 18 19 20 21 10 11 12 13 14 15 16 17]
+obs_type: pure_state_wref_wdelta, num_obs: 725
+numObservationsWActions: 748, numActions: 22, numObservations: 725
+enable_camera_sensors: False, graphics_device_id: -1
+[Debug] shadow_hand_asset_file: allegro_hand_description/urdf/allegro_hand_description_right_fly_v2.urdf
+self.num_shadow_hand_bodies:  27
+self.num_shadow_hand_shapes:  21
+self.num_shadow_hand_dofs:  22
+self.num_shadow_hand_actuators:  22
+self.num_shadow_hand_tendons:  0
+asset_rigid_body_names:  ['hand_root', 'link_palm_x', 'link_palm_y', 'link_palm_z', 'link_palm_rx', 'link_palm_ry', 'palm_link', 'link_0', 'link_1', 'link_2', 'link_3', 'link_3_tip', 'link_12', 'link_13', 'link_14', 'link_15', 'link_15_tip', 'link_4', 'link_5', 'link_6', 'link_7', 'link_7_tip', 'link_8', 'link_9', 'link_10', 'link_11', 'link_11_tip']
+[Debug] shadow_hand_dof_names: ['WRJ0x', 'WRJ0y', 'WRJ0z', 'WRJ0rx', 'WRJ0ry', 'WRJ0rz', 'joint_0', 'joint_1', 'joint_2', 'joint_3', 'joint_12', 'joint_13', 'joint_14', 'joint_15', 'joint_4', 'joint_5', 'joint_6', 'joint_7', 'joint_8', 'joint_9', 'joint_10', 'joint_11']
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+more_allegro_stiffness: False
+[Debug] shadow_hand_dof_lower_limits: tensor([-1.0000, -1.0000, -1.0000, -3.1400, -3.1400, -3.1400, -0.4700, -0.1960,
+        -0.1740, -0.2270,  0.2630, -0.1050, -0.1890, -0.1620, -0.4700, -0.1960,
+        -0.1740, -0.2270, -0.4700, -0.1960, -0.1740, -0.2270], device='cuda:0')
+[Debug] shadow_hand_dof_upper_limits: tensor([1.0000, 1.0000, 1.0000, 3.1400, 3.1400, 3.1400, 0.4700, 1.6100, 1.7090,
+        1.6180, 1.3960, 1.1630, 1.6440, 1.7190, 0.4700, 1.6100, 1.7090, 1.6180,
+        0.4700, 1.6100, 1.7090, 1.6180], device='cuda:0')
+key: WRJ0rx val: 3
+key: WRJ0ry val: 4
+key: WRJ0rz val: 5
+key: WRJ0x val: 0
+key: WRJ0y val: 1
+key: WRJ0z val: 2
+key: joint_0 val: 6
+key: joint_1 val: 7
+key: joint_10 val: 23
+key: joint_11 val: 24
+key: joint_11_tip val: 25
+key: joint_12 val: 11
+key: joint_13 val: 12
+key: joint_14 val: 13
+key: joint_15 val: 14
+key: joint_15_tip val: 15
+key: joint_2 val: 8
+key: joint_3 val: 9
+key: joint_3_tip val: 10
+key: joint_4 val: 16
+key: joint_5 val: 17
+key: joint_6 val: 18
+key: joint_7 val: 19
+key: joint_7_tip val: 20
+key: joint_8 val: 21
+key: joint_9 val: 22
+[Debug] object_dof_lower_limits: tensor([], device='cuda:0')
+[Debug] object_dof_upper_limits: tensor([], device='cuda:0')
+[Debug] fingertips handles: [16, 11, 21, 26]
+[Debug] body_name: palm, idx: 6
+[Debug] body_name: thumb, idx: 16
+[Debug] body_name: index, idx: 11
+[Debug] body_name: middle, idx: 21
+[Debug] body_name: ring, idx: 26
+len(object_code_list): 1
+first_frame_hand_kine_qs: tensor([-0.1304,  0.0815,  0.1757,  1.6094,  0.2114, -1.0646, -0.0402,  0.2452,
+         0.2441,  0.0744,  0.8434,  0.2286,  0.8122,  0.1948,  0.0340,  0.2669,
+         0.1761,  0.0351,  0.2147,  0.3893,  0.2271,  0.0788], device='cuda:0'), load_kine_info_retar_with_arm: False, 
+mass: [0.3581828773021698]
+AUDIT_FIX: creation-time joint state applied to 1024 hands
+tot_obj_succ_nn: 0
+num_shadow_hand_dofs: 22
+Registering the history observations...
+[Debug] shadow_hand_default_dof_pos: torch.Size([1024, 22])
+[Debug] dof_state: torch.Size([22528, 2])
+AUDIT_FIX 3: reset snapshot replaced with creation pose at rest
+[Debug] num_dofs: 22
+Box(-1.0, 1.0, (22,), float32) Box(-inf, inf, (725,), float32)
+WARNING: seq_len is deprecated, use seq_length instead
+seq_length: 4
+current training device: cuda:0
+build mlp: 725
+RunningMeanStd:  (1,)
+RunningMeanStd:  (725,)
+=> loading checkpoint '/workspace/DexTrack/isaacgymenvs/ckpts/grab_trajs_tracking_ckpt.pth'
+[_build_gt_act_buffers] gt_act_dim: 23
+AUDIT_FIX 2: settled links with objects parked
+AUDIT_FIX 3b: object pinned at creation pose before the first step
+PEN-REWARD on: weight 3.48 N, hulls 64, points 33114 spacing 0.002, w_pen 300.0, w_force 0.0
+AUDIT_FIX 3b: object pinned at creation pose before the first step
+AUDIT_FIX 3b: object pinned at creation pose before the first step
+fps step: 3673 fps step and policy inference: 3563 fps total: 2668 epoch: 2201/2350 frames: 3520000000
+mean_rewards:  [-21.43] last_mean_rewards:  -100500
+saving next best rewards:  [-21.43]
+getting weights with keys: dict_keys(['scaler', 'model'])
+=> saving checkpoint './logs/dense_apple_w300_gated/tracking_ori_grab_s10_apple_eat_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5_18-03-32-13/nn/tracking_ori_grab_s10_apple_eat_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5.pth'
+fps step: 3585 fps step and policy inference: 3469 fps total: 2633 epoch: 2202/2350 frames: 3520032768
+mean_rewards:  [-65.09] last_mean_rewards:  -21.428326
+fps step: 3632 fps step and policy inference: 3518 fps total: 2642 epoch: 2203/2350 frames: 3520065536
+mean_rewards:  [-111.51] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.94 mm, frac>2mm 0.15, grip_x mean 15, term mean 0.076, tracked 0.26
+fps step: 3714 fps step and policy inference: 3598 fps total: 2686 epoch: 2204/2350 frames: 3520098304
+mean_rewards:  [-157.58] last_mean_rewards:  -21.428326
+fps step: 3687 fps step and policy inference: 3572 fps total: 2682 epoch: 2205/2350 frames: 3520131072
+mean_rewards:  [-170.93] last_mean_rewards:  -21.428326
+fps step: 3646 fps step and policy inference: 3535 fps total: 2642 epoch: 2206/2350 frames: 3520163840
+mean_rewards:  [-212.19] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.68 mm, frac>2mm 0.07, grip_x mean 10, term mean 0.052, tracked 0.26
+fps step: 3628 fps step and policy inference: 3519 fps total: 2629 epoch: 2207/2350 frames: 3520196608
+mean_rewards:  [-205.96] last_mean_rewards:  -21.428326
+fps step: 3613 fps step and policy inference: 3506 fps total: 2643 epoch: 2208/2350 frames: 3520229376
+mean_rewards:  [-207.8] last_mean_rewards:  -21.428326
+fps step: 3538 fps step and policy inference: 3432 fps total: 2611 epoch: 2209/2350 frames: 3520262144
+mean_rewards:  [-213.2] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.72 mm, frac>2mm 0.07, grip_x mean 10, term mean 0.053, tracked 0.25
+fps step: 3604 fps step and policy inference: 3492 fps total: 2637 epoch: 2210/2350 frames: 3520294912
+mean_rewards:  [-214.28] last_mean_rewards:  -21.428326
+fps step: 3609 fps step and policy inference: 3502 fps total: 2641 epoch: 2211/2350 frames: 3520327680
+mean_rewards:  [-213.25] last_mean_rewards:  -21.428326
+fps step: 3611 fps step and policy inference: 3501 fps total: 2641 epoch: 2212/2350 frames: 3520360448
+mean_rewards:  [-203.38] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.67 mm, frac>2mm 0.07, grip_x mean 11, term mean 0.052, tracked 0.26
+fps step: 3630 fps step and policy inference: 3512 fps total: 2642 epoch: 2213/2350 frames: 3520393216
+mean_rewards:  [-196.42] last_mean_rewards:  -21.428326
+fps step: 3626 fps step and policy inference: 3516 fps total: 2649 epoch: 2214/2350 frames: 3520425984
+mean_rewards:  [-188.38] last_mean_rewards:  -21.428326
+fps step: 3651 fps step and policy inference: 3529 fps total: 2664 epoch: 2215/2350 frames: 3520458752
+mean_rewards:  [-183.91] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.59 mm, frac>2mm 0.06, grip_x mean 13, term mean 0.046, tracked 0.26
+fps step: 3652 fps step and policy inference: 3538 fps total: 2669 epoch: 2216/2350 frames: 3520491520
+mean_rewards:  [-181.1] last_mean_rewards:  -21.428326
+fps step: 3670 fps step and policy inference: 3555 fps total: 2675 epoch: 2217/2350 frames: 3520524288
+mean_rewards:  [-167.58] last_mean_rewards:  -21.428326
+fps step: 3667 fps step and policy inference: 3559 fps total: 2677 epoch: 2218/2350 frames: 3520557056
+mean_rewards:  [-168.69] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.48 mm, frac>2mm 0.04, grip_x mean 14, term mean 0.036, tracked 0.25
+fps step: 3603 fps step and policy inference: 3493 fps total: 2648 epoch: 2219/2350 frames: 3520589824
+mean_rewards:  [-164.8] last_mean_rewards:  -21.428326
+fps step: 3594 fps step and policy inference: 3483 fps total: 2657 epoch: 2220/2350 frames: 3520622592
+mean_rewards:  [-158.32] last_mean_rewards:  -21.428326
+fps step: 3593 fps step and policy inference: 3479 fps total: 2626 epoch: 2221/2350 frames: 3520655360
+mean_rewards:  [-157.85] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.42 mm, frac>2mm 0.03, grip_x mean 14, term mean 0.033, tracked 0.26
+fps step: 3623 fps step and policy inference: 3502 fps total: 2636 epoch: 2222/2350 frames: 3520688128
+mean_rewards:  [-148.81] last_mean_rewards:  -21.428326
+fps step: 3676 fps step and policy inference: 3556 fps total: 2672 epoch: 2223/2350 frames: 3520720896
+mean_rewards:  [-148.18] last_mean_rewards:  -21.428326
+fps step: 3670 fps step and policy inference: 3549 fps total: 2670 epoch: 2224/2350 frames: 3520753664
+mean_rewards:  [-148.82] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.33 mm, frac>2mm 0.02, grip_x mean 15, term mean 0.027, tracked 0.26
+fps step: 3683 fps step and policy inference: 3566 fps total: 2681 epoch: 2225/2350 frames: 3520786432
+mean_rewards:  [-145.14] last_mean_rewards:  -21.428326
+fps step: 3659 fps step and policy inference: 3539 fps total: 2655 epoch: 2226/2350 frames: 3520819200
+mean_rewards:  [-139.43] last_mean_rewards:  -21.428326
+fps step: 3685 fps step and policy inference: 3560 fps total: 2660 epoch: 2227/2350 frames: 3520851968
+mean_rewards:  [-135.88] last_mean_rewards:  -21.428326
+fps step: 3667 fps step and policy inference: 3557 fps total: 2653 epoch: 2228/2350 frames: 3520884736
+mean_rewards:  [-135.16] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.30 mm, frac>2mm 0.01, grip_x mean 14, term mean 0.024, tracked 0.26
+fps step: 3665 fps step and policy inference: 3553 fps total: 2674 epoch: 2229/2350 frames: 3520917504
+mean_rewards:  [-132.07] last_mean_rewards:  -21.428326
+fps step: 3644 fps step and policy inference: 3527 fps total: 2670 epoch: 2230/2350 frames: 3520950272
+mean_rewards:  [-133.3] last_mean_rewards:  -21.428326
+fps step: 3645 fps step and policy inference: 3528 fps total: 2673 epoch: 2231/2350 frames: 3520983040
+mean_rewards:  [-132.] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.30 mm, frac>2mm 0.01, grip_x mean 15, term mean 0.025, tracked 0.28
+fps step: 3673 fps step and policy inference: 3550 fps total: 2685 epoch: 2232/2350 frames: 3521015808
+mean_rewards:  [-127.57] last_mean_rewards:  -21.428326
+fps step: 3652 fps step and policy inference: 3532 fps total: 2679 epoch: 2233/2350 frames: 3521048576
+mean_rewards:  [-127.67] last_mean_rewards:  -21.428326
+fps step: 3649 fps step and policy inference: 3528 fps total: 2678 epoch: 2234/2350 frames: 3521081344
+mean_rewards:  [-125.71] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.32 mm, frac>2mm 0.02, grip_x mean 15, term mean 0.028, tracked 0.29
+fps step: 3638 fps step and policy inference: 3519 fps total: 2670 epoch: 2235/2350 frames: 3521114112
+mean_rewards:  [-127.58] last_mean_rewards:  -21.428326
+fps step: 3628 fps step and policy inference: 3511 fps total: 2659 epoch: 2236/2350 frames: 3521146880
+mean_rewards:  [-127.63] last_mean_rewards:  -21.428326
+fps step: 3689 fps step and policy inference: 3570 fps total: 2687 epoch: 2237/2350 frames: 3521179648
+mean_rewards:  [-125.62] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.29 mm, frac>2mm 0.02, grip_x mean 14, term mean 0.024, tracked 0.27
+fps step: 3685 fps step and policy inference: 3565 fps total: 2679 epoch: 2238/2350 frames: 3521212416
+mean_rewards:  [-125.66] last_mean_rewards:  -21.428326
+fps step: 3701 fps step and policy inference: 3581 fps total: 2694 epoch: 2239/2350 frames: 3521245184
+mean_rewards:  [-125.41] last_mean_rewards:  -21.428326
+fps step: 3686 fps step and policy inference: 3563 fps total: 2690 epoch: 2240/2350 frames: 3521277952
+mean_rewards:  [-123.15] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.31 mm, frac>2mm 0.03, grip_x mean 14, term mean 0.027, tracked 0.29
+fps step: 3684 fps step and policy inference: 3558 fps total: 2690 epoch: 2241/2350 frames: 3521310720
+mean_rewards:  [-124.12] last_mean_rewards:  -21.428326
+fps step: 3642 fps step and policy inference: 3522 fps total: 2665 epoch: 2242/2350 frames: 3521343488
+mean_rewards:  [-123.37] last_mean_rewards:  -21.428326
+fps step: 3641 fps step and policy inference: 3529 fps total: 2667 epoch: 2243/2350 frames: 3521376256
+mean_rewards:  [-124.15] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.27 mm, frac>2mm 0.03, grip_x mean 13, term mean 0.023, tracked 0.29
+fps step: 3677 fps step and policy inference: 3563 fps total: 2686 epoch: 2244/2350 frames: 3521409024
+mean_rewards:  [-124.63] last_mean_rewards:  -21.428326
+fps step: 3682 fps step and policy inference: 3564 fps total: 2682 epoch: 2245/2350 frames: 3521441792
+mean_rewards:  [-120.63] last_mean_rewards:  -21.428326
+fps step: 3650 fps step and policy inference: 3529 fps total: 2653 epoch: 2246/2350 frames: 3521474560
+mean_rewards:  [-119.95] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.27 mm, frac>2mm 0.03, grip_x mean 13, term mean 0.023, tracked 0.28
+fps step: 3670 fps step and policy inference: 3554 fps total: 2669 epoch: 2247/2350 frames: 3521507328
+mean_rewards:  [-121.44] last_mean_rewards:  -21.428326
+fps step: 3681 fps step and policy inference: 3568 fps total: 2656 epoch: 2248/2350 frames: 3521540096
+mean_rewards:  [-119.39] last_mean_rewards:  -21.428326
+fps step: 3681 fps step and policy inference: 3566 fps total: 2654 epoch: 2249/2350 frames: 3521572864
+mean_rewards:  [-121.97] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.25 mm, frac>2mm 0.03, grip_x mean 13, term mean 0.021, tracked 0.28
+fps step: 3660 fps step and policy inference: 3549 fps total: 2656 epoch: 2250/2350 frames: 3521605632
+mean_rewards:  [-119.73] last_mean_rewards:  -21.428326
+fps step: 3599 fps step and policy inference: 3484 fps total: 2635 epoch: 2251/2350 frames: 3521638400
+mean_rewards:  [-119.27] last_mean_rewards:  -21.428326
+fps step: 3611 fps step and policy inference: 3507 fps total: 2650 epoch: 2252/2350 frames: 3521671168
+mean_rewards:  [-117.85] last_mean_rewards:  -21.428326
+fps step: 3652 fps step and policy inference: 3536 fps total: 2664 epoch: 2253/2350 frames: 3521703936
+mean_rewards:  [-117.8] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.23 mm, frac>2mm 0.03, grip_x mean 12, term mean 0.019, tracked 0.28
+fps step: 3648 fps step and policy inference: 3532 fps total: 2659 epoch: 2254/2350 frames: 3521736704
+mean_rewards:  [-118.24] last_mean_rewards:  -21.428326
+fps step: 3657 fps step and policy inference: 3538 fps total: 2665 epoch: 2255/2350 frames: 3521769472
+mean_rewards:  [-117.63] last_mean_rewards:  -21.428326
+fps step: 3674 fps step and policy inference: 3557 fps total: 2678 epoch: 2256/2350 frames: 3521802240
+mean_rewards:  [-116.81] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.19 mm, frac>2mm 0.02, grip_x mean 11, term mean 0.015, tracked 0.28
+fps step: 3663 fps step and policy inference: 3553 fps total: 2668 epoch: 2257/2350 frames: 3521835008
+mean_rewards:  [-115.39] last_mean_rewards:  -21.428326
+fps step: 3709 fps step and policy inference: 3594 fps total: 2690 epoch: 2258/2350 frames: 3521867776
+mean_rewards:  [-118.39] last_mean_rewards:  -21.428326
+fps step: 3691 fps step and policy inference: 3572 fps total: 2686 epoch: 2259/2350 frames: 3521900544
+mean_rewards:  [-116.38] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.17 mm, frac>2mm 0.02, grip_x mean 11, term mean 0.014, tracked 0.28
+fps step: 3711 fps step and policy inference: 3589 fps total: 2699 epoch: 2260/2350 frames: 3521933312
+mean_rewards:  [-114.43] last_mean_rewards:  -21.428326
+fps step: 3671 fps step and policy inference: 3550 fps total: 2685 epoch: 2261/2350 frames: 3521966080
+mean_rewards:  [-113.84] last_mean_rewards:  -21.428326
+fps step: 3685 fps step and policy inference: 3567 fps total: 2688 epoch: 2262/2350 frames: 3521998848
+mean_rewards:  [-115.06] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.15 mm, frac>2mm 0.01, grip_x mean 10, term mean 0.012, tracked 0.28
+fps step: 3687 fps step and policy inference: 3568 fps total: 2681 epoch: 2263/2350 frames: 3522031616
+mean_rewards:  [-114.96] last_mean_rewards:  -21.428326
+fps step: 3713 fps step and policy inference: 3593 fps total: 2695 epoch: 2264/2350 frames: 3522064384
+mean_rewards:  [-114.6] last_mean_rewards:  -21.428326
+fps step: 3743 fps step and policy inference: 3619 fps total: 2709 epoch: 2265/2350 frames: 3522097152
+mean_rewards:  [-113.87] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.12 mm, frac>2mm 0.01, grip_x mean 9, term mean 0.010, tracked 0.28
+fps step: 3721 fps step and policy inference: 3600 fps total: 2702 epoch: 2266/2350 frames: 3522129920
+mean_rewards:  [-113.77] last_mean_rewards:  -21.428326
+fps step: 3715 fps step and policy inference: 3597 fps total: 2703 epoch: 2267/2350 frames: 3522162688
+mean_rewards:  [-112.59] last_mean_rewards:  -21.428326
+fps step: 3707 fps step and policy inference: 3585 fps total: 2683 epoch: 2268/2350 frames: 3522195456
+mean_rewards:  [-113.72] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.12 mm, frac>2mm 0.01, grip_x mean 9, term mean 0.010, tracked 0.28
+fps step: 3723 fps step and policy inference: 3601 fps total: 2699 epoch: 2269/2350 frames: 3522228224
+mean_rewards:  [-112.78] last_mean_rewards:  -21.428326
+fps step: 3696 fps step and policy inference: 3579 fps total: 2683 epoch: 2270/2350 frames: 3522260992
+mean_rewards:  [-112.7] last_mean_rewards:  -21.428326
+fps step: 3708 fps step and policy inference: 3591 fps total: 2698 epoch: 2271/2350 frames: 3522293760
+mean_rewards:  [-111.67] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.12 mm, frac>2mm 0.01, grip_x mean 9, term mean 0.010, tracked 0.28
+fps step: 3650 fps step and policy inference: 3521 fps total: 2644 epoch: 2272/2350 frames: 3522326528
+mean_rewards:  [-113.39] last_mean_rewards:  -21.428326
+fps step: 3704 fps step and policy inference: 3580 fps total: 2690 epoch: 2273/2350 frames: 3522359296
+mean_rewards:  [-111.45] last_mean_rewards:  -21.428326
+fps step: 3694 fps step and policy inference: 3564 fps total: 2681 epoch: 2274/2350 frames: 3522392064
+mean_rewards:  [-110.29] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.14 mm, frac>2mm 0.01, grip_x mean 9, term mean 0.011, tracked 0.28
+fps step: 3681 fps step and policy inference: 3557 fps total: 2672 epoch: 2275/2350 frames: 3522424832
+mean_rewards:  [-112.29] last_mean_rewards:  -21.428326
+fps step: 3686 fps step and policy inference: 3570 fps total: 2667 epoch: 2276/2350 frames: 3522457600
+mean_rewards:  [-112.34] last_mean_rewards:  -21.428326
+fps step: 3745 fps step and policy inference: 3633 fps total: 2702 epoch: 2277/2350 frames: 3522490368
+mean_rewards:  [-112.5] last_mean_rewards:  -21.428326
+fps step: 3726 fps step and policy inference: 3611 fps total: 2682 epoch: 2278/2350 frames: 3522523136
+mean_rewards:  [-111.19] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.14 mm, frac>2mm 0.01, grip_x mean 9, term mean 0.011, tracked 0.27
+fps step: 3658 fps step and policy inference: 3541 fps total: 2651 epoch: 2279/2350 frames: 3522555904
+mean_rewards:  [-109.63] last_mean_rewards:  -21.428326
+fps step: 3572 fps step and policy inference: 3461 fps total: 2621 epoch: 2280/2350 frames: 3522588672
+mean_rewards:  [-110.4] last_mean_rewards:  -21.428326
+fps step: 3661 fps step and policy inference: 3545 fps total: 2657 epoch: 2281/2350 frames: 3522621440
+mean_rewards:  [-110.86] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.13 mm, frac>2mm 0.01, grip_x mean 9, term mean 0.011, tracked 0.28
+fps step: 3734 fps step and policy inference: 3615 fps total: 2693 epoch: 2282/2350 frames: 3522654208
+mean_rewards:  [-109.75] last_mean_rewards:  -21.428326
+fps step: 3734 fps step and policy inference: 3616 fps total: 2700 epoch: 2283/2350 frames: 3522686976
+mean_rewards:  [-110.4] last_mean_rewards:  -21.428326
+fps step: 3736 fps step and policy inference: 3621 fps total: 2694 epoch: 2284/2350 frames: 3522719744
+mean_rewards:  [-109.91] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.16 mm, frac>2mm 0.02, grip_x mean 9, term mean 0.013, tracked 0.27
+fps step: 3669 fps step and policy inference: 3557 fps total: 2647 epoch: 2285/2350 frames: 3522752512
+mean_rewards:  [-110.42] last_mean_rewards:  -21.428326
+fps step: 3686 fps step and policy inference: 3572 fps total: 2658 epoch: 2286/2350 frames: 3522785280
+mean_rewards:  [-111.53] last_mean_rewards:  -21.428326
+fps step: 3704 fps step and policy inference: 3582 fps total: 2669 epoch: 2287/2350 frames: 3522818048
+mean_rewards:  [-110.8] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.18 mm, frac>2mm 0.02, grip_x mean 10, term mean 0.015, tracked 0.26
+fps step: 3720 fps step and policy inference: 3597 fps total: 2689 epoch: 2288/2350 frames: 3522850816
+mean_rewards:  [-111.35] last_mean_rewards:  -21.428326
+fps step: 3707 fps step and policy inference: 3588 fps total: 2672 epoch: 2289/2350 frames: 3522883584
+mean_rewards:  [-111.35] last_mean_rewards:  -21.428326
+fps step: 3688 fps step and policy inference: 3570 fps total: 2657 epoch: 2290/2350 frames: 3522916352
+mean_rewards:  [-110.97] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.19 mm, frac>2mm 0.03, grip_x mean 10, term mean 0.016, tracked 0.27
+fps step: 3697 fps step and policy inference: 3578 fps total: 2663 epoch: 2291/2350 frames: 3522949120
+mean_rewards:  [-111.44] last_mean_rewards:  -21.428326
+fps step: 3661 fps step and policy inference: 3545 fps total: 2645 epoch: 2292/2350 frames: 3522981888
+mean_rewards:  [-110.7] last_mean_rewards:  -21.428326
+fps step: 3713 fps step and policy inference: 3593 fps total: 2678 epoch: 2293/2350 frames: 3523014656
+mean_rewards:  [-110.14] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.20 mm, frac>2mm 0.02, grip_x mean 10, term mean 0.016, tracked 0.27
+fps step: 3638 fps step and policy inference: 3522 fps total: 2660 epoch: 2294/2350 frames: 3523047424
+mean_rewards:  [-110.86] last_mean_rewards:  -21.428326
+fps step: 3627 fps step and policy inference: 3513 fps total: 2647 epoch: 2295/2350 frames: 3523080192
+mean_rewards:  [-110.77] last_mean_rewards:  -21.428326
+fps step: 3659 fps step and policy inference: 3546 fps total: 2644 epoch: 2296/2350 frames: 3523112960
+mean_rewards:  [-110.72] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.23 mm, frac>2mm 0.03, grip_x mean 11, term mean 0.018, tracked 0.26
+fps step: 3712 fps step and policy inference: 3589 fps total: 2701 epoch: 2297/2350 frames: 3523145728
+mean_rewards:  [-110.21] last_mean_rewards:  -21.428326
+fps step: 3675 fps step and policy inference: 3551 fps total: 2682 epoch: 2298/2350 frames: 3523178496
+mean_rewards:  [-109.93] last_mean_rewards:  -21.428326
+fps step: 3688 fps step and policy inference: 3566 fps total: 2685 epoch: 2299/2350 frames: 3523211264
+mean_rewards:  [-109.85] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.20 mm, frac>2mm 0.03, grip_x mean 10, term mean 0.016, tracked 0.27
+fps step: 3694 fps step and policy inference: 3572 fps total: 2694 epoch: 2300/2350 frames: 3523244032
+mean_rewards:  [-111.68] last_mean_rewards:  -21.428326
+fps step: 3697 fps step and policy inference: 3580 fps total: 2698 epoch: 2301/2350 frames: 3523276800
+mean_rewards:  [-110.56] last_mean_rewards:  -21.428326
+fps step: 3666 fps step and policy inference: 3547 fps total: 2672 epoch: 2302/2350 frames: 3523309568
+mean_rewards:  [-109.53] last_mean_rewards:  -21.428326
+fps step: 3675 fps step and policy inference: 3556 fps total: 2687 epoch: 2303/2350 frames: 3523342336
+mean_rewards:  [-108.77] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.15 mm, frac>2mm 0.02, grip_x mean 10, term mean 0.012, tracked 0.27
+fps step: 3646 fps step and policy inference: 3528 fps total: 2672 epoch: 2304/2350 frames: 3523375104
+mean_rewards:  [-108.07] last_mean_rewards:  -21.428326
+fps step: 3658 fps step and policy inference: 3546 fps total: 2681 epoch: 2305/2350 frames: 3523407872
+mean_rewards:  [-108.7] last_mean_rewards:  -21.428326
+fps step: 3659 fps step and policy inference: 3544 fps total: 2680 epoch: 2306/2350 frames: 3523440640
+mean_rewards:  [-107.54] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.17 mm, frac>2mm 0.02, grip_x mean 11, term mean 0.013, tracked 0.26
+fps step: 3647 fps step and policy inference: 3524 fps total: 2667 epoch: 2307/2350 frames: 3523473408
+mean_rewards:  [-108.] last_mean_rewards:  -21.428326
+fps step: 3641 fps step and policy inference: 3519 fps total: 2661 epoch: 2308/2350 frames: 3523506176
+mean_rewards:  [-107.68] last_mean_rewards:  -21.428326
+fps step: 3659 fps step and policy inference: 3544 fps total: 2679 epoch: 2309/2350 frames: 3523538944
+mean_rewards:  [-107.66] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.14 mm, frac>2mm 0.01, grip_x mean 10, term mean 0.011, tracked 0.27
+fps step: 3684 fps step and policy inference: 3570 fps total: 2693 epoch: 2310/2350 frames: 3523571712
+mean_rewards:  [-107.2] last_mean_rewards:  -21.428326
+fps step: 3678 fps step and policy inference: 3555 fps total: 2679 epoch: 2311/2350 frames: 3523604480
+mean_rewards:  [-106.76] last_mean_rewards:  -21.428326
+fps step: 3685 fps step and policy inference: 3568 fps total: 2681 epoch: 2312/2350 frames: 3523637248
+mean_rewards:  [-105.7] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.11 mm, frac>2mm 0.01, grip_x mean 10, term mean 0.009, tracked 0.27
+fps step: 3673 fps step and policy inference: 3558 fps total: 2673 epoch: 2313/2350 frames: 3523670016
+mean_rewards:  [-106.16] last_mean_rewards:  -21.428326
+fps step: 3690 fps step and policy inference: 3568 fps total: 2685 epoch: 2314/2350 frames: 3523702784
+mean_rewards:  [-106.64] last_mean_rewards:  -21.428326
+fps step: 3696 fps step and policy inference: 3575 fps total: 2679 epoch: 2315/2350 frames: 3523735552
+mean_rewards:  [-105.81] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.11 mm, frac>2mm 0.01, grip_x mean 10, term mean 0.009, tracked 0.26
+fps step: 3697 fps step and policy inference: 3577 fps total: 2687 epoch: 2316/2350 frames: 3523768320
+mean_rewards:  [-104.93] last_mean_rewards:  -21.428326
+fps step: 3664 fps step and policy inference: 3548 fps total: 2666 epoch: 2317/2350 frames: 3523801088
+mean_rewards:  [-104.78] last_mean_rewards:  -21.428326
+fps step: 3683 fps step and policy inference: 3568 fps total: 2679 epoch: 2318/2350 frames: 3523833856
+mean_rewards:  [-104.76] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.10 mm, frac>2mm 0.01, grip_x mean 9, term mean 0.008, tracked 0.27
+fps step: 3708 fps step and policy inference: 3586 fps total: 2687 epoch: 2319/2350 frames: 3523866624
+mean_rewards:  [-105.36] last_mean_rewards:  -21.428326
+fps step: 3692 fps step and policy inference: 3576 fps total: 2682 epoch: 2320/2350 frames: 3523899392
+mean_rewards:  [-104.37] last_mean_rewards:  -21.428326
+fps step: 3688 fps step and policy inference: 3562 fps total: 2681 epoch: 2321/2350 frames: 3523932160
+mean_rewards:  [-103.9] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.08 mm, frac>2mm 0.00, grip_x mean 8, term mean 0.006, tracked 0.27
+fps step: 3683 fps step and policy inference: 3565 fps total: 2678 epoch: 2322/2350 frames: 3523964928
+mean_rewards:  [-103.51] last_mean_rewards:  -21.428326
+fps step: 3679 fps step and policy inference: 3562 fps total: 2681 epoch: 2323/2350 frames: 3523997696
+mean_rewards:  [-103.22] last_mean_rewards:  -21.428326
+fps step: 3701 fps step and policy inference: 3580 fps total: 2691 epoch: 2324/2350 frames: 3524030464
+mean_rewards:  [-103.17] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.08 mm, frac>2mm 0.01, grip_x mean 8, term mean 0.007, tracked 0.26
+fps step: 3692 fps step and policy inference: 3572 fps total: 2666 epoch: 2325/2350 frames: 3524063232
+mean_rewards:  [-102.79] last_mean_rewards:  -21.428326
+fps step: 3689 fps step and policy inference: 3575 fps total: 2656 epoch: 2326/2350 frames: 3524096000
+mean_rewards:  [-103.14] last_mean_rewards:  -21.428326
+fps step: 3719 fps step and policy inference: 3604 fps total: 2699 epoch: 2327/2350 frames: 3524128768
+mean_rewards:  [-102.76] last_mean_rewards:  -21.428326
+fps step: 3696 fps step and policy inference: 3573 fps total: 2684 epoch: 2328/2350 frames: 3524161536
+mean_rewards:  [-103.46] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.07 mm, frac>2mm 0.00, grip_x mean 7, term mean 0.006, tracked 0.28
+fps step: 3696 fps step and policy inference: 3573 fps total: 2688 epoch: 2329/2350 frames: 3524194304
+mean_rewards:  [-101.35] last_mean_rewards:  -21.428326
+fps step: 3694 fps step and policy inference: 3567 fps total: 2686 epoch: 2330/2350 frames: 3524227072
+mean_rewards:  [-101.81] last_mean_rewards:  -21.428326
+fps step: 3690 fps step and policy inference: 3579 fps total: 2698 epoch: 2331/2350 frames: 3524259840
+mean_rewards:  [-102.03] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.06 mm, frac>2mm 0.00, grip_x mean 7, term mean 0.005, tracked 0.27
+fps step: 3668 fps step and policy inference: 3547 fps total: 2669 epoch: 2332/2350 frames: 3524292608
+mean_rewards:  [-102.46] last_mean_rewards:  -21.428326
+fps step: 3703 fps step and policy inference: 3587 fps total: 2694 epoch: 2333/2350 frames: 3524325376
+mean_rewards:  [-103.62] last_mean_rewards:  -21.428326
+fps step: 3700 fps step and policy inference: 3583 fps total: 2692 epoch: 2334/2350 frames: 3524358144
+mean_rewards:  [-102.71] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.07 mm, frac>2mm 0.00, grip_x mean 7, term mean 0.005, tracked 0.26
+fps step: 3683 fps step and policy inference: 3566 fps total: 2680 epoch: 2335/2350 frames: 3524390912
+mean_rewards:  [-102.59] last_mean_rewards:  -21.428326
+fps step: 3670 fps step and policy inference: 3555 fps total: 2662 epoch: 2336/2350 frames: 3524423680
+mean_rewards:  [-103.59] last_mean_rewards:  -21.428326
+fps step: 3709 fps step and policy inference: 3594 fps total: 2678 epoch: 2337/2350 frames: 3524456448
+mean_rewards:  [-104.98] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.07 mm, frac>2mm 0.00, grip_x mean 7, term mean 0.006, tracked 0.28
+fps step: 3728 fps step and policy inference: 3605 fps total: 2681 epoch: 2338/2350 frames: 3524489216
+mean_rewards:  [-103.27] last_mean_rewards:  -21.428326
+fps step: 3717 fps step and policy inference: 3592 fps total: 2679 epoch: 2339/2350 frames: 3524521984
+mean_rewards:  [-102.92] last_mean_rewards:  -21.428326
+fps step: 3663 fps step and policy inference: 3548 fps total: 2674 epoch: 2340/2350 frames: 3524554752
+mean_rewards:  [-103.06] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.07 mm, frac>2mm 0.00, grip_x mean 7, term mean 0.006, tracked 0.27
+fps step: 3608 fps step and policy inference: 3494 fps total: 2653 epoch: 2341/2350 frames: 3524587520
+mean_rewards:  [-102.49] last_mean_rewards:  -21.428326
+fps step: 3669 fps step and policy inference: 3553 fps total: 2677 epoch: 2342/2350 frames: 3524620288
+mean_rewards:  [-103.91] last_mean_rewards:  -21.428326
+fps step: 3699 fps step and policy inference: 3586 fps total: 2696 epoch: 2343/2350 frames: 3524653056
+mean_rewards:  [-103.15] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.07 mm, frac>2mm 0.00, grip_x mean 7, term mean 0.005, tracked 0.26
+fps step: 3673 fps step and policy inference: 3548 fps total: 2678 epoch: 2344/2350 frames: 3524685824
+mean_rewards:  [-103.67] last_mean_rewards:  -21.428326
+fps step: 3673 fps step and policy inference: 3559 fps total: 2673 epoch: 2345/2350 frames: 3524718592
+mean_rewards:  [-102.69] last_mean_rewards:  -21.428326
+fps step: 3685 fps step and policy inference: 3575 fps total: 2687 epoch: 2346/2350 frames: 3524751360
+mean_rewards:  [-102.88] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.07 mm, frac>2mm 0.00, grip_x mean 7, term mean 0.006, tracked 0.27
+fps step: 3690 fps step and policy inference: 3572 fps total: 2681 epoch: 2347/2350 frames: 3524784128
+mean_rewards:  [-103.28] last_mean_rewards:  -21.428326
+fps step: 3678 fps step and policy inference: 3556 fps total: 2674 epoch: 2348/2350 frames: 3524816896
+mean_rewards:  [-102.98] last_mean_rewards:  -21.428326
+fps step: 3674 fps step and policy inference: 3556 fps total: 2688 epoch: 2349/2350 frames: 3524849664
+mean_rewards:  [-101.97] last_mean_rewards:  -21.428326
+PEN-REWARD last200 (tracked envs): depth mean 0.06 mm, frac>2mm 0.00, grip_x mean 6, term mean 0.005, tracked 0.27
+/workspace/dextrack-venv/lib/python3.8/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+/workspace/dextrack-venv/lib/python3.8/site-packages/gym/spaces/box.py:84: UserWarning: [33mWARN: Box bound precision lowered by casting to float32[0m
+  logger.warn(f"Box bound precision lowered by casting to {self.dtype}")
+/workspace/DexTrack/isaacgymenvs/tasks/allegro_hand_tracking_generalist.py:4684: DeprecationWarning: an integer is required (got type isaacgym._bindings.linux-x86_64.gym_38.DofDriveMode).  Implicit conversion to integers using __int__ is deprecated, and may be removed in a future version of Python.
+  asset_options.default_dof_drive_mode = gymapi.DOF_MODE_POS
+/workspace/dextrack-venv/lib/python3.8/site-packages/rl_games/common/a2c_common.py:254: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = torch.cuda.amp.GradScaler(enabled=self.mixed_precision)
+/workspace/dextrack-venv/lib/python3.8/site-packages/rl_games/algos_torch/torch_ext.py:62: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return func(*args, **kwargs)
+/workspace/DexTrack/isaacgymenvs/learning/a2c_supervised.py:3261: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=self.mixed_precision):
+fps step: 3643 fps step and policy inference: 3529 fps total: 2675 epoch: 2350/2350 frames: 3524882432
+mean_rewards:  [-102.35] last_mean_rewards:  -21.428326
+getting weights with keys: dict_keys(['scaler', 'model'])
+=> saving checkpoint './logs/dense_apple_w300_gated/tracking_ori_grab_s10_apple_eat_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5_18-03-32-13/nn/last_tracking_ori_grab_s10_apple_eat_1_nf_300_obs_pure_state_wref_wdelta_density_500.0_trans_0.5_rot_0.5_goalcond_False_kinebias_t0.5r0.5f20_rfd_0.3_rh_0.5_ep_2350_rew__-102.35_.pth'
+MAX EPOCHS NUM!
+Using VHACD cache directory '/root/.isaacgym/vhacd'
+Found existing convex decomposition for mesh '../assets/meshdatav3_scaled/sem/ori_grab_s10_apple_eat_1/coacd/decomposed.obj'

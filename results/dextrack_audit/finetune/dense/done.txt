@@ -5,3 +5,4 @@ cube_w1000_sdf DONE
 stoch DONE
 apple_w300_sdf DONE
 apple_w100_gated DONE
+apple_w300_gated DONE

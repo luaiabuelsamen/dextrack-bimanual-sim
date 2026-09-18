@@ -5541,3 +5541,9 @@ ft 2.64 mm / 43 % / 10x / 14/16 vs base 2.34 / 46 % / 19x / 13/16.
 Train-time depth stat averaged over dropped envs -> now tracked-only.
 w 300 gated queued beside the scratch control (epoch 624/3000 at 20:31).
 
+### Apple, gated w 300: lets go again (0/16, 0.17 mm). tracked 0.26 all run.
+Conclusion for the night: the penetration term works on a strong per-clip
+tracker (cube: -26 % pen, -56 % grip, 16/16) and fails on the generalist's
+marginal clips by two exits (drop at >=300, no change at 100). Control run
+(cube from scratch, 3000 ep) still training; pod stops 06:41 PDT.
+
