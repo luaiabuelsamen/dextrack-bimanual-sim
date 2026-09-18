@@ -22,7 +22,7 @@ was written down; **[NOTES.md](NOTES.md) is the log and is authoritative.**
 | **D1 · Audit DexTrack's released policies with penetration read live** | done | their release cannot run its own checkpoints; fixed, two of three per-clip policies track at 1–2 mm of interpenetration; the generalist holds 17 of 43 GRAB clips at a median 1.7 mm |
 | **Penetration as a reward term in their trainer** | done, bounded | a per-clip policy gives up a fifth to a quarter of its interpenetration and half its grip (two seeds: one keeps all 16 rollouts, one loses 4 of 16); the generalist on a marginal clip lets go instead |
 | **D2 · Our MuJoCo pipeline on DexTrack's rule** | done | 20 of 40 references hold under perturbation; 6 strict / 13 loose of 40 on their rule, 16 of 40 on ours |
-| **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | environment built, trained, and its first result understood | two hands on one object in Isaac Gym, the policy on the right and the reference on the left: the object is still held in 16 of 16 environments and the right hand presses 38 % less deeply into it |
+| **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | environment built and trained; its first result was a false positive, corrected | two hands on one object in Isaac Gym, the policy on the right and the reference on the left: the object is still held in 16 of 16 environments and the right hand presses 38 % less deeply into it |
 
 The goal, the guardrails and D4's stop rules: **[docs/BRIEF.md](docs/BRIEF.md)**.
 The evidence behind every row: **[docs/STAGE2.md](docs/STAGE2.md)**.
@@ -109,15 +109,25 @@ past 2 mm red, the audit's numbers on every frame.
 
 Two hands on one object in DexTrack's own simulator. The left hand is
 appended as the last actor, so every tensor slice in their task still
-addresses the right hand and nothing they wrote changes. Adding it leaves the
-object held in all sixteen environments and drops the right hand's
-interpenetration from 1.21 mm to 0.74 mm, because the load is shared.
+addresses the right hand and nothing they wrote changes.
+
+**The environment works; the first result from it was a false positive.**
+Adding the second hand loses the object: end-of-clip error goes from 2.27 cm
+with one hand to 10.30 cm with two, because the reference-driven left hand
+knocks the controller clear around frame 120. The right hand's
+interpenetration falls from 1.21 mm to 0.74 mm not because the load is
+shared but because it is no longer holding anything. This was reported the
+other way round until the rollouts were watched frame by frame, and the
+reason it passed was a `held` column that read the object's pose after the
+episode reset and therefore scored 16 of 16 for every run ever measured with
+it, including one that left the object a metre from its target.
 
 Training a policy inside that scene then produced the session's sharpest
-negative: every metric improved because **the right hand stopped taking hold
-at all**, touching the object on 23 frames of 299 against the generalist's
-152, and those 23 are the last eight per cent of the clip rather than a grasp
-that slipped, while the position-driven left hand carried it throughout
+negative: tracking recovered to 1.85 cm because **the right hand stopped
+taking hold at all**, touching the object on 23 frames of 299 against the
+generalist's 152, and those 23 are the last eight per cent of the clip rather
+than a grasp that slipped, while the position-driven left hand carried the
+controller alone and did it better than the policy had
 ([the render](figures/bimanual_isaac_gc_finetuned.gif)). An objective that
 only asks where the object ends up is satisfied by a hand that does nothing,
 whenever something else in the scene will do the work. A partner driven

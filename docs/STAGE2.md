@@ -682,6 +682,47 @@ problem and needs the doubled action space this design deliberately avoided.
 The environment is built and measured either way, and that was the thing that
 did not exist.
 
+### Correction: the second hand made it worse, and the success column was empty
+
+Watching the rollouts frame by frame, rather than reading the summary and a
+four-frame sheet, overturned the result above. Two things were wrong.
+
+**The `held` column was vacuous.** The all-environment summary took its
+end-of-clip error from the last logged row, and that row is written after the
+episode resets: the object is back at its start pose, which is where the goal
+sits at frame zero. So the error read 0.00 cm in all sixteen environments of
+every run, and `held` was 16 of 16 unconditionally. The camera run scored 16
+of 16 while leaving the object on the ground a metre and a quarter away.
+Corrected by `dextrack/pod/patches/patch_held_fix.py`, which takes the end of
+the clip from before the reset.
+
+**Measured properly, adding the second hand loses the object.** End-of-clip
+error, environment zero, averaged over the last ten frames before the reset:
+
+| | error at the end of the clip | what the render shows |
+|---|---:|---|
+| generalist, one hand | 2.27 cm | holds the controller throughout |
+| generalist + reference-driven left hand | 10.30 cm | holds to about frame 120, then the object is knocked clear and left behind |
+| fine-tuned in the two-hand scene | 1.85 cm | the left hand carries it the whole way; the right hand never closes |
+
+So the second hand does not share the load, it fights the first: the object
+ends four times further from its target than with one hand. **The right
+hand's lower interpenetration, 1.21 mm down to 0.74 mm, is a symptom of
+losing the object, not of sharing it.** And the fine-tune's recovery to 1.85
+cm is the right hand withdrawing entirely, leaving a single position-driven
+hand to carry the object cleanly, which it does better than the policy did.
+
+The signal was in the table the whole time. Mean tracking error went 4.64 cm
+with one hand to 7.48 and 8.34 cm with two, and I wrote that down as "it
+costs 2.6 cm of tracking error" and treated it as the price of load sharing.
+It was the result. The `held` column, which said nothing, is what made the
+rest look like a success.
+
+Three lessons, all of them old ones in this project. A success rule has to be
+checked against a case it should fail before it is quoted. A contact count is
+not a contact timeline. And the only reason any of this was caught is that
+the rollouts were watched end to end rather than sampled at four frames.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with

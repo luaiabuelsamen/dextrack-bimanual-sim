@@ -5647,3 +5647,22 @@ on the object; it collides with it as the clip ends. Figure re-rendered with
 an accurate title. Check a contact TIMELINE, not a contact COUNT, before
 describing what a policy did.
 
+### CORRECTION: the two-hand result was a false positive (2026-09-18)
+Watched the rollouts frame by frame (16-frame sheets, not 4) at the owner's
+suggestion. Two errors:
+1. `held` read _a[-1] = the POST-RESET row. Object back at start pose == goal
+   at frame 0 -> end err 0.00 for every env of every run -> held 16/16
+   unconditional. bi_camera scored 16/16 with the object 125 cm away.
+   Fix: dextrack/pod/patches/patch_held_fix.py (end of clip taken before the
+   reset, averaged over 10 frames).
+2. End err env0, last 10 real frames:
+       generalist one hand            2.27 cm   holds throughout
+       generalist + left hand        10.30 cm   loses it ~frame 120
+       fine-tuned in two-hand scene   1.85 cm   left hand carries, right never closes
+   So the second hand FIGHTS the first; the right hand's 1.21 -> 0.74 mm
+   penetration drop is losing the object, not sharing load. I had written
+   "costs 2.6 cm of tracking error" -- that WAS the result, and the empty
+   held column made it look like a win.
+Rules: check a success rule against a case it should FAIL before quoting it;
+a contact count is not a contact timeline; watch the rollout end to end.
+
