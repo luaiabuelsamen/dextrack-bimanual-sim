@@ -210,11 +210,17 @@ In order, each with its own stop rule:
 
 1. **Control: one per-clip policy trained from scratch in their trainer**,
    small cube, their command line, 1024 environments, their success rule
-   and the dense probe read at the end. Calibrates epochs and cost (their
-   per-clip runs are hours at 8192 environments; expect 2 to 4 hours on a
-   3090, about a dollar). Stop rule: if it does not track within 2 cm by
-   3000 epochs, the framework is not reproducible at this scale and D4
-   stops here with that result.
+   and the dense probe read at the end. **Ran 2026-09-17/18: at 93 M frames
+   the policy never grasps the cube** (41 of 260 evaluated frames touch it,
+   21.6 cm mean error, reward -41.3 against their +208.9). Their released
+   checkpoints carry frame counters and the cube's stands at 228 M, so the
+   original "3000 epochs" bought 41 % of that budget. Stop rule restated in
+   frames, the invariant across environment counts: **if it does not track
+   within 2 cm by 229 M frames (7000 epochs at 1024 environments), the
+   framework is not reproducible at this scale and D4 stops here with that
+   result.** The continuation is training. Budget for one per-clip policy:
+   228 M to 704 M frames, eight to twenty-four hours on a 3090, two to five
+   dollars.
 2. **The reference.** One clip from the 63, both hands retargeted to
    Allegro in their `passive_active_info` format (object pose, two 22-dof
    trajectories), checked by rendering the kinematic replay with the
@@ -232,7 +238,7 @@ In order, each with its own stop rule:
    3 mm and the object within their loose rule at the end.
 
 Not in D4: a bimanual generalist, more than one clip, the Shadow hand,
-real-hand data beyond GRAB. Budget: about 20 pod-hours (under 5 dollars)
+real-hand data beyond GRAB. Budget, corrected by the control: about 40 pod-hours (under 10 dollars)
 and one to two weeks of evenings; the estimate is honest, not promised.
 Guardrails as before: nothing runs on the pod that did not run at 4
 environments first; every number rendered before it is written down; the

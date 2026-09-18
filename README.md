@@ -22,7 +22,7 @@ was written down; **[NOTES.md](NOTES.md) is the log and is authoritative.**
 | **D1 · Audit DexTrack's released policies with penetration read live** | done | their release cannot run its own checkpoints; fixed, two of three per-clip policies track at 1–2 mm of interpenetration; the generalist holds 17 of 43 GRAB clips at a median 1.7 mm |
 | **Penetration as a reward term in their trainer** | done, bounded | a per-clip policy gives up a fifth to a quarter of its interpenetration and half its grip (two seeds: one keeps all 16 rollouts, one loses 4 of 16); the generalist on a marginal clip lets go instead |
 | **D2 · Our MuJoCo pipeline on DexTrack's rule** | done | 20 of 40 references hold under perturbation; 6 strict / 13 loose of 40 on their rule, 16 of 40 on ours |
-| **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | proposed, control run in progress | first step, their per-clip policy trained from scratch, is training tonight |
+| **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | control run, first result | from scratch at 93 M frames their per-clip policy never grasps the cube; their released checkpoint for it carries 228 M frames, so the control is running to that budget before it is judged |
 
 The goal, the guardrails and D4's stop rules: **[docs/BRIEF.md](docs/BRIEF.md)**.
 The evidence behind every row: **[docs/STAGE2.md](docs/STAGE2.md)**.
@@ -90,6 +90,10 @@ past 2 mm red, the audit's numbers on every frame.
 |---|
 | ![Three moments of the cube clip, released policy above and penetration-aware fine-tune below, fewer red links below](figures/dextrack_cubesmall_base_vs_penft.jpg) |
 | ![The fine-tuned DexTrack policy carrying the translucent cube in a light grip, one thumb-tip excursion](figures/dextrack_cubesmall_penft.gif) |
+
+| From scratch, 93 M frames: the hand follows the reference and the cube never moves |
+|---|
+| ![The Allegro hand moving through reference poses beside a cube that stays on the ground, error climbing to 36 cm](figures/dextrack_cubesmall_scratch.gif) |
 
 | Small cube, released, 0.44 cm | Duck, released, 0.26 cm |
 |---|---|

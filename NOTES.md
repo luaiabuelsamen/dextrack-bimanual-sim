@@ -5565,3 +5565,18 @@ so new work follows them. Earlier entries reference the old paths.
 2.12 / 16/16. Quote the range, run a third seed before any single number.
 Ledger + W&B + Hub rows exist for it.
 
+### D4 step 1 control: from scratch, 93M frames, never grasps (2026-09-18)
+Their per-clip cmd, cube, 1024 envs, no pen term, 2844 ep = 93.2M frames:
+41/260 frames touch the cube, grip 0, pen 0.22 mm, err 21.6 cm,
+rot 77 deg, reward -41.3 (theirs +208.9). The hand tracks the
+wrist, the cube stays put. Released ckpt frame counters: cube ep 324 /
+228.1M, duck ep 1000 / 704M, generalist ep 2200 / 3.52B. Their per-clip
+epoch = 704k frames vs our 32.8k, so the brief's "3000 epochs" stop rule
+was 41 % of their budget -- restated in FRAMES (229M). Continuation to
+ep 7000 running (wandb y19nzvst).
+Caution: end err 3-4 cm in all 16 envs because the reference returns beside
+the resting cube; an end-distance-only "held" rule calls that 16 holds. The
+ledger's held column does exactly that and is wrong for un-grasped runs.
+Their own rule is not fooled: strict and loose both False here (mean pos
+21.6 cm > 10, rot 77 deg > 40).
+
