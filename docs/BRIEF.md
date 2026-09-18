@@ -174,3 +174,63 @@ Ask a labmate for a Shadow-hand MuJoCo contact setup. Ask the DexTrack
 authors whether they ever measured penetration. Find out whether a lab
 workstation or a Savio allocation exists before renting anything. Decide,
 after D2, whether the audit paper or the pipeline paper is the one to write.
+
+## Status after the probe correction (2026-09-17, late)
+
+The fine-tune's 46 % was half probe-learning; on a 2 mm grid the cut is
+22 % (2.87 to 2.23 mm), 16 of 16 held. The probe now trains on a dense
+grid read through a signed-depth volume (64 to 124 ms per step at 1024
+environments on any object) and is judged by the exact plane test. The
+rented host lost its GPU mid-run; work moved to a second pod. Owner's
+question, answered here: **we have not reproduced DexTrack.** Their code
+runs, their policies track, their generalist holds 17 of 43, and their
+trainer accepts our term. Their Table 1 is not reproduced, their own
+counter reads 0 on their released test path, and no policy has been
+trained from scratch. That is the base the next goal stands on.
+
+## D4, the bimanual deliverable (proposed 2026-09-17)
+
+**One GRAB two-handed clip tracked by two Allegro hands in DexTrack's
+Isaac Gym trainer, both hands scored on their rule and on ours, rendered.**
+
+What exists for it: GRAB records both hands and `oppdef.human.grab` loads
+them; 136 of GRAB's 291 sequences have both hands on the object at once and
+63 hold that for 15 frames or more (`scene.py`); the MuJoCo bimanual scene
+and grasp search exist (`BimanualScene`, the binoculars and camera GIFs);
+DexTrack ships `allegro_hand_description_left.urdf`; their per-clip
+reference is only object pose plus a 300 x 22 right-hand trajectory, so the
+left hand must be retargeted by us, which `retarget.py` already does for
+Allegro.
+
+In order, each with its own stop rule:
+
+1. **Control: one per-clip policy trained from scratch in their trainer**,
+   small cube, their command line, 1024 environments, their success rule
+   and the dense probe read at the end. Calibrates epochs and cost (their
+   per-clip runs are hours at 8192 environments; expect 2 to 4 hours on a
+   3090, about a dollar). Stop rule: if it does not track within 2 cm by
+   3000 epochs, the framework is not reproducible at this scale and D4
+   stops here with that result.
+2. **The reference.** One clip from the 63, both hands retargeted to
+   Allegro in their `passive_active_info` format (object pose, two 22-dof
+   trajectories), checked by rendering the kinematic replay with the
+   probe on both hands. Stop rule: kinematic penetration over 10 mm on
+   either hand for a quarter of the frames means the clip is a burial in
+   the reference; pick another.
+3. **The environment.** A second hand actor from the left URDF, observations
+   and reward duplicated per hand, the penetration term summed over both,
+   the success rule per hand. Four-environment smoke on the Jetson-side
+   code path is impossible (Isaac Gym is x86); smoke at 4 environments on
+   the pod before any run over 100.
+4. **Training and the score.** Per-clip PPO as in step 1. Report: held at
+   the end, dense penetration per hand, grip per hand, their rule per hand,
+   with the reset frame and the end frame rendered. Pass: both hands under
+   3 mm and the object within their loose rule at the end.
+
+Not in D4: a bimanual generalist, more than one clip, the Shadow hand,
+real-hand data beyond GRAB. Budget: about 20 pod-hours (under 5 dollars)
+and one to two weeks of evenings; the estimate is honest, not promised.
+Guardrails as before: nothing runs on the pod that did not run at 4
+environments first; every number rendered before it is written down; the
+measure the policy optimises is never the measure that judges it.
+
