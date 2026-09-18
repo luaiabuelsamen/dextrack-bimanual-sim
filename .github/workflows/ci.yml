@@ -10,7 +10,7 @@ jobs:
     timeout-minutes: 25
     env:
       PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1"
-      MUJOCO_GL: egl
+      MUJOCO_GL: disable
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
