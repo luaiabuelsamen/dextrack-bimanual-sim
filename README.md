@@ -117,6 +117,7 @@ generalist, more than one clip.
 | machine | a RunPod community RTX 3090 at $0.22 per hour, `/workspace` persistent; rebuilt from [`dextrack/pod/setup_pod.sh`](dextrack/pod/setup_pod.sh) in ten minutes after a host lost its GPU mid-run |
 | cost | a 150-epoch fine-tune on the cube is 25 minutes; the 43-clip generalist audit an hour; the from-scratch control about six hours; everything to date under $5 |
 | the Jetson | renders, offline audits, docs, and the earlier MuJoCo pipeline |
+| tracking | every run has a row in `results/dextrack_audit/runs.jsonl`, a [W&B](https://wandb.ai/luai-abuelsamen-university-of-california-berkeley/dextrack-bimanual) run with its metrics and render, and a folder in a private Hugging Face dataset (`dextrack/track.py`) |
 
 The workflow, the protocol and every script: **[dextrack/README.md](dextrack/README.md)**.
 

@@ -18,6 +18,8 @@ its policies do to the object. The Jetson side of the repository (`src/`,
 | `pod/dense_eval.sh`, `pod/sweep.sh`, `pod/ft_dense.sh` | the evaluation and sweep scripts as they ran; `sweep.sh` is the sparse-probe sweep, kept as the record of the mistake. |
 | `pod/gen_batch.sh`, `pod/summarize_gen.py` | the 43-clip generalist audit. |
 | `pod/patches/` | the incremental patches that became `task_hook.diff`, in order. |
+| `pod/wandb_utils.py` | the trainer's W&B observer, restored: the release imports it commented out and the class was missing. |
+| `track.py` | the ledger, W&B evaluation runs and Hub upload (see Observability). |
 | `pod/train_cmd_cube.txt`, `pod/gen_cmd.txt` | DexTrack's own test command lines for the cube checkpoint and the generalist; every run is a `sed` of one of these. |
 
 ## The protocol
@@ -34,6 +36,29 @@ its policies do to the object. The Jetson side of the repository (`src/`,
    printed on one `AUDIT_ALLENV` line.
 3. **Audit env 0 offline** (`audit.py`) with the independent 400-point
    sampler, and **render it** (`render.py`) before a number is written down.
+
+## Observability
+
+Three layers, each usable without the others:
+
+1. **The ledger**, `results/dextrack_audit/runs.jsonl`: one row per run with
+   the clip, checkpoint, term weight, probe settings, epochs, and the exact
+   test's base and fine-tuned metrics (per-env values included), plus the
+   commit and, when present, the env-0 audit, the render, the checkpoint,
+   the W&B and Hub links. `track.py add` writes a row; `track.py backfill`
+   parses a directory of evaluation logs. The README's tables are read off it.
+2. **Weights & Biases**, project `dextrack-bimanual`. Training runs come from
+   the trainer's restored observer (`pod/wandb_utils.py`: rl_games' reward,
+   episode-length and loss scalars, plus `pen/*` from the hook every 200
+   steps, with every `AUDIT_*` setting in the config). Evaluation runs
+   (`job_type=eval`) come from `track.py`: base and fine-tuned metrics side
+   by side, per-env tables, the per-frame penetration curve, the render.
+   Runs are grouped by clip. `AUDIT_WANDB=0` turns it off for a smoke run.
+3. **The Hub**, private dataset `luaia/dextrack-bimanual-runs`: `track.py
+   publish` uploads a run's logs, summaries, audit, render and checkpoint
+   under `runs/<tag>/` and refreshes the ledger. Private, and it stays so:
+   every log carries object trajectories derived from GRAB, which is
+   licensed and not redistributable.
 
 ## Running it
 

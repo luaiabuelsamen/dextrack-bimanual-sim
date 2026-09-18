@@ -50,6 +50,14 @@ untouched. Training at 1024 environments; evaluation at 16 with the exact
 plane test on the dense grid; env 0 audited offline and rendered. A `DONE`
 marker copied from another machine is not a result: check the log timestamp.
 
+Every run is tracked three ways, and a run that is not in all three is not
+finished: a row in `results/dextrack_audit/runs.jsonl` (`dextrack/track.py
+add`), a W&B run in project `dextrack-bimanual` (training runs report
+themselves; evaluations are logged by `track.py` with the render), and a
+folder in the private Hub dataset `luaia/dextrack-bimanual-runs`
+(`track.py publish`). The Hub repo stays private: the logs carry
+GRAB-derived trajectories.
+
 ## Style
 
 Python 3.10+, numpy/torch, no frameworks beyond what the pipeline needs.
