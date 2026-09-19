@@ -11,7 +11,7 @@ cd $WS
 # 1. code: the DexTrack fork on its audit branch (the hook), and this repository
 [ -d DexTrack ] || git clone -q -b audit https://github.com/luaiabuelsamen/DexTrack.git
 [ -d dextrack-bimanual-sim ] || git clone -q https://github.com/luaiabuelsamen/dextrack-bimanual-sim.git
-(cd dextrack-bimanual-sim && git pull -q)
+(cd dextrack-bimanual-sim && git pull -q 2>/dev/null) || true   # a copied tree has no git metadata
 cp dextrack-bimanual-sim/dextrack/penetration_torch.py $WS/penetration_torch.py
 cp dextrack-bimanual-sim/dextrack/pod/run.py $WS/run.py
 cp dextrack-bimanual-sim/dextrack/pod/*_cmd*.txt $WS/ 2>/dev/null || true
@@ -31,13 +31,17 @@ fi
 # the release omits datasetv4.1; their loader reads an unused qpos and a scale of 1.0
 python3 - <<'PY'
 import os, numpy as np
-root = "/workspace/DexTrack/assets/datasetv4.1"; sem = "/workspace/DexTrack/assets/meshdatav3_scaled/sem"
+# their loader does os.listdir(datasetv4.1/sem/<instance>) and reads every npz
+# inside for `qpos` and `scale`, so the stub is a DIRECTORY per instance, not a
+# file. `scale` is stored inverted: they compute round(1/scale, 2).
+root = "/workspace/DexTrack/assets/datasetv4.1/sem"; sem = "/workspace/DexTrack/assets/meshdatav3_scaled/sem"
 os.makedirs(root, exist_ok=True); n = 0
 for inst in os.listdir(sem):
-    p = os.path.join(root, f"{inst}.npz")
-    if not os.path.exists(p):
-        np.savez(p, qpos=np.zeros(22, np.float32), scale=np.float32(1.0)); n += 1
-print("datasetv4.1 stubs written:", n)
+    d = os.path.join(root, inst)
+    if not os.path.isdir(d) or not os.listdir(d):
+        os.makedirs(d, exist_ok=True)
+        np.savez(os.path.join(d, "stub.npz"), qpos=np.zeros(22, np.float32), scale=np.float32(1.0)); n += 1
+print("datasetv4.1 stub directories written:", n)
 PY
 
 # the left hand they do not ship, generated from their own two urdfs so this
@@ -55,8 +59,12 @@ uv python install 3.8 >/dev/null
 P=$WS/dextrack-venv/bin/python
 uv pip install -q --python $P torch==2.4.1 torchvision==0.19.1 --index-url https://download.pytorch.org/whl/cu121
 uv pip install -q --python $P numpy==1.24.4 gym==0.23.1 omegaconf==2.3.1 hydra-core==1.3.2 rl-games==1.6.1 scipy==1.10.1 \
-  trimesh==4.12.2 rtree ninja pyyaml termcolor tensorboard==2.14.0 tensorboardX "wandb>=0.17,<0.19" huggingface_hub imageio \
+  trimesh==4.12.2 rtree ninja pyyaml termcolor tensorboard==2.14.0 tensorboardX huggingface_hub imageio \
   matplotlib==3.7.5 mujoco==3.2.3 transforms3d opencv-python pillow==10.4.0 psutil setproctitle pygame==2.1.0 pyopengl glfw
+# rl-games 1.6.1 pins wandb below 0.13, which cannot log what we need. Install it
+# after, on its own, so the resolver does not have to satisfy both at once; the
+# only part of wandb rl_games touches is wandb.init, unchanged across these.
+uv pip install -q --python $P "wandb>=0.17,<0.19"
 uv pip install -q --python $P -e $WS/isaacgym_pkg/isaacgym/python
 uv pip install -q --python $P $WS/DexTrack/whls/torch_cluster-1.6.3+pt24cu121-cp38-cp38-linux_x86_64.whl
 echo $WS/DexTrack > dextrack-venv/lib/python3.8/site-packages/dextrack.pth

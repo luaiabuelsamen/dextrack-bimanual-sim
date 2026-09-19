@@ -723,6 +723,43 @@ checked against a case it should fail before it is quoted. A contact count is
 not a contact timeline. And the only reason any of this was caught is that
 the rollouts were watched end to end rather than sampled at four frames.
 
+### Two hands on one clip, both engaged (2026-09-18)
+
+The contact term went in and the run is the one this was for. Same clip,
+`s1_gamecontroller_lift`, the generalist fine-tuned 150 epochs inside the
+two-hand scene, left hand driven from the reference, right hand under the
+policy, evaluated at 16 environments on the exact plane test with the
+corrected `held` rule.
+
+| right hand | contact frames | its penetration | left hand's | grip | tracking error |
+|---|---:|---:|---:|---:|---:|
+| generalist, untrained in this scene | 152 of 299 | 0.81 mm | 0.24 mm | 17.0x | 7.48 cm |
+| fine-tuned, no contact term | 23 of 299 | 0.17 mm | 0.57 mm | 3.0x | 2.28 cm |
+| **fine-tuned, contact term** | **134 of 298** | 2.09 mm | 1.12 mm | **22.3x** | 4.05 cm |
+
+**The withdrawal is fixed.** Without the term the right hand touched the
+object on 23 frames, all of them in the last eight per cent of the clip.
+With it, 134 frames including one unbroken run of a hundred, from frame 22 to
+frame 122, at 33 to 42 N, eleven to thirteen times the object's weight. Grip
+went from 3x to 22x. That is a hand holding something.
+
+**And the object is carried the whole way.** Watched frame by frame
+(`figures/bimanual_isaac_gc_contact.gif`): the controller stays between the
+two hands for all 298 frames, tracking error 0.1 cm at the start, 8.2 cm at
+its worst, 4.05 cm on average, 15 of 16 environments inside their
+10 cm rule at the end. Both hands are on the object and the object goes where
+the reference goes.
+
+What it is not. The right hand's contact lapses between frames 123 and 240,
+where the left hand carries alone before the right returns. The left hand is
+driven from the reference rather than by a policy, so this is one learned hand
+and one scripted one, which the survey's corpus does not do and which the
+decaying-assist schedule of `dexmachina_2025` is the principled replacement
+for. The left trajectory is the right one reflected across the object, not the
+human's own left hand. One clip, one seed. The tracking error is better than
+the untrained pairing's 7.48 cm but worse than the single hand's 4.64, so the
+second hand still costs accuracy.
+
 **What this settles and what it does not.** Settled: the property is
 dynamic and searchable — scoring the end of the carry turns one clean end
 state into nineteen, on the same seeds, in the same neighbourhood, with
