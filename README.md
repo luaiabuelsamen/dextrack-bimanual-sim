@@ -22,7 +22,7 @@ was written down; **[NOTES.md](NOTES.md) is the log and is authoritative.**
 | **D1 · Audit DexTrack's released policies with penetration read live** | done | their release cannot run its own checkpoints; fixed, two of three per-clip policies track at 1–2 mm of interpenetration; the generalist holds 17 of 43 GRAB clips at a median 1.7 mm |
 | **Penetration as a reward term in their trainer** | done, bounded | a per-clip policy gives up a fifth to a quarter of its interpenetration and half its grip (two seeds: one keeps all 16 rollouts, one loses 4 of 16); the generalist on a marginal clip lets go instead |
 | **D2 · Our MuJoCo pipeline on DexTrack's rule** | done | 20 of 40 references hold under perturbation; 6 strict / 13 loose of 40 on their rule, 16 of 40 on ours |
-| **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | environment built and trained; its first result was a false positive, corrected | two hands on one object in Isaac Gym, the policy on the right and the reference on the left: the object is still held in 16 of 16 environments and the right hand presses 38 % less deeply into it |
+| **D4 · One two-handed GRAB clip, two Allegro hands, in their trainer** | **done** | two hands on one object in Isaac Gym, policy right and reference left. With a fingertip contact term the right hand holds for 134 of 298 frames at 22x the object's weight and the controller is carried the whole clip at 4.1 cm mean error, 15 of 16 inside their rule |
 
 The goal, the guardrails and D4's stop rules: **[docs/BRIEF.md](docs/BRIEF.md)**.
 The evidence behind every row: **[docs/STAGE2.md](docs/STAGE2.md)**.
@@ -105,7 +105,7 @@ past 2 mm red, the audit's numbers on every frame.
 
 ## Two hands
 
-![Two Allegro hands holding a translucent gamecontroller in Isaac Gym, the right driven by DexTrack's policy and the left by the reference](figures/bimanual_isaac_gamecontroller.gif)
+![Two Allegro hands carrying a translucent gamecontroller through a GRAB clip in Isaac Gym, the right hand under DexTrack's policy and the left driven from the reference](figures/bimanual_isaac_gc_contact.gif)
 
 Two hands on one object in DexTrack's own simulator. The left hand is
 appended as the last actor, so every tensor slice in their task still

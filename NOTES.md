@@ -5666,3 +5666,17 @@ suggestion. Two errors:
 Rules: check a success rule against a case it should FAIL before quoting it;
 a contact count is not a contact timeline; watch the rollout end to end.
 
+### BIMANUAL ON ONE CLIP (2026-09-18, RTX 4090)
+s1_gamecontroller_lift, generalist + reference-driven left hand, 150 ep with
+the PhysHOI/ManipTrans contact term (AUDIT_CONTACT_W=0.5 BETA=10), corrected held:
+    right contact 134/298 frames (23/298 without the term), one unbroken run
+    frames 22-122 at 33-42 N = 11-13x weight; grip 3.0x -> 22.3x
+    right pen 2.09 mm, left 1.12 mm, err 4.05 cm, held 15/16
+Watched 16 sampled frames: the controller stays between the hands the whole
+clip, err 0.1 -> 8.2 cm. Right-hand contact lapses frames 123-240.
+Cost of getting here: a CUDA illegal-memory-access bisect. Writing the left
+hand's dof state via set_dof_state_tensor_indexed faults at 1024 envs (fine at
+4 and 256), from the physics step AND from reset_idx. Left hand is now placed
+at creation and held by position targets only (AUDIT_BI_TELEPORT=0). The
+contact term was blamed first and was innocent; bisected by disabling each.
+
