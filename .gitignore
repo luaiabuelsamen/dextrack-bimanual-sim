@@ -26,3 +26,6 @@ vendor/GRAB/
 
 # the dextrack run specs ARE source; the bare runs/ rule above is for training output
 !dextrack/runs/
+
+# wandb run directories, written by the local eval logger
+wandb/
