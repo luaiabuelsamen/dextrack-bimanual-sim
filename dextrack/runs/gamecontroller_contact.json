@@ -1,0 +1,4 @@
+{"kind": "finetune", "base": "gen", "clip": "ori_grab_s1_gamecontroller_lift",
+ "checkpoint": "./ckpts/grab_trajs_tracking_ckpt.pth",
+ "w_pen": 0, "epochs": 150, "envs": 1024,
+ "note": "the literature's fix for a hand that stops touching: PhysHOI's contact term in ManipTrans's exponential form. Run with AUDIT_BIMANUAL set and AUDIT_CONTACT_W=0.5 AUDIT_CONTACT_BETA=10"}

@@ -40,6 +40,14 @@ for inst in os.listdir(sem):
 print("datasetv4.1 stubs written:", n)
 PY
 
+# the left hand they do not ship, generated from their own two urdfs so this
+# does not depend on a file happening to be lying around
+U=$WS/DexTrack/assets/allegro_hand_description/urdf
+[ -f $U/allegro_hand_description_left_fly_v2.urdf ] || python3 dextrack-bimanual-sim/dextrack/left_hand.py \
+  --right $U/allegro_hand_description_right_fly_v2.urdf \
+  --left  $U/allegro_hand_description_left.urdf \
+  --out   $U/allegro_hand_description_left_fly_v2.urdf
+
 # 3. python: uv, 3.8, the venv, the pinned stack
 which uv >/dev/null 2>&1 || (curl -LsSf https://astral.sh/uv/install.sh | sh >/dev/null)
 uv python install 3.8 >/dev/null
