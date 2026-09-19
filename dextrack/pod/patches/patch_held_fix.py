@@ -56,7 +56,7 @@ for old, new in (
     assert s.count(old) == 1, (old, s.count(old))
     s = s.replace(old, new, 1)
 
-T.write_text(s)
 import ast
-ast.parse(s)
+ast.parse(s)          # never write a file that does not parse
+T.write_text(s)
 print(f"patched {T}: held now measured before the reset")

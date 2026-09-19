@@ -92,11 +92,12 @@ s = s.replace(old, new, 1)
 
 # report it beside the depth statistic
 old = '''                print(f"PEN-REWARD last200 (tracked envs): depth mean {a[:,0].mean():.2f} mm, frac>2mm {a[:,1].mean():.2f}, grip_x mean {a[:,2].mean():.0f}, term mean {a[:,3].mean():.3f}, tracked {a[:,4].mean():.2f}", flush=True)'''
-new = '''                print(f"PEN-REWARD last200 (tracked envs): depth mean {a[:,0].mean():.2f} mm, frac>2mm {a[:,1].mean():.2f}, grip_x mean {a[:,2].mean():.0f}, term mean {a[:,3].mean():.3f}, tracked {a[:,4].mean():.2f}, contact {getattr(self, "_contact_last", float("nan")):.3f}", flush=True)'''
+new = """                _c_last = getattr(self, '_contact_last', float('nan'))
+                print(f"PEN-REWARD last200 (tracked envs): depth mean {a[:,0].mean():.2f} mm, frac>2mm {a[:,1].mean():.2f}, grip_x mean {a[:,2].mean():.0f}, term mean {a[:,3].mean():.3f}, tracked {a[:,4].mean():.2f}, contact {_c_last:.3f}", flush=True)"""
 assert s.count(old) == 1
 s = s.replace(old, new, 1)
 
-T.write_text(s)
 import ast
-ast.parse(s)
+ast.parse(s)          # never write a file that does not parse
+T.write_text(s)
 print(f"patched {T}: AUDIT_CONTACT_W adds a fingertip contact reward")
